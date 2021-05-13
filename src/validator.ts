@@ -148,13 +148,13 @@ export async function optIntoValidatorIfNecessary({
     initiatorAddr: string,
     initiatorSigner: (txns: any[], index: number) => Promise<Uint8Array>
 }): Promise<void> {
-    const shouldOptIn = await isOptedIntoValidator({
+    const isAlreadyOptedIn = await isOptedIntoValidator({
         client,
         validatorAppID,
         initiatorAddr
     });
 
-    if (shouldOptIn) {
+    if (!isAlreadyOptedIn) {
         await optIntoValidator({
             client,
             validatorAppID,
