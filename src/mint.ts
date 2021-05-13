@@ -3,6 +3,7 @@ import { waitForTransaction } from './util';
 import { MINIMUM_LIQUIDITY, PoolInfo, getPoolReserves, getAccountExcess } from './pool';
 import { redeemExcessAsset } from './redeem';
 import { optIntoAssetIfNecessary } from './asset-transfer';
+import { optIntoValidatorIfNecessary } from './validator';
 
 /** An object containing information about a mint quote. */
 export interface MintQuote {
@@ -269,6 +270,13 @@ export async function mintLiquidity({
         client,
         pool,
         accountAddr: initiatorAddr,
+    });
+
+    await optIntoValidatorIfNecessary({
+        client,
+        validatorAppID: pool.validatorAppID,
+        initiatorAddr,
+        initiatorSigner
     });
 
     await optIntoAssetIfNecessary({
