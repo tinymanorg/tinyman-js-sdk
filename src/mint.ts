@@ -2,6 +2,7 @@ import algosdk from 'algosdk';
 import { waitForTransaction } from './util';
 import { MINIMUM_LIQUIDITY, PoolInfo, getPoolReserves, getAccountExcess } from './pool';
 import { redeemExcessAsset } from './redeem';
+import { optIntoAssetIfNecessary } from './asset-transfer';
 
 /** An object containing information about a mint quote. */
 export interface MintQuote {
@@ -269,6 +270,13 @@ export async function mintLiquidity({
         pool,
         accountAddr: initiatorAddr,
     });
+
+    await optIntoAssetIfNecessary({
+        client,
+        assetID: pool.liquidityTokenID!,
+        initiatorAddr,
+        initiatorSigner
+    })
 
     let { fees, confirmedRound } = await doMint({
         client,
