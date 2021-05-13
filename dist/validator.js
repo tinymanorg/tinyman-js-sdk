@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendValidatorAppCreationTransaction = exports.getValidatorAppCreationTransaction = exports.isOptedIntoValidator = exports.closeOutOfValidator = exports.optIntoValidator = exports.getvalidatorAppID = void 0;
+exports.sendValidatorAppCreationTransaction = exports.getValidatorAppCreationTransaction = exports.optIntoValidatorIfNecessary = exports.isOptedIntoValidator = exports.closeOutOfValidator = exports.optIntoValidator = exports.getvalidatorAppID = void 0;
 const assert_1 = __importDefault(require("assert"));
 const algosdk_1 = __importDefault(require("algosdk"));
 const util_1 = require("./util");
@@ -86,8 +86,8 @@ exports.closeOutOfValidator = closeOutOfValidator;
  * @returns A promise that resolve to true if and only if the indicated account has opted into the
  *   pool's pair app.
  */
-async function isOptedIntoValidator({ client, validatorAppID, account }) {
-    const info = await client.accountInformation(account).setIntDecoding('mixed').do();
+async function isOptedIntoValidator({ client, validatorAppID, initiatorAddr }) {
+    const info = await client.accountInformation(initiatorAddr).setIntDecoding('mixed').do();
     const appsLocalState = info['apps-local-state'] || [];
     for (const app of appsLocalState) {
         if (app.id === validatorAppID) {
@@ -97,6 +97,22 @@ async function isOptedIntoValidator({ client, validatorAppID, account }) {
     return false;
 }
 exports.isOptedIntoValidator = isOptedIntoValidator;
+async function optIntoValidatorIfNecessary({ client, validatorAppID, initiatorAddr, initiatorSigner }) {
+    const isAlreadyOptedIn = await isOptedIntoValidator({
+        client,
+        validatorAppID,
+        initiatorAddr
+    });
+    if (!isAlreadyOptedIn) {
+        await optIntoValidator({
+            client,
+            validatorAppID,
+            initiatorAddr,
+            initiatorSigner
+        });
+    }
+}
+exports.optIntoValidatorIfNecessary = optIntoValidatorIfNecessary;
 async function getValidatorAppCreationTransaction(client, addr) {
     const suggestedParams = await client.getTransactionParams().do();
     const appCreateTxn = algosdk_1.default.makeApplicationCreateTxnFromObject({

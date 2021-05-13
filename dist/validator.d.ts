@@ -49,10 +49,16 @@ export declare function closeOutOfValidator({ client, validatorAppID, initiatorA
  * @returns A promise that resolve to true if and only if the indicated account has opted into the
  *   pool's pair app.
  */
-export declare function isOptedIntoValidator({ client, validatorAppID, account }: {
+export declare function isOptedIntoValidator({ client, validatorAppID, initiatorAddr }: {
     client: any;
     validatorAppID: number;
-    account: string;
+    initiatorAddr: string;
 }): Promise<boolean>;
+export declare function optIntoValidatorIfNecessary({ client, validatorAppID, initiatorAddr, initiatorSigner }: {
+    client: any;
+    validatorAppID: number;
+    initiatorAddr: string;
+    initiatorSigner: (txns: any[], index: number) => Promise<Uint8Array>;
+}): Promise<void>;
 export declare function getValidatorAppCreationTransaction(client: any, addr: string): Promise<algosdk.Transaction>;
 export declare function sendValidatorAppCreationTransaction(client: any, stx: any): Promise<number>;
