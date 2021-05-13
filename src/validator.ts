@@ -119,13 +119,13 @@ export async function closeOutOfValidator({
 export async function isOptedIntoValidator({
     client,
     validatorAppID,
-    account
+    initiatorAddr
 }: {
     client: any,
     validatorAppID: number,
-    account: string,
+    initiatorAddr: string,
 }): Promise<boolean> {
-    const info = await client.accountInformation(account).setIntDecoding('mixed').do();
+    const info = await client.accountInformation(initiatorAddr).setIntDecoding('mixed').do();
     const appsLocalState = info['apps-local-state'] || [];
 
     for (const app of appsLocalState) {
@@ -135,6 +135,33 @@ export async function isOptedIntoValidator({
     }
 
     return false;
+}
+
+export async function optIntoValidatorIfNecessary({
+    client,
+    validatorAppID,
+    initiatorAddr,
+    initiatorSigner
+}: {
+    client: any,
+    validatorAppID: number,
+    initiatorAddr: string,
+    initiatorSigner: (txns: any[], index: number) => Promise<Uint8Array>
+}): Promise<void> {
+    const isAlreadyOptedIn = await isOptedIntoValidator({
+        client,
+        validatorAppID,
+        initiatorAddr
+    });
+
+    if (!isAlreadyOptedIn) {
+        await optIntoValidator({
+            client,
+            validatorAppID,
+            initiatorAddr,
+            initiatorSigner
+        });
+    }
 }
 
 export async function getValidatorAppCreationTransaction(client: any, addr: string): Promise<algosdk.Transaction> {
