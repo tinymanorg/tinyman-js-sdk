@@ -1,5 +1,5 @@
 import algosdk from 'algosdk';
-import { waitForTransaction } from './util';
+import { applySlippageToAmount, waitForTransaction } from './util';
 import { MINIMUM_LIQUIDITY, PoolInfo, getPoolReserves, getAccountExcess } from './pool';
 import { redeemExcessAsset } from './redeem';
 import { optIntoAssetIfNecessary } from './asset-transfer';
@@ -259,12 +259,12 @@ export async function mintLiquidity({
     initiatorAddr: string,
     initiatorSigner: (txns: any[], index: number) => Promise<Uint8Array>
 }): Promise<MintExecution> {
-    if (!Number.isInteger(slippage) || slippage < 0 || slippage > 100) {
-        throw new Error(`Invalid slippage value. Must be an integer between 0 and 100, got ${slippage}`);
-    }
-
     // apply slippage to liquidity out amount
-    const liquidityOutAmount = BigInt(liquidityOut) * BigInt(100 - slippage) / 100n;
+    const liquidityOutAmount = applySlippageToAmount(
+        "negative",
+        slippage,
+        liquidityOut
+    );
 
     const prevExcessAssets = await getAccountExcess({
         client,
