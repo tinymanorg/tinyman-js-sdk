@@ -11,6 +11,7 @@ export {
 export {
     PoolStatus,
     PoolInfo,
+    PoolReserves,
     MINIMUM_LIQUIDITY,
     getPoolInfo,
     createPool,
