@@ -153,11 +153,8 @@ async function doMint({ client, pool, asset1In, asset2In, liquidityOut, initiato
  *   account.
  */
 async function mintLiquidity({ client, pool, asset1In, asset2In, liquidityOut, slippage, redeemExcess, initiatorAddr, initiatorSigner, }) {
-    if (!Number.isInteger(slippage) || slippage < 0 || slippage > 100) {
-        throw new Error(`Invalid slippage value. Must be an integer between 0 and 100, got ${slippage}`);
-    }
     // apply slippage to liquidity out amount
-    const liquidityOutAmount = BigInt(liquidityOut) * BigInt(100 - slippage) / 100n;
+    const liquidityOutAmount = util_1.applySlippageToAmount("negative", slippage, liquidityOut);
     const prevExcessAssets = await pool_1.getAccountExcess({
         client,
         pool,

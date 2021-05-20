@@ -13,8 +13,18 @@ export interface PoolInfo {
     liquidityTokenID?: number;
     status: PoolStatus;
 }
-declare const MINIMUM_LIQUIDITY = 1000;
-export { MINIMUM_LIQUIDITY };
+export interface PoolReserves {
+    round: number;
+    asset1: bigint;
+    asset2: bigint;
+    issuedLiquidity: bigint;
+}
+export interface AccountExcess {
+    excessAsset1: bigint;
+    excessAsset2: bigint;
+    excessLiquidityTokens: bigint;
+}
+export declare const MINIMUM_LIQUIDITY = 1000;
 /**
  * Look up information about an pool.
  *
@@ -46,18 +56,9 @@ export declare function createPool(client: any, pool: {
     asset1ID: number;
     asset2ID: number;
 }, initiatorAddr: string, initiatorSigner: (txns: any[], index: number) => Promise<Uint8Array>): Promise<PoolInfo>;
-export declare function getPoolReserves(client: any, pool: PoolInfo): Promise<{
-    round: number;
-    asset1: bigint;
-    asset2: bigint;
-    issuedLiquidity: bigint;
-}>;
+export declare function getPoolReserves(client: any, pool: PoolInfo): Promise<PoolReserves>;
 export declare function getAccountExcess({ client, pool, accountAddr, }: {
     client: any;
     pool: PoolInfo;
     accountAddr: string;
-}): Promise<{
-    excessAsset1: bigint;
-    excessAsset2: bigint;
-    excessLiquidityTokens: bigint;
-}>;
+}): Promise<AccountExcess>;

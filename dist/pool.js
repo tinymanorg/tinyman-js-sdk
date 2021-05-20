@@ -16,8 +16,7 @@ var PoolStatus;
     PoolStatus["READY"] = "ready";
     PoolStatus["ERROR"] = "error";
 })(PoolStatus = exports.PoolStatus || (exports.PoolStatus = {}));
-const MINIMUM_LIQUIDITY = 1000;
-exports.MINIMUM_LIQUIDITY = MINIMUM_LIQUIDITY;
+exports.MINIMUM_LIQUIDITY = 1000;
 /**
  * Look up information about an pool.
  *

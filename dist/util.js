@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.waitForTransaction = exports.getMinBalanceForAccount = exports.joinUint8Arrays = exports.decodeState = void 0;
+exports.applySlippageToAmount = exports.waitForTransaction = exports.getMinBalanceForAccount = exports.joinUint8Arrays = exports.decodeState = void 0;
+const constant_1 = require("./constant");
 function decodeState(stateArray) {
     const state = {};
     for (const pair of stateArray) {
@@ -73,3 +74,19 @@ async function waitForTransaction(client, txId) {
     }
 }
 exports.waitForTransaction = waitForTransaction;
+function applySlippageToAmount(type, slippage, amount) {
+    if (slippage > 1 || slippage < 0) {
+        throw new Error(`Invalid slippage value. Must be between 0 and 1, got ${slippage}`);
+    }
+    let final;
+    try {
+        const factor = 10 ** constant_1.MAX_SLIPPAGE_FRACTION_DIGITS;
+        const offset = type === "negative" ? 1 - slippage : 1 + slippage;
+        final = (BigInt(amount) * BigInt(factor * offset)) / BigInt(factor);
+    }
+    catch (error) {
+        throw new Error(error.message);
+    }
+    return final;
+}
+exports.applySlippageToAmount = applySlippageToAmount;

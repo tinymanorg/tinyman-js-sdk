@@ -46,13 +46,11 @@ async function doBootstrap({ client, poolLogicSig, validatorAppID, asset1ID, ass
         + 100000 // fee + min balance to opt into asset 1
         + (asset2Optin ? 100000 : 0) // min balance to opt into asset 2
         + 100000 + (25000 + 3500) * algoswap_1.VALIDATOR_APP_SCHEMA.numLocalInts + (25000 + 25000) * algoswap_1.VALIDATOR_APP_SCHEMA.numLocalByteSlices; // min balance to opt into validator app
-    console.log(minBalance);
     const fundingAmount = minBalance
         + liquidityTokenCreateTxn.fee
         + asset1Optin.fee
         + (asset2Optin ? asset2Optin.fee : 0)
         + validatorAppCallTxn.fee;
-    console.log(fundingAmount);
     const fundingTxn = algosdk_1.default.makePaymentTxnWithSuggestedParamsFromObject({
         from: initiatorAddr,
         to: poolLogicSig.addr,

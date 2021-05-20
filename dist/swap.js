@@ -8,6 +8,8 @@ const algosdk_1 = __importDefault(require("algosdk"));
 const util_1 = require("./util");
 const pool_1 = require("./pool");
 const redeem_1 = require("./redeem");
+const validator_1 = require("./validator");
+const asset_transfer_1 = require("./asset-transfer");
 const FEE_PRECISION = 1000n;
 const FEE = 3n;
 const ONE_MINUS_FEE = FEE_PRECISION - FEE;
@@ -20,6 +22,18 @@ async function doSwap({ client, pool, swapType, assetIn, assetOut, initiatorAddr
         SWAP_ENCODED,
         swapType === 'fixed input' ? FIXED_INPUT_ENCODED : FIXED_OUTPUT_ENCODED,
     ];
+    await validator_1.optIntoValidatorIfNecessary({
+        client,
+        validatorAppID: pool.validatorAppID,
+        initiatorAddr,
+        initiatorSigner
+    });
+    await asset_transfer_1.optIntoAssetIfNecessary({
+        client,
+        assetID: assetOut.assetID,
+        initiatorAddr,
+        initiatorSigner
+    });
     const validatorAppCallTxn = algosdk_1.default.makeApplicationNoOpTxnFromObject({
         from: pool.addr,
         appIndex: pool.validatorAppID,
@@ -130,6 +144,7 @@ async function getFixedInputSwapQuote({ client, pool, assetIn, }) {
         assetInAmount,
         assetOutID,
         assetOutAmount,
+        swapFee: Number(assetInAmount * FEE / FEE_PRECISION)
     };
 }
 exports.getFixedInputSwapQuote = getFixedInputSwapQuote;
@@ -153,11 +168,8 @@ exports.getFixedInputSwapQuote = getFixedInputSwapQuote;
  *   account.
  */
 async function fixedInputSwap({ client, pool, assetIn, assetOut, redeemExcess, initiatorAddr, initiatorSigner, }) {
-    if (!Number.isInteger(assetOut.slippage) || assetOut.slippage < 0 || assetOut.slippage > 100) {
-        throw new Error(`Invalid slippage value. Must be an integer between 0 and 100, got ${assetOut.slippage}`);
-    }
     // apply slippage to asset out amount
-    const assetOutAmount = BigInt(assetOut.amount) * BigInt(100 - assetOut.slippage) / 100n;
+    const assetOutAmount = util_1.applySlippageToAmount("negative", assetOut.slippage, assetOut.amount);
     const prevExcessAssets = await pool_1.getAccountExcess({
         client,
         pool,
@@ -247,6 +259,7 @@ async function getFixedOutputSwapQuote({ client, pool, assetOut, }) {
         assetInAmount,
         assetOutID: assetOut.assetID,
         assetOutAmount,
+        swapFee: Number(assetOutAmount * FEE / FEE_PRECISION)
     };
 }
 exports.getFixedOutputSwapQuote = getFixedOutputSwapQuote;
@@ -272,11 +285,8 @@ exports.getFixedOutputSwapQuote = getFixedOutputSwapQuote;
  *   account.
  */
 async function fixedOutputSwap({ client, pool, assetIn, assetOut, redeemExcess, initiatorAddr, initiatorSigner, }) {
-    if (!Number.isInteger(assetIn.slippage) || assetIn.slippage < 0) {
-        throw new Error(`Invalid slippage value. Must be an nonegative integer, got ${assetIn.slippage}`);
-    }
     // apply slippage to asset in amount
-    const assetInAmount = BigInt(assetIn.amount) * BigInt(100 + assetIn.slippage) / 100n;
+    const assetInAmount = util_1.applySlippageToAmount("positive", assetIn.slippage, assetIn.amount);
     const prevExcessAssets = await pool_1.getAccountExcess({
         client,
         pool,
