@@ -21,8 +21,8 @@ export interface SwapQuote {
     assetOutID: number,
     /** The quantity of the output asset in this quote. */
     assetOutAmount: bigint,
-    /** The amount of fee that may be spent (in microAlgos) for the swap  */
-    fees: number
+    /** The amount of fee that may be spent (in the currency of the fixed asset) for the swap  */
+    swapFee: number
 }
 
 /** An object containing information about a successfully executed swap. */
@@ -229,7 +229,7 @@ export async function getFixedInputSwapQuote({
         assetInAmount,
         assetOutID,
         assetOutAmount,
-        fees: Number(assetOutAmount * FEE / 10000n)
+        swapFee: Number(assetInAmount * FEE / FEE_PRECISION)
     }
 }
 
@@ -392,7 +392,7 @@ export async function getFixedOutputSwapQuote({
         assetInAmount,
         assetOutID: assetOut.assetID,
         assetOutAmount,
-        fees: Number(assetInAmount * FEE / FEE_PRECISION)
+        swapFee: Number(assetOutAmount * FEE / FEE_PRECISION)
     }
 }
 
