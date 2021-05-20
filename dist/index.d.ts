@@ -4,3 +4,4 @@ export { MintQuote, MintExecution, getMintLiquidityQuote, mintLiquidity, } from 
 export { BurnQuote, BurnExecution, getBurnLiquidityQuote, burnLiquidity, } from './burn';
 export { SwapQuote, SwapExecution, getFixedInputSwapQuote, fixedInputSwap, getFixedOutputSwapQuote, fixedOutputSwap, } from './swap';
 export { redeemExcessAsset } from './redeem';
+export { applySlippageToAmount } from './util';

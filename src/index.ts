@@ -42,3 +42,5 @@ export {
 } from './swap';
 
 export { redeemExcessAsset } from './redeem';
+
+export { applySlippageToAmount } from './util';

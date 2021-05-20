@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.redeemExcessAsset = exports.fixedOutputSwap = exports.getFixedOutputSwapQuote = exports.fixedInputSwap = exports.getFixedInputSwapQuote = exports.burnLiquidity = exports.getBurnLiquidityQuote = exports.mintLiquidity = exports.getMintLiquidityQuote = exports.getPoolReserves = exports.createPool = exports.getPoolInfo = exports.MINIMUM_LIQUIDITY = exports.PoolStatus = exports.closeOutOfValidator = exports.isOptedIntoValidator = exports.optIntoValidator = exports.sendValidatorAppCreationTransaction = exports.getValidatorAppCreationTransaction = exports.getvalidatorAppID = void 0;
+exports.applySlippageToAmount = exports.redeemExcessAsset = exports.fixedOutputSwap = exports.getFixedOutputSwapQuote = exports.fixedInputSwap = exports.getFixedInputSwapQuote = exports.burnLiquidity = exports.getBurnLiquidityQuote = exports.mintLiquidity = exports.getMintLiquidityQuote = exports.getPoolReserves = exports.createPool = exports.getPoolInfo = exports.MINIMUM_LIQUIDITY = exports.PoolStatus = exports.closeOutOfValidator = exports.isOptedIntoValidator = exports.optIntoValidator = exports.sendValidatorAppCreationTransaction = exports.getValidatorAppCreationTransaction = exports.getvalidatorAppID = void 0;
 var validator_1 = require("./validator");
 Object.defineProperty(exports, "getvalidatorAppID", { enumerable: true, get: function () { return validator_1.getvalidatorAppID; } });
 Object.defineProperty(exports, "getValidatorAppCreationTransaction", { enumerable: true, get: function () { return validator_1.getValidatorAppCreationTransaction; } });
@@ -27,3 +27,5 @@ Object.defineProperty(exports, "getFixedOutputSwapQuote", { enumerable: true, ge
 Object.defineProperty(exports, "fixedOutputSwap", { enumerable: true, get: function () { return swap_1.fixedOutputSwap; } });
 var redeem_1 = require("./redeem");
 Object.defineProperty(exports, "redeemExcessAsset", { enumerable: true, get: function () { return redeem_1.redeemExcessAsset; } });
+var util_1 = require("./util");
+Object.defineProperty(exports, "applySlippageToAmount", { enumerable: true, get: function () { return util_1.applySlippageToAmount; } });
