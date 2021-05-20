@@ -1,3 +1,4 @@
+import { MAX_SLIPPAGE_FRACTION_DIGITS } from "./constant";
 
 export function decodeState(stateArray: any[]): Record<string, string | number | bigint> {
     const state: Record<string, number | string> = {};
@@ -74,4 +75,27 @@ export async function waitForTransaction(client: any, txId: string): Promise<any
         lastStatus = await client.statusAfterBlock(lastRound + 1).do();
         lastRound = lastStatus['last-round'];
     }
+}
+
+export function applySlippageToAmount(
+    type: "positive" | "negative",
+    slippage: number,
+    amount: number | bigint
+): bigint {
+    if (slippage > 1 || slippage < 0) {
+      throw new Error(`Invalid slippage value. Must be between 0 and 1, got ${slippage}`);
+    }
+  
+    let final: bigint;
+  
+    try {
+      const factor = 10 ** MAX_SLIPPAGE_FRACTION_DIGITS;
+      const offset = type === "negative" ? 1 - slippage : 1 + slippage;
+  
+      final = (BigInt(amount) * BigInt(factor * offset)) / BigInt(factor);
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  
+    return final;
 }

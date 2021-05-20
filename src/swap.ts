@@ -1,7 +1,9 @@
 import algosdk from 'algosdk';
-import { waitForTransaction } from './util';
+import { applySlippageToAmount, waitForTransaction } from './util';
 import { PoolInfo, getPoolReserves, getAccountExcess } from './pool';
 import { redeemExcessAsset } from './redeem';
+import { optIntoValidatorIfNecessary } from './validator';
+import { optIntoAssetIfNecessary } from './asset-transfer';
 
 const FEE_PRECISION = 1000n;
 const FEE = 3n;
@@ -19,6 +21,8 @@ export interface SwapQuote {
     assetOutID: number,
     /** The quantity of the output asset in this quote. */
     assetOutAmount: bigint,
+    /** The amount of fee that may be spent (in the currency of the fixed asset) for the swap  */
+    swapFee: number
 }
 
 /** An object containing information about a successfully executed swap. */
@@ -76,6 +80,20 @@ async function doSwap({
         SWAP_ENCODED,
         swapType === 'fixed input' ? FIXED_INPUT_ENCODED : FIXED_OUTPUT_ENCODED,
     ];
+
+    await optIntoValidatorIfNecessary({
+        client,
+        validatorAppID: pool.validatorAppID,
+        initiatorAddr,
+        initiatorSigner
+    });
+
+    await optIntoAssetIfNecessary({
+        client,
+        assetID: assetOut.assetID,
+        initiatorAddr,
+        initiatorSigner
+    });
 
     const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
         from: pool.addr,
@@ -211,6 +229,7 @@ export async function getFixedInputSwapQuote({
         assetInAmount,
         assetOutID,
         assetOutAmount,
+        swapFee: Number(assetInAmount * FEE / FEE_PRECISION)
     }
 }
 
@@ -257,12 +276,12 @@ export async function fixedInputSwap({
     initiatorAddr: string,
     initiatorSigner: (txns: any[], index: number) => Promise<Uint8Array>
 }): Promise<SwapExecution> {
-    if (!Number.isInteger(assetOut.slippage) || assetOut.slippage < 0 || assetOut.slippage > 100) {
-        throw new Error(`Invalid slippage value. Must be an integer between 0 and 100, got ${assetOut.slippage}`);
-    }
-
-    // apply slippage to asset out amount
-    const assetOutAmount = BigInt(assetOut.amount) * BigInt(100 - assetOut.slippage) / 100n;
+     // apply slippage to asset out amount
+    const assetOutAmount = applySlippageToAmount(
+        "negative",
+        assetOut.slippage,
+        assetOut.amount
+    );
 
     const prevExcessAssets = await getAccountExcess({
         client,
@@ -373,6 +392,7 @@ export async function getFixedOutputSwapQuote({
         assetInAmount,
         assetOutID: assetOut.assetID,
         assetOutAmount,
+        swapFee: Number(assetOutAmount * FEE / FEE_PRECISION)
     }
 }
 
@@ -421,12 +441,12 @@ export async function fixedOutputSwap({
     initiatorAddr: string,
     initiatorSigner: (txns: any[], index: number) => Promise<Uint8Array>
 }): Promise<SwapExecution> {
-    if (!Number.isInteger(assetIn.slippage) || assetIn.slippage < 0) {
-        throw new Error(`Invalid slippage value. Must be an nonegative integer, got ${assetIn.slippage}`);
-    }
-
     // apply slippage to asset in amount
-    const assetInAmount = BigInt(assetIn.amount) * BigInt(100 + assetIn.slippage) / 100n;
+    const assetInAmount = applySlippageToAmount(
+        "positive",
+        assetIn.slippage,
+        assetIn.amount
+    );
 
     const prevExcessAssets = await getAccountExcess({
         client,

@@ -1,7 +1,7 @@
 import algosdk from 'algosdk';
 import { fromByteArray } from 'base64-js';
 import { getPoolLogicSig } from 'algoswap';
-import { decodeState, joinUint8Arrays, getMinBalanceForAccount, waitForTransaction } from './util';
+import { decodeState, joinUint8Arrays, getMinBalanceForAccount } from './util';
 import { doBootstrap } from './bootstrap';
 
 export enum PoolStatus {
@@ -21,8 +21,20 @@ export interface PoolInfo {
     status: PoolStatus,
 }
 
-const MINIMUM_LIQUIDITY = 1000;
-export { MINIMUM_LIQUIDITY };
+export interface PoolReserves {
+  round: number;
+  asset1: bigint;
+  asset2: bigint;
+  issuedLiquidity: bigint;
+}
+
+export interface AccountExcess {
+    excessAsset1: bigint,
+    excessAsset2: bigint,
+    excessLiquidityTokens: bigint,
+}
+
+export const MINIMUM_LIQUIDITY = 1000;
 
 /**
  * Look up information about an pool.
@@ -121,12 +133,7 @@ export async function createPool(
 const OUTSTANDING_ENCODED = Uint8Array.from([111]); // 'o'
 const TOTAL_LIQUIDITY = 0xFFFFFFFFFFFFFFFFn;
 
-export async function getPoolReserves(client: any, pool: PoolInfo): Promise<{
-    round: number,
-    asset1: bigint,
-    asset2: bigint,
-    issuedLiquidity: bigint,
-}> {
+export async function getPoolReserves(client: any, pool: PoolInfo): Promise<PoolReserves> {
     const info = await client.accountInformation(pool.addr).setIntDecoding('bigint').do();
     const appsLocalState = info['apps-local-state'] || [];
 
@@ -218,11 +225,7 @@ export async function getAccountExcess({
     client: any,
     pool: PoolInfo,
     accountAddr: string,
-}): Promise<{
-    excessAsset1: bigint,
-    excessAsset2: bigint,
-    excessLiquidityTokens: bigint,
-}> {
+}): Promise<AccountExcess> {
     const info = await client.accountInformation(accountAddr).setIntDecoding('bigint').do();
 
     const appsLocalState = info['apps-local-state'] || [];
