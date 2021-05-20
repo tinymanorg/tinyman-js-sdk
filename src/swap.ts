@@ -2,6 +2,8 @@ import algosdk from 'algosdk';
 import { waitForTransaction } from './util';
 import { PoolInfo, getPoolReserves, getAccountExcess } from './pool';
 import { redeemExcessAsset } from './redeem';
+import { optIntoValidatorIfNecessary } from './validator';
+import { optIntoAssetIfNecessary } from './asset-transfer';
 
 const FEE_PRECISION = 1000n;
 const FEE = 3n;
@@ -76,6 +78,20 @@ async function doSwap({
         SWAP_ENCODED,
         swapType === 'fixed input' ? FIXED_INPUT_ENCODED : FIXED_OUTPUT_ENCODED,
     ];
+
+    await optIntoValidatorIfNecessary({
+        client,
+        validatorAppID: pool.validatorAppID,
+        initiatorAddr,
+        initiatorSigner
+    });
+
+    await optIntoAssetIfNecessary({
+        client,
+        assetID: assetOut.assetID,
+        initiatorAddr,
+        initiatorSigner
+    });
 
     const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
         from: pool.addr,
