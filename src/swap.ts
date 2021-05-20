@@ -1,5 +1,5 @@
 import algosdk from 'algosdk';
-import { waitForTransaction } from './util';
+import { applySlippageToAmount, waitForTransaction } from './util';
 import { PoolInfo, getPoolReserves, getAccountExcess } from './pool';
 import { redeemExcessAsset } from './redeem';
 import { optIntoValidatorIfNecessary } from './validator';
@@ -273,12 +273,12 @@ export async function fixedInputSwap({
     initiatorAddr: string,
     initiatorSigner: (txns: any[], index: number) => Promise<Uint8Array>
 }): Promise<SwapExecution> {
-    if (!Number.isInteger(assetOut.slippage) || assetOut.slippage < 0 || assetOut.slippage > 100) {
-        throw new Error(`Invalid slippage value. Must be an integer between 0 and 100, got ${assetOut.slippage}`);
-    }
-
-    // apply slippage to asset out amount
-    const assetOutAmount = BigInt(assetOut.amount) * BigInt(100 - assetOut.slippage) / 100n;
+     // apply slippage to asset out amount
+    const assetOutAmount = applySlippageToAmount(
+        "negative",
+        assetOut.slippage,
+        assetOut.amount
+    );
 
     const prevExcessAssets = await getAccountExcess({
         client,
@@ -437,12 +437,12 @@ export async function fixedOutputSwap({
     initiatorAddr: string,
     initiatorSigner: (txns: any[], index: number) => Promise<Uint8Array>
 }): Promise<SwapExecution> {
-    if (!Number.isInteger(assetIn.slippage) || assetIn.slippage < 0) {
-        throw new Error(`Invalid slippage value. Must be an nonegative integer, got ${assetIn.slippage}`);
-    }
-
     // apply slippage to asset in amount
-    const assetInAmount = BigInt(assetIn.amount) * BigInt(100 + assetIn.slippage) / 100n;
+    const assetInAmount = applySlippageToAmount(
+        "positive",
+        assetIn.slippage,
+        assetIn.amount
+    );
 
     const prevExcessAssets = await getAccountExcess({
         client,
