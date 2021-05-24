@@ -5,9 +5,9 @@ import { redeemExcessAsset } from './redeem';
 import { optIntoValidatorIfNecessary } from './validator';
 import { optIntoAssetIfNecessary } from './asset-transfer';
 
-const FEE_PRECISION = 1000n;
-const FEE = 3n;
-const ONE_MINUS_FEE = FEE_PRECISION - FEE;
+// FEE = %0.03 or 3/1000
+const FEE_NUMERATOR = 3n;
+const FEE_DENOMINATOR = 1000n;
 
 /** An object containing information about a swap quote. */
 export interface SwapQuote {
@@ -22,7 +22,9 @@ export interface SwapQuote {
     /** The quantity of the output asset in this quote. */
     assetOutAmount: bigint,
     /** The amount of fee that may be spent (in the currency of the fixed asset) for the swap  */
-    swapFee: number
+    swapFee: number,
+    /** The final exchange rate for this swap expressed as  assetOutAmount / assetInAmount */
+    rate: number,
 }
 
 /** An object containing information about a successfully executed swap. */
@@ -221,7 +223,17 @@ export async function getFixedInputSwapQuote({
         outputSupply = reserves.asset1;
     }
 
-    const assetOutAmount = assetInAmount * ONE_MINUS_FEE * outputSupply / (inputSupply * FEE_PRECISION + assetInAmount * ONE_MINUS_FEE);
+    const swapFee = assetInAmount * FEE_NUMERATOR / FEE_DENOMINATOR;
+    const assetInAmountMinusFee =  assetInAmount - swapFee
+    const k = inputSupply * outputSupply
+    // k = (inputSupply + assetInAmountMinusFee) * (outputSupply - assetOutAmount)
+    const assetOutAmount = (k / (inputSupply + assetInAmountMinusFee)) - outputSupply;
+
+    if(assetOutAmount > outputSupply){
+        throw new Error('Output amount exceeds available liquidity.');
+    }
+
+    const rate = Number(assetOutAmount) / Number(assetInAmount);
 
     return {
         round: reserves.round,
@@ -229,7 +241,8 @@ export async function getFixedInputSwapQuote({
         assetInAmount,
         assetOutID,
         assetOutAmount,
-        swapFee: Number(assetInAmount * FEE / FEE_PRECISION)
+        swapFee: Number(swapFee),
+        rate,
     }
 }
 
@@ -384,15 +397,25 @@ export async function getFixedOutputSwapQuote({
         outputSupply = reserves.asset2;
     }
 
-    const assetInAmount = assetOutAmount * inputSupply * FEE_PRECISION / ((outputSupply - assetOutAmount) * ONE_MINUS_FEE) + 1n;
+    if(assetOutAmount > outputSupply){
+        throw new Error('Output amount exceeds available liquidity.');
+    }
+
+    const k = inputSupply * outputSupply
+    // k = (inputSupply + assetInAmount) * (outputSupply - assetOutAmount)
+    const assetInAmount = (k / (outputSupply - assetOutAmount)) - inputSupply;
+    const swapFee = assetOutAmount * FEE_NUMERATOR / FEE_DENOMINATOR;
+    const assetInAmountPlusFee = assetInAmount + swapFee;
+    const rate = Number(assetOutAmount) / Number(assetInAmountPlusFee);
 
     return {
         round: reserves.round,
         assetInID,
-        assetInAmount,
+        assetInAmount: assetInAmountPlusFee,
         assetOutID: assetOut.assetID,
         assetOutAmount,
-        swapFee: Number(assetOutAmount * FEE / FEE_PRECISION)
+        swapFee: Number(swapFee),
+        rate
     }
 }
 
