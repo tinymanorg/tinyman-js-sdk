@@ -1,4 +1,5 @@
 import algosdk, { Algodv2 } from "algosdk";
+import { AccountInformationData } from "./algosdk-missing-types";
 import { waitForTransaction } from "./util";
 
 export async function optIntoAssetIfNecessary({
@@ -12,9 +13,9 @@ export async function optIntoAssetIfNecessary({
   initiatorAddr: string;
   initiatorSigner: (txns: any[], index: number) => Promise<Uint8Array>;
 }): Promise<void> {
-  const account = await client.accountInformation(initiatorAddr).do();
+  const account = (await client.accountInformation(initiatorAddr).do()) as AccountInformationData;
 
-  if (!account.assets.some((asset: any) => asset.id === assetID)) {
+  if (!account.assets.some((asset) => asset["asset-id"] === assetID)) {
     const suggestedParams = await client.getTransactionParams().do();
 
     const optInTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({

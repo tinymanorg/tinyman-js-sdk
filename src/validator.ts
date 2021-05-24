@@ -2,6 +2,7 @@ import assert from 'assert';
 import algosdk from 'algosdk';
 import { waitForTransaction } from './util';
 import { validatorApprovalContract, validatorClearStateContract, VALIDATOR_APP_SCHEMA } from 'algoswap';
+import { AccountInformationData } from './algosdk-missing-types';
 
 
 const CREATE_ENCODED = Uint8Array.from([99, 114, 101, 97, 116, 101]); // 'create'
@@ -125,7 +126,7 @@ export async function isOptedIntoValidator({
     validatorAppID: number,
     initiatorAddr: string,
 }): Promise<boolean> {
-    const info = await client.accountInformation(initiatorAddr).setIntDecoding('mixed').do();
+    const info = (await client.accountInformation(initiatorAddr).setIntDecoding('mixed').do()) as AccountInformationData;
     const appsLocalState = info['apps-local-state'] || [];
 
     for (const app of appsLocalState) {
