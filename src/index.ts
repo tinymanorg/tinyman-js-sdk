@@ -44,3 +44,8 @@ export {
 export { redeemExcessAsset } from './redeem';
 
 export { applySlippageToAmount } from './util';
+
+export {
+    AccountAsset,
+    AccountInformationData
+} from "./algosdk-missing-types";

@@ -3,6 +3,7 @@ import { fromByteArray } from 'base64-js';
 import { getPoolLogicSig } from 'algoswap';
 import { decodeState, joinUint8Arrays, getMinBalanceForAccount } from './util';
 import { doBootstrap } from './bootstrap';
+import { AccountInformationData } from './algosdk-missing-types';
 
 export enum PoolStatus {
     NOT_CREATED = 'not created',
@@ -62,7 +63,7 @@ export async function getPoolInfo(client: any, pool: {
     };
 
 
-    const info = await client.accountInformation(poolLogicSig.addr).do();
+    const info = (await client.accountInformation(poolLogicSig.addr).do()) as AccountInformationData;
     for (const app of info['apps-local-state']) {
         if (app.id !== pool.validatorAppID) {
             continue;
@@ -134,7 +135,7 @@ const OUTSTANDING_ENCODED = Uint8Array.from([111]); // 'o'
 const TOTAL_LIQUIDITY = 0xFFFFFFFFFFFFFFFFn;
 
 export async function getPoolReserves(client: any, pool: PoolInfo): Promise<PoolReserves> {
-    const info = await client.accountInformation(pool.addr).setIntDecoding('bigint').do();
+    const info = (await client.accountInformation(pool.addr).setIntDecoding('bigint').do()) as AccountInformationData;
     const appsLocalState = info['apps-local-state'] || [];
 
     let outstandingAsset1 = 0n;
@@ -188,17 +189,17 @@ export async function getPoolReserves(client: any, pool: PoolInfo): Promise<Pool
         const amount = asset['amount'];
 
         if (id == pool.asset1ID) {
-            asset1Balance = amount;
+            asset1Balance = BigInt(amount);
         } else if(id == pool.asset2ID) {
-            asset2Balance = amount;
+            asset2Balance = BigInt(amount);
         } else if (id == pool.liquidityTokenID) {
-            liquidityTokenBalance = amount;
+            liquidityTokenBalance = BigInt(amount);
         }
     }
 
     if (pool.asset2ID === 0) {
         const minBalance = getMinBalanceForAccount(info);
-        asset2Balance = info.amount - minBalance;
+        asset2Balance = BigInt(info.amount) - minBalance;
     }
 
     const reserves = {
@@ -226,7 +227,7 @@ export async function getAccountExcess({
     pool: PoolInfo,
     accountAddr: string,
 }): Promise<AccountExcess> {
-    const info = await client.accountInformation(accountAddr).setIntDecoding('bigint').do();
+    const info = (await client.accountInformation(accountAddr).setIntDecoding('bigint').do()) as AccountInformationData;
 
     const appsLocalState = info['apps-local-state'] || [];
 
