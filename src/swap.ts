@@ -5,7 +5,7 @@ import { redeemExcessAsset } from './redeem';
 import { optIntoValidatorIfNecessary } from './validator';
 import { optIntoAssetIfNecessary } from './asset-transfer';
 
-// FEE = %0.03 or 3/1000
+// FEE = %0.3 or 3/1000
 const FEE_NUMERATOR = 3n;
 const FEE_DENOMINATOR = 1000n;
 
@@ -227,7 +227,7 @@ export async function getFixedInputSwapQuote({
     const assetInAmountMinusFee =  assetInAmount - swapFee
     const k = inputSupply * outputSupply
     // k = (inputSupply + assetInAmountMinusFee) * (outputSupply - assetOutAmount)
-    const assetOutAmount = (k / (inputSupply + assetInAmountMinusFee)) - outputSupply;
+    const assetOutAmount =  outputSupply - (k / (inputSupply + assetInAmountMinusFee));
 
     if(assetOutAmount > outputSupply){
         throw new Error('Output amount exceeds available liquidity.');
@@ -404,7 +404,7 @@ export async function getFixedOutputSwapQuote({
     const k = inputSupply * outputSupply
     // k = (inputSupply + assetInAmount) * (outputSupply - assetOutAmount)
     const assetInAmount = (k / (outputSupply - assetOutAmount)) - inputSupply;
-    const swapFee = assetOutAmount * FEE_NUMERATOR / FEE_DENOMINATOR;
+    const swapFee = assetInAmount * FEE_NUMERATOR / FEE_DENOMINATOR;
     const assetInAmountPlusFee = assetInAmount + swapFee;
     const rate = Number(assetOutAmount) / Number(assetInAmountPlusFee);
 
