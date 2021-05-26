@@ -9,7 +9,9 @@
   },
   "scripts": {
     "build": "tsc",
-    "test": "mocha --require ts-node/register --extensions ts tests/*.test.ts tests/**/*.test.ts --no-diff --timeout 90000"
+    "test": "mocha --require ts-node/register --extensions ts tests/*.test.ts tests/**/*.test.ts --no-diff --timeout 90000",
+    "prepare": "husky install",
+    "prettify": "./node_modules/.bin/prettier --config ./.prettierrc.js --write \"src/**/*\""
   },
   "repository": {
     "type": "git",
@@ -20,10 +22,21 @@
   },
   "homepage": "https://github.com/tinymanorg/tinyman-js-sdk#readme",
   "devDependencies": {
+    "@hipo/eslint-config-base": "^4.1.1",
+    "@hipo/eslint-config-typescript": "^1.0.1",
     "@types/mocha": "^8.2.0",
     "@types/node": "^14.14.14",
+    "@typescript-eslint/eslint-plugin": "^4.25.0",
+    "@typescript-eslint/parser": "^4.25.0",
+    "eslint": "^7.27.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-import-resolver-typescript": "^2.4.0",
+    "eslint-plugin-import": "^2.23.3",
+    "husky": "^6.0.0",
     "js-sha512": "^0.8.0",
+    "lint-staged": "^11.0.0",
     "mocha": "^8.3.0",
+    "prettier": "^2.3.0",
     "tmp": "^0.2.1",
     "ts-node": "^9.1.1",
     "typescript": "^4.1.3"
@@ -32,5 +45,9 @@
     "algosdk": "^1.9.1",
     "algoswap": "git+ssh://git@github.com/Hipo/algoswap-contracts.git#split-sdk-from-contracts",
     "base64-js": "^1.5.1"
+  },
+  "lint-staged": {
+    "*.{js,ts,md}": "prettier --write",
+    "*.{js,ts}": "eslint"
   }
 }
