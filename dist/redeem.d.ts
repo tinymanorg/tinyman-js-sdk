@@ -1,4 +1,4 @@
-import { PoolInfo } from './pool';
+import {PoolInfo} from "./pool";
 /**
  * Execute a redeem operation to collect excess assets from previous operations.
  *
@@ -11,14 +11,21 @@ import { PoolInfo } from './pool';
  * @param params.initiatorSigner A function that will sign transactions from the initiator's
  *   account.
  */
-export declare function redeemExcessAsset({ client, pool, assetID, assetOut, initiatorAddr, initiatorSigner, }: {
-    client: any;
-    pool: PoolInfo;
-    assetID: number;
-    assetOut: number | bigint;
-    initiatorAddr: string;
-    initiatorSigner: (txns: any[], index: number) => Promise<Uint8Array>;
+export declare function redeemExcessAsset({
+  client,
+  pool,
+  assetID,
+  assetOut,
+  initiatorAddr,
+  initiatorSigner
+}: {
+  client: any;
+  pool: PoolInfo;
+  assetID: number;
+  assetOut: number | bigint;
+  initiatorAddr: string;
+  initiatorSigner: (txns: any[], index: number) => Promise<Uint8Array>;
 }): Promise<{
-    fees: number;
-    confirmedRound: number;
+  fees: number;
+  confirmedRound: number;
 }>;

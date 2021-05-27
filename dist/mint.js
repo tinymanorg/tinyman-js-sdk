@@ -19,7 +19,7 @@ const validator_1 = require("./validator");
  * @param params.asset1In The quantity of the first asset being deposited.
  * @param params.asset2In The quantity of the second asset being deposited.
  */
-async function getMintLiquidityQuote({ client, pool, asset1In, asset2In, }) {
+async function getMintLiquidityQuote({ client, pool, asset1In, asset2In }) {
     const reserves = await pool_1.getPoolReserves(client, pool);
     if (reserves.issuedLiquidity === 0n) {
         // TODO: compute sqrt on bigints
@@ -38,8 +38,8 @@ async function getMintLiquidityQuote({ client, pool, asset1In, asset2In, }) {
             share: 100n
         };
     }
-    const asset1Ratio = BigInt(asset1In) * reserves.issuedLiquidity / reserves.asset1;
-    const asset2Ratio = BigInt(asset2In) * reserves.issuedLiquidity / reserves.asset2;
+    const asset1Ratio = (BigInt(asset1In) * reserves.issuedLiquidity) / reserves.asset1;
+    const asset2Ratio = (BigInt(asset2In) * reserves.issuedLiquidity) / reserves.asset2;
     const liquidityOut = asset1Ratio < asset2Ratio ? asset1Ratio : asset2Ratio;
     return {
         round: reserves.round,
@@ -49,26 +49,26 @@ async function getMintLiquidityQuote({ client, pool, asset1In, asset2In, }) {
         asset2In: BigInt(asset2In),
         liquidityID: pool.liquidityTokenID,
         liquidityOut,
-        share: 100n * liquidityOut / (reserves.issuedLiquidity + liquidityOut)
+        share: (100n * liquidityOut) / (reserves.issuedLiquidity + liquidityOut)
     };
 }
 exports.getMintLiquidityQuote = getMintLiquidityQuote;
 const MINT_ENCODED = Uint8Array.from([109, 105, 110, 116]); // 'mint'
-async function doMint({ client, pool, asset1In, asset2In, liquidityOut, initiatorAddr, initiatorSigner, }) {
+async function doMint({ client, pool, asset1In, asset2In, liquidityOut, initiatorAddr, initiatorSigner }) {
     const suggestedParams = await client.getTransactionParams().do();
     const validatorAppCallTxn = algosdk_1.default.makeApplicationNoOpTxnFromObject({
         from: pool.addr,
         appIndex: pool.validatorAppID,
         appArgs: [MINT_ENCODED],
         accounts: [initiatorAddr],
-        suggestedParams,
+        suggestedParams
     });
     const asset1InTxn = algosdk_1.default.makeAssetTransferTxnWithSuggestedParamsFromObject({
         from: initiatorAddr,
         to: pool.addr,
         assetIndex: pool.asset1ID,
         amount: asset1In,
-        suggestedParams,
+        suggestedParams
     });
     let asset2InTxn;
     if (pool.asset2ID === 0) {
@@ -76,7 +76,7 @@ async function doMint({ client, pool, asset1In, asset2In, liquidityOut, initiato
             from: initiatorAddr,
             to: pool.addr,
             amount: asset2In,
-            suggestedParams,
+            suggestedParams
         });
     }
     else {
@@ -85,7 +85,7 @@ async function doMint({ client, pool, asset1In, asset2In, liquidityOut, initiato
             to: pool.addr,
             assetIndex: pool.asset2ID,
             amount: asset2In,
-            suggestedParams,
+            suggestedParams
         });
     }
     const liquidityOutTxn = algosdk_1.default.makeAssetTransferTxnWithSuggestedParamsFromObject({
@@ -93,7 +93,7 @@ async function doMint({ client, pool, asset1In, asset2In, liquidityOut, initiato
         to: initiatorAddr,
         assetIndex: pool.liquidityTokenID,
         amount: liquidityOut,
-        suggestedParams,
+        suggestedParams
     });
     let txnFees = validatorAppCallTxn.fee + liquidityOutTxn.fee;
     const feeTxn = algosdk_1.default.makePaymentTxnWithSuggestedParamsFromObject({
@@ -101,7 +101,7 @@ async function doMint({ client, pool, asset1In, asset2In, liquidityOut, initiato
         to: pool.addr,
         amount: txnFees,
         note: Uint8Array.from([1]),
-        suggestedParams,
+        suggestedParams
     });
     txnFees += asset1InTxn.fee + asset2InTxn.fee + feeTxn.fee;
     const txGroup = algosdk_1.default.assignGroupID([
@@ -109,7 +109,7 @@ async function doMint({ client, pool, asset1In, asset2In, liquidityOut, initiato
         validatorAppCallTxn,
         asset1InTxn,
         asset2InTxn,
-        liquidityOutTxn,
+        liquidityOutTxn
     ]);
     const lsig = algosdk_1.default.makeLogicSig(pool.program);
     const signedFeeTxn = await initiatorSigner(txGroup, 0);
@@ -130,10 +130,10 @@ async function doMint({ client, pool, asset1In, asset2In, liquidityOut, initiato
     });
     const { txId } = await client.sendRawTransaction(signedTxns).do();
     const status = await util_1.waitForTransaction(client, txId);
-    const confirmedRound = status['confirmed-round'];
+    const confirmedRound = status["confirmed-round"];
     return {
         fees: txnFees,
-        confirmedRound,
+        confirmedRound
     };
 }
 /**
@@ -152,13 +152,13 @@ async function doMint({ client, pool, asset1In, asset2In, liquidityOut, initiato
  * @param params.initiatorSigner A function that will sign transactions from the initiator's
  *   account.
  */
-async function mintLiquidity({ client, pool, asset1In, asset2In, liquidityOut, slippage, redeemExcess, initiatorAddr, initiatorSigner, }) {
+async function mintLiquidity({ client, pool, asset1In, asset2In, liquidityOut, slippage, redeemExcess, initiatorAddr, initiatorSigner }) {
     // apply slippage to liquidity out amount
     const liquidityOutAmount = util_1.applySlippageToAmount("negative", slippage, liquidityOut);
     const prevExcessAssets = await pool_1.getAccountExcess({
         client,
         pool,
-        accountAddr: initiatorAddr,
+        accountAddr: initiatorAddr
     });
     await validator_1.optIntoValidatorIfNecessary({
         client,
@@ -179,12 +179,12 @@ async function mintLiquidity({ client, pool, asset1In, asset2In, liquidityOut, s
         asset2In,
         liquidityOut: liquidityOutAmount,
         initiatorAddr,
-        initiatorSigner,
+        initiatorSigner
     });
     const excessAssets = await pool_1.getAccountExcess({
         client,
         pool,
-        accountAddr: initiatorAddr,
+        accountAddr: initiatorAddr
     });
     let excessAmountDelta = excessAssets.excessLiquidityTokens - prevExcessAssets.excessLiquidityTokens;
     if (excessAmountDelta < 0n) {
@@ -197,7 +197,7 @@ async function mintLiquidity({ client, pool, asset1In, asset2In, liquidityOut, s
             assetID: pool.liquidityTokenID,
             assetOut: excessAmountDelta,
             initiatorAddr,
-            initiatorSigner,
+            initiatorSigner
         });
         fees += redeemOutput.fees;
     }
@@ -209,7 +209,7 @@ async function mintLiquidity({ client, pool, asset1In, asset2In, liquidityOut, s
         asset2ID: pool.asset2ID,
         asset2In: BigInt(asset2In),
         liquidityID: pool.liquidityTokenID,
-        liquidityOut: liquidityOutAmount + excessAmountDelta,
+        liquidityOut: liquidityOutAmount + excessAmountDelta
     };
 }
 exports.mintLiquidity = mintLiquidity;

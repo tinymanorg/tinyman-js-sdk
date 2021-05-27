@@ -10,17 +10,17 @@ const pool_1 = require("./pool");
 const redeem_1 = require("./redeem");
 const validator_1 = require("./validator");
 const asset_transfer_1 = require("./asset-transfer");
-const FEE_PRECISION = 1000n;
-const FEE = 3n;
-const ONE_MINUS_FEE = FEE_PRECISION - FEE;
+// FEE = %0.3 or 3/1000
+const FEE_NUMERATOR = 3n;
+const FEE_DENOMINATOR = 1000n;
 const SWAP_ENCODED = Uint8Array.from([115, 119, 97, 112]); // 'swap'
 const FIXED_INPUT_ENCODED = Uint8Array.from([102, 105]); // 'fi'
 const FIXED_OUTPUT_ENCODED = Uint8Array.from([102, 111]); // 'fo'
-async function doSwap({ client, pool, swapType, assetIn, assetOut, initiatorAddr, initiatorSigner, }) {
+async function doSwap({ client, pool, swapType, assetIn, assetOut, initiatorAddr, initiatorSigner }) {
     const suggestedParams = await client.getTransactionParams().do();
     const validatorAppCallArgs = [
         SWAP_ENCODED,
-        swapType === 'fixed input' ? FIXED_INPUT_ENCODED : FIXED_OUTPUT_ENCODED,
+        swapType === "fixed input" ? FIXED_INPUT_ENCODED : FIXED_OUTPUT_ENCODED
     ];
     await validator_1.optIntoValidatorIfNecessary({
         client,
@@ -39,7 +39,7 @@ async function doSwap({ client, pool, swapType, assetIn, assetOut, initiatorAddr
         appIndex: pool.validatorAppID,
         appArgs: validatorAppCallArgs,
         accounts: [initiatorAddr],
-        suggestedParams,
+        suggestedParams
     });
     let assetInTxn;
     if (assetIn.assetID === 0) {
@@ -47,7 +47,7 @@ async function doSwap({ client, pool, swapType, assetIn, assetOut, initiatorAddr
             from: initiatorAddr,
             to: pool.addr,
             amount: assetIn.amount,
-            suggestedParams,
+            suggestedParams
         });
     }
     else {
@@ -56,7 +56,7 @@ async function doSwap({ client, pool, swapType, assetIn, assetOut, initiatorAddr
             to: pool.addr,
             assetIndex: assetIn.assetID,
             amount: assetIn.amount,
-            suggestedParams,
+            suggestedParams
         });
     }
     let assetOutTxn;
@@ -65,7 +65,7 @@ async function doSwap({ client, pool, swapType, assetIn, assetOut, initiatorAddr
             from: pool.addr,
             to: initiatorAddr,
             amount: assetOut.amount,
-            suggestedParams,
+            suggestedParams
         });
     }
     else {
@@ -74,7 +74,7 @@ async function doSwap({ client, pool, swapType, assetIn, assetOut, initiatorAddr
             to: initiatorAddr,
             assetIndex: assetOut.assetID,
             amount: assetOut.amount,
-            suggestedParams,
+            suggestedParams
         });
     }
     let txnFees = validatorAppCallTxn.fee + assetOutTxn.fee;
@@ -82,14 +82,14 @@ async function doSwap({ client, pool, swapType, assetIn, assetOut, initiatorAddr
         from: initiatorAddr,
         to: pool.addr,
         amount: txnFees,
-        suggestedParams,
+        suggestedParams
     });
     txnFees += assetInTxn.fee + feeTxn.fee;
     const txGroup = algosdk_1.default.assignGroupID([
         feeTxn,
         validatorAppCallTxn,
         assetInTxn,
-        assetOutTxn,
+        assetOutTxn
     ]);
     const lsig = algosdk_1.default.makeLogicSig(pool.program);
     const signedFeeTxn = await initiatorSigner(txGroup, 0);
@@ -106,10 +106,10 @@ async function doSwap({ client, pool, swapType, assetIn, assetOut, initiatorAddr
     });
     const { txId } = await client.sendRawTransaction(signedTxns).do();
     const status = await util_1.waitForTransaction(client, txId);
-    const confirmedRound = status['confirmed-round'];
+    const confirmedRound = status["confirmed-round"];
     return {
         fees: txnFees,
-        confirmedRound,
+        confirmedRound
     };
 }
 /**
@@ -121,7 +121,7 @@ async function doSwap({ client, pool, swapType, assetIn, assetOut, initiatorAddr
  *   or asset2ID.
  * @param params.assetIn.amount The quantity of the input asset.
  */
-async function getFixedInputSwapQuote({ client, pool, assetIn, }) {
+async function getFixedInputSwapQuote({ client, pool, assetIn }) {
     const reserves = await pool_1.getPoolReserves(client, pool);
     const assetInAmount = BigInt(assetIn.amount);
     let assetOutID;
@@ -137,14 +137,23 @@ async function getFixedInputSwapQuote({ client, pool, assetIn, }) {
         inputSupply = reserves.asset2;
         outputSupply = reserves.asset1;
     }
-    const assetOutAmount = assetInAmount * ONE_MINUS_FEE * outputSupply / (inputSupply * FEE_PRECISION + assetInAmount * ONE_MINUS_FEE);
+    const swapFee = (assetInAmount * FEE_NUMERATOR) / FEE_DENOMINATOR;
+    const assetInAmountMinusFee = assetInAmount - swapFee;
+    const k = inputSupply * outputSupply;
+    // k = (inputSupply + assetInAmountMinusFee) * (outputSupply - assetOutAmount)
+    const assetOutAmount = outputSupply - k / (inputSupply + assetInAmountMinusFee);
+    if (assetOutAmount > outputSupply) {
+        throw new Error("Output amount exceeds available liquidity.");
+    }
+    const rate = Number(assetOutAmount) / Number(assetInAmount);
     return {
         round: reserves.round,
         assetInID: assetIn.assetID,
         assetInAmount,
         assetOutID,
         assetOutAmount,
-        swapFee: Number(assetInAmount * FEE / FEE_PRECISION)
+        swapFee: Number(swapFee),
+        rate
     };
 }
 exports.getFixedInputSwapQuote = getFixedInputSwapQuote;
@@ -167,30 +176,30 @@ exports.getFixedInputSwapQuote = getFixedInputSwapQuote;
  * @param params.initiatorSigner A function that will sign transactions from the initiator's
  *   account.
  */
-async function fixedInputSwap({ client, pool, assetIn, assetOut, redeemExcess, initiatorAddr, initiatorSigner, }) {
+async function fixedInputSwap({ client, pool, assetIn, assetOut, redeemExcess, initiatorAddr, initiatorSigner }) {
     // apply slippage to asset out amount
     const assetOutAmount = util_1.applySlippageToAmount("negative", assetOut.slippage, assetOut.amount);
     const prevExcessAssets = await pool_1.getAccountExcess({
         client,
         pool,
-        accountAddr: initiatorAddr,
+        accountAddr: initiatorAddr
     });
     let { fees, confirmedRound } = await doSwap({
         client,
         pool,
-        swapType: 'fixed input',
+        swapType: "fixed input",
         assetIn,
         assetOut: {
             assetID: assetOut.assetID,
-            amount: assetOutAmount,
+            amount: assetOutAmount
         },
         initiatorAddr,
-        initiatorSigner,
+        initiatorSigner
     });
     const excessAssets = await pool_1.getAccountExcess({
         client,
         pool,
-        accountAddr: initiatorAddr,
+        accountAddr: initiatorAddr
     });
     let prevExcessAmount;
     let excessAmount;
@@ -213,7 +222,7 @@ async function fixedInputSwap({ client, pool, assetIn, assetOut, redeemExcess, i
             assetID: assetOut.assetID,
             assetOut: excessAmount,
             initiatorAddr,
-            initiatorSigner,
+            initiatorSigner
         });
         fees += redeemOutput.fees;
     }
@@ -223,7 +232,7 @@ async function fixedInputSwap({ client, pool, assetIn, assetOut, redeemExcess, i
         assetInID: assetIn.assetID,
         assetInAmount: BigInt(assetIn.amount),
         assetOutID: assetOut.assetID,
-        assetOutAmount: assetOutAmount + excessAmountDelta,
+        assetOutAmount: assetOutAmount + excessAmountDelta
     };
 }
 exports.fixedInputSwap = fixedInputSwap;
@@ -236,7 +245,7 @@ exports.fixedInputSwap = fixedInputSwap;
  *   or asset2ID.
  * @param params.assetOut.amount The quantity of the output asset.
  */
-async function getFixedOutputSwapQuote({ client, pool, assetOut, }) {
+async function getFixedOutputSwapQuote({ client, pool, assetOut }) {
     const reserves = await pool_1.getPoolReserves(client, pool);
     const assetOutAmount = BigInt(assetOut.amount);
     let assetInID;
@@ -252,14 +261,23 @@ async function getFixedOutputSwapQuote({ client, pool, assetOut, }) {
         inputSupply = reserves.asset1;
         outputSupply = reserves.asset2;
     }
-    const assetInAmount = assetOutAmount * inputSupply * FEE_PRECISION / ((outputSupply - assetOutAmount) * ONE_MINUS_FEE) + 1n;
+    if (assetOutAmount > outputSupply) {
+        throw new Error("Output amount exceeds available liquidity.");
+    }
+    const k = inputSupply * outputSupply;
+    // k = (inputSupply + assetInAmount) * (outputSupply - assetOutAmount)
+    const assetInAmount = k / (outputSupply - assetOutAmount) - inputSupply;
+    const swapFee = (assetInAmount * FEE_NUMERATOR) / FEE_DENOMINATOR;
+    const assetInAmountPlusFee = assetInAmount + swapFee;
+    const rate = Number(assetOutAmount) / Number(assetInAmountPlusFee);
     return {
         round: reserves.round,
         assetInID,
-        assetInAmount,
+        assetInAmount: assetInAmountPlusFee,
         assetOutID: assetOut.assetID,
         assetOutAmount,
-        swapFee: Number(assetOutAmount * FEE / FEE_PRECISION)
+        swapFee: Number(swapFee),
+        rate
     };
 }
 exports.getFixedOutputSwapQuote = getFixedOutputSwapQuote;
@@ -284,30 +302,30 @@ exports.getFixedOutputSwapQuote = getFixedOutputSwapQuote;
  * @param params.initiatorSigner A function that will sign transactions from the initiator's
  *   account.
  */
-async function fixedOutputSwap({ client, pool, assetIn, assetOut, redeemExcess, initiatorAddr, initiatorSigner, }) {
+async function fixedOutputSwap({ client, pool, assetIn, assetOut, redeemExcess, initiatorAddr, initiatorSigner }) {
     // apply slippage to asset in amount
     const assetInAmount = util_1.applySlippageToAmount("positive", assetIn.slippage, assetIn.amount);
     const prevExcessAssets = await pool_1.getAccountExcess({
         client,
         pool,
-        accountAddr: initiatorAddr,
+        accountAddr: initiatorAddr
     });
     let { fees, confirmedRound } = await doSwap({
         client,
         pool,
-        swapType: 'fixed output',
+        swapType: "fixed output",
         assetIn: {
             assetID: assetIn.assetID,
-            amount: assetInAmount,
+            amount: assetInAmount
         },
         assetOut,
         initiatorAddr,
-        initiatorSigner,
+        initiatorSigner
     });
     const excessAssets = await pool_1.getAccountExcess({
         client,
         pool,
-        accountAddr: initiatorAddr,
+        accountAddr: initiatorAddr
     });
     let prevExcessAmount;
     let excessAmount;
@@ -330,7 +348,7 @@ async function fixedOutputSwap({ client, pool, assetIn, assetOut, redeemExcess, 
             assetID: assetIn.assetID,
             assetOut: excessAmount,
             initiatorAddr,
-            initiatorSigner,
+            initiatorSigner
         });
         fees += redeemOutput.fees;
     }
@@ -340,7 +358,7 @@ async function fixedOutputSwap({ client, pool, assetIn, assetOut, redeemExcess, 
         assetInID: assetIn.assetID,
         assetInAmount: assetInAmount - excessAmountDelta,
         assetOutID: assetOut.assetID,
-        assetOutAmount: BigInt(assetOut.amount),
+        assetOutAmount: BigInt(assetOut.amount)
     };
 }
 exports.fixedOutputSwap = fixedOutputSwap;

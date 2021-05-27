@@ -5,11 +5,14 @@ const constant_1 = require("./constant");
 function decodeState(stateArray) {
     const state = {};
     for (const pair of stateArray) {
-        const key = pair.key;
+        const { key } = pair;
         let value;
-        if (pair.value.type == 1) { // intentionally using == to match BigInts
+        // intentionally using == to match BigInts
+        // eslint-disable-next-line eqeqeq
+        if (pair.value.type == 1) {
             // value is byte array
             value = pair.value.bytes;
+            // eslint-disable-next-line eqeqeq
         }
         else if (pair.value.type == 2) {
             // value is uint64
@@ -37,40 +40,41 @@ const MIN_BALANCE_PER_APP = 100000n;
 const MIN_BALANCE_PER_APP_BYTESLICE = 25000n + 25000n;
 const MIN_BALANCE_PER_APP_UINT = 25000n + 3500n;
 function getMinBalanceForAccount(accountInfo) {
-    const totalSchema = accountInfo['apps-total-schema'];
+    const totalSchema = accountInfo["apps-total-schema"];
     let totalByteSlices = 0n;
     let totalUints = 0n;
     if (totalSchema) {
-        if (totalSchema['num-byte-slice']) {
-            totalByteSlices = totalSchema['num-byte-slice'];
+        if (totalSchema["num-byte-slice"]) {
+            totalByteSlices = totalSchema["num-byte-slice"];
         }
-        if (totalSchema['num-uint']) {
-            totalUints = totalSchema['num-uint'];
+        if (totalSchema["num-uint"]) {
+            totalUints = totalSchema["num-uint"];
         }
     }
-    const localApps = accountInfo['apps-local-state'] || [];
-    const createdApps = accountInfo['created-apps'] || [];
-    const assets = accountInfo['assets'] || [];
-    return MIN_BALANCE_PER_ACCOUNT +
+    const localApps = accountInfo["apps-local-state"] || [];
+    const createdApps = accountInfo["created-apps"] || [];
+    const assets = accountInfo.assets || [];
+    return (MIN_BALANCE_PER_ACCOUNT +
         MIN_BALANCE_PER_ASSET * BigInt(assets.length) +
         MIN_BALANCE_PER_APP * BigInt(createdApps.length + localApps.length) +
         MIN_BALANCE_PER_APP_UINT * totalUints +
-        MIN_BALANCE_PER_APP_BYTESLICE * totalByteSlices;
+        MIN_BALANCE_PER_APP_BYTESLICE * totalByteSlices);
 }
 exports.getMinBalanceForAccount = getMinBalanceForAccount;
 async function waitForTransaction(client, txId) {
     let lastStatus = await client.status().do();
-    let lastRound = lastStatus['last-round'];
+    let lastRound = lastStatus["last-round"];
+    // eslint-disable-next-line no-constant-condition
     while (true) {
         const status = await client.pendingTransactionInformation(txId).do();
-        if (status['pool-error']) {
-            throw new Error(`Transaction Pool Error: ${status['pool-error']}`);
+        if (status["pool-error"]) {
+            throw new Error(`Transaction Pool Error: ${status["pool-error"]}`);
         }
-        if (status['confirmed-round']) {
+        if (status["confirmed-round"]) {
             return status;
         }
         lastStatus = await client.statusAfterBlock(lastRound + 1).do();
-        lastRound = lastStatus['last-round'];
+        lastRound = lastStatus["last-round"];
     }
 }
 exports.waitForTransaction = waitForTransaction;
