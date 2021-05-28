@@ -1,4 +1,4 @@
-import algosdk from 'algosdk';
+import algosdk from "algosdk";
 /**
  * Get the Validator App ID for a network.
  *
@@ -17,11 +17,16 @@ export declare function getvalidatorAppID(client: any): Promise<number>;
  * @param params.initiatorSigner A function that will sign  transactions from the initiator's
  *   account.
  */
-export declare function optIntoValidator({ client, validatorAppID, initiatorAddr, initiatorSigner, }: {
-    client: any;
-    validatorAppID: number;
-    initiatorAddr: string;
-    initiatorSigner: (txns: any[], index: number) => Promise<Uint8Array>;
+export declare function optIntoValidator({
+  client,
+  validatorAppID,
+  initiatorAddr,
+  initiatorSigner
+}: {
+  client: any;
+  validatorAppID: number;
+  initiatorAddr: string;
+  initiatorSigner: (txns: any[], index: number) => Promise<Uint8Array>;
 }): Promise<void>;
 /**
  * Close out of the Validator app. WARNING: Make sure to redeem ALL excess asset amounts
@@ -33,11 +38,16 @@ export declare function optIntoValidator({ client, validatorAppID, initiatorAddr
  * @param params.initiatorSigner A function that will sign transactions from the initiator's
  *   account.
  */
-export declare function closeOutOfValidator({ client, validatorAppID, initiatorAddr, initiatorSigner, }: {
-    client: any;
-    validatorAppID: number;
-    initiatorAddr: string;
-    initiatorSigner: (txns: any[], index: number) => Promise<Uint8Array>;
+export declare function closeOutOfValidator({
+  client,
+  validatorAppID,
+  initiatorAddr,
+  initiatorSigner
+}: {
+  client: any;
+  validatorAppID: number;
+  initiatorAddr: string;
+  initiatorSigner: (txns: any[], index: number) => Promise<Uint8Array>;
 }): Promise<void>;
 /**
  * Check if an account is opted into the Validator app.
@@ -49,16 +59,31 @@ export declare function closeOutOfValidator({ client, validatorAppID, initiatorA
  * @returns A promise that resolve to true if and only if the indicated account has opted into the
  *   pool's pair app.
  */
-export declare function isOptedIntoValidator({ client, validatorAppID, initiatorAddr }: {
-    client: any;
-    validatorAppID: number;
-    initiatorAddr: string;
+export declare function isOptedIntoValidator({
+  client,
+  validatorAppID,
+  initiatorAddr
+}: {
+  client: any;
+  validatorAppID: number;
+  initiatorAddr: string;
 }): Promise<boolean>;
-export declare function optIntoValidatorIfNecessary({ client, validatorAppID, initiatorAddr, initiatorSigner }: {
-    client: any;
-    validatorAppID: number;
-    initiatorAddr: string;
-    initiatorSigner: (txns: any[], index: number) => Promise<Uint8Array>;
+export declare function optIntoValidatorIfNecessary({
+  client,
+  validatorAppID,
+  initiatorAddr,
+  initiatorSigner
+}: {
+  client: any;
+  validatorAppID: number;
+  initiatorAddr: string;
+  initiatorSigner: (txns: any[], index: number) => Promise<Uint8Array>;
 }): Promise<void>;
-export declare function getValidatorAppCreationTransaction(client: any, addr: string): Promise<algosdk.Transaction>;
-export declare function sendValidatorAppCreationTransaction(client: any, stx: any): Promise<number>;
+export declare function getValidatorAppCreationTransaction(
+  client: any,
+  addr: string
+): Promise<algosdk.Transaction>;
+export declare function sendValidatorAppCreationTransaction(
+  client: any,
+  stx: any
+): Promise<number>;

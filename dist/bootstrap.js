@@ -5,26 +5,30 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.doBootstrap = void 0;
 const algosdk_1 = __importDefault(require("algosdk"));
-const util_1 = require("./util");
 const algoswap_1 = require("algoswap");
+const util_1 = require("./util");
 const BOOTSTRAP_ENCODED = Uint8Array.from([98, 111, 111, 116, 115, 116, 114, 97, 112]); // 'bootstrap'
-async function doBootstrap({ client, poolLogicSig, validatorAppID, asset1ID, asset2ID, initiatorAddr, initiatorSigner, }) {
+async function doBootstrap({ client, poolLogicSig, validatorAppID, asset1ID, asset2ID, initiatorAddr, initiatorSigner }) {
     const suggestedParams = await client.getTransactionParams().do();
     const validatorAppCallTxn = algosdk_1.default.makeApplicationOptInTxnFromObject({
         from: poolLogicSig.addr,
         appIndex: validatorAppID,
-        appArgs: [BOOTSTRAP_ENCODED, algosdk_1.default.encodeUint64(asset1ID), algosdk_1.default.encodeUint64(asset2ID)],
-        suggestedParams,
+        appArgs: [
+            BOOTSTRAP_ENCODED,
+            algosdk_1.default.encodeUint64(asset1ID),
+            algosdk_1.default.encodeUint64(asset2ID)
+        ],
+        suggestedParams
     });
     const liquidityTokenCreateTxn = algosdk_1.default.makeAssetCreateTxnWithSuggestedParamsFromObject({
         from: poolLogicSig.addr,
         total: Number.MAX_SAFE_INTEGER,
         decimals: 6,
         defaultFrozen: false,
-        unitName: 'LQDTY',
-        assetName: 'Liquidity',
-        assetURL: 'https://algoswap.com',
-        suggestedParams,
+        unitName: "LQDTY",
+        assetName: "Liquidity",
+        assetURL: "https://algoswap.com",
+        suggestedParams
     });
     liquidityTokenCreateTxn.assetTotal = 0xffffffffffffffffn;
     const asset1Optin = algosdk_1.default.makeAssetTransferTxnWithSuggestedParamsFromObject({
@@ -32,36 +36,40 @@ async function doBootstrap({ client, poolLogicSig, validatorAppID, asset1ID, ass
         to: poolLogicSig.addr,
         assetIndex: asset1ID,
         amount: 0,
-        suggestedParams,
+        suggestedParams
     });
-    const asset2Optin = asset2ID === 0 ? null : algosdk_1.default.makeAssetTransferTxnWithSuggestedParamsFromObject({
-        from: poolLogicSig.addr,
-        to: poolLogicSig.addr,
-        assetIndex: asset2ID,
-        amount: 0,
-        suggestedParams,
-    });
-    const minBalance = 100000 // min account balance
-        + 100000 // min balance to create asset
-        + 100000 // fee + min balance to opt into asset 1
-        + (asset2Optin ? 100000 : 0) // min balance to opt into asset 2
-        + 100000 + (25000 + 3500) * algoswap_1.VALIDATOR_APP_SCHEMA.numLocalInts + (25000 + 25000) * algoswap_1.VALIDATOR_APP_SCHEMA.numLocalByteSlices; // min balance to opt into validator app
-    const fundingAmount = minBalance
-        + liquidityTokenCreateTxn.fee
-        + asset1Optin.fee
-        + (asset2Optin ? asset2Optin.fee : 0)
-        + validatorAppCallTxn.fee;
+    const asset2Optin = asset2ID === 0
+        ? null
+        : algosdk_1.default.makeAssetTransferTxnWithSuggestedParamsFromObject({
+            from: poolLogicSig.addr,
+            to: poolLogicSig.addr,
+            assetIndex: asset2ID,
+            amount: 0,
+            suggestedParams
+        });
+    const minBalance = 100000 + // min account balance
+        100000 + // min balance to create asset
+        100000 + // fee + min balance to opt into asset 1
+        (asset2Optin ? 100000 : 0) + // min balance to opt into asset 2
+        100000 +
+        (25000 + 3500) * algoswap_1.VALIDATOR_APP_SCHEMA.numLocalInts +
+        (25000 + 25000) * algoswap_1.VALIDATOR_APP_SCHEMA.numLocalByteSlices; // min balance to opt into validator app
+    const fundingAmount = minBalance +
+        liquidityTokenCreateTxn.fee +
+        asset1Optin.fee +
+        (asset2Optin ? asset2Optin.fee : 0) +
+        validatorAppCallTxn.fee;
     const fundingTxn = algosdk_1.default.makePaymentTxnWithSuggestedParamsFromObject({
         from: initiatorAddr,
         to: poolLogicSig.addr,
         amount: fundingAmount,
-        suggestedParams,
+        suggestedParams
     });
     let txns = [
         fundingTxn,
         validatorAppCallTxn,
         liquidityTokenCreateTxn,
-        asset1Optin,
+        asset1Optin
     ];
     if (asset2Optin) {
         txns.push(asset2Optin);
@@ -80,7 +88,7 @@ async function doBootstrap({ client, poolLogicSig, validatorAppID, asset1ID, ass
         return blob;
     });
     try {
-        const response = await client.sendRawTransaction(signedTxns).do();
+        await client.sendRawTransaction(signedTxns).do();
     }
     catch (err) {
         if (err.response) {
@@ -89,12 +97,12 @@ async function doBootstrap({ client, poolLogicSig, validatorAppID, asset1ID, ass
         throw err;
     }
     const assetCreationResult = await util_1.waitForTransaction(client, txIDs[2]);
-    const liquidityTokenID = assetCreationResult['asset-index'];
-    if (typeof liquidityTokenID !== 'number') {
+    const liquidityTokenID = assetCreationResult["asset-index"];
+    if (typeof liquidityTokenID !== "number") {
         throw new Error(`Generated ID is not valid: got ${liquidityTokenID}`);
     }
     return {
-        liquidityTokenID,
+        liquidityTokenID
     };
 }
 exports.doBootstrap = doBootstrap;

@@ -1,36 +1,38 @@
-import { PoolInfo } from './pool';
+import {PoolInfo} from "./pool";
 /** An object containing information about a swap quote. */
 export interface SwapQuote {
-    /** The round that this quote is based on. */
-    round: number;
-    /** The ID of the input asset in this quote. */
-    assetInID: number;
-    /** The quantity of the input asset in this quote. */
-    assetInAmount: bigint;
-    /** The ID of the output asset in this quote. */
-    assetOutID: number;
-    /** The quantity of the output asset in this quote. */
-    assetOutAmount: bigint;
-    /** The amount of fee that may be spent (in the currency of the fixed asset) for the swap  */
-    swapFee: number;
+  /** The round that this quote is based on. */
+  round: number;
+  /** The ID of the input asset in this quote. */
+  assetInID: number;
+  /** The quantity of the input asset in this quote. */
+  assetInAmount: bigint;
+  /** The ID of the output asset in this quote. */
+  assetOutID: number;
+  /** The quantity of the output asset in this quote. */
+  assetOutAmount: bigint;
+  /** The amount of fee that may be spent (in the currency of the fixed asset) for the swap  */
+  swapFee: number;
+  /** The final exchange rate for this swap expressed as  assetOutAmount / assetInAmount */
+  rate: number;
 }
 /** An object containing information about a successfully executed swap. */
 export interface SwapExecution {
-    /** The round that the swap occurred in. */
-    round: number;
-    /**
-     * The total amount of transaction fees that were spent (in microAlgos) to execute the swap and,
-     * if applicable, redeem transactions.
-     */
-    fees: number;
-    /** The ID of the swap's input asset. */
-    assetInID: number;
-    /** The amount of the swap's input asset. */
-    assetInAmount: bigint;
-    /** The ID of the swap's output asset. */
-    assetOutID: number;
-    /** The amount of the swap's output asset. */
-    assetOutAmount: bigint;
+  /** The round that the swap occurred in. */
+  round: number;
+  /**
+   * The total amount of transaction fees that were spent (in microAlgos) to execute the swap and,
+   * if applicable, redeem transactions.
+   */
+  fees: number;
+  /** The ID of the swap's input asset. */
+  assetInID: number;
+  /** The amount of the swap's input asset. */
+  assetInAmount: bigint;
+  /** The ID of the swap's output asset. */
+  assetOutID: number;
+  /** The amount of the swap's output asset. */
+  assetOutAmount: bigint;
 }
 /**
  * Get a quote for a fixed input swap This does not execute any transactions.
@@ -41,13 +43,17 @@ export interface SwapExecution {
  *   or asset2ID.
  * @param params.assetIn.amount The quantity of the input asset.
  */
-export declare function getFixedInputSwapQuote({ client, pool, assetIn, }: {
-    client: any;
-    pool: PoolInfo;
-    assetIn: {
-        assetID: number;
-        amount: number | bigint;
-    };
+export declare function getFixedInputSwapQuote({
+  client,
+  pool,
+  assetIn
+}: {
+  client: any;
+  pool: PoolInfo;
+  assetIn: {
+    assetID: number;
+    amount: number | bigint;
+  };
 }): Promise<SwapQuote>;
 /**
  * Execute a fixed input swap with the desired quantities.
@@ -68,21 +74,29 @@ export declare function getFixedInputSwapQuote({ client, pool, assetIn, }: {
  * @param params.initiatorSigner A function that will sign transactions from the initiator's
  *   account.
  */
-export declare function fixedInputSwap({ client, pool, assetIn, assetOut, redeemExcess, initiatorAddr, initiatorSigner, }: {
-    client: any;
-    pool: PoolInfo;
-    assetIn: {
-        assetID: number;
-        amount: number | bigint;
-    };
-    assetOut: {
-        assetID: number;
-        amount: number | bigint;
-        slippage: number;
-    };
-    redeemExcess: boolean;
-    initiatorAddr: string;
-    initiatorSigner: (txns: any[], index: number) => Promise<Uint8Array>;
+export declare function fixedInputSwap({
+  client,
+  pool,
+  assetIn,
+  assetOut,
+  redeemExcess,
+  initiatorAddr,
+  initiatorSigner
+}: {
+  client: any;
+  pool: PoolInfo;
+  assetIn: {
+    assetID: number;
+    amount: number | bigint;
+  };
+  assetOut: {
+    assetID: number;
+    amount: number | bigint;
+    slippage: number;
+  };
+  redeemExcess: boolean;
+  initiatorAddr: string;
+  initiatorSigner: (txns: any[], index: number) => Promise<Uint8Array>;
 }): Promise<SwapExecution>;
 /**
  * Get a quote for a fixed output swap This does not execute any transactions.
@@ -93,13 +107,17 @@ export declare function fixedInputSwap({ client, pool, assetIn, assetOut, redeem
  *   or asset2ID.
  * @param params.assetOut.amount The quantity of the output asset.
  */
-export declare function getFixedOutputSwapQuote({ client, pool, assetOut, }: {
-    client: any;
-    pool: PoolInfo;
-    assetOut: {
-        assetID: number;
-        amount: number | bigint;
-    };
+export declare function getFixedOutputSwapQuote({
+  client,
+  pool,
+  assetOut
+}: {
+  client: any;
+  pool: PoolInfo;
+  assetOut: {
+    assetID: number;
+    amount: number | bigint;
+  };
 }): Promise<SwapQuote>;
 /**
  * Execute a fixed output swap with the desired quantities.
@@ -122,19 +140,27 @@ export declare function getFixedOutputSwapQuote({ client, pool, assetOut, }: {
  * @param params.initiatorSigner A function that will sign transactions from the initiator's
  *   account.
  */
-export declare function fixedOutputSwap({ client, pool, assetIn, assetOut, redeemExcess, initiatorAddr, initiatorSigner, }: {
-    client: any;
-    pool: PoolInfo;
-    assetIn: {
-        assetID: number;
-        amount: number | bigint;
-        slippage: number;
-    };
-    assetOut: {
-        assetID: number;
-        amount: number | bigint;
-    };
-    redeemExcess: boolean;
-    initiatorAddr: string;
-    initiatorSigner: (txns: any[], index: number) => Promise<Uint8Array>;
+export declare function fixedOutputSwap({
+  client,
+  pool,
+  assetIn,
+  assetOut,
+  redeemExcess,
+  initiatorAddr,
+  initiatorSigner
+}: {
+  client: any;
+  pool: PoolInfo;
+  assetIn: {
+    assetID: number;
+    amount: number | bigint;
+    slippage: number;
+  };
+  assetOut: {
+    assetID: number;
+    amount: number | bigint;
+  };
+  redeemExcess: boolean;
+  initiatorAddr: string;
+  initiatorSigner: (txns: any[], index: number) => Promise<Uint8Array>;
 }): Promise<SwapExecution>;

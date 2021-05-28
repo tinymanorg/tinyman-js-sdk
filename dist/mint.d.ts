@@ -1,44 +1,44 @@
-import { PoolInfo } from './pool';
+import {PoolInfo} from "./pool";
 /** An object containing information about a mint quote. */
 export interface MintQuote {
-    /** The round that this quote is based on. */
-    round: number;
-    /** The ID of the first input asset in this quote. */
-    asset1ID: number;
-    /** The quantity of the first input asset in this quote. */
-    asset1In: bigint;
-    /** The ID of the second input asset in this quote. */
-    asset2ID: number;
-    /** The quantity of the second input asset in this quote. */
-    asset2In: bigint;
-    /** The ID of the liquidity token output in this quote. */
-    liquidityID: number;
-    /** The amount of the liquidity token output in this quote. */
-    liquidityOut: bigint;
-    /** The share of the total liquidity in this quote. */
-    share: bigint;
+  /** The round that this quote is based on. */
+  round: number;
+  /** The ID of the first input asset in this quote. */
+  asset1ID: number;
+  /** The quantity of the first input asset in this quote. */
+  asset1In: bigint;
+  /** The ID of the second input asset in this quote. */
+  asset2ID: number;
+  /** The quantity of the second input asset in this quote. */
+  asset2In: bigint;
+  /** The ID of the liquidity token output in this quote. */
+  liquidityID: number;
+  /** The amount of the liquidity token output in this quote. */
+  liquidityOut: bigint;
+  /** The share of the total liquidity in this quote. */
+  share: bigint;
 }
 /** An object containing information about a successfully executed mint transaction. */
 export interface MintExecution {
-    /** The round that the mint occurred in. */
-    round: number;
-    /**
-     * The total amount of transaction fees that were spent (in microAlgos) to execute the mint and,
-     * if applicable, redeem transactions.
-     */
-    fees: number;
-    /** The ID of the first input asset. */
-    asset1ID: number;
-    /** The quantity of the first input asset. */
-    asset1In: bigint;
-    /** The ID of the second input asset. */
-    asset2ID: number;
-    /** The quantity of the second input asset. */
-    asset2In: bigint;
-    /** The ID of the output liquidity token asset. */
-    liquidityID: number;
-    /** The quantity of the output liquidity token asset. */
-    liquidityOut: bigint;
+  /** The round that the mint occurred in. */
+  round: number;
+  /**
+   * The total amount of transaction fees that were spent (in microAlgos) to execute the mint and,
+   * if applicable, redeem transactions.
+   */
+  fees: number;
+  /** The ID of the first input asset. */
+  asset1ID: number;
+  /** The quantity of the first input asset. */
+  asset1In: bigint;
+  /** The ID of the second input asset. */
+  asset2ID: number;
+  /** The quantity of the second input asset. */
+  asset2In: bigint;
+  /** The ID of the output liquidity token asset. */
+  liquidityID: number;
+  /** The quantity of the output liquidity token asset. */
+  liquidityOut: bigint;
 }
 /**
  * Get a quote for how many liquidity tokens a deposit of asset1In and asset2In is worth at this
@@ -49,11 +49,16 @@ export interface MintExecution {
  * @param params.asset1In The quantity of the first asset being deposited.
  * @param params.asset2In The quantity of the second asset being deposited.
  */
-export declare function getMintLiquidityQuote({ client, pool, asset1In, asset2In, }: {
-    client: any;
-    pool: PoolInfo;
-    asset1In: number | bigint;
-    asset2In: number | bigint;
+export declare function getMintLiquidityQuote({
+  client,
+  pool,
+  asset1In,
+  asset2In
+}: {
+  client: any;
+  pool: PoolInfo;
+  asset1In: number | bigint;
+  asset2In: number | bigint;
 }): Promise<MintQuote>;
 /**
  * Execute a mint operation with the desired quantities.
@@ -71,14 +76,24 @@ export declare function getMintLiquidityQuote({ client, pool, asset1In, asset2In
  * @param params.initiatorSigner A function that will sign transactions from the initiator's
  *   account.
  */
-export declare function mintLiquidity({ client, pool, asset1In, asset2In, liquidityOut, slippage, redeemExcess, initiatorAddr, initiatorSigner, }: {
-    client: any;
-    pool: PoolInfo;
-    asset1In: number | bigint;
-    asset2In: number | bigint;
-    liquidityOut: number | bigint;
-    slippage: number;
-    redeemExcess: boolean;
-    initiatorAddr: string;
-    initiatorSigner: (txns: any[], index: number) => Promise<Uint8Array>;
+export declare function mintLiquidity({
+  client,
+  pool,
+  asset1In,
+  asset2In,
+  liquidityOut,
+  slippage,
+  redeemExcess,
+  initiatorAddr,
+  initiatorSigner
+}: {
+  client: any;
+  pool: PoolInfo;
+  asset1In: number | bigint;
+  asset2In: number | bigint;
+  liquidityOut: number | bigint;
+  slippage: number;
+  redeemExcess: boolean;
+  initiatorAddr: string;
+  initiatorSigner: (txns: any[], index: number) => Promise<Uint8Array>;
 }): Promise<MintExecution>;

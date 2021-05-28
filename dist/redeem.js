@@ -19,14 +19,14 @@ const REDEEM_ENCODED = Uint8Array.from([114, 101, 100, 101, 101, 109]); // 'rede
  * @param params.initiatorSigner A function that will sign transactions from the initiator's
  *   account.
  */
-async function redeemExcessAsset({ client, pool, assetID, assetOut, initiatorAddr, initiatorSigner, }) {
+async function redeemExcessAsset({ client, pool, assetID, assetOut, initiatorAddr, initiatorSigner }) {
     const suggestedParams = await client.getTransactionParams().do();
     const validatorAppCallTxn = algosdk_1.default.makeApplicationNoOpTxnFromObject({
         from: pool.addr,
         appIndex: pool.validatorAppID,
         appArgs: [REDEEM_ENCODED],
         accounts: [initiatorAddr],
-        suggestedParams,
+        suggestedParams
     });
     let assetOutTxn;
     if (assetID === 0) {
@@ -34,7 +34,7 @@ async function redeemExcessAsset({ client, pool, assetID, assetOut, initiatorAdd
             from: pool.addr,
             to: initiatorAddr,
             amount: assetOut,
-            suggestedParams,
+            suggestedParams
         });
     }
     else {
@@ -43,7 +43,7 @@ async function redeemExcessAsset({ client, pool, assetID, assetOut, initiatorAdd
             to: initiatorAddr,
             assetIndex: assetID,
             amount: assetOut,
-            suggestedParams,
+            suggestedParams
         });
     }
     let txnFees = validatorAppCallTxn.fee + assetOutTxn.fee;
@@ -51,13 +51,13 @@ async function redeemExcessAsset({ client, pool, assetID, assetOut, initiatorAdd
         from: initiatorAddr,
         to: pool.addr,
         amount: validatorAppCallTxn.fee + assetOutTxn.fee,
-        suggestedParams,
+        suggestedParams
     });
     txnFees += feeTxn.fee;
     const txGroup = algosdk_1.default.assignGroupID([
         feeTxn,
         validatorAppCallTxn,
-        assetOutTxn,
+        assetOutTxn
     ]);
     const lsig = algosdk_1.default.makeLogicSig(pool.program);
     const signedFeeTxn = await initiatorSigner(txGroup, 0);
@@ -70,10 +70,10 @@ async function redeemExcessAsset({ client, pool, assetID, assetOut, initiatorAdd
     });
     const { txId } = await client.sendRawTransaction(signedTxns).do();
     const status = await util_1.waitForTransaction(client, txId);
-    const confirmedRound = status['confirmed-round'];
+    const confirmedRound = status["confirmed-round"];
     return {
         fees: txnFees,
-        confirmedRound,
+        confirmedRound
     };
 }
 exports.redeemExcessAsset = redeemExcessAsset;

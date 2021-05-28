@@ -34,23 +34,26 @@ async function getPoolInfo(client, pool) {
         validatorAppID: pool.validatorAppID,
         asset1ID: Math.max(pool.asset1ID, pool.asset2ID),
         asset2ID: Math.min(pool.asset1ID, pool.asset2ID),
-        status: PoolStatus.NOT_CREATED,
+        status: PoolStatus.NOT_CREATED
     };
-    const info = await client.accountInformation(poolLogicSig.addr).do();
-    for (const app of info['apps-local-state']) {
+    const info = (await client
+        .accountInformation(poolLogicSig.addr)
+        .do());
+    for (const app of info["apps-local-state"]) {
         if (app.id !== pool.validatorAppID) {
             continue;
         }
-        const keyValue = app['key-value'];
+        const keyValue = app["key-value"];
         const state = util_1.decodeState(keyValue);
-        const asset1Key = 'YTE='; // 'a1' in base64
-        const asset2Key = 'YTI='; // 'a2' in base64
-        const liquidityTokenAsset = info['created-assets'][0]; // The Liquidity Token is the only asset the Pool has created
-        const liquidityTokenID = liquidityTokenAsset['index'];
-        result['asset1ID'] = state[asset1Key];
-        result['asset2ID'] = state[asset2Key];
-        result['liquidityTokenID'] = liquidityTokenID;
-        result['status'] = PoolStatus.READY;
+        const asset1Key = "YTE="; // 'a1' in base64
+        const asset2Key = "YTI="; // 'a2' in base64
+        // The Liquidity Token is the only asset the Pool has created
+        const liquidityTokenAsset = info["created-assets"][0];
+        const liquidityTokenID = liquidityTokenAsset.index;
+        result.asset1ID = state[asset1Key];
+        result.asset2ID = state[asset2Key];
+        result.liquidityTokenID = liquidityTokenID;
+        result.status = PoolStatus.READY;
         return result;
     }
     return result;
@@ -73,135 +76,136 @@ async function createPool(client, pool, initiatorAddr, initiatorSigner) {
     const { validatorAppID } = pool;
     const asset1ID = Math.max(pool.asset1ID, pool.asset2ID);
     const asset2ID = Math.min(pool.asset1ID, pool.asset2ID);
-    const { liquidityTokenID } = await bootstrap_1.doBootstrap({
+    await bootstrap_1.doBootstrap({
         client,
         poolLogicSig,
         validatorAppID,
         asset1ID,
         asset2ID,
         initiatorAddr,
-        initiatorSigner,
+        initiatorSigner
     });
-    return await getPoolInfo(client, pool);
+    return getPoolInfo(client, pool);
 }
 exports.createPool = createPool;
 const OUTSTANDING_ENCODED = Uint8Array.from([111]); // 'o'
 const TOTAL_LIQUIDITY = 0xffffffffffffffffn;
 async function getPoolReserves(client, pool) {
-    const info = await client.accountInformation(pool.addr).setIntDecoding('bigint').do();
-    const appsLocalState = info['apps-local-state'] || [];
+    const info = (await client
+        .accountInformation(pool.addr)
+        .setIntDecoding("bigint")
+        .do());
+    const appsLocalState = info["apps-local-state"] || [];
     let outstandingAsset1 = 0n;
     let outstandingAsset2 = 0n;
     let outstandingLiquidityTokens = 0n;
     for (const app of appsLocalState) {
+        // eslint-disable-next-line eqeqeq
         if (app.id != pool.validatorAppID) {
             continue;
         }
-        const keyValue = app['key-value'];
+        const keyValue = app["key-value"];
         if (!keyValue) {
             break;
         }
         const state = util_1.decodeState(keyValue);
-        const outstandingAsset1Key = base64_js_1.fromByteArray(util_1.joinUint8Arrays([
-            OUTSTANDING_ENCODED, algosdk_1.default.encodeUint64(pool.asset1ID)
-        ]));
-        const outstandingAsset2Key = base64_js_1.fromByteArray(util_1.joinUint8Arrays([
-            OUTSTANDING_ENCODED, algosdk_1.default.encodeUint64(pool.asset2ID)
-        ]));
-        const outstandingLiquidityTokenKey = base64_js_1.fromByteArray(util_1.joinUint8Arrays([
-            OUTSTANDING_ENCODED,
-            algosdk_1.default.encodeUint64(pool.liquidityTokenID)
-        ]));
+        const outstandingAsset1Key = base64_js_1.fromByteArray(util_1.joinUint8Arrays([OUTSTANDING_ENCODED, algosdk_1.default.encodeUint64(pool.asset1ID)]));
+        const outstandingAsset2Key = base64_js_1.fromByteArray(util_1.joinUint8Arrays([OUTSTANDING_ENCODED, algosdk_1.default.encodeUint64(pool.asset2ID)]));
+        const outstandingLiquidityTokenKey = base64_js_1.fromByteArray(util_1.joinUint8Arrays([OUTSTANDING_ENCODED, algosdk_1.default.encodeUint64(pool.liquidityTokenID)]));
         const outstandingAsset1Value = state[outstandingAsset1Key];
         const outstandingAsset2Value = state[outstandingAsset2Key];
         const outstandingLiquidityTokenValue = state[outstandingLiquidityTokenKey];
-        if (typeof (outstandingAsset1Value) === 'bigint') {
+        if (typeof outstandingAsset1Value === "bigint") {
             outstandingAsset1 = outstandingAsset1Value;
         }
-        if (typeof (outstandingAsset2Value) === 'bigint') {
+        if (typeof outstandingAsset2Value === "bigint") {
             outstandingAsset2 = outstandingAsset2Value;
         }
-        if (typeof (outstandingLiquidityTokenValue) === 'bigint') {
+        if (typeof outstandingLiquidityTokenValue === "bigint") {
             outstandingLiquidityTokens = outstandingLiquidityTokenValue;
         }
     }
     let asset1Balance = 0n;
     let asset2Balance = 0n;
     let liquidityTokenBalance = 0n;
-    for (const asset of info['assets']) {
-        const id = asset['asset-id'];
-        const amount = asset['amount'];
+    for (const asset of info.assets) {
+        const id = asset["asset-id"];
+        const { amount } = asset;
+        /* eslint-disable eqeqeq */
         if (id == pool.asset1ID) {
-            asset1Balance = amount;
+            asset1Balance = BigInt(amount);
         }
         else if (id == pool.asset2ID) {
-            asset2Balance = amount;
+            asset2Balance = BigInt(amount);
         }
         else if (id == pool.liquidityTokenID) {
-            liquidityTokenBalance = amount;
+            liquidityTokenBalance = BigInt(amount);
         }
+        /* eslint-enable eqeqeq */
     }
     if (pool.asset2ID === 0) {
         const minBalance = util_1.getMinBalanceForAccount(info);
-        asset2Balance = info.amount - minBalance;
+        asset2Balance = BigInt(info.amount) - minBalance;
     }
     const reserves = {
-        round: Number(info['round']),
+        round: Number(info.round),
         asset1: asset1Balance - outstandingAsset1,
         asset2: asset2Balance - outstandingAsset2,
-        issuedLiquidity: TOTAL_LIQUIDITY - liquidityTokenBalance + outstandingLiquidityTokens,
+        issuedLiquidity: TOTAL_LIQUIDITY - liquidityTokenBalance + outstandingLiquidityTokens
     };
-    if (reserves.asset1 < 0n || reserves.asset2 < 0n || reserves.issuedLiquidity < 0n || reserves.issuedLiquidity > TOTAL_LIQUIDITY) {
+    if (reserves.asset1 < 0n ||
+        reserves.asset2 < 0n ||
+        reserves.issuedLiquidity < 0n ||
+        reserves.issuedLiquidity > TOTAL_LIQUIDITY) {
         throw new Error(`Invalid reserves: ${reserves}`);
     }
     return reserves;
 }
 exports.getPoolReserves = getPoolReserves;
 const EXCESS_ENCODED = Uint8Array.from([101]); // 'e'
-async function getAccountExcess({ client, pool, accountAddr, }) {
-    const info = await client.accountInformation(accountAddr).setIntDecoding('bigint').do();
-    const appsLocalState = info['apps-local-state'] || [];
+async function getAccountExcess({ client, pool, accountAddr }) {
+    const info = (await client
+        .accountInformation(accountAddr)
+        .setIntDecoding("bigint")
+        .do());
+    const appsLocalState = info["apps-local-state"] || [];
     let excessAsset1 = 0n;
     let excessAsset2 = 0n;
     let excessLiquidityTokens = 0n;
     for (const app of appsLocalState) {
+        // eslint-disable-next-line eqeqeq
         if (app.id != pool.validatorAppID) {
             continue;
         }
-        const keyValue = app['key-value'];
+        const keyValue = app["key-value"];
         if (!keyValue) {
             break;
         }
         const state = util_1.decodeState(keyValue);
-        const excessAsset1Key = base64_js_1.fromByteArray(util_1.joinUint8Arrays([
-            EXCESS_ENCODED, algosdk_1.default.encodeUint64(pool.asset1ID)
-        ]));
-        const excessAsset2Key = base64_js_1.fromByteArray(util_1.joinUint8Arrays([
-            EXCESS_ENCODED, algosdk_1.default.encodeUint64(pool.asset2ID)
-        ]));
-        const excessLiquidityTokenKey = base64_js_1.fromByteArray(util_1.joinUint8Arrays([
-            EXCESS_ENCODED,
-            algosdk_1.default.encodeUint64(pool.liquidityTokenID)
-        ]));
+        const excessAsset1Key = base64_js_1.fromByteArray(util_1.joinUint8Arrays([EXCESS_ENCODED, algosdk_1.default.encodeUint64(pool.asset1ID)]));
+        const excessAsset2Key = base64_js_1.fromByteArray(util_1.joinUint8Arrays([EXCESS_ENCODED, algosdk_1.default.encodeUint64(pool.asset2ID)]));
+        const excessLiquidityTokenKey = base64_js_1.fromByteArray(util_1.joinUint8Arrays([EXCESS_ENCODED, algosdk_1.default.encodeUint64(pool.liquidityTokenID)]));
         const excessAsset1Value = state[excessAsset1Key];
         const excessAsset2Value = state[excessAsset2Key];
         const excessLiquidityTokenValue = state[excessLiquidityTokenKey];
-        if (typeof (excessAsset1Value) === 'bigint') {
+        if (typeof excessAsset1Value === "bigint") {
             excessAsset1 = excessAsset1Value;
         }
-        if (typeof (excessAsset2Value) === 'bigint') {
+        if (typeof excessAsset2Value === "bigint") {
             excessAsset2 = excessAsset2Value;
         }
-        if (typeof (excessLiquidityTokenValue) === 'bigint') {
+        if (typeof excessLiquidityTokenValue === "bigint") {
             excessLiquidityTokens = excessLiquidityTokenValue;
         }
     }
     const excessAssets = {
         excessAsset1,
         excessAsset2,
-        excessLiquidityTokens,
+        excessLiquidityTokens
     };
-    if (excessAssets.excessAsset1 < 0n || excessAssets.excessAsset2 < 0n || excessAssets.excessLiquidityTokens < 0n) {
+    if (excessAssets.excessAsset1 < 0n ||
+        excessAssets.excessAsset2 < 0n ||
+        excessAssets.excessLiquidityTokens < 0n) {
         throw new Error(`Invalid excess assets: ${excessAssets}`);
     }
     return excessAssets;
