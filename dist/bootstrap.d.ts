@@ -1,3 +1,4 @@
+import {InitiatorSigner} from "./common-types";
 export declare function doBootstrap({
   client,
   poolLogicSig,
@@ -16,7 +17,7 @@ export declare function doBootstrap({
   asset1ID: number;
   asset2ID: number;
   initiatorAddr: string;
-  initiatorSigner: (txns: any[], index: number) => Promise<Uint8Array>;
+  initiatorSigner: InitiatorSigner;
 }): Promise<{
   liquidityTokenID: number;
 }>;

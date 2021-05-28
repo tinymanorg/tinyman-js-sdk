@@ -43,7 +43,7 @@
   },
   "dependencies": {
     "algosdk": "^1.9.1",
-    "algoswap": "git+ssh://git@github.com/Hipo/algoswap-contracts.git#split-sdk-from-contracts",
+    "algoswap-contracts-v1": "git+ssh://git@github.com/Hipo/algoswap-contracts.git#split-sdk-from-contracts",
     "base64-js": "^1.5.1"
   },
   "lint-staged": {

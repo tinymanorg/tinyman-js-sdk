@@ -1,4 +1,5 @@
 import {PoolInfo} from "./pool";
+import {InitiatorSigner} from "./common-types";
 /** An object containing information about a mint quote. */
 export interface MintQuote {
   /** The round that this quote is based on. */
@@ -95,5 +96,5 @@ export declare function mintLiquidity({
   slippage: number;
   redeemExcess: boolean;
   initiatorAddr: string;
-  initiatorSigner: (txns: any[], index: number) => Promise<Uint8Array>;
+  initiatorSigner: InitiatorSigner;
 }): Promise<MintExecution>;

@@ -3,6 +3,7 @@ import algosdk from "algosdk";
 import {waitForTransaction} from "./util";
 import {PoolInfo, getPoolReserves, getAccountExcess} from "./pool";
 import {redeemExcessAsset} from "./redeem";
+import {InitiatorSigner} from "./common-types";
 
 /** An object containing information about a burn quote. */
 export interface BurnQuote {
@@ -96,7 +97,7 @@ async function doBurn({
   asset1Out: number | bigint;
   asset2Out: number | bigint;
   initiatorAddr: string;
-  initiatorSigner: (txns: any[], index: number) => Promise<Uint8Array>;
+  initiatorSigner: InitiatorSigner;
 }): Promise<{
   fees: number;
   confirmedRound: number;
@@ -166,8 +167,10 @@ async function doBurn({
   ]);
 
   const lsig = algosdk.makeLogicSig(pool.program);
-  const signedFeeTxn = await initiatorSigner(txGroup, 0);
-  const signedLiquidityInTxn = await initiatorSigner(txGroup, 4);
+  const [signedFeeTxn, signedLiquidityInTxn] = await initiatorSigner([
+    txGroup[0],
+    txGroup[4]
+  ]);
 
   const signedTxns = txGroup.map((txn, index) => {
     if (index === 0) {
@@ -233,7 +236,7 @@ export async function burnLiquidity({
   };
   redeemExcess: boolean;
   initiatorAddr: string;
-  initiatorSigner: (txns: any[], index: number) => Promise<Uint8Array>;
+  initiatorSigner: InitiatorSigner;
 }): Promise<BurnExecution> {
   if (
     !Number.isInteger(asset1Out.slippage) ||

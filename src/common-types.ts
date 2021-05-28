@@ -1,3 +1,5 @@
+import algosdk from "algosdk";
+
 export interface AccountAsset {
   amount: number;
   "asset-id": number;
@@ -20,3 +22,5 @@ export interface AccountInformationData {
   round: number;
   status: "Offline";
 }
+
+export type InitiatorSigner = (txns: algosdk.Transaction[]) => Promise<Uint8Array[]>;

@@ -92,8 +92,11 @@ async function doSwap({ client, pool, swapType, assetIn, assetOut, initiatorAddr
         assetOutTxn
     ]);
     const lsig = algosdk_1.default.makeLogicSig(pool.program);
-    const signedFeeTxn = await initiatorSigner(txGroup, 0);
-    const signedAssetInTxn = await initiatorSigner(txGroup, 2);
+    const [signedFeeTxn, signedAssetInTxn] = await initiatorSigner([
+        txGroup[0],
+        txGroup[2]
+    ]);
+    // const [signedFeeTxn, _1, signedAssetInTxn, _2] = await initiatorSigner(txGroup);
     const signedTxns = txGroup.map((txn, index) => {
         if (index === 0) {
             return signedFeeTxn;
@@ -104,6 +107,7 @@ async function doSwap({ client, pool, swapType, assetIn, assetOut, initiatorAddr
         const { blob } = algosdk_1.default.signLogicSigTransactionObject(txn, lsig);
         return blob;
     });
+    console.log({ txGroup, signedTxns: signedTxns.map(txn => Buffer.from(txn).toString("base64")) });
     const { txId } = await client.sendRawTransaction(signedTxns).do();
     const status = await util_1.waitForTransaction(client, txId);
     const confirmedRound = status["confirmed-round"];

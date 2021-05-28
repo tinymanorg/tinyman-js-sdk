@@ -1,4 +1,5 @@
 import {PoolInfo} from "./pool";
+import {InitiatorSigner} from "./common-types";
 /** An object containing information about a burn quote. */
 export interface BurnQuote {
   /** The round that this quote is based on. */
@@ -96,5 +97,5 @@ export declare function burnLiquidity({
   };
   redeemExcess: boolean;
   initiatorAddr: string;
-  initiatorSigner: (txns: any[], index: number) => Promise<Uint8Array>;
+  initiatorSigner: InitiatorSigner;
 }): Promise<BurnExecution>;

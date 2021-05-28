@@ -2,6 +2,7 @@ import algosdk from "algosdk";
 
 import {waitForTransaction} from "./util";
 import {PoolInfo} from "./pool";
+import {InitiatorSigner} from "./common-types";
 
 const REDEEM_ENCODED = Uint8Array.from([114, 101, 100, 101, 101, 109]); // 'redeem'
 
@@ -30,7 +31,7 @@ export async function redeemExcessAsset({
   assetID: number;
   assetOut: number | bigint;
   initiatorAddr: string;
-  initiatorSigner: (txns: any[], index: number) => Promise<Uint8Array>;
+  initiatorSigner: InitiatorSigner;
 }): Promise<{
   fees: number;
   confirmedRound: number;
@@ -82,7 +83,7 @@ export async function redeemExcessAsset({
   ]);
 
   const lsig = algosdk.makeLogicSig(pool.program);
-  const signedFeeTxn = await initiatorSigner(txGroup, 0);
+  const [signedFeeTxn] = await initiatorSigner([txGroup[0]]);
 
   const signedTxns = txGroup.map((txn, index) => {
     if (index === 0) {

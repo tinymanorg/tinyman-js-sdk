@@ -90,8 +90,10 @@ async function doBurn({ client, pool, liquidityIn, asset1Out, asset2Out, initiat
         liquidityInTxn
     ]);
     const lsig = algosdk_1.default.makeLogicSig(pool.program);
-    const signedFeeTxn = await initiatorSigner(txGroup, 0);
-    const signedLiquidityInTxn = await initiatorSigner(txGroup, 4);
+    const [signedFeeTxn, signedLiquidityInTxn] = await initiatorSigner([
+        txGroup[0],
+        txGroup[4]
+    ]);
     const signedTxns = txGroup.map((txn, index) => {
         if (index === 0) {
             return signedFeeTxn;

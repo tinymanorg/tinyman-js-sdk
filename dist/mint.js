@@ -112,9 +112,11 @@ async function doMint({ client, pool, asset1In, asset2In, liquidityOut, initiato
         liquidityOutTxn
     ]);
     const lsig = algosdk_1.default.makeLogicSig(pool.program);
-    const signedFeeTxn = await initiatorSigner(txGroup, 0);
-    const signedAsset1InTxn = await initiatorSigner(txGroup, 2);
-    const signedAsset2InTxn = await initiatorSigner(txGroup, 3);
+    const [signedFeeTxn, signedAsset1InTxn, signedAsset2InTxn] = await initiatorSigner([
+        txGroup[0],
+        txGroup[2],
+        txGroup[3]
+    ]);
     const signedTxns = txGroup.map((txn, index) => {
         if (index === 0) {
             return signedFeeTxn;

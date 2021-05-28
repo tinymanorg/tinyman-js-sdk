@@ -1,6 +1,7 @@
 import algosdk from "algosdk";
-import {VALIDATOR_APP_SCHEMA} from "algoswap";
+import {VALIDATOR_APP_SCHEMA} from "algoswap-contracts-v1";
 
+import {InitiatorSigner} from "./common-types";
 import {waitForTransaction} from "./util";
 
 const BOOTSTRAP_ENCODED = Uint8Array.from([98, 111, 111, 116, 115, 116, 114, 97, 112]); // 'bootstrap'
@@ -20,7 +21,7 @@ export async function doBootstrap({
   asset1ID: number;
   asset2ID: number;
   initiatorAddr: string;
-  initiatorSigner: (txns: any[], index: number) => Promise<Uint8Array>;
+  initiatorSigner: InitiatorSigner;
 }): Promise<{liquidityTokenID: number}> {
   const suggestedParams = await client.getTransactionParams().do();
 
@@ -106,7 +107,7 @@ export async function doBootstrap({
   let txGroup: any[] = algosdk.assignGroupID(txns);
 
   const lsig = algosdk.makeLogicSig(poolLogicSig.program);
-  const signedFundingTxn = await initiatorSigner(txGroup, 0);
+  const [signedFundingTxn] = await initiatorSigner([txGroup[0]]);
 
   const txIDs: string[] = [];
   const signedTxns = txGroup.map((txn, index) => {

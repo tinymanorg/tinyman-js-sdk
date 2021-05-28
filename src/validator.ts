@@ -4,10 +4,10 @@ import {
   validatorApprovalContract,
   validatorClearStateContract,
   VALIDATOR_APP_SCHEMA
-} from "algoswap";
+} from "algoswap-contracts-v1";
 
 import {waitForTransaction} from "./util";
-import {AccountInformationData} from "./algosdk-missing-types";
+import {AccountInformationData, InitiatorSigner} from "./common-types";
 
 const CREATE_ENCODED = Uint8Array.from([99, 114, 101, 97, 116, 101]); // 'create'
 
@@ -66,7 +66,7 @@ export async function optIntoValidator({
   client: any;
   validatorAppID: number;
   initiatorAddr: string;
-  initiatorSigner: (txns: any[], index: number) => Promise<Uint8Array>;
+  initiatorSigner: InitiatorSigner;
 }): Promise<void> {
   const suggestedParams = await client.getTransactionParams().do();
 
@@ -76,7 +76,7 @@ export async function optIntoValidator({
     suggestedParams
   });
 
-  const signedTxn = await initiatorSigner([appOptInTxn], 0);
+  const [signedTxn] = await initiatorSigner([appOptInTxn]);
 
   const {txId} = await client.sendRawTransaction(signedTxn).do();
 
@@ -102,7 +102,7 @@ export async function closeOutOfValidator({
   client: any;
   validatorAppID: number;
   initiatorAddr: string;
-  initiatorSigner: (txns: any[], index: number) => Promise<Uint8Array>;
+  initiatorSigner: InitiatorSigner;
 }): Promise<void> {
   const suggestedParams = await client.getTransactionParams().do();
 
@@ -112,7 +112,7 @@ export async function closeOutOfValidator({
     suggestedParams
   });
 
-  const signedTxn = await initiatorSigner([appCloseOutTxn], 0);
+  const [signedTxn] = await initiatorSigner([appCloseOutTxn]);
 
   const {txId} = await client.sendRawTransaction(signedTxn).do();
 
@@ -162,7 +162,7 @@ export async function optIntoValidatorIfNecessary({
   client: any;
   validatorAppID: number;
   initiatorAddr: string;
-  initiatorSigner: (txns: any[], index: number) => Promise<Uint8Array>;
+  initiatorSigner: InitiatorSigner;
 }): Promise<void> {
   const isAlreadyOptedIn = await isOptedIntoValidator({
     client,
