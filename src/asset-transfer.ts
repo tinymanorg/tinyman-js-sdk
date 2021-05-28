@@ -1,6 +1,6 @@
 import algosdk, {Algodv2} from "algosdk";
 
-import {AccountInformationData} from "./algosdk-missing-types";
+import {AccountInformationData, InitiatorSigner} from "./common-types";
 import {waitForTransaction} from "./util";
 
 export async function optIntoAssetIfNecessary({
@@ -12,7 +12,7 @@ export async function optIntoAssetIfNecessary({
   client: Algodv2;
   assetID: number;
   initiatorAddr: string;
-  initiatorSigner: (txns: any[], index: number) => Promise<Uint8Array>;
+  initiatorSigner: InitiatorSigner;
 }): Promise<void> {
   const account = (await client
     .accountInformation(initiatorAddr)
@@ -29,7 +29,7 @@ export async function optIntoAssetIfNecessary({
       suggestedParams
     });
 
-    const signedTxn = await initiatorSigner([optInTxn], 0);
+    const [signedTxn] = await initiatorSigner([optInTxn]);
 
     const {txId} = await client.sendRawTransaction(signedTxn).do();
 

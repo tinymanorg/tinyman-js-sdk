@@ -5,6 +5,7 @@ import {MINIMUM_LIQUIDITY, PoolInfo, getPoolReserves, getAccountExcess} from "./
 import {redeemExcessAsset} from "./redeem";
 import {optIntoAssetIfNecessary} from "./asset-transfer";
 import {optIntoValidatorIfNecessary} from "./validator";
+import {InitiatorSigner} from "./common-types";
 
 /** An object containing information about a mint quote. */
 export interface MintQuote {
@@ -126,7 +127,7 @@ async function doMint({
   asset2In: number | bigint;
   liquidityOut: number | bigint;
   initiatorAddr: string;
-  initiatorSigner: (txns: any[], index: number) => Promise<Uint8Array>;
+  initiatorSigner: InitiatorSigner;
 }): Promise<{
   fees: number;
   confirmedRound: number;
@@ -197,9 +198,11 @@ async function doMint({
   ]);
 
   const lsig = algosdk.makeLogicSig(pool.program);
-  const signedFeeTxn = await initiatorSigner(txGroup, 0);
-  const signedAsset1InTxn = await initiatorSigner(txGroup, 2);
-  const signedAsset2InTxn = await initiatorSigner(txGroup, 3);
+  const [signedFeeTxn, signedAsset1InTxn, signedAsset2InTxn] = await initiatorSigner([
+    txGroup[0],
+    txGroup[2],
+    txGroup[3]
+  ]);
 
   const signedTxns = txGroup.map((txn, index) => {
     if (index === 0) {
@@ -262,7 +265,7 @@ export async function mintLiquidity({
   slippage: number;
   redeemExcess: boolean;
   initiatorAddr: string;
-  initiatorSigner: (txns: any[], index: number) => Promise<Uint8Array>;
+  initiatorSigner: InitiatorSigner;
 }): Promise<MintExecution> {
   // apply slippage to liquidity out amount
   const liquidityOutAmount = applySlippageToAmount("negative", slippage, liquidityOut);

@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getAccountExcess = exports.getPoolReserves = exports.createPool = exports.getPoolInfo = exports.MINIMUM_LIQUIDITY = exports.PoolStatus = void 0;
 const algosdk_1 = __importDefault(require("algosdk"));
 const base64_js_1 = require("base64-js");
-const algoswap_1 = require("algoswap");
+const algoswap_contracts_v1_1 = require("algoswap-contracts-v1");
 const util_1 = require("./util");
 const bootstrap_1 = require("./bootstrap");
 var PoolStatus;
@@ -27,7 +27,7 @@ exports.MINIMUM_LIQUIDITY = 1000;
  * @param pool.asset2ID The ID of the second asset in the pool pair.
  */
 async function getPoolInfo(client, pool) {
-    const poolLogicSig = algoswap_1.getPoolLogicSig(pool);
+    const poolLogicSig = algoswap_contracts_v1_1.getPoolLogicSig(pool);
     let result = {
         addr: poolLogicSig.addr,
         program: poolLogicSig.program,
@@ -72,7 +72,7 @@ exports.getPoolInfo = getPoolInfo;
  * @param initiatorSigner A function that will sign transactions from the initiator's account.
  */
 async function createPool(client, pool, initiatorAddr, initiatorSigner) {
-    const poolLogicSig = algoswap_1.getPoolLogicSig(pool);
+    const poolLogicSig = algoswap_contracts_v1_1.getPoolLogicSig(pool);
     const { validatorAppID } = pool;
     const asset1ID = Math.max(pool.asset1ID, pool.asset2ID);
     const asset2ID = Math.min(pool.asset1ID, pool.asset2ID);

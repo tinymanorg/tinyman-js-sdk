@@ -5,6 +5,7 @@ import {PoolInfo, getPoolReserves, getAccountExcess} from "./pool";
 import {redeemExcessAsset} from "./redeem";
 import {optIntoValidatorIfNecessary} from "./validator";
 import {optIntoAssetIfNecessary} from "./asset-transfer";
+import {InitiatorSigner} from "./common-types";
 
 // FEE = %0.3 or 3/1000
 const FEE_NUMERATOR = 3n;
@@ -72,7 +73,7 @@ async function doSwap({
     amount: number | bigint;
   };
   initiatorAddr: string;
-  initiatorSigner: (txns: any[], index: number) => Promise<Uint8Array>;
+  initiatorSigner: InitiatorSigner;
 }): Promise<{
   fees: number;
   confirmedRound: number;
@@ -106,7 +107,7 @@ async function doSwap({
     suggestedParams
   });
 
-  let assetInTxn;
+  let assetInTxn: algosdk.Transaction;
 
   if (assetIn.assetID === 0) {
     assetInTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
@@ -125,7 +126,7 @@ async function doSwap({
     });
   }
 
-  let assetOutTxn;
+  let assetOutTxn: algosdk.Transaction;
 
   if (assetOut.assetID === 0) {
     assetOutTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
@@ -155,7 +156,7 @@ async function doSwap({
 
   txnFees += assetInTxn.fee + feeTxn.fee;
 
-  const txGroup: any[] = algosdk.assignGroupID([
+  const txGroup: algosdk.Transaction[] = algosdk.assignGroupID([
     feeTxn,
     validatorAppCallTxn,
     assetInTxn,
@@ -163,8 +164,11 @@ async function doSwap({
   ]);
 
   const lsig = algosdk.makeLogicSig(pool.program);
-  const signedFeeTxn = await initiatorSigner(txGroup, 0);
-  const signedAssetInTxn = await initiatorSigner(txGroup, 2);
+
+  const [signedFeeTxn, signedAssetInTxn] = await initiatorSigner([
+    txGroup[0],
+    txGroup[2]
+  ]);
 
   const signedTxns = txGroup.map((txn, index) => {
     if (index === 0) {
@@ -181,6 +185,7 @@ async function doSwap({
   const {txId} = await client.sendRawTransaction(signedTxns).do();
 
   const status = await waitForTransaction(client, txId);
+
   const confirmedRound: number = status["confirmed-round"];
 
   return {
@@ -292,7 +297,7 @@ export async function fixedInputSwap({
   };
   redeemExcess: boolean;
   initiatorAddr: string;
-  initiatorSigner: (txns: any[], index: number) => Promise<Uint8Array>;
+  initiatorSigner: InitiatorSigner;
 }): Promise<SwapExecution> {
   // apply slippage to asset out amount
   const assetOutAmount = applySlippageToAmount(
@@ -470,7 +475,7 @@ export async function fixedOutputSwap({
   };
   redeemExcess: boolean;
   initiatorAddr: string;
-  initiatorSigner: (txns: any[], index: number) => Promise<Uint8Array>;
+  initiatorSigner: InitiatorSigner;
 }): Promise<SwapExecution> {
   // apply slippage to asset in amount
   const assetInAmount = applySlippageToAmount(

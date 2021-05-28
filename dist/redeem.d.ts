@@ -1,4 +1,5 @@
 import {PoolInfo} from "./pool";
+import {InitiatorSigner} from "./common-types";
 /**
  * Execute a redeem operation to collect excess assets from previous operations.
  *
@@ -24,7 +25,7 @@ export declare function redeemExcessAsset({
   assetID: number;
   assetOut: number | bigint;
   initiatorAddr: string;
-  initiatorSigner: (txns: any[], index: number) => Promise<Uint8Array>;
+  initiatorSigner: InitiatorSigner;
 }): Promise<{
   fees: number;
   confirmedRound: number;

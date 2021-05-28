@@ -60,7 +60,7 @@ async function redeemExcessAsset({ client, pool, assetID, assetOut, initiatorAdd
         assetOutTxn
     ]);
     const lsig = algosdk_1.default.makeLogicSig(pool.program);
-    const signedFeeTxn = await initiatorSigner(txGroup, 0);
+    const [signedFeeTxn] = await initiatorSigner([txGroup[0]]);
     const signedTxns = txGroup.map((txn, index) => {
         if (index === 0) {
             return signedFeeTxn;

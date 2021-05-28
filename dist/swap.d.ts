@@ -1,4 +1,5 @@
 import {PoolInfo} from "./pool";
+import {InitiatorSigner} from "./common-types";
 /** An object containing information about a swap quote. */
 export interface SwapQuote {
   /** The round that this quote is based on. */
@@ -96,7 +97,7 @@ export declare function fixedInputSwap({
   };
   redeemExcess: boolean;
   initiatorAddr: string;
-  initiatorSigner: (txns: any[], index: number) => Promise<Uint8Array>;
+  initiatorSigner: InitiatorSigner;
 }): Promise<SwapExecution>;
 /**
  * Get a quote for a fixed output swap This does not execute any transactions.
@@ -162,5 +163,5 @@ export declare function fixedOutputSwap({
   };
   redeemExcess: boolean;
   initiatorAddr: string;
-  initiatorSigner: (txns: any[], index: number) => Promise<Uint8Array>;
+  initiatorSigner: InitiatorSigner;
 }): Promise<SwapExecution>;

@@ -1,4 +1,5 @@
 import algosdk from "algosdk";
+import {InitiatorSigner} from "./common-types";
 /**
  * Get the Validator App ID for a network.
  *
@@ -26,7 +27,7 @@ export declare function optIntoValidator({
   client: any;
   validatorAppID: number;
   initiatorAddr: string;
-  initiatorSigner: (txns: any[], index: number) => Promise<Uint8Array>;
+  initiatorSigner: InitiatorSigner;
 }): Promise<void>;
 /**
  * Close out of the Validator app. WARNING: Make sure to redeem ALL excess asset amounts
@@ -47,7 +48,7 @@ export declare function closeOutOfValidator({
   client: any;
   validatorAppID: number;
   initiatorAddr: string;
-  initiatorSigner: (txns: any[], index: number) => Promise<Uint8Array>;
+  initiatorSigner: InitiatorSigner;
 }): Promise<void>;
 /**
  * Check if an account is opted into the Validator app.
@@ -77,7 +78,7 @@ export declare function optIntoValidatorIfNecessary({
   client: any;
   validatorAppID: number;
   initiatorAddr: string;
-  initiatorSigner: (txns: any[], index: number) => Promise<Uint8Array>;
+  initiatorSigner: InitiatorSigner;
 }): Promise<void>;
 export declare function getValidatorAppCreationTransaction(
   client: any,

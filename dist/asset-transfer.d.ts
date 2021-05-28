@@ -1,4 +1,5 @@
 import {Algodv2} from "algosdk";
+import {InitiatorSigner} from "./common-types";
 export declare function optIntoAssetIfNecessary({
   client,
   assetID,
@@ -8,5 +9,5 @@ export declare function optIntoAssetIfNecessary({
   client: Algodv2;
   assetID: number;
   initiatorAddr: string;
-  initiatorSigner: (txns: any[], index: number) => Promise<Uint8Array>;
+  initiatorSigner: InitiatorSigner;
 }): Promise<void>;

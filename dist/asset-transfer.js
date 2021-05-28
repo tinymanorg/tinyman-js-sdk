@@ -19,7 +19,7 @@ async function optIntoAssetIfNecessary({ client, assetID, initiatorAddr, initiat
             amount: 0,
             suggestedParams
         });
-        const signedTxn = await initiatorSigner([optInTxn], 0);
+        const [signedTxn] = await initiatorSigner([optInTxn]);
         const { txId } = await client.sendRawTransaction(signedTxn).do();
         await util_1.waitForTransaction(client, txId);
     }

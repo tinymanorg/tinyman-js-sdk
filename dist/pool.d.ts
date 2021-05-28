@@ -1,3 +1,4 @@
+import {InitiatorSigner} from "./common-types";
 export declare enum PoolStatus {
   NOT_CREATED = "not created",
   BOOTSTRAP = "bootstrap",
@@ -62,7 +63,7 @@ export declare function createPool(
     asset2ID: number;
   },
   initiatorAddr: string,
-  initiatorSigner: (txns: any[], index: number) => Promise<Uint8Array>
+  initiatorSigner: InitiatorSigner
 ): Promise<PoolInfo>;
 export declare function getPoolReserves(
   client: any,

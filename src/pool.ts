@@ -1,10 +1,10 @@
 import algosdk from "algosdk";
 import {fromByteArray} from "base64-js";
-import {getPoolLogicSig} from "algoswap";
+import {getPoolLogicSig} from "algoswap-contracts-v1";
 
 import {decodeState, joinUint8Arrays, getMinBalanceForAccount} from "./util";
 import {doBootstrap} from "./bootstrap";
-import {AccountInformationData} from "./algosdk-missing-types";
+import {AccountInformationData, InitiatorSigner} from "./common-types";
 
 export enum PoolStatus {
   NOT_CREATED = "not created",
@@ -116,7 +116,7 @@ export async function createPool(
     asset2ID: number;
   },
   initiatorAddr: string,
-  initiatorSigner: (txns: any[], index: number) => Promise<Uint8Array>
+  initiatorSigner: InitiatorSigner
 ): Promise<PoolInfo> {
   const poolLogicSig = getPoolLogicSig(pool);
 
