@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendValidatorAppCreationTransaction = exports.getValidatorAppCreationTransaction = exports.optIntoValidatorIfNecessary = exports.isOptedIntoValidator = exports.closeOutOfValidator = exports.optIntoValidator = exports.getvalidatorAppID = void 0;
+exports.sendValidatorAppCreationTransaction = exports.getValidatorAppCreationTransaction = exports.isOptedIntoValidator = exports.closeOutOfValidator = exports.optIntoValidator = exports.getvalidatorAppID = void 0;
 const assert_1 = __importDefault(require("assert"));
 const algosdk_1 = __importDefault(require("algosdk"));
 const algoswap_contracts_v1_1 = require("algoswap-contracts-v1");
@@ -103,22 +103,6 @@ async function isOptedIntoValidator({ client, validatorAppID, initiatorAddr }) {
     return false;
 }
 exports.isOptedIntoValidator = isOptedIntoValidator;
-async function optIntoValidatorIfNecessary({ client, validatorAppID, initiatorAddr, initiatorSigner }) {
-    const isAlreadyOptedIn = await isOptedIntoValidator({
-        client,
-        validatorAppID,
-        initiatorAddr
-    });
-    if (!isAlreadyOptedIn) {
-        await optIntoValidator({
-            client,
-            validatorAppID,
-            initiatorAddr,
-            initiatorSigner
-        });
-    }
-}
-exports.optIntoValidatorIfNecessary = optIntoValidatorIfNecessary;
 async function getValidatorAppCreationTransaction(client, addr) {
     const suggestedParams = await client.getTransactionParams().do();
     const appCreateTxn = algosdk_1.default.makeApplicationCreateTxnFromObject({

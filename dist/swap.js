@@ -8,8 +8,6 @@ const algosdk_1 = __importDefault(require("algosdk"));
 const util_1 = require("./util");
 const pool_1 = require("./pool");
 const redeem_1 = require("./redeem");
-const validator_1 = require("./validator");
-const asset_transfer_1 = require("./asset-transfer");
 // FEE = %0.3 or 3/1000
 const FEE_NUMERATOR = 3n;
 const FEE_DENOMINATOR = 1000n;
@@ -22,18 +20,6 @@ async function doSwap({ client, pool, swapType, assetIn, assetOut, initiatorAddr
         SWAP_ENCODED,
         swapType === "fixed input" ? FIXED_INPUT_ENCODED : FIXED_OUTPUT_ENCODED
     ];
-    await validator_1.optIntoValidatorIfNecessary({
-        client,
-        validatorAppID: pool.validatorAppID,
-        initiatorAddr,
-        initiatorSigner
-    });
-    await asset_transfer_1.optIntoAssetIfNecessary({
-        client,
-        assetID: assetOut.assetID,
-        initiatorAddr,
-        initiatorSigner
-    });
     const validatorAppCallTxn = algosdk_1.default.makeApplicationNoOpTxnFromObject({
         from: pool.addr,
         appIndex: pool.validatorAppID,
@@ -96,7 +82,6 @@ async function doSwap({ client, pool, swapType, assetIn, assetOut, initiatorAddr
         txGroup[0],
         txGroup[2]
     ]);
-    // const [signedFeeTxn, _1, signedAssetInTxn, _2] = await initiatorSigner(txGroup);
     const signedTxns = txGroup.map((txn, index) => {
         if (index === 0) {
             return signedFeeTxn;
@@ -107,7 +92,6 @@ async function doSwap({ client, pool, swapType, assetIn, assetOut, initiatorAddr
         const { blob } = algosdk_1.default.signLogicSigTransactionObject(txn, lsig);
         return blob;
     });
-    console.log({ txGroup, signedTxns: signedTxns.map(txn => Buffer.from(txn).toString("base64")) });
     const { txId } = await client.sendRawTransaction(signedTxns).do();
     const status = await util_1.waitForTransaction(client, txId);
     const confirmedRound = status["confirmed-round"];

@@ -1,3 +1,6 @@
+import algosdk, {Algodv2} from "algosdk";
+
+import {InitiatorSigner} from "./common-types";
 import {MAX_SLIPPAGE_FRACTION_DIGITS} from "./constant";
 
 export function decodeState(stateArray: any[]): Record<string, string | number | bigint> {
@@ -109,4 +112,32 @@ export function applySlippageToAmount(
   }
 
   return final;
+}
+
+export async function optIntoAsset({
+  client,
+  assetID,
+  initiatorAddr,
+  initiatorSigner
+}: {
+  client: Algodv2;
+  assetID: number;
+  initiatorAddr: string;
+  initiatorSigner: InitiatorSigner;
+}) {
+  const suggestedParams = await client.getTransactionParams().do();
+
+  const optInTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
+    from: initiatorAddr,
+    to: initiatorAddr,
+    assetIndex: assetID,
+    amount: 0,
+    suggestedParams
+  });
+
+  const [signedTxn] = await initiatorSigner([optInTxn]);
+
+  const {txId} = await client.sendRawTransaction(signedTxn).do();
+
+  await waitForTransaction(client, txId);
 }
