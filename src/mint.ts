@@ -3,8 +3,6 @@ import algosdk from "algosdk";
 import {applySlippageToAmount, waitForTransaction} from "./util";
 import {MINIMUM_LIQUIDITY, PoolInfo, getPoolReserves, getAccountExcess} from "./pool";
 import {redeemExcessAsset} from "./redeem";
-import {optIntoAssetIfNecessary} from "./asset-transfer";
-import {optIntoValidatorIfNecessary} from "./validator";
 import {InitiatorSigner} from "./common-types";
 
 /** An object containing information about a mint quote. */
@@ -274,20 +272,6 @@ export async function mintLiquidity({
     client,
     pool,
     accountAddr: initiatorAddr
-  });
-
-  await optIntoValidatorIfNecessary({
-    client,
-    validatorAppID: pool.validatorAppID,
-    initiatorAddr,
-    initiatorSigner
-  });
-
-  await optIntoAssetIfNecessary({
-    client,
-    assetID: pool.liquidityTokenID!,
-    initiatorAddr,
-    initiatorSigner
   });
 
   let {fees, confirmedRound} = await doMint({

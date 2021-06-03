@@ -26,5 +26,5 @@ export {
   fixedOutputSwap
 } from "./swap";
 export {redeemExcessAsset} from "./redeem";
-export {applySlippageToAmount} from "./util";
+export {applySlippageToAmount, optIntoAsset} from "./util";
 export {AccountAsset, AccountInformationData, InitiatorSigner} from "./common-types";

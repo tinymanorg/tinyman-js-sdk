@@ -153,33 +153,6 @@ export async function isOptedIntoValidator({
   return false;
 }
 
-export async function optIntoValidatorIfNecessary({
-  client,
-  validatorAppID,
-  initiatorAddr,
-  initiatorSigner
-}: {
-  client: any;
-  validatorAppID: number;
-  initiatorAddr: string;
-  initiatorSigner: InitiatorSigner;
-}): Promise<void> {
-  const isAlreadyOptedIn = await isOptedIntoValidator({
-    client,
-    validatorAppID,
-    initiatorAddr
-  });
-
-  if (!isAlreadyOptedIn) {
-    await optIntoValidator({
-      client,
-      validatorAppID,
-      initiatorAddr,
-      initiatorSigner
-    });
-  }
-}
-
 export async function getValidatorAppCreationTransaction(
   client: any,
   addr: string

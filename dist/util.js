@@ -1,6 +1,10 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.applySlippageToAmount = exports.waitForTransaction = exports.getMinBalanceForAccount = exports.joinUint8Arrays = exports.decodeState = void 0;
+exports.optIntoAsset = exports.applySlippageToAmount = exports.waitForTransaction = exports.getMinBalanceForAccount = exports.joinUint8Arrays = exports.decodeState = void 0;
+const algosdk_1 = __importDefault(require("algosdk"));
 const constant_1 = require("./constant");
 function decodeState(stateArray) {
     const state = {};
@@ -94,3 +98,17 @@ function applySlippageToAmount(type, slippage, amount) {
     return final;
 }
 exports.applySlippageToAmount = applySlippageToAmount;
+async function optIntoAsset({ client, assetID, initiatorAddr, initiatorSigner }) {
+    const suggestedParams = await client.getTransactionParams().do();
+    const optInTxn = algosdk_1.default.makeAssetTransferTxnWithSuggestedParamsFromObject({
+        from: initiatorAddr,
+        to: initiatorAddr,
+        assetIndex: assetID,
+        amount: 0,
+        suggestedParams
+    });
+    const [signedTxn] = await initiatorSigner([optInTxn]);
+    const { txId } = await client.sendRawTransaction(signedTxn).do();
+    await waitForTransaction(client, txId);
+}
+exports.optIntoAsset = optIntoAsset;

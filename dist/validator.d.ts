@@ -69,17 +69,6 @@ export declare function isOptedIntoValidator({
   validatorAppID: number;
   initiatorAddr: string;
 }): Promise<boolean>;
-export declare function optIntoValidatorIfNecessary({
-  client,
-  validatorAppID,
-  initiatorAddr,
-  initiatorSigner
-}: {
-  client: any;
-  validatorAppID: number;
-  initiatorAddr: string;
-  initiatorSigner: InitiatorSigner;
-}): Promise<void>;
 export declare function getValidatorAppCreationTransaction(
   client: any,
   addr: string

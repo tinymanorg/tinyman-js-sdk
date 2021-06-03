@@ -8,8 +8,6 @@ const algosdk_1 = __importDefault(require("algosdk"));
 const util_1 = require("./util");
 const pool_1 = require("./pool");
 const redeem_1 = require("./redeem");
-const asset_transfer_1 = require("./asset-transfer");
-const validator_1 = require("./validator");
 /**
  * Get a quote for how many liquidity tokens a deposit of asset1In and asset2In is worth at this
  * moment. This does not execute any transactions.
@@ -161,18 +159,6 @@ async function mintLiquidity({ client, pool, asset1In, asset2In, liquidityOut, s
         client,
         pool,
         accountAddr: initiatorAddr
-    });
-    await validator_1.optIntoValidatorIfNecessary({
-        client,
-        validatorAppID: pool.validatorAppID,
-        initiatorAddr,
-        initiatorSigner
-    });
-    await asset_transfer_1.optIntoAssetIfNecessary({
-        client,
-        assetID: pool.liquidityTokenID,
-        initiatorAddr,
-        initiatorSigner
     });
     let { fees, confirmedRound } = await doMint({
         client,
