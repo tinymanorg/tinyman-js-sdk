@@ -1,7 +1,13 @@
 import algosdk from "algosdk";
 
 import {applySlippageToAmount, waitForTransaction} from "./util";
-import {MINIMUM_LIQUIDITY, PoolInfo, getPoolReserves, getAccountExcess} from "./pool";
+import {
+  MINIMUM_LIQUIDITY,
+  PoolInfo,
+  getPoolReserves,
+  getAccountExcess,
+  getPoolShare
+} from "./pool";
 import {redeemExcessAsset} from "./redeem";
 import {InitiatorSigner} from "./common-types";
 
@@ -104,7 +110,7 @@ export async function getMintLiquidityQuote({
     asset2In: BigInt(asset2In),
     liquidityID: pool.liquidityTokenID!,
     liquidityOut,
-    share: (100n * liquidityOut) / (reserves.issuedLiquidity + liquidityOut)
+    share: getPoolShare(reserves.issuedLiquidity, liquidityOut)
   };
 }
 
