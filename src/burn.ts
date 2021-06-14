@@ -1,7 +1,7 @@
 import algosdk from "algosdk";
 
 import {waitForTransaction} from "./util";
-import {PoolInfo, getPoolReserves, getAccountExcess, PoolReserves} from "./pool";
+import {PoolInfo, getPoolReserves, getAccountExcess} from "./pool";
 import {redeemExcessAsset} from "./redeem";
 import {InitiatorSigner} from "./common-types";
 
@@ -50,19 +50,20 @@ export interface BurnExecution {
  * Get a quote for how many of assets 1 and 2 a deposit of liquidityIn is worth at this moment. This
  * does not execute any transactions.
  *
+ * @param params.client An Algodv2 client.
  * @param params.pool Information for the pool.
- * @param params.reserves Pool reserves.
  * @param params.liquidityIn The quantity of the liquidity being deposited.
  */
-export function getBurnLiquidityQuote({
+export async function getBurnLiquidityQuote({
+  client,
   pool,
-  reserves,
   liquidityIn
 }: {
+  client: any;
   pool: PoolInfo;
-  reserves: PoolReserves;
   liquidityIn: number | bigint;
-}): BurnQuote {
+}): Promise<BurnQuote> {
+  const reserves = await getPoolReserves(client, pool);
   const liquidityIn_bigInt = BigInt(liquidityIn);
 
   const asset1Out = (liquidityIn_bigInt * reserves.asset1) / reserves.issuedLiquidity;
