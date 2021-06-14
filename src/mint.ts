@@ -28,7 +28,7 @@ export interface MintQuote {
   /** The amount of the liquidity token output in this quote. */
   liquidityOut: bigint;
   /** The share of the total liquidity in this quote. */
-  share: bigint;
+  share: number;
 }
 
 /** An object containing information about a successfully executed mint transaction. */
@@ -94,7 +94,7 @@ export async function getMintLiquidityQuote({
       asset2In: BigInt(asset2In),
       liquidityID: pool.liquidityTokenID!,
       liquidityOut: geoMean - BigInt(MINIMUM_LIQUIDITY),
-      share: 100n
+      share: 1
     };
   }
 
@@ -110,7 +110,7 @@ export async function getMintLiquidityQuote({
     asset2In: BigInt(asset2In),
     liquidityID: pool.liquidityTokenID!,
     liquidityOut,
-    share: getPoolShare(reserves.issuedLiquidity, liquidityOut)
+    share: getPoolShare(reserves.issuedLiquidity + liquidityOut, liquidityOut)
   };
 }
 

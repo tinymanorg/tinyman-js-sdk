@@ -324,17 +324,5 @@ export async function getAccountExcess({
  * @returns Percentage of liquidity that the account holds
  */
 export function getPoolShare(totalLiquidity: bigint, ownedLiquidity: bigint) {
-  return (100n * ownedLiquidity) / (totalLiquidity + ownedLiquidity);
-}
-
-/**
- * @param reserves PoolReserves
- * @param poolShare Percentage of liquidity held by an account
- * @returns The amount of individual assets minted by an account
- */
-export function getOwnedPoolReserves(reserves: PoolReserves, poolShare: bigint) {
-  return {
-    asset1: (reserves.asset1 * poolShare) / 100n,
-    asset2: (reserves.asset2 * poolShare) / 100n
-  };
+  return Number(ownedLiquidity) / Number(totalLiquidity);
 }

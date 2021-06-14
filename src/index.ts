@@ -15,8 +15,7 @@ export {
   getPoolInfo,
   createPool,
   getPoolReserves,
-  getPoolShare,
-  getOwnedPoolReserves
+  getPoolShare
 } from "./pool";
 
 export {MintQuote, MintExecution, getMintLiquidityQuote, mintLiquidity} from "./mint";
