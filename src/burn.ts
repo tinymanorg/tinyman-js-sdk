@@ -1,6 +1,6 @@
 import algosdk from "algosdk";
 
-import {waitForTransaction} from "./util";
+import {applySlippageToAmount, waitForTransaction} from "./util";
 import {PoolInfo, getPoolReserves, getAccountExcess} from "./pool";
 import {redeemExcessAsset} from "./redeem";
 import {InitiatorSigner} from "./common-types";
@@ -122,7 +122,7 @@ async function doBurn({
 
   let asset2OutTxn;
 
-  if (pool.asset1ID === 0) {
+  if (pool.asset2ID === 0) {
     asset2OutTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
       from: pool.addr,
       to: initiatorAddr,
@@ -219,52 +219,23 @@ export async function burnLiquidity({
   liquidityIn,
   asset1Out,
   asset2Out,
-  redeemExcess,
+  slippage,
+  redeemExcess = true,
   initiatorAddr,
   initiatorSigner
 }: {
   client: any;
   pool: PoolInfo;
   liquidityIn: number | bigint;
-  asset1Out: {
-    amount: number | bigint;
-    slippage: number;
-  };
-  asset2Out: {
-    amount: number | bigint;
-    slippage: number;
-  };
-  redeemExcess: boolean;
+  asset1Out: number | bigint;
+  asset2Out: number | bigint;
+  slippage: number;
+  redeemExcess?: boolean;
   initiatorAddr: string;
   initiatorSigner: InitiatorSigner;
 }): Promise<BurnExecution> {
-  if (
-    !Number.isInteger(asset1Out.slippage) ||
-    asset1Out.slippage < 0 ||
-    asset1Out.slippage > 100
-  ) {
-    throw new Error(
-      `Invalid slippage value for asset 1. Must be an integer between 0 and 100, got ${asset1Out.slippage}`
-    );
-  }
-
-  if (
-    !Number.isInteger(asset2Out.slippage) ||
-    asset2Out.slippage < 0 ||
-    asset2Out.slippage > 100
-  ) {
-    throw new Error(
-      `Invalid slippage value for asset 2. Must be an integer between 0 and 100, got ${asset2Out.slippage}`
-    );
-  }
-
-  // apply slippage to asset 1 out amount
-  const asset1OutAmount =
-    (BigInt(asset1Out.amount) * BigInt(100 - asset1Out.slippage)) / 100n;
-
-  // apply slippage to asset 2 out amount
-  const asset2OutAmount =
-    (BigInt(asset2Out.amount) * BigInt(100 - asset2Out.slippage)) / 100n;
+  const asset1OutAmount = applySlippageToAmount("negative", slippage, asset1Out);
+  const asset2OutAmount = applySlippageToAmount("negative", slippage, asset2Out);
 
   const prevExcessAssets = await getAccountExcess({
     client,
