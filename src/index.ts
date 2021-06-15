@@ -14,7 +14,8 @@ export {
   MINIMUM_LIQUIDITY,
   getPoolInfo,
   createPool,
-  getPoolReserves
+  getPoolReserves,
+  getPoolShare
 } from "./pool";
 
 export {MintQuote, MintExecution, getMintLiquidityQuote, mintLiquidity} from "./mint";

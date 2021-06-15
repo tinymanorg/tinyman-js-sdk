@@ -317,3 +317,12 @@ export async function getAccountExcess({
 
   return excessAssets;
 }
+
+/**
+ * @param {bigint} totalLiquidity Total amount of issued liquidity within a pool
+ * @param {bigint} ownedLiquidity Amount of liquidity tokens within an account
+ * @returns Percentage of liquidity that the account holds
+ */
+export function getPoolShare(totalLiquidity: bigint, ownedLiquidity: bigint) {
+  return Number(ownedLiquidity) / Number(totalLiquidity);
+}
