@@ -324,5 +324,11 @@ export async function getAccountExcess({
  * @returns Percentage of liquidity that the account holds
  */
 export function getPoolShare(totalLiquidity: bigint, ownedLiquidity: bigint) {
-  return Number(ownedLiquidity) / Number(totalLiquidity);
+  let share = Number(ownedLiquidity) / Number(totalLiquidity);
+
+  if (!Number.isFinite(share)) {
+    share = 0;
+  }
+
+  return share;
 }
