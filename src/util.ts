@@ -1,7 +1,6 @@
 import algosdk, {Algodv2} from "algosdk";
 
 import {InitiatorSigner} from "./common-types";
-import {MAX_SLIPPAGE_FRACTION_DIGITS} from "./constant";
 
 export function decodeState(stateArray: any[]): Record<string, string | number | bigint> {
   const state: Record<string, number | string> = {};
@@ -103,10 +102,9 @@ export function applySlippageToAmount(
   let final: bigint;
 
   try {
-    const factor = 10 ** MAX_SLIPPAGE_FRACTION_DIGITS;
     const offset = type === "negative" ? 1 - slippage : 1 + slippage;
 
-    final = (BigInt(amount) * BigInt(factor * offset)) / BigInt(factor);
+    final = BigInt(Math.floor(Number(amount) * offset));
   } catch (error) {
     throw new Error(error.message);
   }
