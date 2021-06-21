@@ -1,6 +1,6 @@
 import algosdk from "algosdk";
 
-import {applySlippageToAmount, waitForTransaction} from "./util";
+import {applySlippageToAmount, bufferToBase64, waitForTransaction} from "./util";
 import {PoolInfo, getPoolReserves, getAccountExcess} from "./pool";
 import {redeemExcessAsset} from "./redeem";
 import {InitiatorSigner} from "./common-types";
@@ -44,6 +44,10 @@ export interface SwapExecution {
   assetOutID: number;
   /** The amount of the swap's output asset. */
   assetOutAmount: bigint;
+  /** The ID of the transaction. */
+  txnID: string;
+  /** The group ID for the transaction group. */
+  groupID: string;
 }
 
 const SWAP_ENCODED = Uint8Array.from([115, 119, 97, 112]); // 'swap'
@@ -75,6 +79,8 @@ async function doSwap({
 }): Promise<{
   fees: number;
   confirmedRound: number;
+  txnID: string;
+  groupID: string;
 }> {
   const suggestedParams = await client.getTransactionParams().do();
 
@@ -174,7 +180,9 @@ async function doSwap({
 
   return {
     fees: txnFees,
-    confirmedRound
+    confirmedRound,
+    groupID: bufferToBase64(txGroup[0].group),
+    txnID: txId
   };
 }
 
@@ -296,7 +304,7 @@ export async function fixedInputSwap({
     accountAddr: initiatorAddr
   });
 
-  let {fees, confirmedRound} = await doSwap({
+  let {fees, confirmedRound, groupID, txnID} = await doSwap({
     client,
     pool,
     swapType: "fixed input",
@@ -351,7 +359,9 @@ export async function fixedInputSwap({
     assetInID: assetIn.assetID,
     assetInAmount: BigInt(assetIn.amount),
     assetOutID: assetOut.assetID,
-    assetOutAmount: assetOutAmount + excessAmountDelta
+    assetOutAmount: assetOutAmount + excessAmountDelta,
+    groupID,
+    txnID
   };
 }
 
@@ -474,7 +484,7 @@ export async function fixedOutputSwap({
     accountAddr: initiatorAddr
   });
 
-  let {fees, confirmedRound} = await doSwap({
+  let {fees, confirmedRound, groupID, txnID} = await doSwap({
     client,
     pool,
     swapType: "fixed output",
@@ -529,6 +539,8 @@ export async function fixedOutputSwap({
     assetInID: assetIn.assetID,
     assetInAmount: assetInAmount - excessAmountDelta,
     assetOutID: assetOut.assetID,
-    assetOutAmount: BigInt(assetOut.amount)
+    assetOutAmount: BigInt(assetOut.amount),
+    groupID,
+    txnID
   };
 }

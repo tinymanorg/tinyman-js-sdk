@@ -141,3 +141,9 @@ export async function optIntoAsset({
 
   await waitForTransaction(client, txId);
 }
+
+export function bufferToBase64(
+  arrayBuffer: undefined | null | WithImplicitCoercion<ArrayBuffer | SharedArrayBuffer>
+) {
+  return arrayBuffer ? Buffer.from(arrayBuffer).toString("base64") : "";
+}
