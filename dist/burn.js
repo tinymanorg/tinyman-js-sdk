@@ -50,7 +50,7 @@ async function doBurn({ client, pool, liquidityIn, asset1Out, asset2Out, initiat
         suggestedParams
     });
     let asset2OutTxn;
-    if (pool.asset1ID === 0) {
+    if (pool.asset2ID === 0) {
         asset2OutTxn = algosdk_1.default.makePaymentTxnWithSuggestedParamsFromObject({
             from: pool.addr,
             to: initiatorAddr,
@@ -130,21 +130,9 @@ async function doBurn({ client, pool, liquidityIn, asset1Out, asset2Out, initiat
  * @param params.initiatorSigner A function that will sign transactions from the initiator's
  *   account.
  */
-async function burnLiquidity({ client, pool, liquidityIn, asset1Out, asset2Out, redeemExcess, initiatorAddr, initiatorSigner }) {
-    if (!Number.isInteger(asset1Out.slippage) ||
-        asset1Out.slippage < 0 ||
-        asset1Out.slippage > 100) {
-        throw new Error(`Invalid slippage value for asset 1. Must be an integer between 0 and 100, got ${asset1Out.slippage}`);
-    }
-    if (!Number.isInteger(asset2Out.slippage) ||
-        asset2Out.slippage < 0 ||
-        asset2Out.slippage > 100) {
-        throw new Error(`Invalid slippage value for asset 2. Must be an integer between 0 and 100, got ${asset2Out.slippage}`);
-    }
-    // apply slippage to asset 1 out amount
-    const asset1OutAmount = (BigInt(asset1Out.amount) * BigInt(100 - asset1Out.slippage)) / 100n;
-    // apply slippage to asset 2 out amount
-    const asset2OutAmount = (BigInt(asset2Out.amount) * BigInt(100 - asset2Out.slippage)) / 100n;
+async function burnLiquidity({ client, pool, liquidityIn, asset1Out, asset2Out, slippage, redeemExcess = true, initiatorAddr, initiatorSigner }) {
+    const asset1OutAmount = util_1.applySlippageToAmount("negative", slippage, asset1Out);
+    const asset2OutAmount = util_1.applySlippageToAmount("negative", slippage, asset2Out);
     const prevExcessAssets = await pool_1.getAccountExcess({
         client,
         pool,

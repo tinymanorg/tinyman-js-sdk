@@ -33,7 +33,7 @@ async function getMintLiquidityQuote({ client, pool, asset1In, asset2In }) {
             asset2In: BigInt(asset2In),
             liquidityID: pool.liquidityTokenID,
             liquidityOut: geoMean - BigInt(pool_1.MINIMUM_LIQUIDITY),
-            share: 100n
+            share: 1
         };
     }
     const asset1Ratio = (BigInt(asset1In) * reserves.issuedLiquidity) / reserves.asset1;
@@ -47,7 +47,7 @@ async function getMintLiquidityQuote({ client, pool, asset1In, asset2In }) {
         asset2In: BigInt(asset2In),
         liquidityID: pool.liquidityTokenID,
         liquidityOut,
-        share: (100n * liquidityOut) / (reserves.issuedLiquidity + liquidityOut)
+        share: pool_1.getPoolShare(reserves.issuedLiquidity + liquidityOut, liquidityOut)
     };
 }
 exports.getMintLiquidityQuote = getMintLiquidityQuote;

@@ -17,7 +17,7 @@ export interface MintQuote {
   /** The amount of the liquidity token output in this quote. */
   liquidityOut: bigint;
   /** The share of the total liquidity in this quote. */
-  share: bigint;
+  share: number;
 }
 /** An object containing information about a successfully executed mint transaction. */
 export interface MintExecution {

@@ -78,3 +78,12 @@ export declare function getAccountExcess({
   pool: PoolInfo;
   accountAddr: string;
 }): Promise<AccountExcess>;
+/**
+ * @param {bigint} totalLiquidity Total amount of issued liquidity within a pool
+ * @param {bigint} ownedLiquidity Amount of liquidity tokens within an account
+ * @returns Percentage of liquidity that the account holds
+ */
+export declare function getPoolShare(
+  totalLiquidity: bigint,
+  ownedLiquidity: bigint
+): number;

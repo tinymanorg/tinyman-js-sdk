@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAccountExcess = exports.getPoolReserves = exports.createPool = exports.getPoolInfo = exports.MINIMUM_LIQUIDITY = exports.PoolStatus = void 0;
+exports.getPoolShare = exports.getAccountExcess = exports.getPoolReserves = exports.createPool = exports.getPoolInfo = exports.MINIMUM_LIQUIDITY = exports.PoolStatus = void 0;
 const algosdk_1 = __importDefault(require("algosdk"));
 const base64_js_1 = require("base64-js");
 const algoswap_contracts_v1_1 = require("algoswap-contracts-v1");
@@ -211,3 +211,16 @@ async function getAccountExcess({ client, pool, accountAddr }) {
     return excessAssets;
 }
 exports.getAccountExcess = getAccountExcess;
+/**
+ * @param {bigint} totalLiquidity Total amount of issued liquidity within a pool
+ * @param {bigint} ownedLiquidity Amount of liquidity tokens within an account
+ * @returns Percentage of liquidity that the account holds
+ */
+function getPoolShare(totalLiquidity, ownedLiquidity) {
+    let share = Number(ownedLiquidity) / Number(totalLiquidity);
+    if (!Number.isFinite(share)) {
+        share = 0;
+    }
+    return share;
+}
+exports.getPoolShare = getPoolShare;

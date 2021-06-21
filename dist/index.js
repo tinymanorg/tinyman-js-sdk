@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.optIntoAsset = exports.applySlippageToAmount = exports.redeemExcessAsset = exports.fixedOutputSwap = exports.getFixedOutputSwapQuote = exports.fixedInputSwap = exports.getFixedInputSwapQuote = exports.burnLiquidity = exports.getBurnLiquidityQuote = exports.mintLiquidity = exports.getMintLiquidityQuote = exports.getPoolReserves = exports.createPool = exports.getPoolInfo = exports.MINIMUM_LIQUIDITY = exports.PoolStatus = exports.closeOutOfValidator = exports.isOptedIntoValidator = exports.optIntoValidator = exports.sendValidatorAppCreationTransaction = exports.getValidatorAppCreationTransaction = exports.getvalidatorAppID = void 0;
+exports.optIntoAsset = exports.applySlippageToAmount = exports.redeemExcessAsset = exports.fixedOutputSwap = exports.getFixedOutputSwapQuote = exports.fixedInputSwap = exports.getFixedInputSwapQuote = exports.burnLiquidity = exports.getBurnLiquidityQuote = exports.mintLiquidity = exports.getMintLiquidityQuote = exports.getPoolShare = exports.getPoolReserves = exports.createPool = exports.getPoolInfo = exports.MINIMUM_LIQUIDITY = exports.PoolStatus = exports.closeOutOfValidator = exports.isOptedIntoValidator = exports.optIntoValidator = exports.sendValidatorAppCreationTransaction = exports.getValidatorAppCreationTransaction = exports.getvalidatorAppID = void 0;
 var validator_1 = require("./validator");
 Object.defineProperty(exports, "getvalidatorAppID", { enumerable: true, get: function () { return validator_1.getvalidatorAppID; } });
 Object.defineProperty(exports, "getValidatorAppCreationTransaction", { enumerable: true, get: function () { return validator_1.getValidatorAppCreationTransaction; } });
@@ -14,6 +14,7 @@ Object.defineProperty(exports, "MINIMUM_LIQUIDITY", { enumerable: true, get: fun
 Object.defineProperty(exports, "getPoolInfo", { enumerable: true, get: function () { return pool_1.getPoolInfo; } });
 Object.defineProperty(exports, "createPool", { enumerable: true, get: function () { return pool_1.createPool; } });
 Object.defineProperty(exports, "getPoolReserves", { enumerable: true, get: function () { return pool_1.getPoolReserves; } });
+Object.defineProperty(exports, "getPoolShare", { enumerable: true, get: function () { return pool_1.getPoolShare; } });
 var mint_1 = require("./mint");
 Object.defineProperty(exports, "getMintLiquidityQuote", { enumerable: true, get: function () { return mint_1.getMintLiquidityQuote; } });
 Object.defineProperty(exports, "mintLiquidity", { enumerable: true, get: function () { return mint_1.mintLiquidity; } });

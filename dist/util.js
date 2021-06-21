@@ -3,9 +3,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.optIntoAsset = exports.applySlippageToAmount = exports.waitForTransaction = exports.getMinBalanceForAccount = exports.joinUint8Arrays = exports.decodeState = void 0;
+exports.bufferToBase64 = exports.optIntoAsset = exports.applySlippageToAmount = exports.waitForTransaction = exports.getMinBalanceForAccount = exports.joinUint8Arrays = exports.decodeState = void 0;
 const algosdk_1 = __importDefault(require("algosdk"));
-const constant_1 = require("./constant");
 function decodeState(stateArray) {
     const state = {};
     for (const pair of stateArray) {
@@ -88,9 +87,8 @@ function applySlippageToAmount(type, slippage, amount) {
     }
     let final;
     try {
-        const factor = 10 ** constant_1.MAX_SLIPPAGE_FRACTION_DIGITS;
         const offset = type === "negative" ? 1 - slippage : 1 + slippage;
-        final = (BigInt(amount) * BigInt(factor * offset)) / BigInt(factor);
+        final = BigInt(Math.floor(Number(amount) * offset));
     }
     catch (error) {
         throw new Error(error.message);
@@ -112,3 +110,7 @@ async function optIntoAsset({ client, assetID, initiatorAddr, initiatorSigner })
     await waitForTransaction(client, txId);
 }
 exports.optIntoAsset = optIntoAsset;
+function bufferToBase64(arrayBuffer) {
+    return arrayBuffer ? Buffer.from(arrayBuffer).toString("base64") : "";
+}
+exports.bufferToBase64 = bufferToBase64;

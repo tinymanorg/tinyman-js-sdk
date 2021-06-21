@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import {Algodv2} from "algosdk";
 import {InitiatorSigner} from "./common-types";
 export declare function decodeState(
@@ -22,3 +23,6 @@ export declare function optIntoAsset({
   initiatorAddr: string;
   initiatorSigner: InitiatorSigner;
 }): Promise<void>;
+export declare function bufferToBase64(
+  arrayBuffer: undefined | null | WithImplicitCoercion<ArrayBuffer | SharedArrayBuffer>
+): string;

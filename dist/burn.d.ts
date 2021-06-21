@@ -80,6 +80,7 @@ export declare function burnLiquidity({
   liquidityIn,
   asset1Out,
   asset2Out,
+  slippage,
   redeemExcess,
   initiatorAddr,
   initiatorSigner
@@ -87,15 +88,10 @@ export declare function burnLiquidity({
   client: any;
   pool: PoolInfo;
   liquidityIn: number | bigint;
-  asset1Out: {
-    amount: number | bigint;
-    slippage: number;
-  };
-  asset2Out: {
-    amount: number | bigint;
-    slippage: number;
-  };
-  redeemExcess: boolean;
+  asset1Out: number | bigint;
+  asset2Out: number | bigint;
+  slippage: number;
+  redeemExcess?: boolean;
   initiatorAddr: string;
   initiatorSigner: InitiatorSigner;
 }): Promise<BurnExecution>;

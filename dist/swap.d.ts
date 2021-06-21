@@ -34,6 +34,10 @@ export interface SwapExecution {
   assetOutID: number;
   /** The amount of the swap's output asset. */
   assetOutAmount: bigint;
+  /** The ID of the transaction. */
+  txnID: string;
+  /** The group ID for the transaction group. */
+  groupID: string;
 }
 /**
  * Get a quote for a fixed input swap This does not execute any transactions.

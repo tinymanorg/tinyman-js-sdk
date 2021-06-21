@@ -97,7 +97,9 @@ async function doSwap({ client, pool, swapType, assetIn, assetOut, initiatorAddr
     const confirmedRound = status["confirmed-round"];
     return {
         fees: txnFees,
-        confirmedRound
+        confirmedRound,
+        groupID: util_1.bufferToBase64(txGroup[0].group),
+        txnID: txId
     };
 }
 /**
@@ -172,7 +174,7 @@ async function fixedInputSwap({ client, pool, assetIn, assetOut, redeemExcess, i
         pool,
         accountAddr: initiatorAddr
     });
-    let { fees, confirmedRound } = await doSwap({
+    let { fees, confirmedRound, groupID, txnID } = await doSwap({
         client,
         pool,
         swapType: "fixed input",
@@ -220,7 +222,9 @@ async function fixedInputSwap({ client, pool, assetIn, assetOut, redeemExcess, i
         assetInID: assetIn.assetID,
         assetInAmount: BigInt(assetIn.amount),
         assetOutID: assetOut.assetID,
-        assetOutAmount: assetOutAmount + excessAmountDelta
+        assetOutAmount: assetOutAmount + excessAmountDelta,
+        groupID,
+        txnID
     };
 }
 exports.fixedInputSwap = fixedInputSwap;
@@ -298,7 +302,7 @@ async function fixedOutputSwap({ client, pool, assetIn, assetOut, redeemExcess, 
         pool,
         accountAddr: initiatorAddr
     });
-    let { fees, confirmedRound } = await doSwap({
+    let { fees, confirmedRound, groupID, txnID } = await doSwap({
         client,
         pool,
         swapType: "fixed output",
@@ -346,7 +350,9 @@ async function fixedOutputSwap({ client, pool, assetIn, assetOut, redeemExcess, 
         assetInID: assetIn.assetID,
         assetInAmount: assetInAmount - excessAmountDelta,
         assetOutID: assetOut.assetID,
-        assetOutAmount: BigInt(assetOut.amount)
+        assetOutAmount: BigInt(assetOut.amount),
+        groupID,
+        txnID
     };
 }
 exports.fixedOutputSwap = fixedOutputSwap;
