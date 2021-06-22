@@ -133,7 +133,9 @@ async function doMint({ client, pool, asset1In, asset2In, liquidityOut, initiato
     const confirmedRound = status["confirmed-round"];
     return {
         fees: txnFees,
-        confirmedRound
+        confirmedRound,
+        txnID: txId,
+        groupID: util_1.bufferToBase64(txGroup[0].group)
     };
 }
 /**
@@ -160,7 +162,7 @@ async function mintLiquidity({ client, pool, asset1In, asset2In, liquidityOut, s
         pool,
         accountAddr: initiatorAddr
     });
-    let { fees, confirmedRound } = await doMint({
+    let { fees, confirmedRound, txnID, groupID } = await doMint({
         client,
         pool,
         asset1In,
@@ -197,7 +199,9 @@ async function mintLiquidity({ client, pool, asset1In, asset2In, liquidityOut, s
         asset2ID: pool.asset2ID,
         asset2In: BigInt(asset2In),
         liquidityID: pool.liquidityTokenID,
-        liquidityOut: liquidityOutAmount + excessAmountDelta
+        liquidityOut: liquidityOutAmount + excessAmountDelta,
+        txnID,
+        groupID
     };
 }
 exports.mintLiquidity = mintLiquidity;

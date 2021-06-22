@@ -40,6 +40,10 @@ export interface MintExecution {
   liquidityID: number;
   /** The quantity of the output liquidity token asset. */
   liquidityOut: bigint;
+  /** The ID of the transaction. */
+  txnID: string;
+  /** The group ID for the transaction group. */
+  groupID: string;
 }
 /**
  * Get a quote for how many liquidity tokens a deposit of asset1In and asset2In is worth at this
