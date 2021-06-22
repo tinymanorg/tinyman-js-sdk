@@ -1,6 +1,6 @@
 import algosdk from "algosdk";
 
-import {applySlippageToAmount, waitForTransaction} from "./util";
+import {applySlippageToAmount, bufferToBase64, waitForTransaction} from "./util";
 import {
   MINIMUM_LIQUIDITY,
   PoolInfo,
@@ -52,6 +52,10 @@ export interface MintExecution {
   liquidityID: number;
   /** The quantity of the output liquidity token asset. */
   liquidityOut: bigint;
+  /** The ID of the transaction. */
+  txnID: string;
+  /** The group ID for the transaction group. */
+  groupID: string;
 }
 
 /**
@@ -135,6 +139,8 @@ async function doMint({
 }): Promise<{
   fees: number;
   confirmedRound: number;
+  txnID: string;
+  groupID: string;
 }> {
   const suggestedParams = await client.getTransactionParams().do();
 
@@ -230,7 +236,9 @@ async function doMint({
 
   return {
     fees: txnFees,
-    confirmedRound
+    confirmedRound,
+    txnID: txId,
+    groupID: bufferToBase64(txGroup[0].group)
   };
 }
 
@@ -280,7 +288,7 @@ export async function mintLiquidity({
     accountAddr: initiatorAddr
   });
 
-  let {fees, confirmedRound} = await doMint({
+  let {fees, confirmedRound, txnID, groupID} = await doMint({
     client,
     pool,
     asset1In,
@@ -324,6 +332,8 @@ export async function mintLiquidity({
     asset2ID: pool.asset2ID,
     asset2In: BigInt(asset2In),
     liquidityID: pool.liquidityTokenID!,
-    liquidityOut: liquidityOutAmount + excessAmountDelta
+    liquidityOut: liquidityOutAmount + excessAmountDelta,
+    txnID,
+    groupID
   };
 }
