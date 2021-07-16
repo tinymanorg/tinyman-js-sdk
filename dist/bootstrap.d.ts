@@ -5,6 +5,8 @@ export declare function doBootstrap({
   validatorAppID,
   asset1ID,
   asset2ID,
+  asset1UnitName,
+  asset2UnitName,
   initiatorAddr,
   initiatorSigner
 }: {
@@ -16,6 +18,8 @@ export declare function doBootstrap({
   validatorAppID: number;
   asset1ID: number;
   asset2ID: number;
+  asset1UnitName: string;
+  asset2UnitName: string;
   initiatorAddr: string;
   initiatorSigner: InitiatorSigner;
 }): Promise<{

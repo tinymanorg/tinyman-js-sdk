@@ -59,6 +59,7 @@ async function doMint({ client, pool, asset1In, asset2In, liquidityOut, initiato
         appIndex: pool.validatorAppID,
         appArgs: [MINT_ENCODED],
         accounts: [initiatorAddr],
+        foreignAssets: pool.asset2ID == 0 ? [pool.asset1ID, pool.liquidityTokenID] : [pool.asset1ID, pool.asset2ID, pool.liquidityTokenID],
         suggestedParams
     });
     const asset1InTxn = algosdk_1.default.makeAssetTransferTxnWithSuggestedParamsFromObject({

@@ -4,7 +4,7 @@ import {
   validatorApprovalContract,
   validatorClearStateContract,
   VALIDATOR_APP_SCHEMA
-} from "algoswap-contracts-v1";
+} from "./contracts";
 
 import {waitForTransaction} from "./util";
 import {AccountInformationData, InitiatorSigner} from "./common-types";

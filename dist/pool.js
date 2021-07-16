@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getPoolShare = exports.getAccountExcess = exports.getPoolReserves = exports.createPool = exports.getPoolInfo = exports.MINIMUM_LIQUIDITY = exports.PoolStatus = void 0;
 const algosdk_1 = __importDefault(require("algosdk"));
 const base64_js_1 = require("base64-js");
-const algoswap_contracts_v1_1 = require("algoswap-contracts-v1");
+const contracts_1 = require("./contracts");
 const util_1 = require("./util");
 const bootstrap_1 = require("./bootstrap");
 var PoolStatus;
@@ -27,7 +27,7 @@ exports.MINIMUM_LIQUIDITY = 1000;
  * @param pool.asset2ID The ID of the second asset in the pool pair.
  */
 async function getPoolInfo(client, pool) {
-    const poolLogicSig = algoswap_contracts_v1_1.getPoolLogicSig(pool);
+    const poolLogicSig = contracts_1.getPoolLogicSig(pool);
     let result = {
         addr: poolLogicSig.addr,
         program: poolLogicSig.program,
@@ -68,12 +68,14 @@ exports.getPoolInfo = getPoolInfo;
  * @param pool.validatorAppID The ID of the Validator App for the network.
  * @param pool.asset1ID The ID of the first asset in the pool pair.
  * @param pool.asset2ID The ID of the second asset in the pool pair.
+ * @param pool.asset1UnitName The unit name of the first asset in the pool.
+ * @param pool.asset2UnitName The unit name of the second asset in the pool.
  * @param initiatorAddr The address of the account initiating creation.
  * @param initiatorSigner A function that will sign transactions from the initiator's account.
  */
 async function createPool(client, pool, initiatorAddr, initiatorSigner) {
-    const poolLogicSig = algoswap_contracts_v1_1.getPoolLogicSig(pool);
-    const { validatorAppID } = pool;
+    const poolLogicSig = contracts_1.getPoolLogicSig(pool);
+    const { validatorAppID, asset1UnitName, asset2UnitName } = pool;
     const asset1ID = Math.max(pool.asset1ID, pool.asset2ID);
     const asset2ID = Math.min(pool.asset1ID, pool.asset2ID);
     await bootstrap_1.doBootstrap({
@@ -82,6 +84,8 @@ async function createPool(client, pool, initiatorAddr, initiatorSigner) {
         validatorAppID,
         asset1ID,
         asset2ID,
+        asset1UnitName,
+        asset2UnitName,
         initiatorAddr,
         initiatorSigner
     });
