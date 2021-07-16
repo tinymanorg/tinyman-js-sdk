@@ -12,6 +12,8 @@ export async function doBootstrap({
   validatorAppID,
   asset1ID,
   asset2ID,
+  asset1UnitName,
+  asset2UnitName,
   initiatorAddr,
   initiatorSigner
 }: {
@@ -20,6 +22,8 @@ export async function doBootstrap({
   validatorAppID: number;
   asset1ID: number;
   asset2ID: number;
+  asset1UnitName: string;
+  asset2UnitName: string;
   initiatorAddr: string;
   initiatorSigner: InitiatorSigner;
 }): Promise<{liquidityTokenID: number}> {
@@ -33,23 +37,22 @@ export async function doBootstrap({
       algosdk.encodeUint64(asset1ID),
       algosdk.encodeUint64(asset2ID)
     ],
+    foreignAssets: asset2ID == 0 ? [asset1ID] : [asset1ID, asset2ID],
     suggestedParams
   });
 
   const liquidityTokenCreateTxn = algosdk.makeAssetCreateTxnWithSuggestedParamsFromObject(
     <any>{
       from: poolLogicSig.addr,
-      total: Number.MAX_SAFE_INTEGER,
+      total: 0xffffffffffffffffn,
       decimals: 6,
       defaultFrozen: false,
-      unitName: "LQDTY",
-      assetName: "Liquidity",
-      assetURL: "https://algoswap.com",
+      unitName: "TM1Pool",
+      assetName: `Tinyman Pool ${asset1UnitName}-${asset2UnitName}`,
+      assetURL: "https://tinyman.org",
       suggestedParams
     }
   );
-
-  liquidityTokenCreateTxn.assetTotal = 0xffffffffffffffffn;
 
   const asset1Optin = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
     from: poolLogicSig.addr,

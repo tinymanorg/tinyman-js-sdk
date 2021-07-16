@@ -8,7 +8,7 @@ const algosdk_1 = __importDefault(require("algosdk"));
 const contracts_1 = require("./contracts");
 const util_1 = require("./util");
 const BOOTSTRAP_ENCODED = Uint8Array.from([98, 111, 111, 116, 115, 116, 114, 97, 112]); // 'bootstrap'
-async function doBootstrap({ client, poolLogicSig, validatorAppID, asset1ID, asset2ID, initiatorAddr, initiatorSigner }) {
+async function doBootstrap({ client, poolLogicSig, validatorAppID, asset1ID, asset2ID, asset1UnitName, asset2UnitName, initiatorAddr, initiatorSigner }) {
     const suggestedParams = await client.getTransactionParams().do();
     const validatorAppCallTxn = algosdk_1.default.makeApplicationOptInTxnFromObject({
         from: poolLogicSig.addr,
@@ -18,19 +18,19 @@ async function doBootstrap({ client, poolLogicSig, validatorAppID, asset1ID, ass
             algosdk_1.default.encodeUint64(asset1ID),
             algosdk_1.default.encodeUint64(asset2ID)
         ],
+        foreignAssets: asset2ID == 0 ? [asset1ID] : [asset1ID, asset2ID],
         suggestedParams
     });
     const liquidityTokenCreateTxn = algosdk_1.default.makeAssetCreateTxnWithSuggestedParamsFromObject({
         from: poolLogicSig.addr,
-        total: Number.MAX_SAFE_INTEGER,
+        total: 0xffffffffffffffffn,
         decimals: 6,
         defaultFrozen: false,
-        unitName: "LQDTY",
-        assetName: "Liquidity",
-        assetURL: "https://algoswap.com",
+        unitName: "TM1Pool",
+        assetName: `Tinyman Pool ${asset1UnitName}-${asset2UnitName}`,
+        assetURL: "https://tinyman.org",
         suggestedParams
     });
-    liquidityTokenCreateTxn.assetTotal = 0xffffffffffffffffn;
     const asset1Optin = algosdk_1.default.makeAssetTransferTxnWithSuggestedParamsFromObject({
         from: poolLogicSig.addr,
         to: poolLogicSig.addr,

@@ -43,6 +43,10 @@ export async function redeemExcessAsset({
     appIndex: pool.validatorAppID,
     appArgs: [REDEEM_ENCODED],
     accounts: [initiatorAddr],
+    foreignAssets:
+      pool.asset2ID == 0
+        ? [pool.asset1ID, <number>pool.liquidityTokenID]
+        : [pool.asset1ID, pool.asset2ID, <number>pool.liquidityTokenID],
     suggestedParams
   });
 
