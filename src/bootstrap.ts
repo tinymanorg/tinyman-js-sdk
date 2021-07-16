@@ -1,5 +1,5 @@
 import algosdk from "algosdk";
-import {VALIDATOR_APP_SCHEMA} from "algoswap-contracts-v1";
+import {VALIDATOR_APP_SCHEMA} from "./contracts";
 
 import {InitiatorSigner} from "./common-types";
 import {waitForTransaction} from "./util";

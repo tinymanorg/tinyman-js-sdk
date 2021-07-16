@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.doBootstrap = void 0;
 const algosdk_1 = __importDefault(require("algosdk"));
-const algoswap_contracts_v1_1 = require("algoswap-contracts-v1");
+const contracts_1 = require("./contracts");
 const util_1 = require("./util");
 const BOOTSTRAP_ENCODED = Uint8Array.from([98, 111, 111, 116, 115, 116, 114, 97, 112]); // 'bootstrap'
 async function doBootstrap({ client, poolLogicSig, validatorAppID, asset1ID, asset2ID, initiatorAddr, initiatorSigner }) {
@@ -52,8 +52,8 @@ async function doBootstrap({ client, poolLogicSig, validatorAppID, asset1ID, ass
         100000 + // fee + min balance to opt into asset 1
         (asset2Optin ? 100000 : 0) + // min balance to opt into asset 2
         100000 +
-        (25000 + 3500) * algoswap_contracts_v1_1.VALIDATOR_APP_SCHEMA.numLocalInts +
-        (25000 + 25000) * algoswap_contracts_v1_1.VALIDATOR_APP_SCHEMA.numLocalByteSlices; // min balance to opt into validator app
+        (25000 + 3500) * contracts_1.VALIDATOR_APP_SCHEMA.numLocalInts +
+        (25000 + 25000) * contracts_1.VALIDATOR_APP_SCHEMA.numLocalByteSlices; // min balance to opt into validator app
     const fundingAmount = minBalance +
         liquidityTokenCreateTxn.fee +
         asset1Optin.fee +

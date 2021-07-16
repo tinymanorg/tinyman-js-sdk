@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.sendValidatorAppCreationTransaction = exports.getValidatorAppCreationTransaction = exports.isOptedIntoValidator = exports.closeOutOfValidator = exports.optIntoValidator = exports.getvalidatorAppID = void 0;
 const assert_1 = __importDefault(require("assert"));
 const algosdk_1 = __importDefault(require("algosdk"));
-const algoswap_contracts_v1_1 = require("algoswap-contracts-v1");
+const contracts_1 = require("./contracts");
 const util_1 = require("./util");
 const CREATE_ENCODED = Uint8Array.from([99, 114, 101, 97, 116, 101]); // 'create'
 /**
@@ -108,12 +108,12 @@ async function getValidatorAppCreationTransaction(client, addr) {
     const appCreateTxn = algosdk_1.default.makeApplicationCreateTxnFromObject({
         from: addr,
         onComplete: algosdk_1.default.OnApplicationComplete.NoOpOC,
-        approvalProgram: algoswap_contracts_v1_1.validatorApprovalContract,
-        clearProgram: algoswap_contracts_v1_1.validatorClearStateContract,
-        numLocalInts: algoswap_contracts_v1_1.VALIDATOR_APP_SCHEMA.numLocalInts,
-        numLocalByteSlices: algoswap_contracts_v1_1.VALIDATOR_APP_SCHEMA.numLocalByteSlices,
-        numGlobalInts: algoswap_contracts_v1_1.VALIDATOR_APP_SCHEMA.numGlobalInts,
-        numGlobalByteSlices: algoswap_contracts_v1_1.VALIDATOR_APP_SCHEMA.numGlobalByteSlices,
+        approvalProgram: contracts_1.validatorApprovalContract,
+        clearProgram: contracts_1.validatorClearStateContract,
+        numLocalInts: contracts_1.VALIDATOR_APP_SCHEMA.numLocalInts,
+        numLocalByteSlices: contracts_1.VALIDATOR_APP_SCHEMA.numLocalByteSlices,
+        numGlobalInts: contracts_1.VALIDATOR_APP_SCHEMA.numGlobalInts,
+        numGlobalByteSlices: contracts_1.VALIDATOR_APP_SCHEMA.numGlobalByteSlices,
         appArgs: [CREATE_ENCODED],
         suggestedParams
     });

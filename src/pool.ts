@@ -1,6 +1,6 @@
 import algosdk from "algosdk";
 import {fromByteArray} from "base64-js";
-import {getPoolLogicSig} from "algoswap-contracts-v1";
+import {getPoolLogicSig} from "./contracts";
 
 import {decodeState, joinUint8Arrays, getMinBalanceForAccount} from "./util";
 import {doBootstrap} from "./bootstrap";
