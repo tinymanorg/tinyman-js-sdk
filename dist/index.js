@@ -1,13 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.optIntoAsset = exports.applySlippageToAmount = exports.redeemExcessAsset = exports.fixedOutputSwap = exports.getFixedOutputSwapQuote = exports.fixedInputSwap = exports.getFixedInputSwapQuote = exports.burnLiquidity = exports.getBurnLiquidityQuote = exports.mintLiquidity = exports.getMintLiquidityQuote = exports.getPoolShare = exports.getPoolReserves = exports.createPool = exports.getPoolInfo = exports.MINIMUM_LIQUIDITY = exports.PoolStatus = exports.closeOutOfValidator = exports.isOptedIntoValidator = exports.optIntoValidator = exports.sendValidatorAppCreationTransaction = exports.getValidatorAppCreationTransaction = exports.getvalidatorAppID = void 0;
+exports.optIntoAsset = exports.applySlippageToAmount = exports.redeemExcessAsset = exports.fixedOutputSwap = exports.getFixedOutputSwapQuote = exports.fixedInputSwap = exports.getFixedInputSwapQuote = exports.burnLiquidity = exports.getBurnLiquidityQuote = exports.mintLiquidity = exports.getMintLiquidityQuote = exports.getPoolShare = exports.getPoolReserves = exports.createPool = exports.getPoolInfo = exports.MINIMUM_LIQUIDITY = exports.PoolStatus = exports.optOutOfValidator = exports.isOptedIntoValidator = exports.optIntoValidator = exports.sendValidatorAppCreationTransaction = exports.getValidatorAppCreationTransaction = exports.getvalidatorAppID = void 0;
 var validator_1 = require("./validator");
 Object.defineProperty(exports, "getvalidatorAppID", { enumerable: true, get: function () { return validator_1.getvalidatorAppID; } });
 Object.defineProperty(exports, "getValidatorAppCreationTransaction", { enumerable: true, get: function () { return validator_1.getValidatorAppCreationTransaction; } });
 Object.defineProperty(exports, "sendValidatorAppCreationTransaction", { enumerable: true, get: function () { return validator_1.sendValidatorAppCreationTransaction; } });
 Object.defineProperty(exports, "optIntoValidator", { enumerable: true, get: function () { return validator_1.optIntoValidator; } });
 Object.defineProperty(exports, "isOptedIntoValidator", { enumerable: true, get: function () { return validator_1.isOptedIntoValidator; } });
-Object.defineProperty(exports, "closeOutOfValidator", { enumerable: true, get: function () { return validator_1.closeOutOfValidator; } });
+Object.defineProperty(exports, "optOutOfValidator", { enumerable: true, get: function () { return validator_1.optOutOfValidator; } });
 var pool_1 = require("./pool");
 Object.defineProperty(exports, "PoolStatus", { enumerable: true, get: function () { return pool_1.PoolStatus; } });
 Object.defineProperty(exports, "MINIMUM_LIQUIDITY", { enumerable: true, get: function () { return pool_1.MINIMUM_LIQUIDITY; } });

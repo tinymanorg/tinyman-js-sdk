@@ -26,7 +26,9 @@ async function redeemExcessAsset({ client, pool, assetID, assetOut, initiatorAdd
         appIndex: pool.validatorAppID,
         appArgs: [REDEEM_ENCODED],
         accounts: [initiatorAddr],
-        foreignAssets: pool.asset2ID == 0 ? [pool.asset1ID, pool.liquidityTokenID] : [pool.asset1ID, pool.asset2ID, pool.liquidityTokenID],
+        foreignAssets: pool.asset2ID == 0
+            ? [pool.asset1ID, pool.liquidityTokenID]
+            : [pool.asset1ID, pool.asset2ID, pool.liquidityTokenID],
         suggestedParams
     });
     let assetOutTxn;

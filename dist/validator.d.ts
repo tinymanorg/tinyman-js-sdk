@@ -39,7 +39,7 @@ export declare function optIntoValidator({
  * @param params.initiatorSigner A function that will sign transactions from the initiator's
  *   account.
  */
-export declare function closeOutOfValidator({
+export declare function optOutOfValidator({
   client,
   validatorAppID,
   initiatorAddr,
