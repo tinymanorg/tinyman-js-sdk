@@ -93,7 +93,7 @@ export async function optIntoValidator({
  * @param params.initiatorSigner A function that will sign transactions from the initiator's
  *   account.
  */
-export async function closeOutOfValidator({
+export async function optOutOfValidator({
   client,
   validatorAppID,
   initiatorAddr,
@@ -106,13 +106,13 @@ export async function closeOutOfValidator({
 }): Promise<void> {
   const suggestedParams = await client.getTransactionParams().do();
 
-  const appCloseOutTxn = algosdk.makeApplicationCloseOutTxnFromObject({
+  const appClearStateTxn = algosdk.makeApplicationClearStateTxnFromObject({
     from: initiatorAddr,
-    appIndex: validatorAppID!,
+    appIndex: validatorAppID,
     suggestedParams
   });
 
-  const [signedTxn] = await initiatorSigner([appCloseOutTxn]);
+  const [signedTxn] = await initiatorSigner([appClearStateTxn]);
 
   const {txId} = await client.sendRawTransaction(signedTxn).do();
 
