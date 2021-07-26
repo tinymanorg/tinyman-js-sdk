@@ -4,7 +4,7 @@ export {
   sendValidatorAppCreationTransaction,
   optIntoValidator,
   isOptedIntoValidator,
-  closeOutOfValidator
+  optOutOfValidator
 } from "./validator";
 
 export {
