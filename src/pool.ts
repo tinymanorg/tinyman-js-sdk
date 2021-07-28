@@ -1,7 +1,7 @@
 import algosdk from "algosdk";
 import {fromByteArray} from "base64-js";
-import {getPoolLogicSig} from "./contracts";
 
+import {getPoolLogicSig} from "./contracts";
 import {decodeState, joinUint8Arrays, getMinBalanceForAccount} from "./util";
 import {doBootstrap} from "./bootstrap";
 import {AccountInformationData, InitiatorSigner} from "./common-types";
@@ -66,31 +66,17 @@ export async function getPoolInfo(
     status: PoolStatus.NOT_CREATED
   };
 
-  const info = (await client
-    .accountInformation(poolLogicSig.addr)
-    .do()) as AccountInformationData;
+  const readyPoolAssets = await getPoolAssets({
+    client,
+    address: poolLogicSig.addr,
+    validatorAppID: pool.validatorAppID
+  });
 
-  for (const app of info["apps-local-state"]) {
-    if (app.id !== pool.validatorAppID) {
-      continue;
-    }
-
-    const keyValue = app["key-value"];
-    const state = decodeState(keyValue);
-
-    const asset1Key = "YTE="; // 'a1' in base64
-    const asset2Key = "YTI="; // 'a2' in base64
-
-    // The Liquidity Token is the only asset the Pool has created
-    const liquidityTokenAsset = info["created-assets"][0];
-    const liquidityTokenID = liquidityTokenAsset.index;
-
-    result.asset1ID = state[asset1Key] as number;
-    result.asset2ID = state[asset2Key] as number;
-    result.liquidityTokenID = liquidityTokenID;
+  if (readyPoolAssets) {
+    result.asset1ID = readyPoolAssets.asset1ID;
+    result.asset2ID = readyPoolAssets.asset2ID;
+    result.liquidityTokenID = readyPoolAssets.liquidityTokenID;
     result.status = PoolStatus.READY;
-
-    return result;
   }
 
   return result;
@@ -337,4 +323,41 @@ export function getPoolShare(totalLiquidity: bigint, ownedLiquidity: bigint) {
   }
 
   return share;
+}
+
+export async function getPoolAssets({
+  client,
+  address,
+  validatorAppID
+}: {
+  client: any;
+  address: string;
+  validatorAppID: number;
+}) {
+  const info = (await client.accountInformation(address).do()) as AccountInformationData;
+
+  // eslint-disable-next-line eqeqeq
+  const appState = info["apps-local-state"].find((app) => app.id == validatorAppID);
+  let assets: {asset1ID: number; asset2ID: number; liquidityTokenID: number} | null =
+    null;
+
+  if (appState) {
+    const keyValue = appState["key-value"];
+    const state = decodeState(keyValue);
+
+    const asset1Key = "YTE="; // 'a1' in base64
+    const asset2Key = "YTI="; // 'a2' in base64
+
+    // The Liquidity Token is the only asset the Pool has created
+    const liquidityTokenAsset = info["created-assets"][0];
+    const liquidityTokenID = liquidityTokenAsset.index;
+
+    assets = {
+      asset1ID: state[asset1Key] as number,
+      asset2ID: state[asset2Key] as number,
+      liquidityTokenID
+    };
+  }
+
+  return assets;
 }

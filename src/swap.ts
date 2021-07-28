@@ -95,6 +95,7 @@ async function doSwap({
     appArgs: validatorAppCallArgs,
     accounts: [initiatorAddr],
     foreignAssets:
+      // eslint-disable-next-line eqeqeq
       pool.asset2ID == 0
         ? [pool.asset1ID, <number>pool.liquidityTokenID]
         : [pool.asset1ID, pool.asset2ID, <number>pool.liquidityTokenID],

@@ -1,8 +1,16 @@
 import algosdk, {Algodv2} from "algosdk";
+import {AssetParams} from "algosdk/dist/types/src/client/v2/algod/models/types";
 
-import {InitiatorSigner} from "./common-types";
+import {
+  AccountInformationData,
+  AlgorandMobileApiAsset,
+  InitiatorSigner
+} from "./common-types";
+import {ALGO_ASSET, ALGO_ASSET_ID} from "./constant";
 
-export function decodeState(stateArray: any[]): Record<string, string | number | bigint> {
+export function decodeState(
+  stateArray: AccountInformationData["apps-local-state"][0]["key-value"] = []
+): Record<string, number | string> {
   const state: Record<string, number | string> = {};
 
   for (const pair of stateArray) {
@@ -144,4 +152,32 @@ export function bufferToBase64(
   arrayBuffer: undefined | null | WithImplicitCoercion<ArrayBuffer | SharedArrayBuffer>
 ) {
   return arrayBuffer ? Buffer.from(arrayBuffer).toString("base64") : "";
+}
+
+export function getAssetInformationById(algodClient: algosdk.Algodv2, id: number) {
+  return new Promise<AlgorandMobileApiAsset & {creator: null | string}>(
+    async (resolve, reject) => {
+      try {
+        if (id === ALGO_ASSET_ID) {
+          resolve({...ALGO_ASSET, creator: null});
+        } else {
+          const data = (await algodClient.getAssetByID(id).do()) as {
+            index: number;
+            params: AssetParams;
+          };
+
+          resolve({
+            asset_id: data.index,
+            fraction_decimals: Number(data.params.decimals),
+            is_verified: false,
+            name: data.params.name || "",
+            unit_name: data.params["unit-name"] || "",
+            creator: data.params.creator
+          });
+        }
+      } catch (error) {
+        reject(new Error(error.message || "Failed to fetch asset information"));
+      }
+    }
+  );
 }
