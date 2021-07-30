@@ -53,8 +53,8 @@ export interface SwapExecution {
     excessAmountForSwap: bigint;
     /** Total excess amount accumulated for the pool asset */
     totalExcessAmount: bigint;
-    /** The group ID for the transaction group. */
   };
+  /** The group ID for the transaction group. */
   groupID: string;
 }
 
