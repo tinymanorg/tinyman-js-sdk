@@ -1,12 +1,7 @@
 import algosdk from "algosdk";
-import {fromByteArray, toByteArray} from "base64-js";
+import {toByteArray} from "base64-js";
 
-import {
-  decodeState,
-  getAssetInformationById,
-  joinUint8Arrays,
-  waitForTransaction
-} from "./util";
+import {decodeState, getAssetInformationById, waitForTransaction} from "./util";
 import {getPoolAssets, getPoolInfo, PoolInfo} from "./pool";
 import {
   AccountInformationData,

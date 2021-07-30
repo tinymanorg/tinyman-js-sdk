@@ -46,7 +46,15 @@ export interface SwapExecution {
   assetOutAmount: bigint;
   /** The ID of the transaction. */
   txnID: string;
-  /** The group ID for the transaction group. */
+  excessAmount: {
+    /** Asset ID for which the excess amount can be redeemed with */
+    assetID: number;
+    /** Excess amount for the current swap */
+    excessAmountForSwap: bigint;
+    /** Total excess amount accumulated for the pool asset */
+    totalExcessAmount: bigint;
+    /** The group ID for the transaction group. */
+  };
   groupID: string;
 }
 
@@ -277,7 +285,6 @@ export async function fixedInputSwap({
   pool,
   assetIn,
   assetOut,
-  redeemExcess,
   initiatorAddr,
   initiatorSigner
 }: {
@@ -292,7 +299,6 @@ export async function fixedInputSwap({
     amount: number | bigint;
     slippage: number;
   };
-  redeemExcess: boolean;
   initiatorAddr: string;
   initiatorSigner: InitiatorSigner;
 }): Promise<SwapExecution> {
@@ -345,19 +351,6 @@ export async function fixedInputSwap({
     excessAmountDelta = 0n;
   }
 
-  if (redeemExcess && excessAmountDelta > 0n) {
-    const redeemOutput = await redeemExcessAsset({
-      client,
-      pool,
-      assetID: assetOut.assetID,
-      assetOut: excessAmount,
-      initiatorAddr,
-      initiatorSigner
-    });
-
-    fees += redeemOutput.fees;
-  }
-
   return {
     round: confirmedRound,
     fees,
@@ -365,6 +358,11 @@ export async function fixedInputSwap({
     assetInAmount: BigInt(assetIn.amount),
     assetOutID: assetOut.assetID,
     assetOutAmount: assetOutAmount + excessAmountDelta,
+    excessAmount: {
+      assetID: assetOut.assetID,
+      excessAmountForSwap: excessAmountDelta,
+      totalExcessAmount: excessAmount
+    },
     groupID,
     txnID
   };
@@ -457,7 +455,6 @@ export async function fixedOutputSwap({
   pool,
   assetIn,
   assetOut,
-  redeemExcess,
   initiatorAddr,
   initiatorSigner
 }: {
@@ -472,7 +469,6 @@ export async function fixedOutputSwap({
     assetID: number;
     amount: number | bigint;
   };
-  redeemExcess: boolean;
   initiatorAddr: string;
   initiatorSigner: InitiatorSigner;
 }): Promise<SwapExecution> {
@@ -525,19 +521,6 @@ export async function fixedOutputSwap({
     excessAmountDelta = 0n;
   }
 
-  if (redeemExcess && excessAmountDelta > 0n) {
-    const redeemOutput = await redeemExcessAsset({
-      client,
-      pool,
-      assetID: assetIn.assetID,
-      assetOut: excessAmount,
-      initiatorAddr,
-      initiatorSigner
-    });
-
-    fees += redeemOutput.fees;
-  }
-
   return {
     round: confirmedRound,
     fees,
@@ -545,6 +528,11 @@ export async function fixedOutputSwap({
     assetInAmount: assetInAmount - excessAmountDelta,
     assetOutID: assetOut.assetID,
     assetOutAmount: BigInt(assetOut.amount),
+    excessAmount: {
+      assetID: assetIn.assetID,
+      excessAmountForSwap: excessAmountDelta,
+      totalExcessAmount: excessAmount
+    },
     groupID,
     txnID
   };

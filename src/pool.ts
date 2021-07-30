@@ -267,13 +267,25 @@ export async function getAccountExcess({
     const state = decodeState(keyValue);
 
     const excessAsset1Key = fromByteArray(
-      joinUint8Arrays([EXCESS_ENCODED, algosdk.encodeUint64(pool.asset1ID)])
+      joinUint8Arrays([
+        algosdk.decodeAddress(pool.addr).publicKey,
+        EXCESS_ENCODED,
+        algosdk.encodeUint64(pool.asset1ID)
+      ])
     );
     const excessAsset2Key = fromByteArray(
-      joinUint8Arrays([EXCESS_ENCODED, algosdk.encodeUint64(pool.asset2ID)])
+      joinUint8Arrays([
+        algosdk.decodeAddress(pool.addr).publicKey,
+        EXCESS_ENCODED,
+        algosdk.encodeUint64(pool.asset2ID)
+      ])
     );
     const excessLiquidityTokenKey = fromByteArray(
-      joinUint8Arrays([EXCESS_ENCODED, algosdk.encodeUint64(pool.liquidityTokenID!)])
+      joinUint8Arrays([
+        algosdk.decodeAddress(pool.addr).publicKey,
+        EXCESS_ENCODED,
+        algosdk.encodeUint64(pool.liquidityTokenID!)
+      ])
     );
 
     const excessAsset1Value = state[excessAsset1Key];
