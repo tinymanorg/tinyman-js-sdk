@@ -44,6 +44,11 @@ export interface BurnExecution {
   liquidityID: number;
   /** The quantity of the liquidity token input asset. */
   liquidityIn: bigint;
+  excessAmounts: {
+    assetID: number;
+    excessAmountForBurning: bigint;
+    totalExcessAmount: bigint;
+  }[];
 }
 
 /**
@@ -110,6 +115,7 @@ async function doBurn({
     appArgs: [BURN_ENCODED],
     accounts: [initiatorAddr],
     foreignAssets:
+      // eslint-disable-next-line eqeqeq
       pool.asset2ID == 0
         ? [pool.asset1ID, <number>pool.liquidityTokenID]
         : [pool.asset1ID, pool.asset2ID, <number>pool.liquidityTokenID],
@@ -211,8 +217,6 @@ async function doBurn({
  * @param params.asset2Out.amount The quantity of the second asset being withdrawn.
  * @param params.asset2Out.slippage The maximum acceptable slippage rate for asset2. Should be an
  *   integer between 0 and 100 and acts as a percentage of params.asset2Out.amount.
- * @param params.redeemExcess If true, any excess amount of the output assets created by this burn
- *   will be redeemed after the burn executes.
  * @param params.initiatorAddr The address of the account performing the burn operation.
  * @param params.initiatorSigner A function that will sign transactions from the initiator's
  *   account.
@@ -224,7 +228,6 @@ export async function burnLiquidity({
   asset1Out,
   asset2Out,
   slippage,
-  redeemExcess = true,
   initiatorAddr,
   initiatorSigner
 }: {
@@ -234,7 +237,6 @@ export async function burnLiquidity({
   asset1Out: number | bigint;
   asset2Out: number | bigint;
   slippage: number;
-  redeemExcess?: boolean;
   initiatorAddr: string;
   initiatorSigner: InitiatorSigner;
 }): Promise<BurnExecution> {
@@ -275,34 +277,6 @@ export async function burnLiquidity({
     excessAmountDeltaAsset2 = 0n;
   }
 
-  if (redeemExcess) {
-    if (excessAmountDeltaAsset1 > 0n) {
-      const asset1RedeemOutput = await redeemExcessAsset({
-        client,
-        pool,
-        assetID: pool.asset1ID,
-        assetOut: excessAmountDeltaAsset1,
-        initiatorAddr,
-        initiatorSigner
-      });
-
-      fees += asset1RedeemOutput.fees;
-    }
-
-    if (excessAmountDeltaAsset2 > 0n) {
-      const asset2RedeemOutput = await redeemExcessAsset({
-        client,
-        pool,
-        assetID: pool.asset2ID,
-        assetOut: excessAmountDeltaAsset2,
-        initiatorAddr,
-        initiatorSigner
-      });
-
-      fees += asset2RedeemOutput.fees;
-    }
-  }
-
   return {
     round: confirmedRound,
     fees,
@@ -311,6 +285,18 @@ export async function burnLiquidity({
     asset2ID: pool.asset2ID,
     asset2Out: asset2OutAmount + excessAmountDeltaAsset2,
     liquidityID: pool.liquidityTokenID!,
-    liquidityIn: BigInt(liquidityIn)
+    liquidityIn: BigInt(liquidityIn),
+    excessAmounts: [
+      {
+        assetID: pool.asset1ID,
+        excessAmountForBurning: excessAmountDeltaAsset1,
+        totalExcessAmount: excessAssets.excessAsset1
+      },
+      {
+        assetID: pool.asset2ID,
+        excessAmountForBurning: excessAmountDeltaAsset2,
+        totalExcessAmount: excessAssets.excessAsset2
+      }
+    ]
   };
 }
