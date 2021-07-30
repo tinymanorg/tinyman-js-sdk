@@ -171,7 +171,12 @@ export async function getExcessAmounts({
 }
 
 export interface ExcessAmountDataWithPoolAssetDetails {
-  pool: {info: PoolInfo; asset1: AlgorandMobileApiAsset; asset2: AlgorandMobileApiAsset};
+  pool: {
+    info: PoolInfo;
+    asset1: AlgorandMobileApiAsset;
+    asset2: AlgorandMobileApiAsset;
+    liquidityAsset: AlgorandMobileApiAsset;
+  };
   asset: AlgorandMobileApiAsset;
   amount: number;
 }
@@ -211,16 +216,25 @@ export async function getExcessAmountsWithPoolAssetDetails({
       });
       const assetDetails = await Promise.all([
         getAssetInformationById(client, poolAssets.asset1ID),
-        getAssetInformationById(client, poolAssets.asset2ID)
+        getAssetInformationById(client, poolAssets.asset2ID),
+        getAssetInformationById(client, poolInfo.liquidityTokenID!)
       ]);
+      let excessAsset = assetDetails[0];
+
+      if (assetID === assetDetails[1].asset_id) {
+        excessAsset = assetDetails[1];
+      } else if (assetID === assetDetails[2]?.asset_id) {
+        excessAsset = assetDetails[2];
+      }
 
       excessDataWithDetail.push({
         amount,
-        asset: assetID === assetDetails[0].asset_id ? assetDetails[0] : assetDetails[1],
+        asset: excessAsset,
         pool: {
           info: poolInfo,
           asset1: assetDetails[0],
-          asset2: assetDetails[1]
+          asset2: assetDetails[1],
+          liquidityAsset: assetDetails[2]
         }
       });
     }
