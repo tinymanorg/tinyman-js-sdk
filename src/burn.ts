@@ -1,6 +1,6 @@
 import algosdk from "algosdk";
 
-import {applySlippageToAmount, waitForTransaction} from "./util";
+import {applySlippageToAmount, bufferToBase64, waitForTransaction} from "./util";
 import {PoolInfo, getPoolReserves, getAccountExcess} from "./pool";
 import {redeemExcessAsset} from "./redeem";
 import {InitiatorSigner} from "./common-types";
@@ -44,11 +44,16 @@ export interface BurnExecution {
   liquidityID: number;
   /** The quantity of the liquidity token input asset. */
   liquidityIn: bigint;
+  /** Excess amount details for the pool assets */
   excessAmounts: {
     assetID: number;
     excessAmountForBurning: bigint;
     totalExcessAmount: bigint;
   }[];
+  /** The ID of the transaction. */
+  txnID: string;
+  /** The group ID for the transaction group. */
+  groupID: string;
 }
 
 /**
@@ -106,6 +111,8 @@ async function doBurn({
 }): Promise<{
   fees: number;
   confirmedRound: number;
+  txnID: string;
+  groupID: string;
 }> {
   const suggestedParams = await client.getTransactionParams().do();
 
@@ -201,7 +208,9 @@ async function doBurn({
 
   return {
     fees: txnFees,
-    confirmedRound
+    confirmedRound,
+    groupID: bufferToBase64(txGroup[0].group),
+    txnID: txId
   };
 }
 
@@ -249,7 +258,7 @@ export async function burnLiquidity({
     accountAddr: initiatorAddr
   });
 
-  let {fees, confirmedRound} = await doBurn({
+  let {fees, confirmedRound, txnID, groupID} = await doBurn({
     client,
     pool,
     liquidityIn,
@@ -297,6 +306,8 @@ export async function burnLiquidity({
         excessAmountForBurning: excessAmountDeltaAsset2,
         totalExcessAmount: excessAssets.excessAsset2
       }
-    ]
+    ],
+    txnID,
+    groupID
   };
 }
