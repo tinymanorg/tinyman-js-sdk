@@ -2,7 +2,6 @@ import algosdk from "algosdk";
 
 import {applySlippageToAmount, bufferToBase64, waitForTransaction} from "./util";
 import {PoolInfo, getPoolReserves, getAccountExcess} from "./pool";
-import {redeemExcessAsset} from "./redeem";
 import {InitiatorSigner} from "./common-types";
 
 // FEE = %0.3 or 3/1000
@@ -274,8 +273,6 @@ export async function getFixedInputSwapQuote({
  * @param params.assetOut.amount The desired quantity of the output asset.
  * @param params.assetOut.slippage The maximum acceptable slippage rate. Should be a number between
  *   0 and 100 and acts as a percentage of params.assetOut.amount.
- * @param params.redeemExcess If true, any excess amount of the output asset created by this swap
- *   will be redeemed after the swap executes.
  * @param params.initiatorAddr The address of the account performing the swap operation.
  * @param params.initiatorSigner A function that will sign transactions from the initiator's
  *   account.
@@ -444,8 +441,6 @@ export async function getFixedOutputSwapQuote({
  * @param params.assetOut.assetID The ID of the output asset. Must be one of the pool's asset1ID
  *   or asset2ID, and must be different than params.asset1In.assetID.
  * @param params.assetOut.amount The quantity of the output asset.
- * @param params.redeemExcess If true, any excess amount of the input asset created by this swap
- *   will be redeemed after the swap executes.
  * @param params.initiatorAddr The address of the account performing the swap operation.
  * @param params.initiatorSigner A function that will sign transactions from the initiator's
  *   account.
