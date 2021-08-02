@@ -3,10 +3,12 @@ import {AssetParams} from "algosdk/dist/types/src/client/v2/algod/models/types";
 
 import {
   AccountInformationData,
-  AlgorandMobileApiAsset,
+  TinymanAnalyticsApiAsset,
   InitiatorSigner
 } from "./common-types";
 import {ALGO_ASSET, ALGO_ASSET_ID} from "./constant";
+
+const CACHED_ASSETS: Map<string, TinymanAnalyticsApiAsset> = new Map();
 
 export function decodeState(
   stateArray: AccountInformationData["apps-local-state"][0]["key-value"] = []
@@ -154,30 +156,49 @@ export function bufferToBase64(
   return arrayBuffer ? Buffer.from(arrayBuffer).toString("base64") : "";
 }
 
-export function getAssetInformationById(algodClient: algosdk.Algodv2, id: number) {
-  return new Promise<AlgorandMobileApiAsset & {creator: null | string}>(
-    async (resolve, reject) => {
-      try {
-        if (id === ALGO_ASSET_ID) {
-          resolve({...ALGO_ASSET, creator: null});
-        } else {
-          const data = (await algodClient.getAssetByID(id).do()) as {
-            index: number;
-            params: AssetParams;
-          };
-
-          resolve({
-            asset_id: data.index,
-            fraction_decimals: Number(data.params.decimals),
-            is_verified: false,
-            name: data.params.name || "",
-            unit_name: data.params["unit-name"] || "",
-            creator: data.params.creator
-          });
-        }
-      } catch (error) {
-        reject(new Error(error.message || "Failed to fetch asset information"));
+/**
+ * Fetches asset data and caches it in a Map.
+ * @param algodClient - Algodv2 client
+ * @param {number} id - id of the asset
+ * @param {boolean} alwaysFetch - Determines whether to always fetch the information of the asset or read it from the cache
+ * @returns a promise that resolves with TinymanAnalyticsApiAsset
+ */
+export function getAssetInformationById(
+  algodClient: algosdk.Algodv2,
+  id: number,
+  alwaysFetch?: boolean
+) {
+  return new Promise<TinymanAnalyticsApiAsset>(async (resolve, reject) => {
+    try {
+      if (id === ALGO_ASSET_ID) {
+        resolve(ALGO_ASSET);
+        return;
       }
+
+      const memoizedValue = CACHED_ASSETS.get(`${id}`);
+
+      if (memoizedValue && !alwaysFetch) {
+        resolve(memoizedValue);
+        return;
+      }
+
+      const algodAsset = (await algodClient.getAssetByID(id).do()) as {
+        index: number;
+        params: AssetParams;
+      };
+      const assetData = {
+        id: `${algodAsset.index}`,
+        decimals: Number(algodAsset.params.decimals),
+        is_liquidity_token: false,
+        name: algodAsset.params.name || "",
+        unit_name: algodAsset.params["unit-name"] || "",
+        url: ""
+      };
+
+      CACHED_ASSETS.set(`${id}`, assetData);
+      resolve(assetData);
+    } catch (error) {
+      reject(new Error(error.message || "Failed to fetch asset information"));
     }
-  );
+  });
 }
