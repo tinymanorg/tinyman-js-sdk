@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.optIntoAsset = exports.applySlippageToAmount = exports.redeemExcessAsset = exports.fixedOutputSwap = exports.getFixedOutputSwapQuote = exports.fixedInputSwap = exports.getFixedInputSwapQuote = exports.burnLiquidity = exports.getBurnLiquidityQuote = exports.mintLiquidity = exports.getMintLiquidityQuote = exports.getPoolShare = exports.getPoolReserves = exports.createPool = exports.getPoolInfo = exports.MINIMUM_LIQUIDITY = exports.PoolStatus = exports.optOutOfValidator = exports.isOptedIntoValidator = exports.optIntoValidator = exports.sendValidatorAppCreationTransaction = exports.getValidatorAppCreationTransaction = exports.getvalidatorAppID = void 0;
+exports.ALGO_ASSET_ID = exports.ALGO_ASSET = exports.getAssetInformationById = exports.optIntoAsset = exports.applySlippageToAmount = exports.getExcessAmountsWithPoolAssetDetails = exports.getExcessAmounts = exports.redeemExcessAsset = exports.fixedOutputSwap = exports.getFixedOutputSwapQuote = exports.fixedInputSwap = exports.getFixedInputSwapQuote = exports.burnLiquidity = exports.getBurnLiquidityQuote = exports.mintLiquidity = exports.getMintLiquidityQuote = exports.getPoolShare = exports.getPoolReserves = exports.createPool = exports.getPoolInfo = exports.MINIMUM_LIQUIDITY = exports.PoolStatus = exports.optOutOfValidator = exports.isOptedIntoValidator = exports.optIntoValidator = exports.sendValidatorAppCreationTransaction = exports.getValidatorAppCreationTransaction = exports.getvalidatorAppID = void 0;
 var validator_1 = require("./validator");
 Object.defineProperty(exports, "getvalidatorAppID", { enumerable: true, get: function () { return validator_1.getvalidatorAppID; } });
 Object.defineProperty(exports, "getValidatorAppCreationTransaction", { enumerable: true, get: function () { return validator_1.getValidatorAppCreationTransaction; } });
@@ -28,6 +28,12 @@ Object.defineProperty(exports, "getFixedOutputSwapQuote", { enumerable: true, ge
 Object.defineProperty(exports, "fixedOutputSwap", { enumerable: true, get: function () { return swap_1.fixedOutputSwap; } });
 var redeem_1 = require("./redeem");
 Object.defineProperty(exports, "redeemExcessAsset", { enumerable: true, get: function () { return redeem_1.redeemExcessAsset; } });
+Object.defineProperty(exports, "getExcessAmounts", { enumerable: true, get: function () { return redeem_1.getExcessAmounts; } });
+Object.defineProperty(exports, "getExcessAmountsWithPoolAssetDetails", { enumerable: true, get: function () { return redeem_1.getExcessAmountsWithPoolAssetDetails; } });
 var util_1 = require("./util");
 Object.defineProperty(exports, "applySlippageToAmount", { enumerable: true, get: function () { return util_1.applySlippageToAmount; } });
 Object.defineProperty(exports, "optIntoAsset", { enumerable: true, get: function () { return util_1.optIntoAsset; } });
+Object.defineProperty(exports, "getAssetInformationById", { enumerable: true, get: function () { return util_1.getAssetInformationById; } });
+var constant_1 = require("./constant");
+Object.defineProperty(exports, "ALGO_ASSET", { enumerable: true, get: function () { return constant_1.ALGO_ASSET; } });
+Object.defineProperty(exports, "ALGO_ASSET_ID", { enumerable: true, get: function () { return constant_1.ALGO_ASSET_ID; } });

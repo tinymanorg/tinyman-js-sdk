@@ -91,3 +91,16 @@ export declare function getPoolShare(
   totalLiquidity: bigint,
   ownedLiquidity: bigint
 ): number;
+export declare function getPoolAssets({
+  client,
+  address,
+  validatorAppID
+}: {
+  client: any;
+  address: string;
+  validatorAppID: number;
+}): Promise<{
+  asset1ID: number;
+  asset2ID: number;
+  liquidityTokenID: number;
+} | null>;

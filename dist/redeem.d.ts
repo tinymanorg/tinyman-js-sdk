@@ -1,5 +1,5 @@
 import {PoolInfo} from "./pool";
-import {InitiatorSigner} from "./common-types";
+import {AlgorandMobileApiAsset, InitiatorSigner} from "./common-types";
 /**
  * Execute a redeem operation to collect excess assets from previous operations.
  *
@@ -30,3 +30,50 @@ export declare function redeemExcessAsset({
   fees: number;
   confirmedRound: number;
 }>;
+export interface ExcessAmountData {
+  poolAddress: string;
+  assetID: number;
+  amount: number;
+}
+/**
+ * Generates a list of excess amounts accumulated within an account.
+ * @param params.client An Algodv2 client.
+ * @param params.accountAddr The address of the account performing the redeem operation.
+ * @param params.validatorAppID Validator APP ID
+ * @returns List of excess amounts
+ */
+export declare function getExcessAmounts({
+  client,
+  accountAddr,
+  validatorAppID
+}: {
+  client: any;
+  accountAddr: string;
+  validatorAppID: number;
+}): Promise<ExcessAmountData[]>;
+export interface ExcessAmountDataWithPoolAssetDetails {
+  pool: {
+    info: PoolInfo;
+    asset1: AlgorandMobileApiAsset;
+    asset2: AlgorandMobileApiAsset;
+    liquidityAsset: AlgorandMobileApiAsset;
+  };
+  asset: AlgorandMobileApiAsset;
+  amount: number;
+}
+/**
+ * Generates a list of excess amounts accumulated within an account. Each item includes details of pool and its assets.
+ * @param params.client An Algodv2 client.
+ * @param params.accountAddr The address of the account performing the redeem operation.
+ * @param params.validatorAppID Validator APP ID
+ * @returns List of excess amounts
+ */
+export declare function getExcessAmountsWithPoolAssetDetails({
+  client,
+  accountAddr,
+  validatorAppID
+}: {
+  client: any;
+  accountAddr: string;
+  validatorAppID: number;
+}): Promise<ExcessAmountDataWithPoolAssetDetails[]>;

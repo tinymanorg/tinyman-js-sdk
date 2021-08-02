@@ -26,6 +26,18 @@ export {
   getFixedOutputSwapQuote,
   fixedOutputSwap
 } from "./swap";
-export {redeemExcessAsset} from "./redeem";
-export {applySlippageToAmount, optIntoAsset} from "./util";
-export {AccountAsset, AccountInformationData, InitiatorSigner} from "./common-types";
+export {
+  redeemExcessAsset,
+  getExcessAmounts,
+  ExcessAmountData,
+  getExcessAmountsWithPoolAssetDetails,
+  ExcessAmountDataWithPoolAssetDetails
+} from "./redeem";
+export {applySlippageToAmount, optIntoAsset, getAssetInformationById} from "./util";
+export {
+  AccountAsset,
+  AccountInformationData,
+  InitiatorSigner,
+  AlgorandMobileApiAsset
+} from "./common-types";
+export {ALGO_ASSET, ALGO_ASSET_ID} from "./constant";

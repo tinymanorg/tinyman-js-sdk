@@ -3,9 +3,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.bufferToBase64 = exports.optIntoAsset = exports.applySlippageToAmount = exports.waitForTransaction = exports.getMinBalanceForAccount = exports.joinUint8Arrays = exports.decodeState = void 0;
+exports.getAssetInformationById = exports.bufferToBase64 = exports.optIntoAsset = exports.applySlippageToAmount = exports.waitForTransaction = exports.getMinBalanceForAccount = exports.joinUint8Arrays = exports.decodeState = void 0;
 const algosdk_1 = __importDefault(require("algosdk"));
-function decodeState(stateArray) {
+const constant_1 = require("./constant");
+function decodeState(stateArray = []) {
     const state = {};
     for (const pair of stateArray) {
         const { key } = pair;
@@ -114,3 +115,27 @@ function bufferToBase64(arrayBuffer) {
     return arrayBuffer ? Buffer.from(arrayBuffer).toString("base64") : "";
 }
 exports.bufferToBase64 = bufferToBase64;
+function getAssetInformationById(algodClient, id) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (id === constant_1.ALGO_ASSET_ID) {
+                resolve({ ...constant_1.ALGO_ASSET, creator: null });
+            }
+            else {
+                const data = (await algodClient.getAssetByID(id).do());
+                resolve({
+                    asset_id: data.index,
+                    fraction_decimals: Number(data.params.decimals),
+                    is_verified: false,
+                    name: data.params.name || "",
+                    unit_name: data.params["unit-name"] || "",
+                    creator: data.params.creator
+                });
+            }
+        }
+        catch (error) {
+            reject(new Error(error.message || "Failed to fetch asset information"));
+        }
+    });
+}
+exports.getAssetInformationById = getAssetInformationById;

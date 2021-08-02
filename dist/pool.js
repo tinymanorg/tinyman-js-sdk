@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getPoolShare = exports.getAccountExcess = exports.getPoolReserves = exports.createPool = exports.getPoolInfo = exports.MINIMUM_LIQUIDITY = exports.PoolStatus = void 0;
+exports.getPoolAssets = exports.getPoolShare = exports.getAccountExcess = exports.getPoolReserves = exports.createPool = exports.getPoolInfo = exports.MINIMUM_LIQUIDITY = exports.PoolStatus = void 0;
 const algosdk_1 = __importDefault(require("algosdk"));
 const base64_js_1 = require("base64-js");
 const contracts_1 = require("./contracts");
@@ -36,25 +36,16 @@ async function getPoolInfo(client, pool) {
         asset2ID: Math.min(pool.asset1ID, pool.asset2ID),
         status: PoolStatus.NOT_CREATED
     };
-    const info = (await client
-        .accountInformation(poolLogicSig.addr)
-        .do());
-    for (const app of info["apps-local-state"]) {
-        if (app.id !== pool.validatorAppID) {
-            continue;
-        }
-        const keyValue = app["key-value"];
-        const state = util_1.decodeState(keyValue);
-        const asset1Key = "YTE="; // 'a1' in base64
-        const asset2Key = "YTI="; // 'a2' in base64
-        // The Liquidity Token is the only asset the Pool has created
-        const liquidityTokenAsset = info["created-assets"][0];
-        const liquidityTokenID = liquidityTokenAsset.index;
-        result.asset1ID = state[asset1Key];
-        result.asset2ID = state[asset2Key];
-        result.liquidityTokenID = liquidityTokenID;
+    const readyPoolAssets = await getPoolAssets({
+        client,
+        address: poolLogicSig.addr,
+        validatorAppID: pool.validatorAppID
+    });
+    if (readyPoolAssets) {
+        result.asset1ID = readyPoolAssets.asset1ID;
+        result.asset2ID = readyPoolAssets.asset2ID;
+        result.liquidityTokenID = readyPoolAssets.liquidityTokenID;
         result.status = PoolStatus.READY;
-        return result;
     }
     return result;
 }
@@ -186,9 +177,21 @@ async function getAccountExcess({ client, pool, accountAddr }) {
             break;
         }
         const state = util_1.decodeState(keyValue);
-        const excessAsset1Key = base64_js_1.fromByteArray(util_1.joinUint8Arrays([EXCESS_ENCODED, algosdk_1.default.encodeUint64(pool.asset1ID)]));
-        const excessAsset2Key = base64_js_1.fromByteArray(util_1.joinUint8Arrays([EXCESS_ENCODED, algosdk_1.default.encodeUint64(pool.asset2ID)]));
-        const excessLiquidityTokenKey = base64_js_1.fromByteArray(util_1.joinUint8Arrays([EXCESS_ENCODED, algosdk_1.default.encodeUint64(pool.liquidityTokenID)]));
+        const excessAsset1Key = base64_js_1.fromByteArray(util_1.joinUint8Arrays([
+            algosdk_1.default.decodeAddress(pool.addr).publicKey,
+            EXCESS_ENCODED,
+            algosdk_1.default.encodeUint64(pool.asset1ID)
+        ]));
+        const excessAsset2Key = base64_js_1.fromByteArray(util_1.joinUint8Arrays([
+            algosdk_1.default.decodeAddress(pool.addr).publicKey,
+            EXCESS_ENCODED,
+            algosdk_1.default.encodeUint64(pool.asset2ID)
+        ]));
+        const excessLiquidityTokenKey = base64_js_1.fromByteArray(util_1.joinUint8Arrays([
+            algosdk_1.default.decodeAddress(pool.addr).publicKey,
+            EXCESS_ENCODED,
+            algosdk_1.default.encodeUint64(pool.liquidityTokenID)
+        ]));
         const excessAsset1Value = state[excessAsset1Key];
         const excessAsset2Value = state[excessAsset2Key];
         const excessLiquidityTokenValue = state[excessLiquidityTokenKey];
@@ -228,3 +231,25 @@ function getPoolShare(totalLiquidity, ownedLiquidity) {
     return share;
 }
 exports.getPoolShare = getPoolShare;
+async function getPoolAssets({ client, address, validatorAppID }) {
+    const info = (await client.accountInformation(address).do());
+    // eslint-disable-next-line eqeqeq
+    const appState = info["apps-local-state"].find((app) => app.id == validatorAppID);
+    let assets = null;
+    if (appState) {
+        const keyValue = appState["key-value"];
+        const state = util_1.decodeState(keyValue);
+        const asset1Key = "YTE="; // 'a1' in base64
+        const asset2Key = "YTI="; // 'a2' in base64
+        // The Liquidity Token is the only asset the Pool has created
+        const liquidityTokenAsset = info["created-assets"][0];
+        const liquidityTokenID = liquidityTokenAsset.index;
+        assets = {
+            asset1ID: state[asset1Key],
+            asset2ID: state[asset2Key],
+            liquidityTokenID
+        };
+    }
+    return assets;
+}
+exports.getPoolAssets = getPoolAssets;

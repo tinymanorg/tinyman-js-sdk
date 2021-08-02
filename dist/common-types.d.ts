@@ -5,13 +5,31 @@ export interface AccountAsset {
   creator: string;
   "is-frozen": boolean;
 }
+export interface AlgorandMobileApiAsset {
+  asset_id: number;
+  name: string;
+  unit_name: string;
+  is_verified: boolean;
+  fraction_decimals: number;
+}
 export interface AccountInformationData {
   address: string;
   amount: number;
   "amount-without-pending-rewards": number;
   "apps-local-state": {
     id: number;
-    "key-value": any[];
+    "key-value"?: {
+      key: string;
+      value: {
+        type: 1 | 2;
+        bytes: string;
+        uint: number;
+      };
+    }[];
+    schema: {
+      "num-byte-slice": number;
+      "num-uint": number;
+    };
   }[];
   "apps-total-schema": {
     "num-byte-slice": number;
