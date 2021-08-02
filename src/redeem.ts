@@ -5,7 +5,7 @@ import {decodeState, getAssetInformationById, waitForTransaction} from "./util";
 import {getPoolAssets, getPoolInfo, PoolInfo} from "./pool";
 import {
   AccountInformationData,
-  AlgorandMobileApiAsset,
+  TinymanAnalyticsApiAsset,
   InitiatorSigner
 } from "./common-types";
 
@@ -51,8 +51,8 @@ export async function redeemExcessAsset({
     foreignAssets:
       // eslint-disable-next-line eqeqeq
       pool.asset2ID == 0
-        ? [pool.asset1ID, <number>pool.liquidityTokenID]
-        : [pool.asset1ID, pool.asset2ID, <number>pool.liquidityTokenID],
+        ? [pool.asset1ID, pool.liquidityTokenID as number]
+        : [pool.asset1ID, pool.asset2ID, pool.liquidityTokenID as number],
     suggestedParams
   });
 
@@ -107,7 +107,7 @@ export async function redeemExcessAsset({
   const {txId} = await client.sendRawTransaction(signedTxns).do();
 
   const status = await waitForTransaction(client, txId);
-  const confirmedRound: number = status["confirmed-round"];
+  const confirmedRound = status["confirmed-round"];
 
   return {
     fees: txnFees,
@@ -173,11 +173,11 @@ export async function getExcessAmounts({
 export interface ExcessAmountDataWithPoolAssetDetails {
   pool: {
     info: PoolInfo;
-    asset1: AlgorandMobileApiAsset;
-    asset2: AlgorandMobileApiAsset;
-    liquidityAsset: AlgorandMobileApiAsset;
+    asset1: TinymanAnalyticsApiAsset;
+    asset2: TinymanAnalyticsApiAsset;
+    liquidityAsset: TinymanAnalyticsApiAsset;
   };
-  asset: AlgorandMobileApiAsset;
+  asset: TinymanAnalyticsApiAsset;
   amount: number;
 }
 
@@ -221,9 +221,9 @@ export async function getExcessAmountsWithPoolAssetDetails({
       ]);
       let excessAsset = assetDetails[0];
 
-      if (assetID === assetDetails[1].asset_id) {
+      if (assetID === Number(assetDetails[1].id)) {
         excessAsset = assetDetails[1];
-      } else if (assetID === assetDetails[2]?.asset_id) {
+      } else if (assetID === Number(assetDetails[2]?.id)) {
         excessAsset = assetDetails[2];
       }
 

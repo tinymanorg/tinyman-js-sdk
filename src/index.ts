@@ -45,7 +45,7 @@ export {
   AccountAsset,
   AccountInformationData,
   InitiatorSigner,
-  AlgorandMobileApiAsset
+  TinymanAnalyticsApiAsset
 } from "./common-types";
 
 export {ALGO_ASSET, ALGO_ASSET_ID} from "./constant";
