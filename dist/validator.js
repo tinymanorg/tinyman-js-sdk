@@ -80,27 +80,14 @@ async function optOutOfValidator({ client, validatorAppID, initiatorAddr, initia
 }
 exports.optOutOfValidator = optOutOfValidator;
 /**
- * Check if an account is opted into the Validator app.
+ * Checks if an account is opted into the Validator app.
  *
- * @param params.client An Algodv2 client.
  * @param params.validatorAppID The ID of the Validator App for the network.
- * @param params.account The address of the account to check.
- *
- * @returns A promise that resolve to true if and only if the indicated account has opted into the
- *   pool's pair app.
+ * @param params.accountAppsLocalState Array of app local states for an account.
+ * @returns True if and only if the indicated account has opted into the Validator App.
  */
-async function isOptedIntoValidator({ client, validatorAppID, initiatorAddr }) {
-    const info = (await client
-        .accountInformation(initiatorAddr)
-        .setIntDecoding("mixed")
-        .do());
-    const appsLocalState = info["apps-local-state"] || [];
-    for (const app of appsLocalState) {
-        if (app.id === validatorAppID) {
-            return true;
-        }
-    }
-    return false;
+function isOptedIntoValidator({ validatorAppID, accountAppsLocalState }) {
+    return accountAppsLocalState.some((appState) => appState.id === validatorAppID);
 }
 exports.isOptedIntoValidator = isOptedIntoValidator;
 async function getValidatorAppCreationTransaction(client, addr) {

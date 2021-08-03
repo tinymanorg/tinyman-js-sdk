@@ -148,10 +148,10 @@ async function getExcessAmountsWithPoolAssetDetails({ client, accountAddr, valid
                 util_1.getAssetInformationById(client, poolInfo.liquidityTokenID)
             ]);
             let excessAsset = assetDetails[0];
-            if (assetID === assetDetails[1].asset_id) {
+            if (assetID === Number(assetDetails[1].id)) {
                 excessAsset = assetDetails[1];
             }
-            else if (assetID === assetDetails[2]?.asset_id) {
+            else if (assetID === Number(assetDetails[2]?.id)) {
                 excessAsset = assetDetails[2];
             }
             excessDataWithDetail.push({

@@ -5,12 +5,13 @@ export interface AccountAsset {
   creator: string;
   "is-frozen": boolean;
 }
-export interface AlgorandMobileApiAsset {
-  asset_id: number;
+export interface TinymanAnalyticsApiAsset {
+  id: string;
+  is_liquidity_token: boolean;
   name: string;
   unit_name: string;
-  is_verified: boolean;
-  fraction_decimals: number;
+  decimals: number;
+  url: string;
 }
 export interface AccountInformationData {
   address: string;

@@ -2,7 +2,7 @@
 import algosdk, {Algodv2} from "algosdk";
 import {
   AccountInformationData,
-  AlgorandMobileApiAsset,
+  TinymanAnalyticsApiAsset,
   InitiatorSigner
 } from "./common-types";
 export declare function decodeState(
@@ -30,11 +30,15 @@ export declare function optIntoAsset({
 export declare function bufferToBase64(
   arrayBuffer: undefined | null | WithImplicitCoercion<ArrayBuffer | SharedArrayBuffer>
 ): string;
+/**
+ * Fetches asset data and caches it in a Map.
+ * @param algodClient - Algodv2 client
+ * @param {number} id - id of the asset
+ * @param {boolean} alwaysFetch - Determines whether to always fetch the information of the asset or read it from the cache
+ * @returns a promise that resolves with TinymanAnalyticsApiAsset
+ */
 export declare function getAssetInformationById(
   algodClient: algosdk.Algodv2,
-  id: number
-): Promise<
-  AlgorandMobileApiAsset & {
-    creator: null | string;
-  }
->;
+  id: number,
+  alwaysFetch?: boolean
+): Promise<TinymanAnalyticsApiAsset>;

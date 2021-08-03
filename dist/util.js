@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getAssetInformationById = exports.bufferToBase64 = exports.optIntoAsset = exports.applySlippageToAmount = exports.waitForTransaction = exports.getMinBalanceForAccount = exports.joinUint8Arrays = exports.decodeState = void 0;
 const algosdk_1 = __importDefault(require("algosdk"));
 const constant_1 = require("./constant");
+const CACHED_ASSETS = new Map();
 function decodeState(stateArray = []) {
     const state = {};
     for (const pair of stateArray) {
@@ -115,23 +116,36 @@ function bufferToBase64(arrayBuffer) {
     return arrayBuffer ? Buffer.from(arrayBuffer).toString("base64") : "";
 }
 exports.bufferToBase64 = bufferToBase64;
-function getAssetInformationById(algodClient, id) {
+/**
+ * Fetches asset data and caches it in a Map.
+ * @param algodClient - Algodv2 client
+ * @param {number} id - id of the asset
+ * @param {boolean} alwaysFetch - Determines whether to always fetch the information of the asset or read it from the cache
+ * @returns a promise that resolves with TinymanAnalyticsApiAsset
+ */
+function getAssetInformationById(algodClient, id, alwaysFetch) {
     return new Promise(async (resolve, reject) => {
         try {
             if (id === constant_1.ALGO_ASSET_ID) {
-                resolve({ ...constant_1.ALGO_ASSET, creator: null });
+                resolve(constant_1.ALGO_ASSET);
+                return;
             }
-            else {
-                const data = (await algodClient.getAssetByID(id).do());
-                resolve({
-                    asset_id: data.index,
-                    fraction_decimals: Number(data.params.decimals),
-                    is_verified: false,
-                    name: data.params.name || "",
-                    unit_name: data.params["unit-name"] || "",
-                    creator: data.params.creator
-                });
+            const memoizedValue = CACHED_ASSETS.get(`${id}`);
+            if (memoizedValue && !alwaysFetch) {
+                resolve(memoizedValue);
+                return;
             }
+            const algodAsset = (await algodClient.getAssetByID(id).do());
+            const assetData = {
+                id: `${algodAsset.index}`,
+                decimals: Number(algodAsset.params.decimals),
+                is_liquidity_token: false,
+                name: algodAsset.params.name || "",
+                unit_name: algodAsset.params["unit-name"] || "",
+                url: ""
+            };
+            CACHED_ASSETS.set(`${id}`, assetData);
+            resolve(assetData);
         }
         catch (error) {
             reject(new Error(error.message || "Failed to fetch asset information"));

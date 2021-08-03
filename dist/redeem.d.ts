@@ -1,5 +1,5 @@
 import {PoolInfo} from "./pool";
-import {AlgorandMobileApiAsset, InitiatorSigner} from "./common-types";
+import {TinymanAnalyticsApiAsset, InitiatorSigner} from "./common-types";
 /**
  * Execute a redeem operation to collect excess assets from previous operations.
  *
@@ -54,11 +54,11 @@ export declare function getExcessAmounts({
 export interface ExcessAmountDataWithPoolAssetDetails {
   pool: {
     info: PoolInfo;
-    asset1: AlgorandMobileApiAsset;
-    asset2: AlgorandMobileApiAsset;
-    liquidityAsset: AlgorandMobileApiAsset;
+    asset1: TinymanAnalyticsApiAsset;
+    asset2: TinymanAnalyticsApiAsset;
+    liquidityAsset: TinymanAnalyticsApiAsset;
   };
-  asset: AlgorandMobileApiAsset;
+  asset: TinymanAnalyticsApiAsset;
   amount: number;
 }
 /**
