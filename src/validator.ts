@@ -158,39 +158,3 @@ export async function isOptedIntoValidator({
 
   return false;
 }
-
-export async function getValidatorAppCreationTransaction(
-  client: any,
-  addr: string
-): Promise<algosdk.Transaction> {
-  const suggestedParams = await client.getTransactionParams().do();
-
-  const appCreateTxn = algosdk.makeApplicationCreateTxnFromObject({
-    from: addr,
-    onComplete: algosdk.OnApplicationComplete.NoOpOC,
-    approvalProgram: validatorApprovalContract,
-    clearProgram: validatorClearStateContract,
-    numLocalInts: VALIDATOR_APP_SCHEMA.numLocalInts,
-    numLocalByteSlices: VALIDATOR_APP_SCHEMA.numLocalByteSlices,
-    numGlobalInts: VALIDATOR_APP_SCHEMA.numGlobalInts,
-    numGlobalByteSlices: VALIDATOR_APP_SCHEMA.numGlobalByteSlices,
-    appArgs: [CREATE_ENCODED],
-    suggestedParams
-  });
-
-  return appCreateTxn;
-}
-
-export async function sendValidatorAppCreationTransaction(
-  client: any,
-  stx: any
-): Promise<number> {
-  const tx = await client.sendRawTransaction(stx).do();
-
-  console.log("Signed transaction with txID: %s", tx.txId);
-  const result = await waitForTransaction(client, tx.txId);
-  const appID = result["application-index"];
-
-  assert.ok(typeof appID === "number" && appID > 0);
-  return appID;
-}

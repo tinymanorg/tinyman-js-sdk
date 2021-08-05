@@ -1,7 +1,5 @@
 export {
   getvalidatorAppID,
-  getValidatorAppCreationTransaction,
-  sendValidatorAppCreationTransaction,
   optIntoValidator,
   isOptedIntoValidator,
   closeOutOfValidator
