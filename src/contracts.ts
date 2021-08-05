@@ -1,18 +1,18 @@
 import {toByteArray} from "base64-js";
 import {makeLogicSig} from "algosdk";
-import * as contractsJson from "./contracts.json";
+import * as ascJson from "./asc.json";
 
-const validator_app = contractsJson.contracts.validator_app;
-const pool_logicsig = contractsJson.contracts.pool_logicsig;
+const validator_app = ascJson.contracts.validator_app;
+const pool_logicsig = ascJson.contracts.pool_logicsig;
 
-const poolLogicSigContractTemplate = pool_logicsig.logic.program;
+const poolLogicSigContractTemplate = pool_logicsig.logic.bytecode;
 const templateVariables = pool_logicsig.logic.variables;
 
 export const validatorApprovalContract = toByteArray(
-  validator_app.approval_program.program
+  validator_app.approval_program.bytecode
 );
 export const validatorClearStateContract = toByteArray(
-  validator_app.clear_program.program
+  validator_app.clear_program.bytecode
 );
 
 export const VALIDATOR_APP_SCHEMA = {
