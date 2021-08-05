@@ -20,7 +20,7 @@ const CREATE_ENCODED = Uint8Array.from([99, 114, 101, 97, 116, 101]); // 'create
  */
 export async function getvalidatorAppID(client: any): Promise<number> {
   const params = await client.getTransactionParams().do();
-  const {genesisHash, genesisID} = params.genesisHash;
+  const {genesisHash, genesisID} = params;
 
   if (
     genesisID === "mainnet-v1.0" &&
