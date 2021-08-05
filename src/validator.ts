@@ -11,7 +11,7 @@ import {AccountInformationData, InitiatorSigner} from "./common-types";
 
 import {
   TESTNET_VALIDATOR_APP_ID,
-  BETANET_VALIDATOR_APP_ID,
+  HIPONET_VALIDATOR_APP_ID,
   MAINNET_VALIDATOR_APP_ID
 } from "./constant";
 
@@ -45,10 +45,10 @@ export async function getvalidatorAppID(client: any): Promise<number> {
   }
 
   if (
-    genesisID === "betanet-v1.0" &&
-    genesisHash === "mFgazF+2uRS1tMiL9dsj01hJGySEmPN28B/TjjvpVW0="
+    genesisID === "hiponet-v1" &&
+    genesisHash === "1Ok6UoiCtb3ppI8rWSXxB3ddULOkqugfCB4FGcPFkpE="
   ) {
-    return BETANET_VALIDATOR_APP_ID;
+    return HIPONET_VALIDATOR_APP_ID;
   }
 
   throw new Error(`No Validator App exists for network ${genesisID}`);
