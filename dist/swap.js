@@ -7,7 +7,6 @@ exports.fixedOutputSwap = exports.getFixedOutputSwapQuote = exports.fixedInputSw
 const algosdk_1 = __importDefault(require("algosdk"));
 const util_1 = require("./util");
 const pool_1 = require("./pool");
-const redeem_1 = require("./redeem");
 // FEE = %0.3 or 3/1000
 const FEE_NUMERATOR = 3n;
 const FEE_DENOMINATOR = 1000n;
@@ -25,7 +24,11 @@ async function doSwap({ client, pool, swapType, assetIn, assetOut, initiatorAddr
         appIndex: pool.validatorAppID,
         appArgs: validatorAppCallArgs,
         accounts: [initiatorAddr],
-        foreignAssets: pool.asset2ID == 0 ? [pool.asset1ID, pool.liquidityTokenID] : [pool.asset1ID, pool.asset2ID, pool.liquidityTokenID],
+        foreignAssets: 
+        // eslint-disable-next-line eqeqeq
+        pool.asset2ID == 0
+            ? [pool.asset1ID, pool.liquidityTokenID]
+            : [pool.asset1ID, pool.asset2ID, pool.liquidityTokenID],
         suggestedParams
     });
     let assetInTxn;
@@ -161,13 +164,11 @@ exports.getFixedInputSwapQuote = getFixedInputSwapQuote;
  * @param params.assetOut.amount The desired quantity of the output asset.
  * @param params.assetOut.slippage The maximum acceptable slippage rate. Should be a number between
  *   0 and 100 and acts as a percentage of params.assetOut.amount.
- * @param params.redeemExcess If true, any excess amount of the output asset created by this swap
- *   will be redeemed after the swap executes.
  * @param params.initiatorAddr The address of the account performing the swap operation.
  * @param params.initiatorSigner A function that will sign transactions from the initiator's
  *   account.
  */
-async function fixedInputSwap({ client, pool, assetIn, assetOut, redeemExcess, initiatorAddr, initiatorSigner }) {
+async function fixedInputSwap({ client, pool, assetIn, assetOut, initiatorAddr, initiatorSigner }) {
     // apply slippage to asset out amount
     const assetOutAmount = util_1.applySlippageToAmount("negative", assetOut.slippage, assetOut.amount);
     const prevExcessAssets = await pool_1.getAccountExcess({
@@ -206,17 +207,6 @@ async function fixedInputSwap({ client, pool, assetIn, assetOut, redeemExcess, i
     if (excessAmountDelta < 0n) {
         excessAmountDelta = 0n;
     }
-    if (redeemExcess && excessAmountDelta > 0n) {
-        const redeemOutput = await redeem_1.redeemExcessAsset({
-            client,
-            pool,
-            assetID: assetOut.assetID,
-            assetOut: excessAmount,
-            initiatorAddr,
-            initiatorSigner
-        });
-        fees += redeemOutput.fees;
-    }
     return {
         round: confirmedRound,
         fees,
@@ -224,6 +214,11 @@ async function fixedInputSwap({ client, pool, assetIn, assetOut, redeemExcess, i
         assetInAmount: BigInt(assetIn.amount),
         assetOutID: assetOut.assetID,
         assetOutAmount: assetOutAmount + excessAmountDelta,
+        excessAmount: {
+            assetID: assetOut.assetID,
+            excessAmountForSwap: excessAmountDelta,
+            totalExcessAmount: excessAmount
+        },
         groupID,
         txnID
     };
@@ -289,13 +284,11 @@ exports.getFixedOutputSwapQuote = getFixedOutputSwapQuote;
  * @param params.assetOut.assetID The ID of the output asset. Must be one of the pool's asset1ID
  *   or asset2ID, and must be different than params.asset1In.assetID.
  * @param params.assetOut.amount The quantity of the output asset.
- * @param params.redeemExcess If true, any excess amount of the input asset created by this swap
- *   will be redeemed after the swap executes.
  * @param params.initiatorAddr The address of the account performing the swap operation.
  * @param params.initiatorSigner A function that will sign transactions from the initiator's
  *   account.
  */
-async function fixedOutputSwap({ client, pool, assetIn, assetOut, redeemExcess, initiatorAddr, initiatorSigner }) {
+async function fixedOutputSwap({ client, pool, assetIn, assetOut, initiatorAddr, initiatorSigner }) {
     // apply slippage to asset in amount
     const assetInAmount = util_1.applySlippageToAmount("positive", assetIn.slippage, assetIn.amount);
     const prevExcessAssets = await pool_1.getAccountExcess({
@@ -334,17 +327,6 @@ async function fixedOutputSwap({ client, pool, assetIn, assetOut, redeemExcess, 
     if (excessAmountDelta < 0n) {
         excessAmountDelta = 0n;
     }
-    if (redeemExcess && excessAmountDelta > 0n) {
-        const redeemOutput = await redeem_1.redeemExcessAsset({
-            client,
-            pool,
-            assetID: assetIn.assetID,
-            assetOut: excessAmount,
-            initiatorAddr,
-            initiatorSigner
-        });
-        fees += redeemOutput.fees;
-    }
     return {
         round: confirmedRound,
         fees,
@@ -352,6 +334,11 @@ async function fixedOutputSwap({ client, pool, assetIn, assetOut, redeemExcess, 
         assetInAmount: assetInAmount - excessAmountDelta,
         assetOutID: assetOut.assetID,
         assetOutAmount: BigInt(assetOut.amount),
+        excessAmount: {
+            assetID: assetIn.assetID,
+            excessAmountForSwap: excessAmountDelta,
+            totalExcessAmount: excessAmount
+        },
         groupID,
         txnID
     };

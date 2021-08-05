@@ -7,11 +7,31 @@ export interface AccountAsset {
   "is-frozen": boolean;
 }
 
+export interface TinymanAnalyticsApiAsset {
+  id: string;
+  is_liquidity_token: boolean;
+  name: string;
+  unit_name: string;
+  decimals: number;
+  url: string;
+}
+
 export interface AccountInformationData {
   address: string;
   amount: number;
   "amount-without-pending-rewards": number;
-  "apps-local-state": {id: number; "key-value": any[]}[];
+  "apps-local-state": {
+    id: number;
+    "key-value"?: {
+      key: string;
+      value: {
+        type: 1 | 2;
+        bytes: string;
+        uint: number;
+      };
+    }[];
+    schema: {"num-byte-slice": number; "num-uint": number};
+  }[];
   "apps-total-schema": {"num-byte-slice": number; "num-uint": number};
   assets: AccountAsset[];
   "created-apps": any[];

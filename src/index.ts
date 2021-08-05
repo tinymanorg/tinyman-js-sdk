@@ -2,7 +2,7 @@ export {
   getvalidatorAppID,
   optIntoValidator,
   isOptedIntoValidator,
-  closeOutOfValidator
+  optOutOfValidator
 } from "./validator";
 
 export {
@@ -29,8 +29,21 @@ export {
   fixedOutputSwap
 } from "./swap";
 
-export {redeemExcessAsset} from "./redeem";
+export {
+  redeemExcessAsset,
+  getExcessAmounts,
+  ExcessAmountData,
+  getExcessAmountsWithPoolAssetDetails,
+  ExcessAmountDataWithPoolAssetDetails
+} from "./redeem";
 
-export {applySlippageToAmount, optIntoAsset} from "./util";
+export {applySlippageToAmount, optIntoAsset, getAssetInformationById} from "./util";
 
-export {AccountAsset, AccountInformationData, InitiatorSigner} from "./common-types";
+export {
+  AccountAsset,
+  AccountInformationData,
+  InitiatorSigner,
+  TinymanAnalyticsApiAsset
+} from "./common-types";
+
+export {ALGO_ASSET, ALGO_ASSET_ID} from "./constant";

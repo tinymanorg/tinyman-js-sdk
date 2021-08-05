@@ -7,7 +7,6 @@ exports.mintLiquidity = exports.getMintLiquidityQuote = void 0;
 const algosdk_1 = __importDefault(require("algosdk"));
 const util_1 = require("./util");
 const pool_1 = require("./pool");
-const redeem_1 = require("./redeem");
 /**
  * Get a quote for how many liquidity tokens a deposit of asset1In and asset2In is worth at this
  * moment. This does not execute any transactions.
@@ -59,7 +58,11 @@ async function doMint({ client, pool, asset1In, asset2In, liquidityOut, initiato
         appIndex: pool.validatorAppID,
         appArgs: [MINT_ENCODED],
         accounts: [initiatorAddr],
-        foreignAssets: pool.asset2ID == 0 ? [pool.asset1ID, pool.liquidityTokenID] : [pool.asset1ID, pool.asset2ID, pool.liquidityTokenID],
+        foreignAssets: 
+        // eslint-disable-next-line eqeqeq
+        pool.asset2ID == 0
+            ? [pool.asset1ID, pool.liquidityTokenID]
+            : [pool.asset1ID, pool.asset2ID, pool.liquidityTokenID],
         suggestedParams
     });
     const asset1InTxn = algosdk_1.default.makeAssetTransferTxnWithSuggestedParamsFromObject({
@@ -149,13 +152,11 @@ async function doMint({ client, pool, asset1In, asset2In, liquidityOut, initiato
  * @param params.liquidityOut The quantity of liquidity tokens being withdrawn.
  * @param params.slippage The maximum acceptable slippage rate. Should be a number between 0 and 100
  *   and acts as a percentage of params.liquidityOut.
- * @param params.redeemExcess If true, any excess amount of the output liquidity created by this
- *   mint will be redeemed after the mint executes.
  * @param params.initiatorAddr The address of the account performing the mint operation.
  * @param params.initiatorSigner A function that will sign transactions from the initiator's
  *   account.
  */
-async function mintLiquidity({ client, pool, asset1In, asset2In, liquidityOut, slippage, redeemExcess, initiatorAddr, initiatorSigner }) {
+async function mintLiquidity({ client, pool, asset1In, asset2In, liquidityOut, slippage, initiatorAddr, initiatorSigner }) {
     // apply slippage to liquidity out amount
     const liquidityOutAmount = util_1.applySlippageToAmount("negative", slippage, liquidityOut);
     const prevExcessAssets = await pool_1.getAccountExcess({
@@ -181,17 +182,6 @@ async function mintLiquidity({ client, pool, asset1In, asset2In, liquidityOut, s
     if (excessAmountDelta < 0n) {
         excessAmountDelta = 0n;
     }
-    if (redeemExcess && excessAmountDelta > 0n) {
-        const redeemOutput = await redeem_1.redeemExcessAsset({
-            client,
-            pool,
-            assetID: pool.liquidityTokenID,
-            assetOut: excessAmountDelta,
-            initiatorAddr,
-            initiatorSigner
-        });
-        fees += redeemOutput.fees;
-    }
     return {
         round: confirmedRound,
         fees,
@@ -201,6 +191,10 @@ async function mintLiquidity({ client, pool, asset1In, asset2In, liquidityOut, s
         asset2In: BigInt(asset2In),
         liquidityID: pool.liquidityTokenID,
         liquidityOut: liquidityOutAmount + excessAmountDelta,
+        excessAmount: {
+            excessAmountForMinting: excessAmountDelta,
+            totalExcessAmount: excessAssets.excessLiquidityTokens
+        },
         txnID,
         groupID
     };

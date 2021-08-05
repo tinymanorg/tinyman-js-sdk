@@ -40,6 +40,12 @@ export interface MintExecution {
   liquidityID: number;
   /** The quantity of the output liquidity token asset. */
   liquidityOut: bigint;
+  excessAmount: {
+    /** Excess amount for the current swap */
+    excessAmountForMinting: bigint;
+    /** Total excess amount accumulated for the pool asset */
+    totalExcessAmount: bigint;
+  };
   /** The ID of the transaction. */
   txnID: string;
   /** The group ID for the transaction group. */
@@ -75,8 +81,6 @@ export declare function getMintLiquidityQuote({
  * @param params.liquidityOut The quantity of liquidity tokens being withdrawn.
  * @param params.slippage The maximum acceptable slippage rate. Should be a number between 0 and 100
  *   and acts as a percentage of params.liquidityOut.
- * @param params.redeemExcess If true, any excess amount of the output liquidity created by this
- *   mint will be redeemed after the mint executes.
  * @param params.initiatorAddr The address of the account performing the mint operation.
  * @param params.initiatorSigner A function that will sign transactions from the initiator's
  *   account.
@@ -88,7 +92,6 @@ export declare function mintLiquidity({
   asset2In,
   liquidityOut,
   slippage,
-  redeemExcess,
   initiatorAddr,
   initiatorSigner
 }: {
@@ -98,7 +101,6 @@ export declare function mintLiquidity({
   asset2In: number | bigint;
   liquidityOut: number | bigint;
   slippage: number;
-  redeemExcess: boolean;
   initiatorAddr: string;
   initiatorSigner: InitiatorSigner;
 }): Promise<MintExecution>;

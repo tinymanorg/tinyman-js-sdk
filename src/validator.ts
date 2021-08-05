@@ -1,11 +1,11 @@
 import assert from "assert";
 import algosdk from "algosdk";
+
 import {
   validatorApprovalContract,
   validatorClearStateContract,
   VALIDATOR_APP_SCHEMA
 } from "./contracts";
-
 import {waitForTransaction} from "./util";
 import {AccountInformationData, InitiatorSigner} from "./common-types";
 
@@ -99,7 +99,7 @@ export async function optIntoValidator({
  * @param params.initiatorSigner A function that will sign transactions from the initiator's
  *   account.
  */
-export async function closeOutOfValidator({
+export async function optOutOfValidator({
   client,
   validatorAppID,
   initiatorAddr,
@@ -112,13 +112,13 @@ export async function closeOutOfValidator({
 }): Promise<void> {
   const suggestedParams = await client.getTransactionParams().do();
 
-  const appCloseOutTxn = algosdk.makeApplicationCloseOutTxnFromObject({
+  const appClearStateTxn = algosdk.makeApplicationClearStateTxnFromObject({
     from: initiatorAddr,
-    appIndex: validatorAppID!,
+    appIndex: validatorAppID,
     suggestedParams
   });
 
-  const [signedTxn] = await initiatorSigner([appCloseOutTxn]);
+  const [signedTxn] = await initiatorSigner([appClearStateTxn]);
 
   const {txId} = await client.sendRawTransaction(signedTxn).do();
 
@@ -126,35 +126,18 @@ export async function closeOutOfValidator({
 }
 
 /**
- * Check if an account is opted into the Validator app.
+ * Checks if an account is opted into the Validator app.
  *
- * @param params.client An Algodv2 client.
  * @param params.validatorAppID The ID of the Validator App for the network.
- * @param params.account The address of the account to check.
- *
- * @returns A promise that resolve to true if and only if the indicated account has opted into the
- *   pool's pair app.
+ * @param params.accountAppsLocalState Array of app local states for an account.
+ * @returns True if and only if the indicated account has opted into the Validator App.
  */
-export async function isOptedIntoValidator({
-  client,
+export function isOptedIntoValidator({
   validatorAppID,
-  initiatorAddr
+  accountAppsLocalState
 }: {
-  client: any;
   validatorAppID: number;
-  initiatorAddr: string;
-}): Promise<boolean> {
-  const info = (await client
-    .accountInformation(initiatorAddr)
-    .setIntDecoding("mixed")
-    .do()) as AccountInformationData;
-  const appsLocalState = info["apps-local-state"] || [];
-
-  for (const app of appsLocalState) {
-    if (app.id === validatorAppID) {
-      return true;
-    }
-  }
-
-  return false;
+  accountAppsLocalState: AccountInformationData["apps-local-state"];
+}): boolean {
+  return accountAppsLocalState.some((appState) => appState.id === validatorAppID);
 }

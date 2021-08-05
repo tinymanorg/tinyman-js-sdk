@@ -1,5 +1,5 @@
 import algosdk from "algosdk";
-import {InitiatorSigner} from "./common-types";
+import {AccountInformationData, InitiatorSigner} from "./common-types";
 /**
  * Get the Validator App ID for a network.
  *
@@ -39,7 +39,7 @@ export declare function optIntoValidator({
  * @param params.initiatorSigner A function that will sign transactions from the initiator's
  *   account.
  */
-export declare function closeOutOfValidator({
+export declare function optOutOfValidator({
   client,
   validatorAppID,
   initiatorAddr,
@@ -51,24 +51,19 @@ export declare function closeOutOfValidator({
   initiatorSigner: InitiatorSigner;
 }): Promise<void>;
 /**
- * Check if an account is opted into the Validator app.
+ * Checks if an account is opted into the Validator app.
  *
- * @param params.client An Algodv2 client.
  * @param params.validatorAppID The ID of the Validator App for the network.
- * @param params.account The address of the account to check.
- *
- * @returns A promise that resolve to true if and only if the indicated account has opted into the
- *   pool's pair app.
+ * @param params.accountAppsLocalState Array of app local states for an account.
+ * @returns True if and only if the indicated account has opted into the Validator App.
  */
 export declare function isOptedIntoValidator({
-  client,
   validatorAppID,
-  initiatorAddr
+  accountAppsLocalState
 }: {
-  client: any;
   validatorAppID: number;
-  initiatorAddr: string;
-}): Promise<boolean>;
+  accountAppsLocalState: AccountInformationData["apps-local-state"];
+}): boolean;
 export declare function getValidatorAppCreationTransaction(
   client: any,
   addr: string

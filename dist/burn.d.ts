@@ -38,6 +38,16 @@ export interface BurnExecution {
   liquidityID: number;
   /** The quantity of the liquidity token input asset. */
   liquidityIn: bigint;
+  /** Excess amount details for the pool assets */
+  excessAmounts: {
+    assetID: number;
+    excessAmountForBurning: bigint;
+    totalExcessAmount: bigint;
+  }[];
+  /** The ID of the transaction. */
+  txnID: string;
+  /** The group ID for the transaction group. */
+  groupID: string;
 }
 /**
  * Get a quote for how many of assets 1 and 2 a deposit of liquidityIn is worth at this moment. This
@@ -68,8 +78,6 @@ export declare function getBurnLiquidityQuote({
  * @param params.asset2Out.amount The quantity of the second asset being withdrawn.
  * @param params.asset2Out.slippage The maximum acceptable slippage rate for asset2. Should be an
  *   integer between 0 and 100 and acts as a percentage of params.asset2Out.amount.
- * @param params.redeemExcess If true, any excess amount of the output assets created by this burn
- *   will be redeemed after the burn executes.
  * @param params.initiatorAddr The address of the account performing the burn operation.
  * @param params.initiatorSigner A function that will sign transactions from the initiator's
  *   account.
@@ -81,7 +89,6 @@ export declare function burnLiquidity({
   asset1Out,
   asset2Out,
   slippage,
-  redeemExcess,
   initiatorAddr,
   initiatorSigner
 }: {
@@ -91,7 +98,6 @@ export declare function burnLiquidity({
   asset1Out: number | bigint;
   asset2Out: number | bigint;
   slippage: number;
-  redeemExcess?: boolean;
   initiatorAddr: string;
   initiatorSigner: InitiatorSigner;
 }): Promise<BurnExecution>;

@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendValidatorAppCreationTransaction = exports.getValidatorAppCreationTransaction = exports.isOptedIntoValidator = exports.closeOutOfValidator = exports.optIntoValidator = exports.getvalidatorAppID = void 0;
+exports.sendValidatorAppCreationTransaction = exports.getValidatorAppCreationTransaction = exports.isOptedIntoValidator = exports.optOutOfValidator = exports.optIntoValidator = exports.getvalidatorAppID = void 0;
 const assert_1 = __importDefault(require("assert"));
 const algosdk_1 = __importDefault(require("algosdk"));
 const contracts_1 = require("./contracts");
@@ -67,40 +67,27 @@ exports.optIntoValidator = optIntoValidator;
  * @param params.initiatorSigner A function that will sign transactions from the initiator's
  *   account.
  */
-async function closeOutOfValidator({ client, validatorAppID, initiatorAddr, initiatorSigner }) {
+async function optOutOfValidator({ client, validatorAppID, initiatorAddr, initiatorSigner }) {
     const suggestedParams = await client.getTransactionParams().do();
-    const appCloseOutTxn = algosdk_1.default.makeApplicationCloseOutTxnFromObject({
+    const appClearStateTxn = algosdk_1.default.makeApplicationClearStateTxnFromObject({
         from: initiatorAddr,
         appIndex: validatorAppID,
         suggestedParams
     });
-    const [signedTxn] = await initiatorSigner([appCloseOutTxn]);
+    const [signedTxn] = await initiatorSigner([appClearStateTxn]);
     const { txId } = await client.sendRawTransaction(signedTxn).do();
     await util_1.waitForTransaction(client, txId);
 }
-exports.closeOutOfValidator = closeOutOfValidator;
+exports.optOutOfValidator = optOutOfValidator;
 /**
- * Check if an account is opted into the Validator app.
+ * Checks if an account is opted into the Validator app.
  *
- * @param params.client An Algodv2 client.
  * @param params.validatorAppID The ID of the Validator App for the network.
- * @param params.account The address of the account to check.
- *
- * @returns A promise that resolve to true if and only if the indicated account has opted into the
- *   pool's pair app.
+ * @param params.accountAppsLocalState Array of app local states for an account.
+ * @returns True if and only if the indicated account has opted into the Validator App.
  */
-async function isOptedIntoValidator({ client, validatorAppID, initiatorAddr }) {
-    const info = (await client
-        .accountInformation(initiatorAddr)
-        .setIntDecoding("mixed")
-        .do());
-    const appsLocalState = info["apps-local-state"] || [];
-    for (const app of appsLocalState) {
-        if (app.id === validatorAppID) {
-            return true;
-        }
-    }
-    return false;
+function isOptedIntoValidator({ validatorAppID, accountAppsLocalState }) {
+    return accountAppsLocalState.some((appState) => appState.id === validatorAppID);
 }
 exports.isOptedIntoValidator = isOptedIntoValidator;
 async function getValidatorAppCreationTransaction(client, addr) {

@@ -3,9 +3,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.redeemExcessAsset = void 0;
+exports.getExcessAmountsWithPoolAssetDetails = exports.getExcessAmounts = exports.redeemExcessAsset = void 0;
 const algosdk_1 = __importDefault(require("algosdk"));
+const base64_js_1 = require("base64-js");
 const util_1 = require("./util");
+const pool_1 = require("./pool");
 const REDEEM_ENCODED = Uint8Array.from([114, 101, 100, 101, 101, 109]); // 'redeem'
 /**
  * Execute a redeem operation to collect excess assets from previous operations.
@@ -26,7 +28,11 @@ async function redeemExcessAsset({ client, pool, assetID, assetOut, initiatorAdd
         appIndex: pool.validatorAppID,
         appArgs: [REDEEM_ENCODED],
         accounts: [initiatorAddr],
-        foreignAssets: pool.asset2ID == 0 ? [pool.asset1ID, pool.liquidityTokenID] : [pool.asset1ID, pool.asset2ID, pool.liquidityTokenID],
+        foreignAssets: 
+        // eslint-disable-next-line eqeqeq
+        pool.asset2ID == 0
+            ? [pool.asset1ID, pool.liquidityTokenID]
+            : [pool.asset1ID, pool.asset2ID, pool.liquidityTokenID],
         suggestedParams
     });
     let assetOutTxn;
@@ -74,7 +80,94 @@ async function redeemExcessAsset({ client, pool, assetID, assetOut, initiatorAdd
     const confirmedRound = status["confirmed-round"];
     return {
         fees: txnFees,
-        confirmedRound
+        confirmedRound,
+        txnID: txId,
+        groupID: util_1.bufferToBase64(txGroup[0].group)
     };
 }
 exports.redeemExcessAsset = redeemExcessAsset;
+/**
+ * Generates a list of excess amounts accumulated within an account.
+ * @param params.client An Algodv2 client.
+ * @param params.accountAddr The address of the account performing the redeem operation.
+ * @param params.validatorAppID Validator APP ID
+ * @returns List of excess amounts
+ */
+async function getExcessAmounts({ client, accountAddr, validatorAppID }) {
+    const info = (await client
+        .accountInformation(accountAddr)
+        .setIntDecoding("bigint")
+        .do());
+    const appsLocalState = info["apps-local-state"] || [];
+    const appState = appsLocalState.find(
+    // `==` is used here to coerce bigints if necessary
+    // eslint-disable-next-line eqeqeq
+    (appLocalState) => appLocalState.id == validatorAppID);
+    let excessData = [];
+    if (appState && appState["key-value"]) {
+        const state = util_1.decodeState(appState["key-value"]);
+        for (let entry of Object.entries(state)) {
+            const [key, value] = entry;
+            const decodedKey = base64_js_1.toByteArray(key);
+            if (decodedKey.length === 41 && decodedKey[32] === 101) {
+                excessData.push({
+                    poolAddress: algosdk_1.default.encodeAddress(decodedKey.slice(0, 32)),
+                    assetID: algosdk_1.default.decodeUint64(decodedKey.slice(33, 41), "safe"),
+                    amount: parseInt(value)
+                });
+            }
+        }
+    }
+    return excessData;
+}
+exports.getExcessAmounts = getExcessAmounts;
+/**
+ * Generates a list of excess amounts accumulated within an account. Each item includes details of pool and its assets.
+ * @param params.client An Algodv2 client.
+ * @param params.accountAddr The address of the account performing the redeem operation.
+ * @param params.validatorAppID Validator APP ID
+ * @returns List of excess amounts
+ */
+async function getExcessAmountsWithPoolAssetDetails({ client, accountAddr, validatorAppID }) {
+    const excessData = await getExcessAmounts({ client, accountAddr, validatorAppID });
+    let excessDataWithDetail = [];
+    for (let data of excessData) {
+        const { poolAddress, assetID, amount } = data;
+        const poolAssets = await pool_1.getPoolAssets({
+            client,
+            address: poolAddress,
+            validatorAppID
+        });
+        if (poolAssets) {
+            const poolInfo = await pool_1.getPoolInfo(client, {
+                validatorAppID,
+                asset1ID: poolAssets.asset1ID,
+                asset2ID: poolAssets.asset2ID
+            });
+            const assetDetails = await Promise.all([
+                util_1.getAssetInformationById(client, poolAssets.asset1ID),
+                util_1.getAssetInformationById(client, poolAssets.asset2ID),
+                util_1.getAssetInformationById(client, poolInfo.liquidityTokenID)
+            ]);
+            let excessAsset = assetDetails[0];
+            if (assetID === Number(assetDetails[1].id)) {
+                excessAsset = assetDetails[1];
+            }
+            else if (assetID === Number(assetDetails[2]?.id)) {
+                excessAsset = assetDetails[2];
+            }
+            excessDataWithDetail.push({
+                amount,
+                asset: excessAsset,
+                pool: {
+                    info: poolInfo,
+                    asset1: assetDetails[0],
+                    asset2: assetDetails[1],
+                    liquidityAsset: assetDetails[2]
+                }
+            });
+        }
+    }
+    return excessDataWithDetail;
+}
+exports.getExcessAmountsWithPoolAssetDetails = getExcessAmountsWithPoolAssetDetails;

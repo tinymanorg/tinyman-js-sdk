@@ -36,6 +36,14 @@ export interface SwapExecution {
   assetOutAmount: bigint;
   /** The ID of the transaction. */
   txnID: string;
+  excessAmount: {
+    /** Asset ID for which the excess amount can be redeemed with */
+    assetID: number;
+    /** Excess amount for the current swap */
+    excessAmountForSwap: bigint;
+    /** Total excess amount accumulated for the pool asset */
+    totalExcessAmount: bigint;
+  };
   /** The group ID for the transaction group. */
   groupID: string;
 }
@@ -73,8 +81,6 @@ export declare function getFixedInputSwapQuote({
  * @param params.assetOut.amount The desired quantity of the output asset.
  * @param params.assetOut.slippage The maximum acceptable slippage rate. Should be a number between
  *   0 and 100 and acts as a percentage of params.assetOut.amount.
- * @param params.redeemExcess If true, any excess amount of the output asset created by this swap
- *   will be redeemed after the swap executes.
  * @param params.initiatorAddr The address of the account performing the swap operation.
  * @param params.initiatorSigner A function that will sign transactions from the initiator's
  *   account.
@@ -84,7 +90,6 @@ export declare function fixedInputSwap({
   pool,
   assetIn,
   assetOut,
-  redeemExcess,
   initiatorAddr,
   initiatorSigner
 }: {
@@ -99,7 +104,6 @@ export declare function fixedInputSwap({
     amount: number | bigint;
     slippage: number;
   };
-  redeemExcess: boolean;
   initiatorAddr: string;
   initiatorSigner: InitiatorSigner;
 }): Promise<SwapExecution>;
@@ -139,8 +143,6 @@ export declare function getFixedOutputSwapQuote({
  * @param params.assetOut.assetID The ID of the output asset. Must be one of the pool's asset1ID
  *   or asset2ID, and must be different than params.asset1In.assetID.
  * @param params.assetOut.amount The quantity of the output asset.
- * @param params.redeemExcess If true, any excess amount of the input asset created by this swap
- *   will be redeemed after the swap executes.
  * @param params.initiatorAddr The address of the account performing the swap operation.
  * @param params.initiatorSigner A function that will sign transactions from the initiator's
  *   account.
@@ -150,7 +152,6 @@ export declare function fixedOutputSwap({
   pool,
   assetIn,
   assetOut,
-  redeemExcess,
   initiatorAddr,
   initiatorSigner
 }: {
@@ -165,7 +166,6 @@ export declare function fixedOutputSwap({
     assetID: number;
     amount: number | bigint;
   };
-  redeemExcess: boolean;
   initiatorAddr: string;
   initiatorSigner: InitiatorSigner;
 }): Promise<SwapExecution>;

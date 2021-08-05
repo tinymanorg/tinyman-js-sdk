@@ -1,8 +1,18 @@
 import algosdk, {Algodv2} from "algosdk";
+import {AssetParams} from "algosdk/dist/types/src/client/v2/algod/models/types";
 
-import {InitiatorSigner} from "./common-types";
+import {
+  AccountInformationData,
+  TinymanAnalyticsApiAsset,
+  InitiatorSigner
+} from "./common-types";
+import {ALGO_ASSET, ALGO_ASSET_ID} from "./constant";
 
-export function decodeState(stateArray: any[]): Record<string, string | number | bigint> {
+const CACHED_ASSETS: Map<string, TinymanAnalyticsApiAsset> = new Map();
+
+export function decodeState(
+  stateArray: AccountInformationData["apps-local-state"][0]["key-value"] = []
+): Record<string, number | string> {
   const state: Record<string, number | string> = {};
 
   for (const pair of stateArray) {
@@ -144,4 +154,51 @@ export function bufferToBase64(
   arrayBuffer: undefined | null | WithImplicitCoercion<ArrayBuffer | SharedArrayBuffer>
 ) {
   return arrayBuffer ? Buffer.from(arrayBuffer).toString("base64") : "";
+}
+
+/**
+ * Fetches asset data and caches it in a Map.
+ * @param algodClient - Algodv2 client
+ * @param {number} id - id of the asset
+ * @param {boolean} alwaysFetch - Determines whether to always fetch the information of the asset or read it from the cache
+ * @returns a promise that resolves with TinymanAnalyticsApiAsset
+ */
+export function getAssetInformationById(
+  algodClient: algosdk.Algodv2,
+  id: number,
+  alwaysFetch?: boolean
+) {
+  return new Promise<TinymanAnalyticsApiAsset>(async (resolve, reject) => {
+    try {
+      if (id === ALGO_ASSET_ID) {
+        resolve(ALGO_ASSET);
+        return;
+      }
+
+      const memoizedValue = CACHED_ASSETS.get(`${id}`);
+
+      if (memoizedValue && !alwaysFetch) {
+        resolve(memoizedValue);
+        return;
+      }
+
+      const algodAsset = (await algodClient.getAssetByID(id).do()) as {
+        index: number;
+        params: AssetParams;
+      };
+      const assetData = {
+        id: `${algodAsset.index}`,
+        decimals: Number(algodAsset.params.decimals),
+        is_liquidity_token: false,
+        name: algodAsset.params.name || "",
+        unit_name: algodAsset.params["unit-name"] || "",
+        url: ""
+      };
+
+      CACHED_ASSETS.set(`${id}`, assetData);
+      resolve(assetData);
+    } catch (error) {
+      reject(new Error(error.message || "Failed to fetch asset information"));
+    }
+  });
 }
