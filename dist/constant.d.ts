@@ -1,4 +1,4 @@
-import {TinymanAnalyticsApiAsset} from "./common-types";
+import { TinymanAnalyticsApiAsset } from "./common-types";
 export declare const MAX_SLIPPAGE_FRACTION_DIGITS = 6;
 export declare const TESTNET_VALIDATOR_APP_ID = 21580889;
 export declare const HIPONET_VALIDATOR_APP_ID = 448;

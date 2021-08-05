@@ -1,29 +1,29 @@
-import {InitiatorSigner} from "./common-types";
+import { InitiatorSigner } from "./common-types";
 export declare enum PoolStatus {
-  NOT_CREATED = "not created",
-  BOOTSTRAP = "bootstrap",
-  READY = "ready",
-  ERROR = "error"
+    NOT_CREATED = "not created",
+    BOOTSTRAP = "bootstrap",
+    READY = "ready",
+    ERROR = "error"
 }
 export interface PoolInfo {
-  addr: string;
-  program: Uint8Array;
-  validatorAppID: number;
-  asset1ID: number;
-  asset2ID: number;
-  liquidityTokenID?: number;
-  status: PoolStatus;
+    addr: string;
+    program: Uint8Array;
+    validatorAppID: number;
+    asset1ID: number;
+    asset2ID: number;
+    liquidityTokenID?: number;
+    status: PoolStatus;
 }
 export interface PoolReserves {
-  round: number;
-  asset1: bigint;
-  asset2: bigint;
-  issuedLiquidity: bigint;
+    round: number;
+    asset1: bigint;
+    asset2: bigint;
+    issuedLiquidity: bigint;
 }
 export interface AccountExcess {
-  excessAsset1: bigint;
-  excessAsset2: bigint;
-  excessLiquidityTokens: bigint;
+    excessAsset1: bigint;
+    excessAsset2: bigint;
+    excessLiquidityTokens: bigint;
 }
 export declare const MINIMUM_LIQUIDITY = 1000;
 /**
@@ -35,14 +35,11 @@ export declare const MINIMUM_LIQUIDITY = 1000;
  * @param pool.asset1ID The ID of the first asset in the pool pair.
  * @param pool.asset2ID The ID of the second asset in the pool pair.
  */
-export declare function getPoolInfo(
-  client: any,
-  pool: {
+export declare function getPoolInfo(client: any, pool: {
     validatorAppID: number;
     asset1ID: number;
     asset2ID: number;
-  }
-): Promise<PoolInfo>;
+}): Promise<PoolInfo>;
 /**
  * Create an pool for an asset pair if it does not already exist. The initiator will provide
  * funding to create the pool and pay for the creation transaction fees.
@@ -57,50 +54,31 @@ export declare function getPoolInfo(
  * @param initiatorAddr The address of the account initiating creation.
  * @param initiatorSigner A function that will sign transactions from the initiator's account.
  */
-export declare function createPool(
-  client: any,
-  pool: {
+export declare function createPool(client: any, pool: {
     validatorAppID: number;
     asset1ID: number;
     asset2ID: number;
     asset1UnitName: string;
     asset2UnitName: string;
-  },
-  initiatorAddr: string,
-  initiatorSigner: InitiatorSigner
-): Promise<PoolInfo>;
-export declare function getPoolReserves(
-  client: any,
-  pool: PoolInfo
-): Promise<PoolReserves>;
-export declare function getAccountExcess({
-  client,
-  pool,
-  accountAddr
-}: {
-  client: any;
-  pool: PoolInfo;
-  accountAddr: string;
+}, initiatorAddr: string, initiatorSigner: InitiatorSigner): Promise<PoolInfo>;
+export declare function getPoolReserves(client: any, pool: PoolInfo): Promise<PoolReserves>;
+export declare function getAccountExcess({ client, pool, accountAddr }: {
+    client: any;
+    pool: PoolInfo;
+    accountAddr: string;
 }): Promise<AccountExcess>;
 /**
  * @param {bigint} totalLiquidity Total amount of issued liquidity within a pool
  * @param {bigint} ownedLiquidity Amount of liquidity tokens within an account
  * @returns Percentage of liquidity that the account holds
  */
-export declare function getPoolShare(
-  totalLiquidity: bigint,
-  ownedLiquidity: bigint
-): number;
-export declare function getPoolAssets({
-  client,
-  address,
-  validatorAppID
-}: {
-  client: any;
-  address: string;
-  validatorAppID: number;
+export declare function getPoolShare(totalLiquidity: bigint, ownedLiquidity: bigint): number;
+export declare function getPoolAssets({ client, address, validatorAppID }: {
+    client: any;
+    address: string;
+    validatorAppID: number;
 }): Promise<{
-  asset1ID: number;
-  asset2ID: number;
-  liquidityTokenID: number;
+    asset1ID: number;
+    asset2ID: number;
+    liquidityTokenID: number;
 } | null>;

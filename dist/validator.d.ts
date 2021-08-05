@@ -1,4 +1,4 @@
-import {AccountInformationData, InitiatorSigner} from "./common-types";
+import { AccountInformationData, InitiatorSigner } from "./common-types";
 /**
  * Get the Validator App ID for a network.
  *
@@ -17,16 +17,11 @@ export declare function getvalidatorAppID(client: any): Promise<number>;
  * @param params.initiatorSigner A function that will sign  transactions from the initiator's
  *   account.
  */
-export declare function optIntoValidator({
-  client,
-  validatorAppID,
-  initiatorAddr,
-  initiatorSigner
-}: {
-  client: any;
-  validatorAppID: number;
-  initiatorAddr: string;
-  initiatorSigner: InitiatorSigner;
+export declare function optIntoValidator({ client, validatorAppID, initiatorAddr, initiatorSigner }: {
+    client: any;
+    validatorAppID: number;
+    initiatorAddr: string;
+    initiatorSigner: InitiatorSigner;
 }): Promise<void>;
 /**
  * Close out of the Validator app. WARNING: Make sure to redeem ALL excess asset amounts
@@ -38,16 +33,11 @@ export declare function optIntoValidator({
  * @param params.initiatorSigner A function that will sign transactions from the initiator's
  *   account.
  */
-export declare function optOutOfValidator({
-  client,
-  validatorAppID,
-  initiatorAddr,
-  initiatorSigner
-}: {
-  client: any;
-  validatorAppID: number;
-  initiatorAddr: string;
-  initiatorSigner: InitiatorSigner;
+export declare function optOutOfValidator({ client, validatorAppID, initiatorAddr, initiatorSigner }: {
+    client: any;
+    validatorAppID: number;
+    initiatorAddr: string;
+    initiatorSigner: InitiatorSigner;
 }): Promise<void>;
 /**
  * Checks if an account is opted into the Validator app.
@@ -56,10 +46,7 @@ export declare function optOutOfValidator({
  * @param params.accountAppsLocalState Array of app local states for an account.
  * @returns True if and only if the indicated account has opted into the Validator App.
  */
-export declare function isOptedIntoValidator({
-  validatorAppID,
-  accountAppsLocalState
-}: {
-  validatorAppID: number;
-  accountAppsLocalState: AccountInformationData["apps-local-state"];
+export declare function isOptedIntoValidator({ validatorAppID, accountAppsLocalState }: {
+    validatorAppID: number;
+    accountAppsLocalState: AccountInformationData["apps-local-state"];
 }): boolean;
