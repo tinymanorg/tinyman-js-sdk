@@ -18,8 +18,7 @@ const CREATE_ENCODED = Uint8Array.from([99, 114, 101, 97, 116, 101]); // 'create
  */
 async function getvalidatorAppID(client) {
     const params = await client.getTransactionParams().do();
-    const genesisHash = params["genesis-hash"];
-    const genesisID = params["genesis-id"];
+    const { genesisHash, genesisID } = params;
     if (genesisID === "mainnet-v1.0" &&
         genesisHash === "wGHE2Pwdvd7S12BL5FaOP20EGYesN73ktiC1qzkkit8=") {
         return constant_1.MAINNET_VALIDATOR_APP_ID;

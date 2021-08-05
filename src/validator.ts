@@ -1,14 +1,7 @@
-import assert from "assert";
 import algosdk from "algosdk";
 
-import {
-  validatorApprovalContract,
-  validatorClearStateContract,
-  VALIDATOR_APP_SCHEMA
-} from "./contracts";
 import {waitForTransaction} from "./util";
 import {AccountInformationData, InitiatorSigner} from "./common-types";
-
 import {
   TESTNET_VALIDATOR_APP_ID,
   HIPONET_VALIDATOR_APP_ID,
@@ -27,8 +20,7 @@ const CREATE_ENCODED = Uint8Array.from([99, 114, 101, 97, 116, 101]); // 'create
  */
 export async function getvalidatorAppID(client: any): Promise<number> {
   const params = await client.getTransactionParams().do();
-  const genesisHash: string = params["genesis-hash"];
-  const genesisID: string = params["genesis-id"];
+  const {genesisHash, genesisID} = params;
 
   if (
     genesisID === "mainnet-v1.0" &&
