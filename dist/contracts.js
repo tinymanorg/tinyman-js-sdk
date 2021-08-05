@@ -22,13 +22,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getPoolLogicSig = exports.encodeVarInt = exports.VALIDATOR_APP_SCHEMA = exports.validatorClearStateContract = exports.validatorApprovalContract = void 0;
 const base64_js_1 = require("base64-js");
 const algosdk_1 = require("algosdk");
-const contractsJson = __importStar(require("./contracts.json"));
-const validator_app = contractsJson.contracts.validator_app;
-const pool_logicsig = contractsJson.contracts.pool_logicsig;
-const poolLogicSigContractTemplate = pool_logicsig.logic.program;
+const ascJson = __importStar(require("./asc.json"));
+const validator_app = ascJson.contracts.validator_app;
+const pool_logicsig = ascJson.contracts.pool_logicsig;
+const poolLogicSigContractTemplate = pool_logicsig.logic.bytecode;
 const templateVariables = pool_logicsig.logic.variables;
-exports.validatorApprovalContract = base64_js_1.toByteArray(validator_app.approval_program.program);
-exports.validatorClearStateContract = base64_js_1.toByteArray(validator_app.clear_program.program);
+exports.validatorApprovalContract = base64_js_1.toByteArray(validator_app.approval_program.bytecode);
+exports.validatorClearStateContract = base64_js_1.toByteArray(validator_app.clear_program.bytecode);
 exports.VALIDATOR_APP_SCHEMA = {
     numLocalInts: validator_app.local_state_schema.num_uints,
     numLocalByteSlices: validator_app.local_state_schema.num_byte_slices,

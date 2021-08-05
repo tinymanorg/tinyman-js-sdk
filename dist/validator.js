@@ -3,11 +3,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendValidatorAppCreationTransaction = exports.getValidatorAppCreationTransaction = exports.isOptedIntoValidator = exports.optOutOfValidator = exports.optIntoValidator = exports.getvalidatorAppID = void 0;
-const assert_1 = __importDefault(require("assert"));
+exports.isOptedIntoValidator = exports.optOutOfValidator = exports.optIntoValidator = exports.getvalidatorAppID = void 0;
 const algosdk_1 = __importDefault(require("algosdk"));
-const contracts_1 = require("./contracts");
 const util_1 = require("./util");
+const constant_1 = require("./constant");
 const CREATE_ENCODED = Uint8Array.from([99, 114, 101, 97, 116, 101]); // 'create'
 /**
  * Get the Validator App ID for a network.
@@ -23,15 +22,15 @@ async function getvalidatorAppID(client) {
     const genesisID = params["genesis-id"];
     if (genesisID === "mainnet-v1.0" &&
         genesisHash === "wGHE2Pwdvd7S12BL5FaOP20EGYesN73ktiC1qzkkit8=") {
-        // TODO: return mainnet validator app ID
+        return constant_1.MAINNET_VALIDATOR_APP_ID;
     }
     if (genesisID === "testnet-v1.0" &&
         genesisHash === "SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI=") {
-        // TODO: return testnet validator app ID
+        return constant_1.TESTNET_VALIDATOR_APP_ID;
     }
-    if (genesisID === "betanet-v1.0" &&
-        genesisHash === "mFgazF+2uRS1tMiL9dsj01hJGySEmPN28B/TjjvpVW0=") {
-        // TODO: return betanet validator app ID
+    if (genesisID === "hiponet-v1" &&
+        genesisHash === "1Ok6UoiCtb3ppI8rWSXxB3ddULOkqugfCB4FGcPFkpE=") {
+        return constant_1.HIPONET_VALIDATOR_APP_ID;
     }
     throw new Error(`No Validator App exists for network ${genesisID}`);
 }
@@ -90,29 +89,3 @@ function isOptedIntoValidator({ validatorAppID, accountAppsLocalState }) {
     return accountAppsLocalState.some((appState) => appState.id === validatorAppID);
 }
 exports.isOptedIntoValidator = isOptedIntoValidator;
-async function getValidatorAppCreationTransaction(client, addr) {
-    const suggestedParams = await client.getTransactionParams().do();
-    const appCreateTxn = algosdk_1.default.makeApplicationCreateTxnFromObject({
-        from: addr,
-        onComplete: algosdk_1.default.OnApplicationComplete.NoOpOC,
-        approvalProgram: contracts_1.validatorApprovalContract,
-        clearProgram: contracts_1.validatorClearStateContract,
-        numLocalInts: contracts_1.VALIDATOR_APP_SCHEMA.numLocalInts,
-        numLocalByteSlices: contracts_1.VALIDATOR_APP_SCHEMA.numLocalByteSlices,
-        numGlobalInts: contracts_1.VALIDATOR_APP_SCHEMA.numGlobalInts,
-        numGlobalByteSlices: contracts_1.VALIDATOR_APP_SCHEMA.numGlobalByteSlices,
-        appArgs: [CREATE_ENCODED],
-        suggestedParams
-    });
-    return appCreateTxn;
-}
-exports.getValidatorAppCreationTransaction = getValidatorAppCreationTransaction;
-async function sendValidatorAppCreationTransaction(client, stx) {
-    const tx = await client.sendRawTransaction(stx).do();
-    console.log("Signed transaction with txID: %s", tx.txId);
-    const result = await util_1.waitForTransaction(client, tx.txId);
-    const appID = result["application-index"];
-    assert_1.default.ok(typeof appID === "number" && appID > 0);
-    return appID;
-}
-exports.sendValidatorAppCreationTransaction = sendValidatorAppCreationTransaction;

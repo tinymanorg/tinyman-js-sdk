@@ -1,4 +1,3 @@
-import algosdk from "algosdk";
 import {AccountInformationData, InitiatorSigner} from "./common-types";
 /**
  * Get the Validator App ID for a network.
@@ -64,11 +63,3 @@ export declare function isOptedIntoValidator({
   validatorAppID: number;
   accountAppsLocalState: AccountInformationData["apps-local-state"];
 }): boolean;
-export declare function getValidatorAppCreationTransaction(
-  client: any,
-  addr: string
-): Promise<algosdk.Transaction>;
-export declare function sendValidatorAppCreationTransaction(
-  client: any,
-  stx: any
-): Promise<number>;
