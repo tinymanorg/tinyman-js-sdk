@@ -9,6 +9,12 @@ import {
 import {waitForTransaction} from "./util";
 import {AccountInformationData, InitiatorSigner} from "./common-types";
 
+import {
+  TESTNET_VALIDATOR_APP_ID,
+  BETANET_VALIDATOR_APP_ID,
+  MAINNET_VALIDATOR_APP_ID
+} from "./constant";
+
 const CREATE_ENCODED = Uint8Array.from([99, 114, 101, 97, 116, 101]); // 'create'
 
 /**
@@ -28,21 +34,21 @@ export async function getvalidatorAppID(client: any): Promise<number> {
     genesisID === "mainnet-v1.0" &&
     genesisHash === "wGHE2Pwdvd7S12BL5FaOP20EGYesN73ktiC1qzkkit8="
   ) {
-    // TODO: return mainnet validator app ID
+    return MAINNET_VALIDATOR_APP_ID;
   }
 
   if (
     genesisID === "testnet-v1.0" &&
     genesisHash === "SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI="
   ) {
-    // TODO: return testnet validator app ID
+    return TESTNET_VALIDATOR_APP_ID;
   }
 
   if (
     genesisID === "betanet-v1.0" &&
     genesisHash === "mFgazF+2uRS1tMiL9dsj01hJGySEmPN28B/TjjvpVW0="
   ) {
-    // TODO: return betanet validator app ID
+    return BETANET_VALIDATOR_APP_ID;
   }
 
   throw new Error(`No Validator App exists for network ${genesisID}`);
