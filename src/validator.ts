@@ -9,6 +9,12 @@ import {
 import {waitForTransaction} from "./util";
 import {AccountInformationData, InitiatorSigner} from "./common-types";
 
+import {
+  TESTNET_VALIDATOR_APP_ID,
+  HIPONET_VALIDATOR_APP_ID,
+  MAINNET_VALIDATOR_APP_ID
+} from "./constant";
+
 const CREATE_ENCODED = Uint8Array.from([99, 114, 101, 97, 116, 101]); // 'create'
 
 /**
@@ -28,21 +34,21 @@ export async function getvalidatorAppID(client: any): Promise<number> {
     genesisID === "mainnet-v1.0" &&
     genesisHash === "wGHE2Pwdvd7S12BL5FaOP20EGYesN73ktiC1qzkkit8="
   ) {
-    // TODO: return mainnet validator app ID
+    return MAINNET_VALIDATOR_APP_ID;
   }
 
   if (
     genesisID === "testnet-v1.0" &&
     genesisHash === "SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI="
   ) {
-    // TODO: return testnet validator app ID
+    return TESTNET_VALIDATOR_APP_ID;
   }
 
   if (
-    genesisID === "betanet-v1.0" &&
-    genesisHash === "mFgazF+2uRS1tMiL9dsj01hJGySEmPN28B/TjjvpVW0="
+    genesisID === "hiponet-v1" &&
+    genesisHash === "1Ok6UoiCtb3ppI8rWSXxB3ddULOkqugfCB4FGcPFkpE="
   ) {
-    // TODO: return betanet validator app ID
+    return HIPONET_VALIDATOR_APP_ID;
   }
 
   throw new Error(`No Validator App exists for network ${genesisID}`);
@@ -134,40 +140,4 @@ export function isOptedIntoValidator({
   accountAppsLocalState: AccountInformationData["apps-local-state"];
 }): boolean {
   return accountAppsLocalState.some((appState) => appState.id === validatorAppID);
-}
-
-export async function getValidatorAppCreationTransaction(
-  client: any,
-  addr: string
-): Promise<algosdk.Transaction> {
-  const suggestedParams = await client.getTransactionParams().do();
-
-  const appCreateTxn = algosdk.makeApplicationCreateTxnFromObject({
-    from: addr,
-    onComplete: algosdk.OnApplicationComplete.NoOpOC,
-    approvalProgram: validatorApprovalContract,
-    clearProgram: validatorClearStateContract,
-    numLocalInts: VALIDATOR_APP_SCHEMA.numLocalInts,
-    numLocalByteSlices: VALIDATOR_APP_SCHEMA.numLocalByteSlices,
-    numGlobalInts: VALIDATOR_APP_SCHEMA.numGlobalInts,
-    numGlobalByteSlices: VALIDATOR_APP_SCHEMA.numGlobalByteSlices,
-    appArgs: [CREATE_ENCODED],
-    suggestedParams
-  });
-
-  return appCreateTxn;
-}
-
-export async function sendValidatorAppCreationTransaction(
-  client: any,
-  stx: any
-): Promise<number> {
-  const tx = await client.sendRawTransaction(stx).do();
-
-  console.log("Signed transaction with txID: %s", tx.txId);
-  const result = await waitForTransaction(client, tx.txId);
-  const appID = result["application-index"];
-
-  assert.ok(typeof appID === "number" && appID > 0);
-  return appID;
 }
