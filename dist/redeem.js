@@ -80,7 +80,9 @@ async function redeemExcessAsset({ client, pool, assetID, assetOut, initiatorAdd
     const confirmedRound = status["confirmed-round"];
     return {
         fees: txnFees,
-        confirmedRound
+        confirmedRound,
+        txnID: txId,
+        groupID: util_1.bufferToBase64(txGroup[0].group)
     };
 }
 exports.redeemExcessAsset = redeemExcessAsset;

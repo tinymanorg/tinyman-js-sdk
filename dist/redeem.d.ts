@@ -29,6 +29,8 @@ export declare function redeemExcessAsset({
 }): Promise<{
   fees: number;
   confirmedRound: number;
+  groupID: string;
+  txnID: string;
 }>;
 export interface ExcessAmountData {
   poolAddress: string;
