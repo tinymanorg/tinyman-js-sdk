@@ -1,7 +1,12 @@
 import algosdk from "algosdk";
 import {toByteArray} from "base64-js";
 
-import {decodeState, getAssetInformationById, waitForTransaction} from "./util";
+import {
+  bufferToBase64,
+  decodeState,
+  getAssetInformationById,
+  waitForTransaction
+} from "./util";
 import {getPoolAssets, getPoolInfo, PoolInfo} from "./pool";
 import {
   AccountInformationData,
@@ -40,6 +45,8 @@ export async function redeemExcessAsset({
 }): Promise<{
   fees: number;
   confirmedRound: number;
+  groupID: string;
+  txnID: string;
 }> {
   const suggestedParams = await client.getTransactionParams().do();
 
@@ -111,7 +118,9 @@ export async function redeemExcessAsset({
 
   return {
     fees: txnFees,
-    confirmedRound
+    confirmedRound,
+    txnID: txId,
+    groupID: bufferToBase64(txGroup[0].group)
   };
 }
 
