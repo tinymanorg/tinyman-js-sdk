@@ -7,6 +7,7 @@ exports.doBootstrap = void 0;
 const algosdk_1 = __importDefault(require("algosdk"));
 const contracts_1 = require("./contracts");
 const util_1 = require("./util");
+const constant_1 = require("./constant");
 const BOOTSTRAP_ENCODED = Uint8Array.from([98, 111, 111, 116, 115, 116, 114, 97, 112]); // 'bootstrap'
 async function doBootstrap({ client, poolLogicSig, validatorAppID, asset1ID, asset2ID, asset1UnitName, asset2UnitName, initiatorAddr, initiatorSigner }) {
     const suggestedParams = await client.getTransactionParams().do();
@@ -26,7 +27,7 @@ async function doBootstrap({ client, poolLogicSig, validatorAppID, asset1ID, ass
         total: 0xffffffffffffffffn,
         decimals: 6,
         defaultFrozen: false,
-        unitName: "TM1Pool",
+        unitName: constant_1.LIQUIDITY_TOKEN_UNIT_NAME,
         assetName: `Tinyman Pool ${asset1UnitName}-${asset2UnitName}`,
         assetURL: "https://tinyman.org",
         suggestedParams
