@@ -34,7 +34,8 @@ module.exports = {
     "line-comment-position": "off",
     "prefer-const": "off",
     "max-lines": "off",
-    "no-continue": "off"
+    "no-continue": "off",
+    eqeqeq: "off"
   },
   overrides: [
     {

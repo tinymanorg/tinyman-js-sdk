@@ -1,8 +1,9 @@
 import algosdk from "algosdk";
-import {VALIDATOR_APP_SCHEMA} from "./contracts";
 
+import {VALIDATOR_APP_SCHEMA} from "./contracts";
 import {InitiatorSigner} from "./common-types";
 import {waitForTransaction} from "./util";
+import {LIQUIDITY_TOKEN_UNIT_NAME} from "./constant";
 
 const BOOTSTRAP_ENCODED = Uint8Array.from([98, 111, 111, 116, 115, 116, 114, 97, 112]); // 'bootstrap'
 
@@ -47,7 +48,7 @@ export async function doBootstrap({
       total: 0xffffffffffffffffn,
       decimals: 6,
       defaultFrozen: false,
-      unitName: "TM1Pool",
+      unitName: LIQUIDITY_TOKEN_UNIT_NAME,
       assetName: `Tinyman Pool ${asset1UnitName}-${asset2UnitName}`,
       assetURL: "https://tinyman.org",
       suggestedParams
