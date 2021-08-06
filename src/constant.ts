@@ -16,3 +16,5 @@ export const ALGO_ASSET: TinymanAnalyticsApiAsset = {
   url: "https://algorand.org",
   is_liquidity_token: false
 };
+
+export const LIQUIDITY_TOKEN_UNIT_NAME = "TM1POOL";
