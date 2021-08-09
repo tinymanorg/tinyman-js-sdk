@@ -202,3 +202,44 @@ export function getAssetInformationById(
     }
   });
 }
+
+/**
+ * Computes quantity * 10^(-assetDecimals) and rounds the result
+ */
+export function convertFromBaseUnits(
+  assetDecimals: number | bigint,
+  quantity: number | bigint
+) {
+  const decimals = Number(assetDecimals);
+
+  return roundNumber(
+    {decimalPlaces: decimals},
+    // eslint-disable-next-line no-magic-numbers
+    Math.pow(10, -decimals) * Number(quantity)
+  );
+}
+
+/**
+ * Computs quantity * 10^(assetDecimals) and rounds the result
+ */
+export function convertToBaseUnits(
+  assetDecimals: number | bigint,
+  quantity: number | bigint
+) {
+  // eslint-disable-next-line no-magic-numbers
+  const baseAmount = Math.pow(10, Number(assetDecimals)) * Number(quantity);
+
+  // make sure the final value is an integer. This prevents this kind of computation errors: 0.0012 * 100000 = 119.99999999999999 and rounds this result into 120
+  return roundNumber({decimalPlaces: 0}, baseAmount);
+}
+
+/**
+ * Rounds a number up to the provided decimal places limit
+ * @param {Object} options -
+ * @param {number} x -
+ * @returns {number} Rounded number
+ */
+function roundNumber({decimalPlaces = 0}, x: number): number {
+  // eslint-disable-next-line prefer-template
+  return Number(Math.round(Number(x + `e+${decimalPlaces}`)) + `e-${decimalPlaces}`);
+}
