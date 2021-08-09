@@ -24,14 +24,7 @@ export {MintQuote, MintExecution, getMintLiquidityQuote, mintLiquidity} from "./
 
 export {BurnQuote, BurnExecution, getBurnLiquidityQuote, burnLiquidity} from "./burn";
 
-export {
-  SwapQuote,
-  SwapExecution,
-  getFixedInputSwapQuote,
-  fixedInputSwap,
-  getFixedOutputSwapQuote,
-  fixedOutputSwap
-} from "./swap";
+export {SwapQuote, SwapExecution, SwapType, getSwapQuote, issueSwap} from "./swap";
 
 export {
   redeemExcessAsset,
