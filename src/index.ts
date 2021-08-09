@@ -13,7 +13,11 @@ export {
   getPoolInfo,
   createPool,
   getPoolReserves,
-  getPoolShare
+  getPoolShare,
+  getPoolPairRatio,
+  isPoolEmpty,
+  isPoolNotCreated,
+  isPoolReady
 } from "./pool";
 
 export {MintQuote, MintExecution, getMintLiquidityQuote, mintLiquidity} from "./mint";
@@ -37,7 +41,13 @@ export {
   ExcessAmountDataWithPoolAssetDetails
 } from "./redeem";
 
-export {applySlippageToAmount, optIntoAsset, getAssetInformationById} from "./util";
+export {
+  applySlippageToAmount,
+  optIntoAsset,
+  getAssetInformationById,
+  convertFromBaseUnits,
+  convertToBaseUnits
+} from "./util";
 
 export {
   AccountAsset,

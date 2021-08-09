@@ -417,3 +417,19 @@ export function getPoolPairRatio(
 export function isPoolEmpty(poolReserves: undefined | null | PoolReserves) {
   return Boolean(poolReserves && !(poolReserves.asset1 + poolReserves.asset2));
 }
+
+/**
+ * @param pool - Pool info
+ * @returns true if pool's status is NOT_CREATED, otherwise returns false
+ */
+export function isPoolNotCreated(pool: undefined | null | PoolInfo) {
+  return pool?.status === PoolStatus.NOT_CREATED;
+}
+
+/**
+ * @param pool - Pool info
+ * @returns true if pool's status is READY, otherwise returns false
+ */
+export function isPoolReady(pool: undefined | null | PoolInfo) {
+  return pool?.status === PoolStatus.READY;
+}
