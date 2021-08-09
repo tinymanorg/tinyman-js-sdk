@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAssetInformationById = exports.bufferToBase64 = exports.optIntoAsset = exports.applySlippageToAmount = exports.waitForTransaction = exports.getMinBalanceForAccount = exports.joinUint8Arrays = exports.decodeState = void 0;
+exports.convertToBaseUnits = exports.convertFromBaseUnits = exports.getAssetInformationById = exports.bufferToBase64 = exports.optIntoAsset = exports.applySlippageToAmount = exports.waitForTransaction = exports.getMinBalanceForAccount = exports.joinUint8Arrays = exports.decodeState = void 0;
 const algosdk_1 = __importDefault(require("algosdk"));
 const constant_1 = require("./constant");
 const CACHED_ASSETS = new Map();
@@ -153,3 +153,33 @@ function getAssetInformationById(algodClient, id, alwaysFetch) {
     });
 }
 exports.getAssetInformationById = getAssetInformationById;
+/**
+ * Computes quantity * 10^(-assetDecimals) and rounds the result
+ */
+function convertFromBaseUnits(assetDecimals, quantity) {
+    const decimals = Number(assetDecimals);
+    return roundNumber({ decimalPlaces: decimals }, 
+    // eslint-disable-next-line no-magic-numbers
+    Math.pow(10, -decimals) * Number(quantity));
+}
+exports.convertFromBaseUnits = convertFromBaseUnits;
+/**
+ * Computs quantity * 10^(assetDecimals) and rounds the result
+ */
+function convertToBaseUnits(assetDecimals, quantity) {
+    // eslint-disable-next-line no-magic-numbers
+    const baseAmount = Math.pow(10, Number(assetDecimals)) * Number(quantity);
+    // make sure the final value is an integer. This prevents this kind of computation errors: 0.0012 * 100000 = 119.99999999999999 and rounds this result into 120
+    return roundNumber({ decimalPlaces: 0 }, baseAmount);
+}
+exports.convertToBaseUnits = convertToBaseUnits;
+/**
+ * Rounds a number up to the provided decimal places limit
+ * @param {Object} options -
+ * @param {number} x -
+ * @returns {number} Rounded number
+ */
+function roundNumber({ decimalPlaces = 0 }, x) {
+    // eslint-disable-next-line prefer-template
+    return Number(Math.round(Number(x + `e+${decimalPlaces}`)) + `e-${decimalPlaces}`);
+}

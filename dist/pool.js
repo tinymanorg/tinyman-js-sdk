@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getPoolAssets = exports.getPoolShare = exports.getAccountExcess = exports.getPoolReserves = exports.createPool = exports.getPoolInfo = exports.MINIMUM_LIQUIDITY = exports.PoolStatus = void 0;
+exports.isPoolReady = exports.isPoolNotCreated = exports.isPoolEmpty = exports.getPoolPairRatio = exports.getPoolAssets = exports.getPoolShare = exports.getAccountExcess = exports.getPoolReserves = exports.createPool = exports.getPoolInfo = exports.MINIMUM_LIQUIDITY = exports.PoolStatus = void 0;
 const algosdk_1 = __importDefault(require("algosdk"));
 const base64_js_1 = require("base64-js");
 const contracts_1 = require("./contracts");
@@ -253,3 +253,48 @@ async function getPoolAssets({ client, address, validatorAppID }) {
     return assets;
 }
 exports.getPoolAssets = getPoolAssets;
+/**
+ * Calculates the pair ratio for the pool reserves
+ */
+function getPoolPairRatio(decimals, reserves) {
+    const isEmpty = isPoolEmpty(reserves);
+    let pairRatio = null;
+    if (reserves &&
+        !isEmpty &&
+        reserves.asset1 &&
+        reserves.asset2 &&
+        typeof decimals.asset2 === "number" &&
+        typeof decimals.asset1 === "number") {
+        pairRatio =
+            util_1.convertFromBaseUnits(decimals.asset1, reserves.asset1) /
+                util_1.convertFromBaseUnits(decimals.asset2, reserves.asset2);
+    }
+    return pairRatio;
+}
+exports.getPoolPairRatio = getPoolPairRatio;
+/**
+ * Checks if the pool is empty
+ *
+ * @param poolReserves - Pool reserves
+ * @returns true if pool is empty, otherwise returns false
+ */
+function isPoolEmpty(poolReserves) {
+    return Boolean(poolReserves && !(poolReserves.asset1 + poolReserves.asset2));
+}
+exports.isPoolEmpty = isPoolEmpty;
+/**
+ * @param pool - Pool info
+ * @returns true if pool's status is NOT_CREATED, otherwise returns false
+ */
+function isPoolNotCreated(pool) {
+    return pool?.status === PoolStatus.NOT_CREATED;
+}
+exports.isPoolNotCreated = isPoolNotCreated;
+/**
+ * @param pool - Pool info
+ * @returns true if pool's status is READY, otherwise returns false
+ */
+function isPoolReady(pool) {
+    return pool?.status === PoolStatus.READY;
+}
+exports.isPoolReady = isPoolReady;
