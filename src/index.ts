@@ -13,21 +13,18 @@ export {
   getPoolInfo,
   createPool,
   getPoolReserves,
-  getPoolShare
+  getPoolShare,
+  getPoolPairRatio,
+  isPoolEmpty,
+  isPoolNotCreated,
+  isPoolReady
 } from "./pool";
 
 export {MintQuote, MintExecution, getMintLiquidityQuote, mintLiquidity} from "./mint";
 
 export {BurnQuote, BurnExecution, getBurnLiquidityQuote, burnLiquidity} from "./burn";
 
-export {
-  SwapQuote,
-  SwapExecution,
-  getFixedInputSwapQuote,
-  fixedInputSwap,
-  getFixedOutputSwapQuote,
-  fixedOutputSwap
-} from "./swap";
+export {SwapQuote, SwapExecution, SwapType, getSwapQuote, issueSwap} from "./swap";
 
 export {
   redeemExcessAsset,
@@ -37,7 +34,13 @@ export {
   ExcessAmountDataWithPoolAssetDetails
 } from "./redeem";
 
-export {applySlippageToAmount, optIntoAsset, getAssetInformationById} from "./util";
+export {
+  applySlippageToAmount,
+  optIntoAsset,
+  getAssetInformationById,
+  convertFromBaseUnits,
+  convertToBaseUnits
+} from "./util";
 
 export {
   AccountAsset,

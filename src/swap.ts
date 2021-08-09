@@ -1,12 +1,22 @@
-import algosdk from "algosdk";
+import algosdk, {Algodv2} from "algosdk";
 
-import {applySlippageToAmount, bufferToBase64, waitForTransaction} from "./util";
+import {
+  applySlippageToAmount,
+  bufferToBase64,
+  convertFromBaseUnits,
+  waitForTransaction
+} from "./util";
 import {PoolInfo, getPoolReserves, getAccountExcess} from "./pool";
 import {InitiatorSigner} from "./common-types";
 
 // FEE = %0.3 or 3/1000
 const FEE_NUMERATOR = 3n;
 const FEE_DENOMINATOR = 1000n;
+
+export enum SwapType {
+  FixedInput = "fixed-input",
+  FixedOutput = "fixed-output"
+}
 
 /** An object containing information about a swap quote. */
 export interface SwapQuote {
@@ -207,16 +217,21 @@ async function doSwap({
  *   or asset2ID.
  * @param params.assetIn.amount The quantity of the input asset.
  */
-export async function getFixedInputSwapQuote({
+async function getFixedInputSwapQuote({
   client,
   pool,
-  assetIn
+  assetIn,
+  decimals
 }: {
   client: any;
   pool: PoolInfo;
   assetIn: {
     assetID: number;
     amount: number | bigint;
+  };
+  decimals: {
+    assetIn: number;
+    assetOut: number;
   };
 }): Promise<SwapQuote> {
   const reserves = await getPoolReserves(client, pool);
@@ -247,7 +262,9 @@ export async function getFixedInputSwapQuote({
     throw new Error("Output amount exceeds available liquidity.");
   }
 
-  const rate = Number(assetOutAmount) / Number(assetInAmount);
+  const rate =
+    convertFromBaseUnits(decimals.assetOut, Number(assetOutAmount)) /
+    convertFromBaseUnits(decimals.assetIn, Number(assetInAmount));
 
   return {
     round: reserves.round,
@@ -277,7 +294,7 @@ export async function getFixedInputSwapQuote({
  * @param params.initiatorSigner A function that will sign transactions from the initiator's
  *   account.
  */
-export async function fixedInputSwap({
+async function fixedInputSwap({
   client,
   pool,
   assetIn,
@@ -374,16 +391,21 @@ export async function fixedInputSwap({
  *   or asset2ID.
  * @param params.assetOut.amount The quantity of the output asset.
  */
-export async function getFixedOutputSwapQuote({
+async function getFixedOutputSwapQuote({
   client,
   pool,
-  assetOut
+  assetOut,
+  decimals
 }: {
   client: any;
   pool: PoolInfo;
   assetOut: {
     assetID: number;
     amount: number | bigint;
+  };
+  decimals: {
+    assetIn: number;
+    assetOut: number;
   };
 }): Promise<SwapQuote> {
   const reserves = await getPoolReserves(client, pool);
@@ -413,7 +435,10 @@ export async function getFixedOutputSwapQuote({
   const assetInAmount = k / (outputSupply - assetOutAmount) - inputSupply;
   const swapFee = (assetInAmount * FEE_NUMERATOR) / FEE_DENOMINATOR;
   const assetInAmountPlusFee = assetInAmount + swapFee;
-  const rate = Number(assetOutAmount) / Number(assetInAmountPlusFee);
+
+  const rate =
+    convertFromBaseUnits(decimals.assetOut, Number(assetOutAmount)) /
+    convertFromBaseUnits(decimals.assetIn, Number(assetInAmountPlusFee));
 
   return {
     round: reserves.round,
@@ -424,6 +449,50 @@ export async function getFixedOutputSwapQuote({
     swapFee: Number(swapFee),
     rate
   };
+}
+
+/**
+ *
+ * @param type - Type of the swap
+ * @param pool - Information for the pool.
+ * @param asset.assetID - ID of the asset to be swapped
+ * @param asset.amount - Amount of the asset to be swapped
+ * @param decimals.assetIn - Decimals quantity for the input asset
+ * @param decimals.assetOut - Decimals quantity for the output asset
+ * @returns A promise for the Swap quote
+ */
+export function getSwapQuote(
+  client: Algodv2,
+  type: SwapType,
+  pool: PoolInfo,
+  asset: {
+    assetID: number;
+    amount: number | bigint;
+  },
+  decimals: {
+    assetIn: number;
+    assetOut: number;
+  }
+): Promise<SwapQuote> {
+  let promise;
+
+  if (type === "fixed-input") {
+    promise = getFixedInputSwapQuote({
+      client,
+      pool,
+      assetIn: asset,
+      decimals
+    });
+  } else {
+    promise = getFixedOutputSwapQuote({
+      client,
+      pool,
+      assetOut: asset,
+      decimals
+    });
+  }
+
+  return promise;
 }
 
 /**
@@ -445,7 +514,7 @@ export async function getFixedOutputSwapQuote({
  * @param params.initiatorSigner A function that will sign transactions from the initiator's
  *   account.
  */
-export async function fixedOutputSwap({
+async function fixedOutputSwap({
   client,
   pool,
   assetIn,
@@ -531,4 +600,77 @@ export async function fixedOutputSwap({
     groupID,
     txnID
   };
+}
+
+/**
+ * Execute a swap with the desired quantities.
+ *
+ * @param params.client An Algodv2 client.
+ * @param params.pool Information for the pool.
+ * @param params.swapType Type of the swap.
+ * @param params.assetIn.assetID The ID of the input asset. Must be one of the pool's asset1ID
+ *   or asset1ID.
+ * @param params.assetIn.amount The desired quantity of the input asset.
+ * @param params.assetOut.assetID The ID of the output asset. Must be one of the pool's asset1ID
+ *   or asset2ID, and must be different than params.asset1In.assetID.
+ * @param params.assetOut.amount The quantity of the output asset.
+ * @param params.slippage The maximum acceptable slippage rate.
+ * @param params.initiatorAddr The address of the account performing the swap operation.
+ * @param params.initiatorSigner A function that will sign transactions from the initiator's
+ *   account.
+ */
+export function issueSwap({
+  client,
+  pool,
+  swapType,
+  assetIn,
+  assetOut,
+  slippage,
+  initiatorAddr,
+  initiatorSigner
+}: {
+  client: Algodv2;
+  pool: PoolInfo;
+  swapType: SwapType;
+  assetIn: {
+    assetID: number;
+    amount: number | bigint;
+  };
+  assetOut: {
+    assetID: number;
+    amount: number | bigint;
+  };
+  slippage: number;
+  initiatorAddr: string;
+  initiatorSigner: InitiatorSigner;
+}): Promise<SwapExecution> {
+  let promise;
+
+  if (swapType === SwapType.FixedInput) {
+    promise = fixedInputSwap({
+      client,
+      pool,
+      assetIn,
+      assetOut: {
+        ...assetOut,
+        slippage
+      },
+      initiatorAddr,
+      initiatorSigner
+    });
+  } else {
+    promise = fixedOutputSwap({
+      client,
+      pool,
+      assetIn: {
+        ...assetIn,
+        slippage
+      },
+      assetOut,
+      initiatorAddr,
+      initiatorSigner
+    });
+  }
+
+  return promise;
 }

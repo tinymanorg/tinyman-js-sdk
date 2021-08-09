@@ -2,7 +2,12 @@ import algosdk from "algosdk";
 import {fromByteArray} from "base64-js";
 
 import {getPoolLogicSig} from "./contracts";
-import {decodeState, joinUint8Arrays, getMinBalanceForAccount} from "./util";
+import {
+  decodeState,
+  joinUint8Arrays,
+  getMinBalanceForAccount,
+  convertFromBaseUnits
+} from "./util";
 import {doBootstrap} from "./bootstrap";
 import {AccountInformationData, InitiatorSigner} from "./common-types";
 
@@ -372,4 +377,59 @@ export async function getPoolAssets({
   }
 
   return assets;
+}
+
+/**
+ * Calculates the pair ratio for the pool reserves
+ */
+export function getPoolPairRatio(
+  decimals: {
+    asset1: undefined | number;
+    asset2: undefined | number;
+  },
+  reserves: null | PoolReserves
+): null | number {
+  const isEmpty = isPoolEmpty(reserves);
+  let pairRatio: null | number = null;
+
+  if (
+    reserves &&
+    !isEmpty &&
+    reserves.asset1 &&
+    reserves.asset2 &&
+    typeof decimals.asset2 === "number" &&
+    typeof decimals.asset1 === "number"
+  ) {
+    pairRatio =
+      convertFromBaseUnits(decimals.asset1, reserves.asset1) /
+      convertFromBaseUnits(decimals.asset2, reserves.asset2);
+  }
+
+  return pairRatio;
+}
+
+/**
+ * Checks if the pool is empty
+ *
+ * @param poolReserves - Pool reserves
+ * @returns true if pool is empty, otherwise returns false
+ */
+export function isPoolEmpty(poolReserves: undefined | null | PoolReserves) {
+  return Boolean(poolReserves && !(poolReserves.asset1 + poolReserves.asset2));
+}
+
+/**
+ * @param pool - Pool info
+ * @returns true if pool's status is NOT_CREATED, otherwise returns false
+ */
+export function isPoolNotCreated(pool: undefined | null | PoolInfo) {
+  return pool?.status === PoolStatus.NOT_CREATED;
+}
+
+/**
+ * @param pool - Pool info
+ * @returns true if pool's status is READY, otherwise returns false
+ */
+export function isPoolReady(pool: undefined | null | PoolInfo) {
+  return pool?.status === PoolStatus.READY;
 }
