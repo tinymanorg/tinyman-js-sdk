@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.convertToBaseUnits = exports.convertFromBaseUnits = exports.getAssetInformationById = exports.bufferToBase64 = exports.optIntoAsset = exports.applySlippageToAmount = exports.waitForTransaction = exports.getMinBalanceForAccount = exports.joinUint8Arrays = exports.decodeState = void 0;
+exports.sendAndWaitRawTransaction = exports.convertToBaseUnits = exports.convertFromBaseUnits = exports.getAssetInformationById = exports.bufferToBase64 = exports.optIntoAsset = exports.applySlippageToAmount = exports.waitForTransaction = exports.getMinBalanceForAccount = exports.joinUint8Arrays = exports.decodeState = void 0;
 const algosdk_1 = __importDefault(require("algosdk"));
 const constant_1 = require("./constant");
 const CACHED_ASSETS = new Map();
@@ -183,3 +183,20 @@ function roundNumber({ decimalPlaces = 0 }, x) {
     // eslint-disable-next-line prefer-template
     return Number(Math.round(Number(x + `e+${decimalPlaces}`)) + `e-${decimalPlaces}`);
 }
+/**
+ * @param client - An Algodv2 client.
+ * @param signedTxns - Signed txns to send
+ * @param txnFees - Total transaction fees
+ * @param groupID - Txn Group's ID
+ * @returns Confirmed round and txnID
+ */
+async function sendAndWaitRawTransaction(client, signedTxns) {
+    const { txId } = await client.sendRawTransaction(signedTxns).do();
+    const status = await waitForTransaction(client, txId);
+    const confirmedRound = status["confirmed-round"];
+    return {
+        confirmedRound,
+        txnID: txId
+    };
+}
+exports.sendAndWaitRawTransaction = sendAndWaitRawTransaction;

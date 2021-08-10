@@ -67,7 +67,7 @@ async function doBurn({ client, pool, liquidityIn, asset1Out, asset2Out, initiat
             from: pool.addr,
             to: initiatorAddr,
             assetIndex: pool.asset2ID,
-            amount: asset1Out,
+            amount: asset2Out,
             suggestedParams
         });
     }

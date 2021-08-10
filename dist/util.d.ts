@@ -56,3 +56,17 @@ export declare function convertToBaseUnits(
   assetDecimals: number | bigint,
   quantity: number | bigint
 ): number;
+/**
+ * @param client - An Algodv2 client.
+ * @param signedTxns - Signed txns to send
+ * @param txnFees - Total transaction fees
+ * @param groupID - Txn Group's ID
+ * @returns Confirmed round and txnID
+ */
+export declare function sendAndWaitRawTransaction(
+  client: Algodv2,
+  signedTxns: any[]
+): Promise<{
+  confirmedRound: any;
+  txnID: any;
+}>;

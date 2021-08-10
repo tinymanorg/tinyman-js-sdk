@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ALGO_ASSET_ID = exports.ALGO_ASSET = exports.convertToBaseUnits = exports.convertFromBaseUnits = exports.getAssetInformationById = exports.optIntoAsset = exports.applySlippageToAmount = exports.getExcessAmountsWithPoolAssetDetails = exports.getExcessAmounts = exports.redeemExcessAsset = exports.issueSwap = exports.getSwapQuote = exports.SwapType = exports.burnLiquidity = exports.getBurnLiquidityQuote = exports.mintLiquidity = exports.getMintLiquidityQuote = exports.isPoolReady = exports.isPoolNotCreated = exports.isPoolEmpty = exports.getPoolPairRatio = exports.getPoolShare = exports.getPoolReserves = exports.createPool = exports.getPoolInfo = exports.MINIMUM_LIQUIDITY = exports.PoolStatus = exports.optOutOfValidator = exports.isOptedIntoValidator = exports.optIntoValidator = exports.getvalidatorAppID = void 0;
+exports.ALGO_ASSET_ID = exports.ALGO_ASSET = exports.convertToBaseUnits = exports.convertFromBaseUnits = exports.getAssetInformationById = exports.optIntoAsset = exports.applySlippageToAmount = exports.redeemAllExcessAsset = exports.getExcessAmountsWithPoolAssetDetails = exports.getExcessAmounts = exports.redeemExcessAsset = exports.issueSwap = exports.getSwapQuote = exports.SwapType = exports.burnLiquidity = exports.getBurnLiquidityQuote = exports.mintLiquidity = exports.getMintLiquidityQuote = exports.isPoolReady = exports.isPoolNotCreated = exports.isPoolEmpty = exports.getPoolPairRatio = exports.getPoolShare = exports.getPoolReserves = exports.createPool = exports.getPoolInfo = exports.MINIMUM_LIQUIDITY = exports.PoolStatus = exports.optOutOfValidator = exports.isOptedIntoValidator = exports.optIntoValidator = exports.getvalidatorAppID = void 0;
 var validator_1 = require("./validator");
 Object.defineProperty(exports, "getvalidatorAppID", { enumerable: true, get: function () { return validator_1.getvalidatorAppID; } });
 Object.defineProperty(exports, "optIntoValidator", { enumerable: true, get: function () { return validator_1.optIntoValidator; } });
@@ -31,6 +31,7 @@ var redeem_1 = require("./redeem");
 Object.defineProperty(exports, "redeemExcessAsset", { enumerable: true, get: function () { return redeem_1.redeemExcessAsset; } });
 Object.defineProperty(exports, "getExcessAmounts", { enumerable: true, get: function () { return redeem_1.getExcessAmounts; } });
 Object.defineProperty(exports, "getExcessAmountsWithPoolAssetDetails", { enumerable: true, get: function () { return redeem_1.getExcessAmountsWithPoolAssetDetails; } });
+Object.defineProperty(exports, "redeemAllExcessAsset", { enumerable: true, get: function () { return redeem_1.redeemAllExcessAsset; } });
 var util_1 = require("./util");
 Object.defineProperty(exports, "applySlippageToAmount", { enumerable: true, get: function () { return util_1.applySlippageToAmount; } });
 Object.defineProperty(exports, "optIntoAsset", { enumerable: true, get: function () { return util_1.optIntoAsset; } });
