@@ -151,7 +151,7 @@ async function doBurn({
       from: pool.addr,
       to: initiatorAddr,
       assetIndex: pool.asset2ID,
-      amount: asset1Out,
+      amount: asset2Out,
       suggestedParams
     });
   }
