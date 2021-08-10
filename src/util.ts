@@ -243,3 +243,22 @@ function roundNumber({decimalPlaces = 0}, x: number): number {
   // eslint-disable-next-line prefer-template
   return Number(Math.round(Number(x + `e+${decimalPlaces}`)) + `e-${decimalPlaces}`);
 }
+
+/**
+ * @param client - An Algodv2 client.
+ * @param signedTxns - Signed txns to send
+ * @param txnFees - Total transaction fees
+ * @param groupID - Txn Group's ID
+ * @returns Confirmed round and txnID
+ */
+export async function sendAndWaitRawTransaction(client: Algodv2, signedTxns: any[]) {
+  const {txId} = await client.sendRawTransaction(signedTxns).do();
+
+  const status = await waitForTransaction(client, txId);
+  const confirmedRound = status["confirmed-round"];
+
+  return {
+    confirmedRound,
+    txnID: txId
+  };
+}
