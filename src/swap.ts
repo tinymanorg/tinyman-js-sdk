@@ -82,20 +82,6 @@ enum SwapTxnGroupIndices {
   ASSET_OUT_TXN_INDEX
 }
 
-function doSwap({
-  client,
-  pool,
-  signedTxns,
-  initiatorSigner
-}: {
-  client: any;
-  pool: PoolInfo;
-  signedTxns: Uint8Array[];
-  initiatorSigner: InitiatorSigner;
-}) {
-  return sendAndWaitRawTransaction(client, signedTxns);
-}
-
 export async function signSwapTransactions({
   pool,
   txGroup,
@@ -315,8 +301,6 @@ async function getFixedInputSwapQuote({
  * @param params.assetOut.slippage The maximum acceptable slippage rate. Should be a number between
  *   0 and 100 and acts as a percentage of params.assetOut.amount.
  * @param params.initiatorAddr The address of the account performing the swap operation.
- * @param params.initiatorSigner A function that will sign transactions from the initiator's
- *   account.
  */
 async function fixedInputSwap({
   client,
@@ -324,8 +308,7 @@ async function fixedInputSwap({
   signedTxns,
   assetIn,
   assetOut,
-  initiatorAddr,
-  initiatorSigner
+  initiatorAddr
 }: {
   client: any;
   pool: PoolInfo;
@@ -339,7 +322,6 @@ async function fixedInputSwap({
     amount: number | bigint;
   };
   initiatorAddr: string;
-  initiatorSigner: InitiatorSigner;
 }): Promise<Omit<SwapExecution, "fees" | "groupID">> {
   const prevExcessAssets = await getAccountExcess({
     client,
@@ -347,12 +329,7 @@ async function fixedInputSwap({
     accountAddr: initiatorAddr
   });
 
-  let {confirmedRound, txnID} = await doSwap({
-    client,
-    pool,
-    signedTxns,
-    initiatorSigner
-  });
+  let {confirmedRound, txnID} = await sendAndWaitRawTransaction(client, signedTxns);
 
   const excessAssets = await getAccountExcess({
     client,
@@ -520,8 +497,6 @@ export function getSwapQuote(
  *   or asset2ID, and must be different than params.asset1In.assetID.
  * @param params.assetOut.amount The quantity of the output asset.
  * @param params.initiatorAddr The address of the account performing the swap operation.
- * @param params.initiatorSigner A function that will sign transactions from the initiator's
- *   account.
  */
 async function fixedOutputSwap({
   client,
@@ -529,8 +504,7 @@ async function fixedOutputSwap({
   signedTxns,
   assetIn,
   assetOut,
-  initiatorAddr,
-  initiatorSigner
+  initiatorAddr
 }: {
   client: any;
   pool: PoolInfo;
@@ -544,7 +518,6 @@ async function fixedOutputSwap({
     amount: number | bigint;
   };
   initiatorAddr: string;
-  initiatorSigner: InitiatorSigner;
 }): Promise<Omit<SwapExecution, "fees" | "groupID">> {
   const prevExcessAssets = await getAccountExcess({
     client,
@@ -552,12 +525,7 @@ async function fixedOutputSwap({
     accountAddr: initiatorAddr
   });
 
-  let {confirmedRound, txnID} = await doSwap({
-    client,
-    signedTxns,
-    pool,
-    initiatorSigner
-  });
+  let {confirmedRound, txnID} = await sendAndWaitRawTransaction(client, signedTxns);
 
   const excessAssets = await getAccountExcess({
     client,
@@ -611,8 +579,6 @@ async function fixedOutputSwap({
  * @param params.assetOut.amount The quantity of the output asset.
  * @param params.slippage The maximum acceptable slippage rate.
  * @param params.initiatorAddr The address of the account performing the swap operation.
- * @param params.initiatorSigner A function that will sign transactions from the initiator's
- *   account.
  */
 export async function issueSwap({
   client,
@@ -622,8 +588,7 @@ export async function issueSwap({
   signedTxns,
   assetInID,
   assetOutID,
-  initiatorAddr,
-  initiatorSigner
+  initiatorAddr
 }: {
   client: Algodv2;
   pool: PoolInfo;
@@ -633,7 +598,6 @@ export async function issueSwap({
   assetInID: number;
   assetOutID: number;
   initiatorAddr: string;
-  initiatorSigner: InitiatorSigner;
 }): Promise<SwapExecution> {
   const assetIn = {
     assetID: assetInID,
@@ -652,8 +616,7 @@ export async function issueSwap({
       signedTxns,
       assetIn,
       assetOut,
-      initiatorAddr,
-      initiatorSigner
+      initiatorAddr
     });
   } else {
     swapData = await fixedOutputSwap({
@@ -662,8 +625,7 @@ export async function issueSwap({
       signedTxns,
       assetIn,
       assetOut,
-      initiatorAddr,
-      initiatorSigner
+      initiatorAddr
     });
   }
 
