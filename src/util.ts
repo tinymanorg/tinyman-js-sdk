@@ -1,4 +1,4 @@
-import algosdk, {Algodv2} from "algosdk";
+import algosdk, {Algodv2, Transaction} from "algosdk";
 import {AssetParams} from "algosdk/dist/types/src/client/v2/algod/models/types";
 
 import {
@@ -269,4 +269,12 @@ export async function sendAndWaitRawTransaction(client: Algodv2, signedTxns: any
     confirmedRound,
     txnID: txId
   };
+}
+
+export function sumUpTxnFees(txns: Transaction[]): number {
+  return txns.reduce((totalFee, txn) => totalFee + txn.fee, 0);
+}
+
+export function getTxnGroupID(txns: Transaction[]) {
+  return bufferToBase64(txns[0].group);
 }
