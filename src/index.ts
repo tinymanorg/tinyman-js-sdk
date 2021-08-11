@@ -40,6 +40,7 @@ export {
 export {
   applySlippageToAmount,
   optIntoAsset,
+  generateOptIntoAssetTxns,
   getAssetInformationById,
   convertFromBaseUnits,
   convertToBaseUnits,

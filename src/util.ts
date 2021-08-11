@@ -133,6 +133,18 @@ export async function optIntoAsset({
   initiatorAddr: string;
   initiatorSigner: InitiatorSigner;
 }) {
+  const optInTxns = await generateOptIntoAssetTxns({
+    client,
+    assetID,
+    initiatorAddr
+  });
+
+  const signedTxns = await initiatorSigner(optInTxns);
+
+  return sendAndWaitRawTransaction(client, signedTxns);
+}
+
+export async function generateOptIntoAssetTxns({client, assetID, initiatorAddr}) {
   const suggestedParams = await client.getTransactionParams().do();
 
   const optInTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
@@ -143,11 +155,7 @@ export async function optIntoAsset({
     suggestedParams
   });
 
-  const [signedTxn] = await initiatorSigner([optInTxn]);
-
-  const {txId} = await client.sendRawTransaction(signedTxn).do();
-
-  await waitForTransaction(client, txId);
+  return [optInTxn];
 }
 
 export function bufferToBase64(
