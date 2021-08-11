@@ -1,8 +1,10 @@
 export {
   getvalidatorAppID,
   optIntoValidator,
+  generateOptIntoValidatorTxns,
   isOptedIntoValidator,
-  optOutOfValidator
+  optOutOfValidator,
+  generateOptOutOfValidatorTxns
 } from "./validator";
 
 export {
@@ -40,7 +42,8 @@ export {
   optIntoAsset,
   getAssetInformationById,
   convertFromBaseUnits,
-  convertToBaseUnits
+  convertToBaseUnits,
+  sendAndWaitRawTransaction
 } from "./util";
 
 export {
