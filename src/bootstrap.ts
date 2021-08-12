@@ -4,7 +4,6 @@ import {VALIDATOR_APP_SCHEMA} from "./contracts";
 import {InitiatorSigner} from "./common-types";
 import {waitForTransaction} from "./util";
 import {LIQUIDITY_TOKEN_UNIT_NAME} from "./constant";
-import {PoolInfo} from "./pool";
 
 const BOOTSTRAP_ENCODED = Uint8Array.from([98, 111, 111, 116, 115, 116, 114, 97, 112]); // 'bootstrap'
 
