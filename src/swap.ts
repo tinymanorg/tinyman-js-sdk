@@ -586,8 +586,6 @@ export async function issueSwap({
   swapType,
   txGroup,
   signedTxns,
-  assetInID,
-  assetOutID,
   initiatorAddr
 }: {
   client: Algodv2;
@@ -595,16 +593,14 @@ export async function issueSwap({
   swapType: SwapType;
   txGroup: Transaction[];
   signedTxns: Uint8Array[];
-  assetInID: number;
-  assetOutID: number;
   initiatorAddr: string;
 }): Promise<SwapExecution> {
   const assetIn = {
-    assetID: assetInID,
+    assetID: txGroup[SwapTxnGroupIndices.ASSET_IN_TXN_INDEX].assetIndex || ALGO_ASSET_ID,
     amount: txGroup[SwapTxnGroupIndices.ASSET_IN_TXN_INDEX].amount
   };
   const assetOut = {
-    assetID: assetOutID,
+    assetID: txGroup[SwapTxnGroupIndices.ASSET_OUT_TXN_INDEX].assetIndex || ALGO_ASSET_ID,
     amount: txGroup[SwapTxnGroupIndices.ASSET_OUT_TXN_INDEX].amount
   };
   let swapData: Omit<SwapExecution, "fees" | "groupID">;
