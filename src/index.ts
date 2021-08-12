@@ -42,7 +42,8 @@ export {
   ExcessAmountData,
   getExcessAmountsWithPoolAssetDetails,
   ExcessAmountDataWithPoolAssetDetails,
-  redeemAllExcessAsset
+  redeemAllExcessAsset,
+  generateRedeemTxns
 } from "./redeem";
 
 export {
