@@ -1,6 +1,5 @@
 import algosdk, {Algodv2, Transaction} from "algosdk";
 import {toByteArray} from "base64-js";
-import LogicSig from "algosdk/dist/types/src/logicsig";
 
 import {
   bufferToBase64,
@@ -47,14 +46,6 @@ export async function redeemExcessAsset({
   groupID: string;
   txnID: string;
 }> {
-  // const txGroup = await generateRedeemTxns({
-  //   client,
-  //   pool,
-  //   assetID,
-  //   assetOut,
-  //   initiatorAddr
-  // });
-
   const signedTxns = await signRedeemTxns({
     txGroup,
     pool,
