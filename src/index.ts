@@ -26,7 +26,15 @@ export {MintQuote, MintExecution, getMintLiquidityQuote, mintLiquidity} from "./
 
 export {BurnQuote, BurnExecution, getBurnLiquidityQuote, burnLiquidity} from "./burn";
 
-export {SwapQuote, SwapExecution, SwapType, getSwapQuote, issueSwap} from "./swap";
+export {
+  SwapQuote,
+  SwapExecution,
+  SwapType,
+  getSwapQuote,
+  issueSwap,
+  generateSwapTransactions,
+  signSwapTransactions
+} from "./swap";
 
 export {
   redeemExcessAsset,
@@ -34,7 +42,8 @@ export {
   ExcessAmountData,
   getExcessAmountsWithPoolAssetDetails,
   ExcessAmountDataWithPoolAssetDetails,
-  redeemAllExcessAsset
+  redeemAllExcessAsset,
+  generateRedeemTxns
 } from "./redeem";
 
 export {
@@ -44,7 +53,8 @@ export {
   getAssetInformationById,
   convertFromBaseUnits,
   convertToBaseUnits,
-  sendAndWaitRawTransaction
+  sendAndWaitRawTransaction,
+  getTxnGroupID
 } from "./util";
 
 export {
