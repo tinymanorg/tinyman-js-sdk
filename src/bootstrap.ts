@@ -1,13 +1,22 @@
-import algosdk from "algosdk";
+import algosdk, {Algodv2, Transaction} from "algosdk";
 
 import {VALIDATOR_APP_SCHEMA} from "./contracts";
 import {InitiatorSigner} from "./common-types";
 import {waitForTransaction} from "./util";
 import {LIQUIDITY_TOKEN_UNIT_NAME} from "./constant";
+import {PoolInfo} from "./pool";
 
 const BOOTSTRAP_ENCODED = Uint8Array.from([98, 111, 111, 116, 115, 116, 114, 97, 112]); // 'bootstrap'
 
-export async function doBootstrap({
+enum BootstapTxnGroupIndices {
+  FUNDING_TXN = 0,
+  VALIDATOR_APP_CALL,
+  LIQUIDITY_TOKEN_CREATE,
+  ASSET1_OPT_IN,
+  ASSET2_OPT_IN
+}
+
+export async function generateBootstrapTransactions({
   client,
   poolLogicSig,
   validatorAppID,
@@ -15,10 +24,9 @@ export async function doBootstrap({
   asset2ID,
   asset1UnitName,
   asset2UnitName,
-  initiatorAddr,
-  initiatorSigner
+  initiatorAddr
 }: {
-  client: any;
+  client: Algodv2;
   poolLogicSig: {addr: string; program: Uint8Array};
   validatorAppID: number;
   asset1ID: number;
@@ -26,8 +34,7 @@ export async function doBootstrap({
   asset1UnitName: string;
   asset2UnitName: string;
   initiatorAddr: string;
-  initiatorSigner: InitiatorSigner;
-}): Promise<{liquidityTokenID: number}> {
+}): Promise<Transaction[]> {
   const suggestedParams = await client.getTransactionParams().do();
 
   const validatorAppCallTxn = algosdk.makeApplicationOptInTxnFromObject({
@@ -43,7 +50,7 @@ export async function doBootstrap({
   });
 
   const liquidityTokenCreateTxn = algosdk.makeAssetCreateTxnWithSuggestedParamsFromObject(
-    <any>{
+    {
       from: poolLogicSig.addr,
       total: 0xffffffffffffffffn,
       decimals: 6,
@@ -97,7 +104,7 @@ export async function doBootstrap({
     suggestedParams
   });
 
-  let txns: any[] = [
+  let txns: Transaction[] = [
     fundingTxn,
     validatorAppCallTxn,
     liquidityTokenCreateTxn,
@@ -108,35 +115,62 @@ export async function doBootstrap({
     txns.push(asset2Optin);
   }
 
-  let txGroup: any[] = algosdk.assignGroupID(txns);
+  return algosdk.assignGroupID(txns);
+}
 
+export async function signBootstrapTransactions({
+  poolLogicSig,
+  txGroup,
+  initiatorSigner
+}: {
+  poolLogicSig: {addr: string; program: Uint8Array};
+  txGroup: Transaction[];
+  initiatorSigner: InitiatorSigner;
+}): Promise<{signedTxns: Uint8Array[]; txnIDs: string[]}> {
+  const [signedFundingTxn] = await initiatorSigner([
+    txGroup[BootstapTxnGroupIndices.FUNDING_TXN]
+  ]);
   const lsig = algosdk.makeLogicSig(poolLogicSig.program);
-  const [signedFundingTxn] = await initiatorSigner([txGroup[0]]);
 
-  const txIDs: string[] = [];
+  const txnIDs: string[] = [];
   const signedTxns = txGroup.map((txn, index) => {
-    if (index === 0) {
-      txIDs.push(txn.txID().toString());
+    if (index === BootstapTxnGroupIndices.FUNDING_TXN) {
+      txnIDs.push(txn.txID().toString());
       return signedFundingTxn;
     }
     const {txID, blob} = algosdk.signLogicSigTransactionObject(txn, lsig);
 
-    txIDs.push(txID);
+    txnIDs.push(txID);
     return blob;
   });
 
+  return {signedTxns, txnIDs};
+}
+
+export async function doBootstrap({
+  client,
+  signedTxns,
+  txnIDs
+}: {
+  client: any;
+  signedTxns: Uint8Array[];
+  txnIDs: string[];
+}): Promise<{liquidityTokenID: number}> {
   try {
     await client.sendRawTransaction(signedTxns).do();
   } catch (err) {
     if (err.response) {
       throw new Error(
-        `Response ${err.response.status}: ${err.response.text}\nTxIDs are: ${txIDs}`
+        `Response ${err.response.status}: ${err.response.text}\nTxIDs are: ${txnIDs}`
       );
     }
     throw err;
   }
 
-  const assetCreationResult = await waitForTransaction(client, txIDs[2]);
+  const assetCreationResult = await waitForTransaction(
+    client,
+    txnIDs[BootstapTxnGroupIndices.LIQUIDITY_TOKEN_CREATE]
+  );
 
   const liquidityTokenID = assetCreationResult["asset-index"];
 

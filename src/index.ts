@@ -22,6 +22,8 @@ export {
   isPoolReady
 } from "./pool";
 
+export {generateBootstrapTransactions, signBootstrapTransactions} from "./bootstrap";
+
 export {MintQuote, MintExecution, getMintLiquidityQuote, mintLiquidity} from "./mint";
 
 export {BurnQuote, BurnExecution, getBurnLiquidityQuote, burnLiquidity} from "./burn";
@@ -65,3 +67,5 @@ export {
 } from "./common-types";
 
 export {ALGO_ASSET, ALGO_ASSET_ID} from "./constant";
+
+export {getPoolLogicSig} from "./contracts";
