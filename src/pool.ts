@@ -98,8 +98,8 @@ export async function getPoolInfo(
  * @param pool.asset2ID The ID of the second asset in the pool pair.
  * @param pool.asset1UnitName The unit name of the first asset in the pool.
  * @param pool.asset2UnitName The unit name of the second asset in the pool.
- * @param initiatorAddr The address of the account initiating creation.
- * @param initiatorSigner A function that will sign transactions from the initiator's account.
+ * @param signedTxns Signed transactions
+ * @param txnIDs Transaction IDs
  */
 export async function createPool(
   client: Algodv2,
