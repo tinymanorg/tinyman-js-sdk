@@ -1,4 +1,4 @@
-import {Algodv2} from "algosdk";
+import algosdk, {Algodv2, Transaction} from "algosdk";
 import {PoolInfo} from "./pool";
 import {InitiatorSigner} from "./common-types";
 export declare enum SwapType {
@@ -52,6 +52,38 @@ export interface SwapExecution {
   /** The group ID for the transaction group. */
   groupID: string;
 }
+export declare function signSwapTransactions({
+  pool,
+  txGroup,
+  initiatorSigner
+}: {
+  pool: PoolInfo;
+  txGroup: Transaction[];
+  initiatorSigner: InitiatorSigner;
+}): Promise<Uint8Array[]>;
+export declare function generateSwapTransactions({
+  client,
+  pool,
+  swapType,
+  assetIn,
+  assetOut,
+  slippage,
+  initiatorAddr
+}: {
+  client: any;
+  pool: PoolInfo;
+  swapType: SwapType;
+  assetIn: {
+    assetID: number;
+    amount: number | bigint;
+  };
+  assetOut: {
+    assetID: number;
+    amount: number | bigint;
+  };
+  slippage: number;
+  initiatorAddr: string;
+}): Promise<algosdk.Transaction[]>;
 /**
  *
  * @param type - Type of the swap
@@ -89,31 +121,19 @@ export declare function getSwapQuote(
  * @param params.assetOut.amount The quantity of the output asset.
  * @param params.slippage The maximum acceptable slippage rate.
  * @param params.initiatorAddr The address of the account performing the swap operation.
- * @param params.initiatorSigner A function that will sign transactions from the initiator's
- *   account.
  */
 export declare function issueSwap({
   client,
   pool,
   swapType,
-  assetIn,
-  assetOut,
-  slippage,
-  initiatorAddr,
-  initiatorSigner
+  txGroup,
+  signedTxns,
+  initiatorAddr
 }: {
   client: Algodv2;
   pool: PoolInfo;
   swapType: SwapType;
-  assetIn: {
-    assetID: number;
-    amount: number | bigint;
-  };
-  assetOut: {
-    assetID: number;
-    amount: number | bigint;
-  };
-  slippage: number;
+  txGroup: Transaction[];
+  signedTxns: Uint8Array[];
   initiatorAddr: string;
-  initiatorSigner: InitiatorSigner;
 }): Promise<SwapExecution>;

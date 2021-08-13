@@ -3,10 +3,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.burnLiquidity = exports.getBurnLiquidityQuote = void 0;
+exports.burnLiquidity = exports.signBurnTxns = exports.generateBurnTxns = exports.getBurnLiquidityQuote = void 0;
 const algosdk_1 = __importDefault(require("algosdk"));
 const util_1 = require("./util");
 const pool_1 = require("./pool");
+const constant_1 = require("./constant");
+var BurnTxnIndices;
+(function (BurnTxnIndices) {
+    BurnTxnIndices[BurnTxnIndices["FEE_TXN"] = 0] = "FEE_TXN";
+    BurnTxnIndices[BurnTxnIndices["VALIDATOR_APP_CALL_TXN"] = 1] = "VALIDATOR_APP_CALL_TXN";
+    BurnTxnIndices[BurnTxnIndices["ASSET1_OUT_TXN"] = 2] = "ASSET1_OUT_TXN";
+    BurnTxnIndices[BurnTxnIndices["ASSET2_OUT_TXN"] = 3] = "ASSET2_OUT_TXN";
+    BurnTxnIndices[BurnTxnIndices["LIQUDITY_IN_TXN"] = 4] = "LIQUDITY_IN_TXN";
+})(BurnTxnIndices || (BurnTxnIndices = {}));
 /**
  * Get a quote for how many of assets 1 and 2 a deposit of liquidityIn is worth at this moment. This
  * does not execute any transactions.
@@ -32,33 +41,33 @@ async function getBurnLiquidityQuote({ client, pool, liquidityIn }) {
 }
 exports.getBurnLiquidityQuote = getBurnLiquidityQuote;
 const BURN_ENCODED = Uint8Array.from([98, 117, 114, 110]); // 'burn'
-async function doBurn({ client, pool, liquidityIn, asset1Out, asset2Out, initiatorAddr, initiatorSigner }) {
+async function generateBurnTxns({ client, pool, liquidityIn, asset1Out, asset2Out, slippage, initiatorAddr }) {
     const suggestedParams = await client.getTransactionParams().do();
     const validatorAppCallTxn = algosdk_1.default.makeApplicationNoOpTxnFromObject({
         from: pool.addr,
         appIndex: pool.validatorAppID,
         appArgs: [BURN_ENCODED],
         accounts: [initiatorAddr],
-        foreignAssets: 
-        // eslint-disable-next-line eqeqeq
-        pool.asset2ID == 0
+        foreignAssets: pool.asset2ID == constant_1.ALGO_ASSET_ID
             ? [pool.asset1ID, pool.liquidityTokenID]
             : [pool.asset1ID, pool.asset2ID, pool.liquidityTokenID],
         suggestedParams
     });
+    const asset1OutAmount = util_1.applySlippageToAmount("negative", slippage, asset1Out);
     const asset1OutTxn = algosdk_1.default.makeAssetTransferTxnWithSuggestedParamsFromObject({
         from: pool.addr,
         to: initiatorAddr,
         assetIndex: pool.asset1ID,
-        amount: asset1Out,
+        amount: asset1OutAmount,
         suggestedParams
     });
+    const asset2OutAmount = util_1.applySlippageToAmount("negative", slippage, asset2Out);
     let asset2OutTxn;
-    if (pool.asset2ID === 0) {
+    if (pool.asset2ID === constant_1.ALGO_ASSET_ID) {
         asset2OutTxn = algosdk_1.default.makePaymentTxnWithSuggestedParamsFromObject({
             from: pool.addr,
             to: initiatorAddr,
-            amount: asset2Out,
+            amount: asset2OutAmount,
             suggestedParams
         });
     }
@@ -67,7 +76,7 @@ async function doBurn({ client, pool, liquidityIn, asset1Out, asset2Out, initiat
             from: pool.addr,
             to: initiatorAddr,
             assetIndex: pool.asset2ID,
-            amount: asset2Out,
+            amount: asset2OutAmount,
             suggestedParams
         });
     }
@@ -86,38 +95,34 @@ async function doBurn({ client, pool, liquidityIn, asset1Out, asset2Out, initiat
         suggestedParams
     });
     txnFees += liquidityInTxn.fee + feeTxn.fee;
-    const txGroup = algosdk_1.default.assignGroupID([
+    return algosdk_1.default.assignGroupID([
         feeTxn,
         validatorAppCallTxn,
         asset1OutTxn,
         asset2OutTxn,
         liquidityInTxn
     ]);
-    const lsig = algosdk_1.default.makeLogicSig(pool.program);
+}
+exports.generateBurnTxns = generateBurnTxns;
+async function signBurnTxns({ pool, txGroup, initiatorSigner }) {
     const [signedFeeTxn, signedLiquidityInTxn] = await initiatorSigner([
-        txGroup[0],
-        txGroup[4]
+        txGroup[BurnTxnIndices.FEE_TXN],
+        txGroup[BurnTxnIndices.LIQUDITY_IN_TXN]
     ]);
+    const lsig = algosdk_1.default.makeLogicSig(pool.program);
     const signedTxns = txGroup.map((txn, index) => {
-        if (index === 0) {
+        if (index === BurnTxnIndices.FEE_TXN) {
             return signedFeeTxn;
         }
-        if (index === 4) {
+        if (index === BurnTxnIndices.LIQUDITY_IN_TXN) {
             return signedLiquidityInTxn;
         }
         const { blob } = algosdk_1.default.signLogicSigTransactionObject(txn, lsig);
         return blob;
     });
-    const { txId } = await client.sendRawTransaction(signedTxns).do();
-    const status = await util_1.waitForTransaction(client, txId);
-    const confirmedRound = status["confirmed-round"];
-    return {
-        fees: txnFees,
-        confirmedRound,
-        groupID: util_1.bufferToBase64(txGroup[0].group),
-        txnID: txId
-    };
+    return signedTxns;
 }
+exports.signBurnTxns = signBurnTxns;
 /**
  * Execute a burn operation with the desired quantities.
  *
@@ -134,23 +139,16 @@ async function doBurn({ client, pool, liquidityIn, asset1Out, asset2Out, initiat
  * @param params.initiatorSigner A function that will sign transactions from the initiator's
  *   account.
  */
-async function burnLiquidity({ client, pool, liquidityIn, asset1Out, asset2Out, slippage, initiatorAddr, initiatorSigner }) {
-    const asset1OutAmount = util_1.applySlippageToAmount("negative", slippage, asset1Out);
-    const asset2OutAmount = util_1.applySlippageToAmount("negative", slippage, asset2Out);
+async function burnLiquidity({ client, pool, txGroup, signedTxns, initiatorAddr }) {
+    const asset1Out = txGroup[BurnTxnIndices.ASSET1_OUT_TXN].amount;
+    const asset2Out = txGroup[BurnTxnIndices.ASSET2_OUT_TXN].amount;
+    const liquidityIn = txGroup[BurnTxnIndices.LIQUDITY_IN_TXN].amount;
     const prevExcessAssets = await pool_1.getAccountExcess({
         client,
         pool,
         accountAddr: initiatorAddr
     });
-    let { fees, confirmedRound, txnID, groupID } = await doBurn({
-        client,
-        pool,
-        liquidityIn,
-        asset1Out: asset1OutAmount,
-        asset2Out: asset2OutAmount,
-        initiatorAddr,
-        initiatorSigner
-    });
+    const { confirmedRound, txnID } = await util_1.sendAndWaitRawTransaction(client, signedTxns);
     const excessAssets = await pool_1.getAccountExcess({
         client,
         pool,
@@ -166,11 +164,11 @@ async function burnLiquidity({ client, pool, liquidityIn, asset1Out, asset2Out, 
     }
     return {
         round: confirmedRound,
-        fees,
+        fees: util_1.sumUpTxnFees(txGroup),
         asset1ID: pool.asset1ID,
-        asset1Out: asset1OutAmount + excessAmountDeltaAsset1,
+        asset1Out: BigInt(asset1Out) + excessAmountDeltaAsset1,
         asset2ID: pool.asset2ID,
-        asset2Out: asset2OutAmount + excessAmountDeltaAsset2,
+        asset2Out: BigInt(asset2Out) + excessAmountDeltaAsset2,
         liquidityID: pool.liquidityTokenID,
         liquidityIn: BigInt(liquidityIn),
         excessAmounts: [
@@ -186,7 +184,7 @@ async function burnLiquidity({ client, pool, liquidityIn, asset1Out, asset2Out, 
             }
         ],
         txnID,
-        groupID
+        groupID: util_1.getTxnGroupID(txGroup)
     };
 }
 exports.burnLiquidity = burnLiquidity;

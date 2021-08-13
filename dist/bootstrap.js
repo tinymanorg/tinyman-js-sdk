@@ -3,13 +3,21 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.doBootstrap = void 0;
+exports.doBootstrap = exports.signBootstrapTransactions = exports.generateBootstrapTransactions = void 0;
 const algosdk_1 = __importDefault(require("algosdk"));
 const contracts_1 = require("./contracts");
 const util_1 = require("./util");
 const constant_1 = require("./constant");
 const BOOTSTRAP_ENCODED = Uint8Array.from([98, 111, 111, 116, 115, 116, 114, 97, 112]); // 'bootstrap'
-async function doBootstrap({ client, poolLogicSig, validatorAppID, asset1ID, asset2ID, asset1UnitName, asset2UnitName, initiatorAddr, initiatorSigner }) {
+var BootstapTxnGroupIndices;
+(function (BootstapTxnGroupIndices) {
+    BootstapTxnGroupIndices[BootstapTxnGroupIndices["FUNDING_TXN"] = 0] = "FUNDING_TXN";
+    BootstapTxnGroupIndices[BootstapTxnGroupIndices["VALIDATOR_APP_CALL"] = 1] = "VALIDATOR_APP_CALL";
+    BootstapTxnGroupIndices[BootstapTxnGroupIndices["LIQUIDITY_TOKEN_CREATE"] = 2] = "LIQUIDITY_TOKEN_CREATE";
+    BootstapTxnGroupIndices[BootstapTxnGroupIndices["ASSET1_OPT_IN"] = 3] = "ASSET1_OPT_IN";
+    BootstapTxnGroupIndices[BootstapTxnGroupIndices["ASSET2_OPT_IN"] = 4] = "ASSET2_OPT_IN";
+})(BootstapTxnGroupIndices || (BootstapTxnGroupIndices = {}));
+async function generateBootstrapTransactions({ client, poolLogicSig, validatorAppID, asset1ID, asset2ID, asset1UnitName, asset2UnitName, initiatorAddr }) {
     const suggestedParams = await client.getTransactionParams().do();
     const validatorAppCallTxn = algosdk_1.default.makeApplicationOptInTxnFromObject({
         from: poolLogicSig.addr,
@@ -75,29 +83,38 @@ async function doBootstrap({ client, poolLogicSig, validatorAppID, asset1ID, ass
     if (asset2Optin) {
         txns.push(asset2Optin);
     }
-    let txGroup = algosdk_1.default.assignGroupID(txns);
+    return algosdk_1.default.assignGroupID(txns);
+}
+exports.generateBootstrapTransactions = generateBootstrapTransactions;
+async function signBootstrapTransactions({ poolLogicSig, txGroup, initiatorSigner }) {
+    const [signedFundingTxn] = await initiatorSigner([
+        txGroup[BootstapTxnGroupIndices.FUNDING_TXN]
+    ]);
     const lsig = algosdk_1.default.makeLogicSig(poolLogicSig.program);
-    const [signedFundingTxn] = await initiatorSigner([txGroup[0]]);
-    const txIDs = [];
+    const txnIDs = [];
     const signedTxns = txGroup.map((txn, index) => {
-        if (index === 0) {
-            txIDs.push(txn.txID().toString());
+        if (index === BootstapTxnGroupIndices.FUNDING_TXN) {
+            txnIDs.push(txn.txID().toString());
             return signedFundingTxn;
         }
         const { txID, blob } = algosdk_1.default.signLogicSigTransactionObject(txn, lsig);
-        txIDs.push(txID);
+        txnIDs.push(txID);
         return blob;
     });
+    return { signedTxns, txnIDs };
+}
+exports.signBootstrapTransactions = signBootstrapTransactions;
+async function doBootstrap({ client, signedTxns, txnIDs }) {
     try {
         await client.sendRawTransaction(signedTxns).do();
     }
     catch (err) {
         if (err.response) {
-            throw new Error(`Response ${err.response.status}: ${err.response.text}\nTxIDs are: ${txIDs}`);
+            throw new Error(`Response ${err.response.status}: ${err.response.text}\nTxIDs are: ${txnIDs}`);
         }
         throw err;
     }
-    const assetCreationResult = await util_1.waitForTransaction(client, txIDs[2]);
+    const assetCreationResult = await util_1.waitForTransaction(client, txnIDs[BootstapTxnGroupIndices.LIQUIDITY_TOKEN_CREATE]);
     const liquidityTokenID = assetCreationResult["asset-index"];
     if (typeof liquidityTokenID !== "number") {
         throw new Error(`Generated ID is not valid: got ${liquidityTokenID}`);

@@ -3,10 +3,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.issueSwap = exports.getSwapQuote = exports.SwapType = void 0;
+exports.issueSwap = exports.getSwapQuote = exports.generateSwapTransactions = exports.signSwapTransactions = exports.SwapType = void 0;
 const algosdk_1 = __importDefault(require("algosdk"));
 const util_1 = require("./util");
 const pool_1 = require("./pool");
+const constant_1 = require("./constant");
 // FEE = %0.3 or 3/1000
 const FEE_NUMERATOR = 3n;
 const FEE_DENOMINATOR = 1000n;
@@ -18,30 +19,57 @@ var SwapType;
 const SWAP_ENCODED = Uint8Array.from([115, 119, 97, 112]); // 'swap'
 const FIXED_INPUT_ENCODED = Uint8Array.from([102, 105]); // 'fi'
 const FIXED_OUTPUT_ENCODED = Uint8Array.from([102, 111]); // 'fo'
-async function doSwap({ client, pool, swapType, assetIn, assetOut, initiatorAddr, initiatorSigner }) {
+var SwapTxnGroupIndices;
+(function (SwapTxnGroupIndices) {
+    SwapTxnGroupIndices[SwapTxnGroupIndices["FEE_TXN_INDEX"] = 0] = "FEE_TXN_INDEX";
+    SwapTxnGroupIndices[SwapTxnGroupIndices["VALIDATOR_APP_CALL_TXN_INDEX"] = 1] = "VALIDATOR_APP_CALL_TXN_INDEX";
+    SwapTxnGroupIndices[SwapTxnGroupIndices["ASSET_IN_TXN_INDEX"] = 2] = "ASSET_IN_TXN_INDEX";
+    SwapTxnGroupIndices[SwapTxnGroupIndices["ASSET_OUT_TXN_INDEX"] = 3] = "ASSET_OUT_TXN_INDEX";
+})(SwapTxnGroupIndices || (SwapTxnGroupIndices = {}));
+async function signSwapTransactions({ pool, txGroup, initiatorSigner }) {
+    const lsig = algosdk_1.default.makeLogicSig(pool.program);
+    const [signedFeeTxn, signedAssetInTxn] = await initiatorSigner([
+        txGroup[SwapTxnGroupIndices.FEE_TXN_INDEX],
+        txGroup[SwapTxnGroupIndices.ASSET_IN_TXN_INDEX]
+    ]);
+    const signedTxns = txGroup.map((txn, index) => {
+        if (index === SwapTxnGroupIndices.FEE_TXN_INDEX) {
+            return signedFeeTxn;
+        }
+        if (index === SwapTxnGroupIndices.ASSET_IN_TXN_INDEX) {
+            return signedAssetInTxn;
+        }
+        const { blob } = algosdk_1.default.signLogicSigTransactionObject(txn, lsig);
+        return blob;
+    });
+    return signedTxns;
+}
+exports.signSwapTransactions = signSwapTransactions;
+async function generateSwapTransactions({ client, pool, swapType, assetIn, assetOut, slippage, initiatorAddr }) {
     const suggestedParams = await client.getTransactionParams().do();
     const validatorAppCallArgs = [
         SWAP_ENCODED,
-        swapType === "fixed input" ? FIXED_INPUT_ENCODED : FIXED_OUTPUT_ENCODED
+        swapType === SwapType.FixedInput ? FIXED_INPUT_ENCODED : FIXED_OUTPUT_ENCODED
     ];
     const validatorAppCallTxn = algosdk_1.default.makeApplicationNoOpTxnFromObject({
         from: pool.addr,
         appIndex: pool.validatorAppID,
         appArgs: validatorAppCallArgs,
         accounts: [initiatorAddr],
-        foreignAssets: 
-        // eslint-disable-next-line eqeqeq
-        pool.asset2ID == 0
+        foreignAssets: pool.asset2ID == constant_1.ALGO_ASSET_ID
             ? [pool.asset1ID, pool.liquidityTokenID]
             : [pool.asset1ID, pool.asset2ID, pool.liquidityTokenID],
         suggestedParams
     });
+    const assetInAmount = swapType === SwapType.FixedOutput
+        ? util_1.applySlippageToAmount("positive", slippage, assetIn.amount)
+        : assetIn.amount;
     let assetInTxn;
-    if (assetIn.assetID === 0) {
+    if (assetIn.assetID === constant_1.ALGO_ASSET_ID) {
         assetInTxn = algosdk_1.default.makePaymentTxnWithSuggestedParamsFromObject({
             from: initiatorAddr,
             to: pool.addr,
-            amount: assetIn.amount,
+            amount: assetInAmount,
             suggestedParams
         });
     }
@@ -50,16 +78,19 @@ async function doSwap({ client, pool, swapType, assetIn, assetOut, initiatorAddr
             from: initiatorAddr,
             to: pool.addr,
             assetIndex: assetIn.assetID,
-            amount: assetIn.amount,
+            amount: assetInAmount,
             suggestedParams
         });
     }
+    const assetOutAmount = swapType === SwapType.FixedInput
+        ? util_1.applySlippageToAmount("negative", slippage, assetOut.amount)
+        : assetOut.amount;
     let assetOutTxn;
-    if (assetOut.assetID === 0) {
+    if (assetOut.assetID === constant_1.ALGO_ASSET_ID) {
         assetOutTxn = algosdk_1.default.makePaymentTxnWithSuggestedParamsFromObject({
             from: pool.addr,
             to: initiatorAddr,
-            amount: assetOut.amount,
+            amount: assetOutAmount,
             suggestedParams
         });
     }
@@ -68,49 +99,25 @@ async function doSwap({ client, pool, swapType, assetIn, assetOut, initiatorAddr
             from: pool.addr,
             to: initiatorAddr,
             assetIndex: assetOut.assetID,
-            amount: assetOut.amount,
+            amount: assetOutAmount,
             suggestedParams
         });
     }
-    let txnFees = validatorAppCallTxn.fee + assetOutTxn.fee;
     const feeTxn = algosdk_1.default.makePaymentTxnWithSuggestedParamsFromObject({
         from: initiatorAddr,
         to: pool.addr,
-        amount: txnFees,
+        amount: validatorAppCallTxn.fee + assetOutTxn.fee,
         suggestedParams
     });
-    txnFees += assetInTxn.fee + feeTxn.fee;
     const txGroup = algosdk_1.default.assignGroupID([
         feeTxn,
         validatorAppCallTxn,
         assetInTxn,
         assetOutTxn
     ]);
-    const lsig = algosdk_1.default.makeLogicSig(pool.program);
-    const [signedFeeTxn, signedAssetInTxn] = await initiatorSigner([
-        txGroup[0],
-        txGroup[2]
-    ]);
-    const signedTxns = txGroup.map((txn, index) => {
-        if (index === 0) {
-            return signedFeeTxn;
-        }
-        if (index === 2) {
-            return signedAssetInTxn;
-        }
-        const { blob } = algosdk_1.default.signLogicSigTransactionObject(txn, lsig);
-        return blob;
-    });
-    const { txId } = await client.sendRawTransaction(signedTxns).do();
-    const status = await util_1.waitForTransaction(client, txId);
-    const confirmedRound = status["confirmed-round"];
-    return {
-        fees: txnFees,
-        confirmedRound,
-        groupID: util_1.bufferToBase64(txGroup[0].group),
-        txnID: txId
-    };
+    return txGroup;
 }
+exports.generateSwapTransactions = generateSwapTransactions;
 /**
  * Get a quote for a fixed input swap This does not execute any transactions.
  *
@@ -170,29 +177,14 @@ async function getFixedInputSwapQuote({ client, pool, assetIn, decimals }) {
  * @param params.assetOut.slippage The maximum acceptable slippage rate. Should be a number between
  *   0 and 100 and acts as a percentage of params.assetOut.amount.
  * @param params.initiatorAddr The address of the account performing the swap operation.
- * @param params.initiatorSigner A function that will sign transactions from the initiator's
- *   account.
  */
-async function fixedInputSwap({ client, pool, assetIn, assetOut, initiatorAddr, initiatorSigner }) {
-    // apply slippage to asset out amount
-    const assetOutAmount = util_1.applySlippageToAmount("negative", assetOut.slippage, assetOut.amount);
+async function fixedInputSwap({ client, pool, signedTxns, assetIn, assetOut, initiatorAddr }) {
     const prevExcessAssets = await pool_1.getAccountExcess({
         client,
         pool,
         accountAddr: initiatorAddr
     });
-    let { fees, confirmedRound, groupID, txnID } = await doSwap({
-        client,
-        pool,
-        swapType: "fixed input",
-        assetIn,
-        assetOut: {
-            assetID: assetOut.assetID,
-            amount: assetOutAmount
-        },
-        initiatorAddr,
-        initiatorSigner
-    });
+    let { confirmedRound, txnID } = await util_1.sendAndWaitRawTransaction(client, signedTxns);
     const excessAssets = await pool_1.getAccountExcess({
         client,
         pool,
@@ -214,17 +206,15 @@ async function fixedInputSwap({ client, pool, assetIn, assetOut, initiatorAddr, 
     }
     return {
         round: confirmedRound,
-        fees,
         assetInID: assetIn.assetID,
         assetInAmount: BigInt(assetIn.amount),
         assetOutID: assetOut.assetID,
-        assetOutAmount: assetOutAmount + excessAmountDelta,
+        assetOutAmount: BigInt(assetOut.amount) + excessAmountDelta,
         excessAmount: {
             assetID: assetOut.assetID,
             excessAmountForSwap: excessAmountDelta,
             totalExcessAmount: excessAmount
         },
-        groupID,
         txnID
     };
 }
@@ -320,29 +310,14 @@ exports.getSwapQuote = getSwapQuote;
  *   or asset2ID, and must be different than params.asset1In.assetID.
  * @param params.assetOut.amount The quantity of the output asset.
  * @param params.initiatorAddr The address of the account performing the swap operation.
- * @param params.initiatorSigner A function that will sign transactions from the initiator's
- *   account.
  */
-async function fixedOutputSwap({ client, pool, assetIn, assetOut, initiatorAddr, initiatorSigner }) {
-    // apply slippage to asset in amount
-    const assetInAmount = util_1.applySlippageToAmount("positive", assetIn.slippage, assetIn.amount);
+async function fixedOutputSwap({ client, pool, signedTxns, assetIn, assetOut, initiatorAddr }) {
     const prevExcessAssets = await pool_1.getAccountExcess({
         client,
         pool,
         accountAddr: initiatorAddr
     });
-    let { fees, confirmedRound, groupID, txnID } = await doSwap({
-        client,
-        pool,
-        swapType: "fixed output",
-        assetIn: {
-            assetID: assetIn.assetID,
-            amount: assetInAmount
-        },
-        assetOut,
-        initiatorAddr,
-        initiatorSigner
-    });
+    let { confirmedRound, txnID } = await util_1.sendAndWaitRawTransaction(client, signedTxns);
     const excessAssets = await pool_1.getAccountExcess({
         client,
         pool,
@@ -364,9 +339,8 @@ async function fixedOutputSwap({ client, pool, assetIn, assetOut, initiatorAddr,
     }
     return {
         round: confirmedRound,
-        fees,
         assetInID: assetIn.assetID,
-        assetInAmount: assetInAmount - excessAmountDelta,
+        assetInAmount: BigInt(assetIn.amount) - excessAmountDelta,
         assetOutID: assetOut.assetID,
         assetOutAmount: BigInt(assetOut.amount),
         excessAmount: {
@@ -374,7 +348,6 @@ async function fixedOutputSwap({ client, pool, assetIn, assetOut, initiatorAddr,
             excessAmountForSwap: excessAmountDelta,
             totalExcessAmount: excessAmount
         },
-        groupID,
         txnID
     };
 }
@@ -392,37 +365,37 @@ async function fixedOutputSwap({ client, pool, assetIn, assetOut, initiatorAddr,
  * @param params.assetOut.amount The quantity of the output asset.
  * @param params.slippage The maximum acceptable slippage rate.
  * @param params.initiatorAddr The address of the account performing the swap operation.
- * @param params.initiatorSigner A function that will sign transactions from the initiator's
- *   account.
  */
-function issueSwap({ client, pool, swapType, assetIn, assetOut, slippage, initiatorAddr, initiatorSigner }) {
-    let promise;
+async function issueSwap({ client, pool, swapType, txGroup, signedTxns, initiatorAddr }) {
+    const assetIn = {
+        assetID: txGroup[SwapTxnGroupIndices.ASSET_IN_TXN_INDEX].assetIndex || constant_1.ALGO_ASSET_ID,
+        amount: txGroup[SwapTxnGroupIndices.ASSET_IN_TXN_INDEX].amount
+    };
+    const assetOut = {
+        assetID: txGroup[SwapTxnGroupIndices.ASSET_OUT_TXN_INDEX].assetIndex || constant_1.ALGO_ASSET_ID,
+        amount: txGroup[SwapTxnGroupIndices.ASSET_OUT_TXN_INDEX].amount
+    };
+    let swapData;
     if (swapType === SwapType.FixedInput) {
-        promise = fixedInputSwap({
+        swapData = await fixedInputSwap({
             client,
             pool,
+            signedTxns,
             assetIn,
-            assetOut: {
-                ...assetOut,
-                slippage
-            },
-            initiatorAddr,
-            initiatorSigner
+            assetOut,
+            initiatorAddr
         });
     }
     else {
-        promise = fixedOutputSwap({
+        swapData = await fixedOutputSwap({
             client,
             pool,
-            assetIn: {
-                ...assetIn,
-                slippage
-            },
+            signedTxns,
+            assetIn,
             assetOut,
-            initiatorAddr,
-            initiatorSigner
+            initiatorAddr
         });
     }
-    return promise;
+    return { ...swapData, groupID: util_1.getTxnGroupID(txGroup), fees: util_1.sumUpTxnFees(txGroup) };
 }
 exports.issueSwap = issueSwap;

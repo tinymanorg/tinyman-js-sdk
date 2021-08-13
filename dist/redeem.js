@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getExcessAmountsWithPoolAssetDetails = exports.getExcessAmounts = exports.redeemAllExcessAsset = exports.redeemExcessAsset = void 0;
+exports.getExcessAmountsWithPoolAssetDetails = exports.getExcessAmounts = exports.generateRedeemTxns = exports.redeemAllExcessAsset = exports.redeemExcessAsset = void 0;
 const algosdk_1 = __importDefault(require("algosdk"));
 const base64_js_1 = require("base64-js");
 const util_1 = require("./util");
@@ -21,16 +21,24 @@ const REDEEM_ENCODED = Uint8Array.from([114, 101, 100, 101, 101, 109]); // 'rede
  * @param params.initiatorSigner A function that will sign transactions from the initiator's
  *   account.
  */
-async function redeemExcessAsset({ client, pool, assetID, assetOut, initiatorAddr, initiatorSigner }) {
-    const suggestedParams = await client.getTransactionParams().do();
-    const { txGroup, txnFees } = generateRedeemTransactionGroup(suggestedParams, {
+async function redeemExcessAsset({ client, pool, txGroup, initiatorSigner }) {
+    const signedTxns = await signRedeemTxns({
+        txGroup,
         pool,
-        assetID,
-        assetOut,
-        initiatorAddr
+        initiatorSigner
     });
-    const lsig = algosdk_1.default.makeLogicSig(pool.program);
+    const { txnID, confirmedRound } = await util_1.sendAndWaitRawTransaction(client, signedTxns);
+    return {
+        fees: util_1.sumUpTxnFees(txGroup),
+        confirmedRound,
+        txnID,
+        groupID: util_1.bufferToBase64(txGroup[0].group)
+    };
+}
+exports.redeemExcessAsset = redeemExcessAsset;
+async function signRedeemTxns({ txGroup, pool, initiatorSigner }) {
     const [signedFeeTxn] = await initiatorSigner([txGroup[0]]);
+    const lsig = algosdk_1.default.makeLogicSig(pool.program);
     const signedTxns = txGroup.map((txn, index) => {
         if (index === 0) {
             return signedFeeTxn;
@@ -38,15 +46,8 @@ async function redeemExcessAsset({ client, pool, assetID, assetOut, initiatorAdd
         const { blob } = algosdk_1.default.signLogicSigTransactionObject(txn, lsig);
         return blob;
     });
-    const { txnID, confirmedRound } = await util_1.sendAndWaitRawTransaction(client, signedTxns);
-    return {
-        fees: txnFees,
-        confirmedRound,
-        txnID,
-        groupID: util_1.bufferToBase64(txGroup[0].group)
-    };
+    return signedTxns;
 }
-exports.redeemExcessAsset = redeemExcessAsset;
 /**
  * Execute redeem operations to collect all excess assets from previous operations.
  *
@@ -59,18 +60,13 @@ exports.redeemExcessAsset = redeemExcessAsset;
  * @param params.initiatorSigner A function that will sign transactions from the initiator's
  *   account.
  */
-async function redeemAllExcessAsset({ client, data, initiatorAddr, initiatorSigner }) {
-    const suggestedParams = await client.getTransactionParams().do();
-    const redeemItems = data.map((item) => {
-        const txnGroupData = generateRedeemTransactionGroup(suggestedParams, {
-            ...item,
-            initiatorAddr
-        });
-        return {
-            ...txnGroupData,
-            lsig: algosdk_1.default.makeLogicSig(item.pool.program)
-        };
-    });
+async function redeemAllExcessAsset({ client, data, initiatorSigner }) {
+    const redeemItems = data.map(({ txGroup, pool }) => ({
+        txGroup,
+        txnFees: util_1.sumUpTxnFees(txGroup),
+        groupID: util_1.getTxnGroupID(txGroup),
+        lsig: algosdk_1.default.makeLogicSig(pool.program)
+    }));
     // These are signed by the initiator
     const transactionsToSign = redeemItems.map((item) => {
         return item.txGroup[0]; // feeTxn;
@@ -101,7 +97,8 @@ async function redeemAllExcessAsset({ client, data, initiatorAddr, initiatorSign
     return redeemTxnsPromise;
 }
 exports.redeemAllExcessAsset = redeemAllExcessAsset;
-function generateRedeemTransactionGroup(suggestedParams, { pool, assetID, assetOut, initiatorAddr }) {
+async function generateRedeemTxns({ client, pool, assetID, assetOut, initiatorAddr }) {
+    const suggestedParams = await client.getTransactionParams().do();
     const validatorAppCallTxn = algosdk_1.default.makeApplicationNoOpTxnFromObject({
         from: pool.addr,
         appIndex: pool.validatorAppID,
@@ -132,21 +129,20 @@ function generateRedeemTransactionGroup(suggestedParams, { pool, assetID, assetO
             suggestedParams
         });
     }
-    let txnFees = validatorAppCallTxn.fee + assetOutTxn.fee;
     const feeTxn = algosdk_1.default.makePaymentTxnWithSuggestedParamsFromObject({
         from: initiatorAddr,
         to: pool.addr,
         amount: validatorAppCallTxn.fee + assetOutTxn.fee,
         suggestedParams
     });
-    txnFees += feeTxn.fee;
     const txGroup = algosdk_1.default.assignGroupID([
         feeTxn,
         validatorAppCallTxn,
         assetOutTxn
     ]);
-    return { txGroup, txnFees, groupID: util_1.bufferToBase64(txGroup[0].group) };
+    return txGroup;
 }
+exports.generateRedeemTxns = generateRedeemTxns;
 /**
  * Generates a list of excess amounts accumulated within an account.
  * @param params.client An Algodv2 client.

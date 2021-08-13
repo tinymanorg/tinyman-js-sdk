@@ -1,3 +1,4 @@
+import {Algodv2, Transaction} from "algosdk";
 import {PoolInfo} from "./pool";
 import {TinymanAnalyticsApiAsset, InitiatorSigner} from "./common-types";
 /**
@@ -15,16 +16,12 @@ import {TinymanAnalyticsApiAsset, InitiatorSigner} from "./common-types";
 export declare function redeemExcessAsset({
   client,
   pool,
-  assetID,
-  assetOut,
-  initiatorAddr,
+  txGroup,
   initiatorSigner
 }: {
   client: any;
   pool: PoolInfo;
-  assetID: number;
-  assetOut: number | bigint;
-  initiatorAddr: string;
+  txGroup: Transaction[];
   initiatorSigner: InitiatorSigner;
 }): Promise<{
   fees: number;
@@ -47,16 +44,13 @@ export declare function redeemExcessAsset({
 export declare function redeemAllExcessAsset({
   client,
   data,
-  initiatorAddr,
   initiatorSigner
 }: {
   client: any;
   data: {
     pool: PoolInfo;
-    assetID: number;
-    assetOut: number | bigint;
+    txGroup: Transaction[];
   }[];
-  initiatorAddr: string;
   initiatorSigner: InitiatorSigner;
 }): Promise<
   {
@@ -66,6 +60,19 @@ export declare function redeemAllExcessAsset({
     txnID: string;
   }[]
 >;
+export declare function generateRedeemTxns({
+  client,
+  pool,
+  assetID,
+  assetOut,
+  initiatorAddr
+}: {
+  client: Algodv2;
+  pool: PoolInfo;
+  assetID: number;
+  assetOut: number | bigint;
+  initiatorAddr: string;
+}): Promise<Transaction[]>;
 export interface ExcessAmountData {
   poolAddress: string;
   assetID: number;

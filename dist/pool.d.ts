@@ -1,4 +1,4 @@
-import {InitiatorSigner} from "./common-types";
+import {Algodv2} from "algosdk";
 export declare enum PoolStatus {
   NOT_CREATED = "not created",
   BOOTSTRAP = "bootstrap",
@@ -54,11 +54,11 @@ export declare function getPoolInfo(
  * @param pool.asset2ID The ID of the second asset in the pool pair.
  * @param pool.asset1UnitName The unit name of the first asset in the pool.
  * @param pool.asset2UnitName The unit name of the second asset in the pool.
- * @param initiatorAddr The address of the account initiating creation.
- * @param initiatorSigner A function that will sign transactions from the initiator's account.
+ * @param signedTxns Signed transactions
+ * @param txnIDs Transaction IDs
  */
 export declare function createPool(
-  client: any,
+  client: Algodv2,
   pool: {
     validatorAppID: number;
     asset1ID: number;
@@ -66,8 +66,8 @@ export declare function createPool(
     asset1UnitName: string;
     asset2UnitName: string;
   },
-  initiatorAddr: string,
-  initiatorSigner: InitiatorSigner
+  signedTxns: Uint8Array[],
+  txnIDs: string[]
 ): Promise<PoolInfo>;
 export declare function getPoolReserves(
   client: any,

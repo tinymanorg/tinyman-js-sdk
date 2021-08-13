@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isOptedIntoValidator = exports.optOutOfValidator = exports.optIntoValidator = exports.getvalidatorAppID = void 0;
+exports.isOptedIntoValidator = exports.generateOptOutOfValidatorTxns = exports.optOutOfValidator = exports.generateOptIntoValidatorTxns = exports.optIntoValidator = exports.getvalidatorAppID = void 0;
 const algosdk_1 = __importDefault(require("algosdk"));
 const util_1 = require("./util");
 const constant_1 = require("./constant");
@@ -44,17 +44,25 @@ exports.getvalidatorAppID = getvalidatorAppID;
  *   account.
  */
 async function optIntoValidator({ client, validatorAppID, initiatorAddr, initiatorSigner }) {
+    const appOptInTxns = await generateOptIntoValidatorTxns({
+        client,
+        validatorAppID,
+        initiatorAddr
+    });
+    const signedTxns = await initiatorSigner(appOptInTxns);
+    return util_1.sendAndWaitRawTransaction(client, signedTxns);
+}
+exports.optIntoValidator = optIntoValidator;
+async function generateOptIntoValidatorTxns({ client, validatorAppID, initiatorAddr }) {
     const suggestedParams = await client.getTransactionParams().do();
     const appOptInTxn = algosdk_1.default.makeApplicationOptInTxnFromObject({
         from: initiatorAddr,
         appIndex: validatorAppID,
         suggestedParams
     });
-    const [signedTxn] = await initiatorSigner([appOptInTxn]);
-    const { txId } = await client.sendRawTransaction(signedTxn).do();
-    await util_1.waitForTransaction(client, txId);
+    return [appOptInTxn];
 }
-exports.optIntoValidator = optIntoValidator;
+exports.generateOptIntoValidatorTxns = generateOptIntoValidatorTxns;
 /**
  * Close out of the Validator app. WARNING: Make sure to redeem ALL excess asset amounts
  * before closing out of the validator, otherwise those assets will be returned to Pools.
@@ -66,17 +74,25 @@ exports.optIntoValidator = optIntoValidator;
  *   account.
  */
 async function optOutOfValidator({ client, validatorAppID, initiatorAddr, initiatorSigner }) {
+    const appClearStateTxns = await generateOptOutOfValidatorTxns({
+        client,
+        validatorAppID,
+        initiatorAddr
+    });
+    const signedTxns = await initiatorSigner(appClearStateTxns);
+    return util_1.sendAndWaitRawTransaction(client, signedTxns);
+}
+exports.optOutOfValidator = optOutOfValidator;
+async function generateOptOutOfValidatorTxns({ client, validatorAppID, initiatorAddr }) {
     const suggestedParams = await client.getTransactionParams().do();
     const appClearStateTxn = algosdk_1.default.makeApplicationClearStateTxnFromObject({
         from: initiatorAddr,
         appIndex: validatorAppID,
         suggestedParams
     });
-    const [signedTxn] = await initiatorSigner([appClearStateTxn]);
-    const { txId } = await client.sendRawTransaction(signedTxn).do();
-    await util_1.waitForTransaction(client, txId);
+    return [appClearStateTxn];
 }
-exports.optOutOfValidator = optOutOfValidator;
+exports.generateOptOutOfValidatorTxns = generateOptOutOfValidatorTxns;
 /**
  * Checks if an account is opted into the Validator app.
  *

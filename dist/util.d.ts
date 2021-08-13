@@ -1,5 +1,5 @@
 /// <reference types="node" />
-import algosdk, {Algodv2} from "algosdk";
+import algosdk, {Algodv2, Transaction} from "algosdk";
 import {
   AccountInformationData,
   TinymanAnalyticsApiAsset,
@@ -26,7 +26,19 @@ export declare function optIntoAsset({
   assetID: number;
   initiatorAddr: string;
   initiatorSigner: InitiatorSigner;
-}): Promise<void>;
+}): Promise<{
+  confirmedRound: any;
+  txnID: any;
+}>;
+export declare function generateOptIntoAssetTxns({
+  client,
+  assetID,
+  initiatorAddr
+}: {
+  client: any;
+  assetID: any;
+  initiatorAddr: any;
+}): Promise<algosdk.Transaction[]>;
 export declare function bufferToBase64(
   arrayBuffer: undefined | null | WithImplicitCoercion<ArrayBuffer | SharedArrayBuffer>
 ): string;
@@ -70,3 +82,5 @@ export declare function sendAndWaitRawTransaction(
   confirmedRound: any;
   txnID: any;
 }>;
+export declare function sumUpTxnFees(txns: Transaction[]): number;
+export declare function getTxnGroupID(txns: Transaction[]): string;
