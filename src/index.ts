@@ -24,7 +24,14 @@ export {
 
 export {generateBootstrapTransactions, signBootstrapTransactions} from "./bootstrap";
 
-export {MintQuote, MintExecution, getMintLiquidityQuote, mintLiquidity} from "./mint";
+export {
+  MintQuote,
+  MintExecution,
+  getMintLiquidityQuote,
+  mintLiquidity,
+  generateMintTxns,
+  signMintTxns
+} from "./mint";
 
 export {BurnQuote, BurnExecution, getBurnLiquidityQuote, burnLiquidity} from "./burn";
 
