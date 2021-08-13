@@ -33,7 +33,14 @@ export {
   signMintTxns
 } from "./mint";
 
-export {BurnQuote, BurnExecution, getBurnLiquidityQuote, burnLiquidity} from "./burn";
+export {
+  BurnQuote,
+  BurnExecution,
+  getBurnLiquidityQuote,
+  burnLiquidity,
+  generateBurnTxns,
+  signBurnTxns
+} from "./burn";
 
 export {
   SwapQuote,
