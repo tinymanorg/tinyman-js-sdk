@@ -1,6 +1,6 @@
-import algosdk from "algosdk";
+import algosdk, {Algodv2} from "algosdk";
 
-import {waitForTransaction} from "./util";
+import {sendAndWaitRawTransaction, waitForTransaction} from "./util";
 import {AccountInformationData, InitiatorSigner} from "./common-types";
 import {
   TESTNET_VALIDATOR_APP_ID,
@@ -61,24 +61,40 @@ export async function optIntoValidator({
   initiatorAddr,
   initiatorSigner
 }: {
-  client: any;
+  client: Algodv2;
   validatorAppID: number;
   initiatorAddr: string;
   initiatorSigner: InitiatorSigner;
-}): Promise<void> {
+}) {
+  const appOptInTxns = await generateOptIntoValidatorTxns({
+    client,
+    validatorAppID,
+    initiatorAddr
+  });
+
+  const signedTxns = await initiatorSigner(appOptInTxns);
+
+  return sendAndWaitRawTransaction(client, signedTxns);
+}
+
+export async function generateOptIntoValidatorTxns({
+  client,
+  validatorAppID,
+  initiatorAddr
+}: {
+  client: Algodv2;
+  validatorAppID: number;
+  initiatorAddr: string;
+}) {
   const suggestedParams = await client.getTransactionParams().do();
 
   const appOptInTxn = algosdk.makeApplicationOptInTxnFromObject({
     from: initiatorAddr,
-    appIndex: validatorAppID!,
+    appIndex: validatorAppID,
     suggestedParams
   });
 
-  const [signedTxn] = await initiatorSigner([appOptInTxn]);
-
-  const {txId} = await client.sendRawTransaction(signedTxn).do();
-
-  await waitForTransaction(client, txId);
+  return [appOptInTxn];
 }
 
 /**
@@ -97,11 +113,31 @@ export async function optOutOfValidator({
   initiatorAddr,
   initiatorSigner
 }: {
-  client: any;
+  client: Algodv2;
   validatorAppID: number;
   initiatorAddr: string;
   initiatorSigner: InitiatorSigner;
-}): Promise<void> {
+}) {
+  const appClearStateTxns = await generateOptOutOfValidatorTxns({
+    client,
+    validatorAppID,
+    initiatorAddr
+  });
+
+  const signedTxns = await initiatorSigner(appClearStateTxns);
+
+  return sendAndWaitRawTransaction(client, signedTxns);
+}
+
+export async function generateOptOutOfValidatorTxns({
+  client,
+  validatorAppID,
+  initiatorAddr
+}: {
+  client: Algodv2;
+  validatorAppID: number;
+  initiatorAddr: string;
+}) {
   const suggestedParams = await client.getTransactionParams().do();
 
   const appClearStateTxn = algosdk.makeApplicationClearStateTxnFromObject({
@@ -110,11 +146,7 @@ export async function optOutOfValidator({
     suggestedParams
   });
 
-  const [signedTxn] = await initiatorSigner([appClearStateTxn]);
-
-  const {txId} = await client.sendRawTransaction(signedTxn).do();
-
-  await waitForTransaction(client, txId);
+  return [appClearStateTxn];
 }
 
 /**

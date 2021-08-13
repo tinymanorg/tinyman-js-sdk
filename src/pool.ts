@@ -1,4 +1,4 @@
-import algosdk from "algosdk";
+import algosdk, {Algodv2} from "algosdk";
 import {fromByteArray} from "base64-js";
 
 import {getPoolLogicSig} from "./contracts";
@@ -9,7 +9,7 @@ import {
   convertFromBaseUnits
 } from "./util";
 import {doBootstrap} from "./bootstrap";
-import {AccountInformationData, InitiatorSigner} from "./common-types";
+import {AccountInformationData} from "./common-types";
 
 export enum PoolStatus {
   NOT_CREATED = "not created",
@@ -98,11 +98,11 @@ export async function getPoolInfo(
  * @param pool.asset2ID The ID of the second asset in the pool pair.
  * @param pool.asset1UnitName The unit name of the first asset in the pool.
  * @param pool.asset2UnitName The unit name of the second asset in the pool.
- * @param initiatorAddr The address of the account initiating creation.
- * @param initiatorSigner A function that will sign transactions from the initiator's account.
+ * @param signedTxns Signed transactions
+ * @param txnIDs Transaction IDs
  */
 export async function createPool(
-  client: any,
+  client: Algodv2,
   pool: {
     validatorAppID: number;
     asset1ID: number;
@@ -110,25 +110,13 @@ export async function createPool(
     asset1UnitName: string;
     asset2UnitName: string;
   },
-  initiatorAddr: string,
-  initiatorSigner: InitiatorSigner
+  signedTxns: Uint8Array[],
+  txnIDs: string[]
 ): Promise<PoolInfo> {
-  const poolLogicSig = getPoolLogicSig(pool);
-
-  const {validatorAppID, asset1UnitName, asset2UnitName} = pool;
-  const asset1ID = Math.max(pool.asset1ID, pool.asset2ID);
-  const asset2ID = Math.min(pool.asset1ID, pool.asset2ID);
-
   await doBootstrap({
     client,
-    poolLogicSig,
-    validatorAppID,
-    asset1ID,
-    asset2ID,
-    asset1UnitName,
-    asset2UnitName,
-    initiatorAddr,
-    initiatorSigner
+    signedTxns,
+    txnIDs
   });
 
   return getPoolInfo(client, pool);

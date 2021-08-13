@@ -1,4 +1,4 @@
-import algosdk, {Algodv2} from "algosdk";
+import algosdk, {Algodv2, Transaction} from "algosdk";
 import {AssetParams} from "algosdk/dist/types/src/client/v2/algod/models/types";
 
 import {
@@ -133,6 +133,18 @@ export async function optIntoAsset({
   initiatorAddr: string;
   initiatorSigner: InitiatorSigner;
 }) {
+  const optInTxns = await generateOptIntoAssetTxns({
+    client,
+    assetID,
+    initiatorAddr
+  });
+
+  const signedTxns = await initiatorSigner(optInTxns);
+
+  return sendAndWaitRawTransaction(client, signedTxns);
+}
+
+export async function generateOptIntoAssetTxns({client, assetID, initiatorAddr}) {
   const suggestedParams = await client.getTransactionParams().do();
 
   const optInTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
@@ -143,11 +155,7 @@ export async function optIntoAsset({
     suggestedParams
   });
 
-  const [signedTxn] = await initiatorSigner([optInTxn]);
-
-  const {txId} = await client.sendRawTransaction(signedTxn).do();
-
-  await waitForTransaction(client, txId);
+  return [optInTxn];
 }
 
 export function bufferToBase64(
@@ -261,4 +269,12 @@ export async function sendAndWaitRawTransaction(client: Algodv2, signedTxns: any
     confirmedRound,
     txnID: txId
   };
+}
+
+export function sumUpTxnFees(txns: Transaction[]): number {
+  return txns.reduce((totalFee, txn) => totalFee + txn.fee, 0);
+}
+
+export function getTxnGroupID(txns: Transaction[]) {
+  return bufferToBase64(txns[0].group);
 }

@@ -1,8 +1,10 @@
 export {
   getvalidatorAppID,
   optIntoValidator,
+  generateOptIntoValidatorTxns,
   isOptedIntoValidator,
-  optOutOfValidator
+  optOutOfValidator,
+  generateOptOutOfValidatorTxns
 } from "./validator";
 
 export {
@@ -20,11 +22,35 @@ export {
   isPoolReady
 } from "./pool";
 
-export {MintQuote, MintExecution, getMintLiquidityQuote, mintLiquidity} from "./mint";
+export {generateBootstrapTransactions, signBootstrapTransactions} from "./bootstrap";
 
-export {BurnQuote, BurnExecution, getBurnLiquidityQuote, burnLiquidity} from "./burn";
+export {
+  MintQuote,
+  MintExecution,
+  getMintLiquidityQuote,
+  mintLiquidity,
+  generateMintTxns,
+  signMintTxns
+} from "./mint";
 
-export {SwapQuote, SwapExecution, SwapType, getSwapQuote, issueSwap} from "./swap";
+export {
+  BurnQuote,
+  BurnExecution,
+  getBurnLiquidityQuote,
+  burnLiquidity,
+  generateBurnTxns,
+  signBurnTxns
+} from "./burn";
+
+export {
+  SwapQuote,
+  SwapExecution,
+  SwapType,
+  getSwapQuote,
+  issueSwap,
+  generateSwapTransactions,
+  signSwapTransactions
+} from "./swap";
 
 export {
   redeemExcessAsset,
@@ -32,15 +58,19 @@ export {
   ExcessAmountData,
   getExcessAmountsWithPoolAssetDetails,
   ExcessAmountDataWithPoolAssetDetails,
-  redeemAllExcessAsset
+  redeemAllExcessAsset,
+  generateRedeemTxns
 } from "./redeem";
 
 export {
   applySlippageToAmount,
   optIntoAsset,
+  generateOptIntoAssetTxns,
   getAssetInformationById,
   convertFromBaseUnits,
-  convertToBaseUnits
+  convertToBaseUnits,
+  sendAndWaitRawTransaction,
+  getTxnGroupID
 } from "./util";
 
 export {
@@ -51,3 +81,5 @@ export {
 } from "./common-types";
 
 export {ALGO_ASSET, ALGO_ASSET_ID} from "./constant";
+
+export {getPoolLogicSig} from "./contracts";
