@@ -107,6 +107,7 @@ async function generateSwapTransactions({ client, pool, swapType, assetIn, asset
         from: initiatorAddr,
         to: pool.addr,
         amount: validatorAppCallTxn.fee + assetOutTxn.fee,
+        note: constant_1.DEFAULT_FEE_TXN_NOTE,
         suggestedParams
     });
     const txGroup = algosdk_1.default.assignGroupID([

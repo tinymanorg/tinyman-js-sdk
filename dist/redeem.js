@@ -8,6 +8,7 @@ const algosdk_1 = __importDefault(require("algosdk"));
 const base64_js_1 = require("base64-js");
 const util_1 = require("./util");
 const pool_1 = require("./pool");
+const constant_1 = require("./constant");
 const REDEEM_ENCODED = Uint8Array.from([114, 101, 100, 101, 101, 109]); // 'redeem'
 /**
  * Execute a redeem operation to collect excess assets from previous operations.
@@ -133,6 +134,7 @@ async function generateRedeemTxns({ client, pool, assetID, assetOut, initiatorAd
         from: initiatorAddr,
         to: pool.addr,
         amount: validatorAppCallTxn.fee + assetOutTxn.fee,
+        note: constant_1.DEFAULT_FEE_TXN_NOTE,
         suggestedParams
     });
     const txGroup = algosdk_1.default.assignGroupID([

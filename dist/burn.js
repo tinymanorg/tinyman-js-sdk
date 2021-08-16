@@ -27,8 +27,10 @@ var BurnTxnIndices;
 async function getBurnLiquidityQuote({ client, pool, liquidityIn }) {
     const reserves = await pool_1.getPoolReserves(client, pool);
     const liquidityIn_bigInt = BigInt(liquidityIn);
-    const asset1Out = (liquidityIn_bigInt * reserves.asset1) / reserves.issuedLiquidity;
-    const asset2Out = (liquidityIn_bigInt * reserves.asset2) / reserves.issuedLiquidity;
+    const asset1Out = reserves.issuedLiquidity &&
+        (liquidityIn_bigInt * reserves.asset1) / reserves.issuedLiquidity;
+    const asset2Out = reserves.issuedLiquidity &&
+        (liquidityIn_bigInt * reserves.asset2) / reserves.issuedLiquidity;
     return {
         round: reserves.round,
         liquidityID: pool.liquidityTokenID,
@@ -92,6 +94,7 @@ async function generateBurnTxns({ client, pool, liquidityIn, asset1Out, asset2Ou
         from: initiatorAddr,
         to: pool.addr,
         amount: txnFees,
+        note: constant_1.DEFAULT_FEE_TXN_NOTE,
         suggestedParams
     });
     txnFees += liquidityInTxn.fee + feeTxn.fee;

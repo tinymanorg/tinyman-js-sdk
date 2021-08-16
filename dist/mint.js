@@ -110,7 +110,7 @@ async function generateMintTxns({ client, pool, asset1In, asset2In, liquidityOut
         from: initiatorAddr,
         to: pool.addr,
         amount: validatorAppCallTxn.fee + liquidityOutTxn.fee,
-        note: Uint8Array.from([1]),
+        note: constant_1.DEFAULT_FEE_TXN_NOTE,
         suggestedParams
     });
     return algosdk_1.default.assignGroupID([

@@ -6,3 +6,4 @@ export declare const MAINNET_VALIDATOR_APP_ID = 0;
 export declare const ALGO_ASSET_ID = 0;
 export declare const ALGO_ASSET: TinymanAnalyticsApiAsset;
 export declare const LIQUIDITY_TOKEN_UNIT_NAME = "TM1POOL";
+export declare const DEFAULT_FEE_TXN_NOTE: Uint8Array;
