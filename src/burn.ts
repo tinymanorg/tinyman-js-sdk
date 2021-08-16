@@ -92,8 +92,12 @@ export async function getBurnLiquidityQuote({
   const reserves = await getPoolReserves(client, pool);
   const liquidityIn_bigInt = BigInt(liquidityIn);
 
-  const asset1Out = (liquidityIn_bigInt * reserves.asset1) / reserves.issuedLiquidity;
-  const asset2Out = (liquidityIn_bigInt * reserves.asset2) / reserves.issuedLiquidity;
+  const asset1Out =
+    reserves.issuedLiquidity &&
+    (liquidityIn_bigInt * reserves.asset1) / reserves.issuedLiquidity;
+  const asset2Out =
+    reserves.issuedLiquidity &&
+    (liquidityIn_bigInt * reserves.asset2) / reserves.issuedLiquidity;
 
   return {
     round: reserves.round,
