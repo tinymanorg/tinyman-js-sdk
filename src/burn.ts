@@ -11,7 +11,7 @@ import {
 import {PoolInfo, getPoolReserves, getAccountExcess} from "./pool";
 import {redeemExcessAsset} from "./redeem";
 import {InitiatorSigner} from "./common-types";
-import {ALGO_ASSET_ID} from "./constant";
+import {ALGO_ASSET_ID, DEFAULT_FEE_TXN_NOTE} from "./constant";
 
 /** An object containing information about a burn quote. */
 export interface BurnQuote {
@@ -187,6 +187,7 @@ export async function generateBurnTxns({
     from: initiatorAddr,
     to: pool.addr,
     amount: txnFees,
+    note: DEFAULT_FEE_TXN_NOTE,
     suggestedParams
   });
 
