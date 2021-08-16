@@ -15,6 +15,7 @@ import {
   TinymanAnalyticsApiAsset,
   InitiatorSigner
 } from "./common-types";
+import {DEFAULT_FEE_TXN_NOTE} from "./constant";
 
 const REDEEM_ENCODED = Uint8Array.from([114, 101, 100, 101, 101, 109]); // 'redeem'
 
@@ -220,6 +221,7 @@ export async function generateRedeemTxns({
     from: initiatorAddr,
     to: pool.addr,
     amount: validatorAppCallTxn.fee + assetOutTxn.fee,
+    note: DEFAULT_FEE_TXN_NOTE,
     suggestedParams
   });
 

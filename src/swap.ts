@@ -11,7 +11,7 @@ import {
 } from "./util";
 import {PoolInfo, getPoolReserves, getAccountExcess} from "./pool";
 import {InitiatorSigner} from "./common-types";
-import {ALGO_ASSET_ID} from "./constant";
+import {ALGO_ASSET_ID, DEFAULT_FEE_TXN_NOTE} from "./constant";
 
 // FEE = %0.3 or 3/1000
 const FEE_NUMERATOR = 3n;
@@ -205,6 +205,7 @@ export async function generateSwapTransactions({
     from: initiatorAddr,
     to: pool.addr,
     amount: validatorAppCallTxn.fee + assetOutTxn.fee,
+    note: DEFAULT_FEE_TXN_NOTE,
     suggestedParams
   });
 

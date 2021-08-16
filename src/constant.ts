@@ -18,3 +18,6 @@ export const ALGO_ASSET: TinymanAnalyticsApiAsset = {
 };
 
 export const LIQUIDITY_TOKEN_UNIT_NAME = "TM1POOL";
+
+// The fee paying transaction at group index 0 should have a note value set to distinguish it from other Pay transactions in the group which might have the exact same value.
+export const DEFAULT_FEE_TXN_NOTE = Uint8Array.from([1]);

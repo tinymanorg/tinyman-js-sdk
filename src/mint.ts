@@ -14,7 +14,7 @@ import {
   getPoolShare
 } from "./pool";
 import {InitiatorSigner} from "./common-types";
-import {ALGO_ASSET_ID} from "./constant";
+import {ALGO_ASSET_ID, DEFAULT_FEE_TXN_NOTE} from "./constant";
 
 /** An object containing information about a mint quote. */
 export interface MintQuote {
@@ -204,7 +204,7 @@ export async function generateMintTxns({
     from: initiatorAddr,
     to: pool.addr,
     amount: validatorAppCallTxn.fee + liquidityOutTxn.fee,
-    note: Uint8Array.from([1]), // just here to make this unique from asset1In if necessary
+    note: DEFAULT_FEE_TXN_NOTE, // just here to make this unique from asset1In if necessary
     suggestedParams
   });
 
