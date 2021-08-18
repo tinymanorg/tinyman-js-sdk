@@ -1,17 +1,14 @@
 import algosdk, {Algodv2, Transaction} from "algosdk";
 import {AssetParams} from "algosdk/dist/types/src/client/v2/algod/models/types";
 
-import {
-  AccountInformationData,
-  TinymanAnalyticsApiAsset,
-  InitiatorSigner
-} from "./common-types";
+import {TinymanAnalyticsApiAsset, InitiatorSigner} from "./common-types";
+import {AccountInformation} from "./account/accountTypes";
 import {ALGO_ASSET, ALGO_ASSET_ID} from "./constant";
 
 const CACHED_ASSETS: Map<string, TinymanAnalyticsApiAsset> = new Map();
 
 export function decodeState(
-  stateArray: AccountInformationData["apps-local-state"][0]["key-value"] = []
+  stateArray: AccountInformation["apps-local-state"][0]["key-value"] = []
 ): Record<string, number | string> {
   const state: Record<string, number | string> = {};
 
@@ -143,6 +140,8 @@ export async function optIntoAsset({
 
   return sendAndWaitRawTransaction(client, signedTxns);
 }
+
+export const ASSET_OPT_IN_PROCESS_TOTAL_FEE = 1000;
 
 export async function generateOptIntoAssetTxns({client, assetID, initiatorAddr}) {
   const suggestedParams = await client.getTransactionParams().do();

@@ -2,12 +2,10 @@ import algosdk, {Algodv2, Transaction} from "algosdk";
 
 import {
   applySlippageToAmount,
-  bufferToBase64,
   convertFromBaseUnits,
   getTxnGroupID,
   sendAndWaitRawTransaction,
-  sumUpTxnFees,
-  waitForTransaction
+  sumUpTxnFees
 } from "./util";
 import {PoolInfo, getPoolReserves, getAccountExcess} from "./pool";
 import {InitiatorSigner} from "./common-types";
@@ -81,6 +79,8 @@ enum SwapTxnGroupIndices {
   ASSET_IN_TXN_INDEX,
   ASSET_OUT_TXN_INDEX
 }
+
+export const SWAP_PROCESS_TOTAL_FEE = 4000;
 
 export async function signSwapTransactions({
   pool,

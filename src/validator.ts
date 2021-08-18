@@ -1,12 +1,13 @@
 import algosdk, {Algodv2} from "algosdk";
 
-import {sendAndWaitRawTransaction, waitForTransaction} from "./util";
-import {AccountInformationData, InitiatorSigner} from "./common-types";
+import {sendAndWaitRawTransaction} from "./util";
+import {InitiatorSigner} from "./common-types";
 import {
   TESTNET_VALIDATOR_APP_ID,
   HIPONET_VALIDATOR_APP_ID,
   MAINNET_VALIDATOR_APP_ID
 } from "./constant";
+import {AccountInformation} from "./account/accountTypes";
 
 const CREATE_ENCODED = Uint8Array.from([99, 114, 101, 97, 116, 101]); // 'create'
 
@@ -77,6 +78,8 @@ export async function optIntoValidator({
   return sendAndWaitRawTransaction(client, signedTxns);
 }
 
+export const VALIDATOR_APP_OPT_IN_PROCESS_TOTAL_FEE = 1000;
+
 export async function generateOptIntoValidatorTxns({
   client,
   validatorAppID,
@@ -129,6 +132,8 @@ export async function optOutOfValidator({
   return sendAndWaitRawTransaction(client, signedTxns);
 }
 
+export const VALIDATOR_APP_OPT_OUT_PROCESS_TOTAL_FEE = 1000;
+
 export async function generateOptOutOfValidatorTxns({
   client,
   validatorAppID,
@@ -161,7 +166,7 @@ export function isOptedIntoValidator({
   accountAppsLocalState
 }: {
   validatorAppID: number;
-  accountAppsLocalState: AccountInformationData["apps-local-state"];
+  accountAppsLocalState: AccountInformation["apps-local-state"];
 }): boolean {
   return accountAppsLocalState.some((appState) => appState.id === validatorAppID);
 }

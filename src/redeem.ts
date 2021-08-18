@@ -10,14 +10,13 @@ import {
   sumUpTxnFees
 } from "./util";
 import {getPoolAssets, getPoolInfo, PoolInfo} from "./pool";
-import {
-  AccountInformationData,
-  TinymanAnalyticsApiAsset,
-  InitiatorSigner
-} from "./common-types";
+import {TinymanAnalyticsApiAsset, InitiatorSigner} from "./common-types";
+import {AccountInformation} from "./account/accountTypes";
 import {DEFAULT_FEE_TXN_NOTE} from "./constant";
 
 const REDEEM_ENCODED = Uint8Array.from([114, 101, 100, 101, 101, 109]); // 'redeem'
+
+export const REDEEM_PROCESS_TOTAL_FEE = 3000;
 
 /**
  * Execute a redeem operation to collect excess assets from previous operations.
@@ -259,7 +258,7 @@ export async function getExcessAmounts({
   const info = (await client
     .accountInformation(accountAddr)
     .setIntDecoding("bigint")
-    .do()) as AccountInformationData;
+    .do()) as AccountInformation;
 
   const appsLocalState = info["apps-local-state"] || [];
   const appState = appsLocalState.find(

@@ -3,7 +3,7 @@ import algosdk, {Algodv2, Transaction} from "algosdk";
 import {VALIDATOR_APP_SCHEMA} from "./contracts";
 import {InitiatorSigner} from "./common-types";
 import {waitForTransaction} from "./util";
-import {LIQUIDITY_TOKEN_UNIT_NAME} from "./constant";
+import {ALGO_ASSET_ID, LIQUIDITY_TOKEN_UNIT_NAME} from "./constant";
 
 const BOOTSTRAP_ENCODED = Uint8Array.from([98, 111, 111, 116, 115, 116, 114, 97, 112]); // 'bootstrap'
 
@@ -13,6 +13,11 @@ enum BootstapTxnGroupIndices {
   LIQUIDITY_TOKEN_CREATE,
   ASSET1_OPT_IN,
   ASSET2_OPT_IN
+}
+
+export function getBootstrapProcessTotalFee(asset2ID: number) {
+  // IF asset2 is ALGO, there won't be `asset2Optin` txn within the bootstrap txn group
+  return ALGO_ASSET_ID === asset2ID ? 4000 : 5000;
 }
 
 export async function generateBootstrapTransactions({

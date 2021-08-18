@@ -69,6 +69,8 @@ enum MintTxnIndices {
   LIQUDITY_OUT_TXN
 }
 
+export const MINT_PROCESS_TOTAL_FEE = 5000;
+
 /**
  * Get a quote for how many liquidity tokens a deposit of asset1In and asset2In is worth at this
  * moment. This does not execute any transactions.

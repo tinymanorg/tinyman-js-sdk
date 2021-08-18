@@ -2,14 +2,11 @@ import algosdk, {Transaction} from "algosdk";
 
 import {
   applySlippageToAmount,
-  bufferToBase64,
   getTxnGroupID,
   sendAndWaitRawTransaction,
-  sumUpTxnFees,
-  waitForTransaction
+  sumUpTxnFees
 } from "./util";
 import {PoolInfo, getPoolReserves, getAccountExcess} from "./pool";
-import {redeemExcessAsset} from "./redeem";
 import {InitiatorSigner} from "./common-types";
 import {ALGO_ASSET_ID, DEFAULT_FEE_TXN_NOTE} from "./constant";
 
@@ -71,6 +68,8 @@ enum BurnTxnIndices {
   ASSET2_OUT_TXN,
   LIQUDITY_IN_TXN
 }
+
+export const BURN_PROCESS_TOTAL_FEE = 5000;
 
 /**
  * Get a quote for how many of assets 1 and 2 a deposit of liquidityIn is worth at this moment. This

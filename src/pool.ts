@@ -9,7 +9,7 @@ import {
   convertFromBaseUnits
 } from "./util";
 import {doBootstrap} from "./bootstrap";
-import {AccountInformationData} from "./common-types";
+import {AccountInformation} from "./account/accountTypes";
 
 export enum PoolStatus {
   NOT_CREATED = "not created",
@@ -132,7 +132,7 @@ export async function getPoolReserves(
   const info = (await client
     .accountInformation(pool.addr)
     .setIntDecoding("bigint")
-    .do()) as AccountInformationData;
+    .do()) as AccountInformation;
   const appsLocalState = info["apps-local-state"] || [];
 
   let outstandingAsset1 = 0n;
@@ -237,7 +237,7 @@ export async function getAccountExcess({
   const info = (await client
     .accountInformation(accountAddr)
     .setIntDecoding("bigint")
-    .do()) as AccountInformationData;
+    .do()) as AccountInformation;
 
   const appsLocalState = info["apps-local-state"] || [];
 
@@ -339,7 +339,7 @@ export async function getPoolAssets({
   address: string;
   validatorAppID: number;
 }) {
-  const info = (await client.accountInformation(address).do()) as AccountInformationData;
+  const info = (await client.accountInformation(address).do()) as AccountInformation;
 
   // eslint-disable-next-line eqeqeq
   const appState = info["apps-local-state"].find((app) => app.id == validatorAppID);
