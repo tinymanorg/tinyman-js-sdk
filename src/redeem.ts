@@ -16,8 +16,6 @@ import {DEFAULT_FEE_TXN_NOTE} from "./constant";
 
 const REDEEM_ENCODED = Uint8Array.from([114, 101, 100, 101, 101, 109]); // 'redeem'
 
-export const REDEEM_PROCESS_TOTAL_FEE = 3000;
-
 /**
  * Execute a redeem operation to collect excess assets from previous operations.
  *
@@ -168,6 +166,8 @@ export async function redeemAllExcessAsset({
 
   return redeemTxnsPromise;
 }
+
+export const REDEEM_PROCESS_TXN_COUNT = 3;
 
 export async function generateRedeemTxns({
   client,

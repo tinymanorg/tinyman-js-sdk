@@ -80,8 +80,6 @@ enum SwapTxnGroupIndices {
   ASSET_OUT_TXN_INDEX
 }
 
-export const SWAP_PROCESS_TOTAL_FEE = 4000;
-
 export async function signSwapTransactions({
   pool,
   txGroup,
@@ -112,6 +110,8 @@ export async function signSwapTransactions({
 
   return signedTxns;
 }
+
+export const SWAP_PROCESS_TXN_COUNT = 4;
 
 export async function generateSwapTransactions({
   client,

@@ -2,11 +2,11 @@ export {
   getvalidatorAppID,
   optIntoValidator,
   generateOptIntoValidatorTxns,
-  VALIDATOR_APP_OPT_IN_PROCESS_TOTAL_FEE,
+  OPT_IN_VALIDATOR_APP_PROCESS_TXN_COUNT,
   isOptedIntoValidator,
   optOutOfValidator,
   generateOptOutOfValidatorTxns,
-  VALIDATOR_APP_OPT_OUT_PROCESS_TOTAL_FEE
+  OPT_OUT_VALIDATOR_APP_PROCESS_TXN_COUNT
 } from "./validator";
 
 export {
@@ -27,7 +27,7 @@ export {
 export {
   generateBootstrapTransactions,
   signBootstrapTransactions,
-  getBootstrapProcessTotalFee
+  getBootstrapProcessTxnCount
 } from "./bootstrap";
 
 export {
@@ -37,7 +37,7 @@ export {
   mintLiquidity,
   generateMintTxns,
   signMintTxns,
-  MINT_PROCESS_TOTAL_FEE
+  MINT_PROCESS_TXN_COUNT
 } from "./mint";
 
 export {
@@ -47,7 +47,7 @@ export {
   burnLiquidity,
   generateBurnTxns,
   signBurnTxns,
-  BURN_PROCESS_TOTAL_FEE
+  BURN_PROCESS_TXN_COUNT
 } from "./burn";
 
 export {
@@ -58,7 +58,7 @@ export {
   issueSwap,
   generateSwapTransactions,
   signSwapTransactions,
-  SWAP_PROCESS_TOTAL_FEE
+  SWAP_PROCESS_TXN_COUNT
 } from "./swap";
 
 export {
@@ -69,14 +69,14 @@ export {
   ExcessAmountDataWithPoolAssetDetails,
   redeemAllExcessAsset,
   generateRedeemTxns,
-  REDEEM_PROCESS_TOTAL_FEE
+  REDEEM_PROCESS_TXN_COUNT
 } from "./redeem";
 
 export {
   applySlippageToAmount,
   optIntoAsset,
   generateOptIntoAssetTxns,
-  ASSET_OPT_IN_PROCESS_TOTAL_FEE,
+  ASSET_OPT_IN_PROCESS_TXN_COUNT,
   getAssetInformationById,
   convertFromBaseUnits,
   convertToBaseUnits,

@@ -78,7 +78,7 @@ export async function optIntoValidator({
   return sendAndWaitRawTransaction(client, signedTxns);
 }
 
-export const VALIDATOR_APP_OPT_IN_PROCESS_TOTAL_FEE = 1000;
+export const OPT_IN_VALIDATOR_APP_PROCESS_TXN_COUNT = 1;
 
 export async function generateOptIntoValidatorTxns({
   client,
@@ -132,7 +132,7 @@ export async function optOutOfValidator({
   return sendAndWaitRawTransaction(client, signedTxns);
 }
 
-export const VALIDATOR_APP_OPT_OUT_PROCESS_TOTAL_FEE = 1000;
+export const OPT_OUT_VALIDATOR_APP_PROCESS_TXN_COUNT = 1;
 
 export async function generateOptOutOfValidatorTxns({
   client,

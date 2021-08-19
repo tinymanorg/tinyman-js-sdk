@@ -69,8 +69,6 @@ enum BurnTxnIndices {
   LIQUDITY_IN_TXN
 }
 
-export const BURN_PROCESS_TOTAL_FEE = 5000;
-
 /**
  * Get a quote for how many of assets 1 and 2 a deposit of liquidityIn is worth at this moment. This
  * does not execute any transactions.
@@ -110,6 +108,8 @@ export async function getBurnLiquidityQuote({
 }
 
 const BURN_ENCODED = Uint8Array.from([98, 117, 114, 110]); // 'burn'
+
+export const BURN_PROCESS_TXN_COUNT = 5;
 
 export async function generateBurnTxns({
   client,

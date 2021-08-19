@@ -141,7 +141,7 @@ export async function optIntoAsset({
   return sendAndWaitRawTransaction(client, signedTxns);
 }
 
-export const ASSET_OPT_IN_PROCESS_TOTAL_FEE = 1000;
+export const ASSET_OPT_IN_PROCESS_TXN_COUNT = 1;
 
 export async function generateOptIntoAssetTxns({client, assetID, initiatorAddr}) {
   const suggestedParams = await client.getTransactionParams().do();

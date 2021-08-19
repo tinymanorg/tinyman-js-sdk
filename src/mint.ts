@@ -69,8 +69,6 @@ enum MintTxnIndices {
   LIQUDITY_OUT_TXN
 }
 
-export const MINT_PROCESS_TOTAL_FEE = 5000;
-
 /**
  * Get a quote for how many liquidity tokens a deposit of asset1In and asset2In is worth at this
  * moment. This does not execute any transactions.
@@ -132,6 +130,8 @@ export async function getMintLiquidityQuote({
 }
 
 const MINT_ENCODED = Uint8Array.from([109, 105, 110, 116]); // 'mint'
+
+export const MINT_PROCESS_TXN_COUNT = 5;
 
 export async function generateMintTxns({
   client,

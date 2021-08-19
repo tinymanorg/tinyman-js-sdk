@@ -15,9 +15,9 @@ enum BootstapTxnGroupIndices {
   ASSET2_OPT_IN
 }
 
-export function getBootstrapProcessTotalFee(asset2ID: number) {
+export function getBootstrapProcessTxnCount(asset2ID: number) {
   // IF asset2 is ALGO, there won't be `asset2Optin` txn within the bootstrap txn group
-  return ALGO_ASSET_ID === asset2ID ? 4000 : 5000;
+  return ALGO_ASSET_ID === asset2ID ? 4 : 5;
 }
 
 export async function generateBootstrapTransactions({
