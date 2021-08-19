@@ -1,6 +1,10 @@
 import {Algodv2} from "algosdk";
 
-import {MINIMUM_BALANCE_REQUIRED_PER_ASSET} from "../constant";
+import {
+  BASE_MINIMUM_BALANCE,
+  MINIMUM_BALANCE_REQUIRED_PER_APP,
+  MINIMUM_BALANCE_REQUIRED_PER_ASSET
+} from "../constant";
 import {AccountInformation, AccountInformationData} from "./accountTypes";
 
 export function getAccountInformation(client: Algodv2, address: string) {
@@ -26,9 +30,9 @@ export function calculateAccountMinimumRequiredBalance(
   const totalSchema = account["apps-total-schema"];
 
   return (
-    MINIMUM_BALANCE_REQUIRED_PER_ASSET +
+    BASE_MINIMUM_BALANCE +
     (account.assets || []).length * MINIMUM_BALANCE_REQUIRED_PER_ASSET +
-    (account["apps-local-state"] || []).length * MINIMUM_BALANCE_REQUIRED_PER_ASSET +
+    (account["apps-local-state"] || []).length * MINIMUM_BALANCE_REQUIRED_PER_APP +
     ((totalSchema && totalSchema["num-byte-slice"]) || 0) * 50000 +
     ((totalSchema && totalSchema["num-uint"]) || 0) * 28500
   );
