@@ -64,6 +64,7 @@ export declare function getMintLiquidityQuote({
   asset1In: number | bigint;
   asset2In: number | bigint;
 }): Promise<MintQuote>;
+export declare const MINT_PROCESS_TXN_COUNT = 5;
 export declare function generateMintTxns({
   client,
   pool,

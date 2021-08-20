@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.burnLiquidity = exports.signBurnTxns = exports.generateBurnTxns = exports.getBurnLiquidityQuote = void 0;
+exports.burnLiquidity = exports.signBurnTxns = exports.generateBurnTxns = exports.BURN_PROCESS_TXN_COUNT = exports.getBurnLiquidityQuote = void 0;
 const algosdk_1 = __importDefault(require("algosdk"));
 const util_1 = require("./util");
 const pool_1 = require("./pool");
@@ -43,6 +43,7 @@ async function getBurnLiquidityQuote({ client, pool, liquidityIn }) {
 }
 exports.getBurnLiquidityQuote = getBurnLiquidityQuote;
 const BURN_ENCODED = Uint8Array.from([98, 117, 114, 110]); // 'burn'
+exports.BURN_PROCESS_TXN_COUNT = 5;
 async function generateBurnTxns({ client, pool, liquidityIn, asset1Out, asset2Out, slippage, initiatorAddr }) {
     const suggestedParams = await client.getTransactionParams().do();
     const validatorAppCallTxn = algosdk_1.default.makeApplicationNoOpTxnFromObject({

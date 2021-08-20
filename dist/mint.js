@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.mintLiquidity = exports.signMintTxns = exports.generateMintTxns = exports.getMintLiquidityQuote = void 0;
+exports.mintLiquidity = exports.signMintTxns = exports.generateMintTxns = exports.MINT_PROCESS_TXN_COUNT = exports.getMintLiquidityQuote = void 0;
 const algosdk_1 = __importDefault(require("algosdk"));
 const util_1 = require("./util");
 const pool_1 = require("./pool");
@@ -60,6 +60,7 @@ async function getMintLiquidityQuote({ client, pool, asset1In, asset2In }) {
 }
 exports.getMintLiquidityQuote = getMintLiquidityQuote;
 const MINT_ENCODED = Uint8Array.from([109, 105, 110, 116]); // 'mint'
+exports.MINT_PROCESS_TXN_COUNT = 5;
 async function generateMintTxns({ client, pool, asset1In, asset2In, liquidityOut, slippage, initiatorAddr }) {
     // apply slippage to liquidity out amount
     const liquidityOutAmount = util_1.applySlippageToAmount("negative", slippage, liquidityOut);

@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getTxnGroupID = exports.sumUpTxnFees = exports.sendAndWaitRawTransaction = exports.convertToBaseUnits = exports.convertFromBaseUnits = exports.getAssetInformationById = exports.bufferToBase64 = exports.generateOptIntoAssetTxns = exports.optIntoAsset = exports.applySlippageToAmount = exports.waitForTransaction = exports.getMinBalanceForAccount = exports.joinUint8Arrays = exports.decodeState = void 0;
+exports.getTxnGroupID = exports.sumUpTxnFees = exports.sendAndWaitRawTransaction = exports.convertToBaseUnits = exports.convertFromBaseUnits = exports.getAssetInformationById = exports.bufferToBase64 = exports.generateOptIntoAssetTxns = exports.ASSET_OPT_IN_PROCESS_TXN_COUNT = exports.optIntoAsset = exports.applySlippageToAmount = exports.waitForTransaction = exports.getMinBalanceForAccount = exports.joinUint8Arrays = exports.decodeState = void 0;
 const algosdk_1 = __importDefault(require("algosdk"));
 const constant_1 = require("./constant");
 const CACHED_ASSETS = new Map();
@@ -108,6 +108,7 @@ async function optIntoAsset({ client, assetID, initiatorAddr, initiatorSigner })
     return sendAndWaitRawTransaction(client, signedTxns);
 }
 exports.optIntoAsset = optIntoAsset;
+exports.ASSET_OPT_IN_PROCESS_TXN_COUNT = 1;
 async function generateOptIntoAssetTxns({ client, assetID, initiatorAddr }) {
     const suggestedParams = await client.getTransactionParams().do();
     const optInTxn = algosdk_1.default.makeAssetTransferTxnWithSuggestedParamsFromObject({

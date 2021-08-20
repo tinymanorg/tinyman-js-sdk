@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getExcessAmountsWithPoolAssetDetails = exports.getExcessAmounts = exports.generateRedeemTxns = exports.redeemAllExcessAsset = exports.redeemExcessAsset = void 0;
+exports.getExcessAmountsWithPoolAssetDetails = exports.getExcessAmounts = exports.generateRedeemTxns = exports.REDEEM_PROCESS_TXN_COUNT = exports.redeemAllExcessAsset = exports.redeemExcessAsset = void 0;
 const algosdk_1 = __importDefault(require("algosdk"));
 const base64_js_1 = require("base64-js");
 const util_1 = require("./util");
@@ -98,6 +98,7 @@ async function redeemAllExcessAsset({ client, data, initiatorSigner }) {
     return redeemTxnsPromise;
 }
 exports.redeemAllExcessAsset = redeemAllExcessAsset;
+exports.REDEEM_PROCESS_TXN_COUNT = 3;
 async function generateRedeemTxns({ client, pool, assetID, assetOut, initiatorAddr }) {
     const suggestedParams = await client.getTransactionParams().do();
     const validatorAppCallTxn = algosdk_1.default.makeApplicationNoOpTxnFromObject({

@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isOptedIntoValidator = exports.generateOptOutOfValidatorTxns = exports.optOutOfValidator = exports.generateOptIntoValidatorTxns = exports.optIntoValidator = exports.getvalidatorAppID = void 0;
+exports.isOptedIntoValidator = exports.generateOptOutOfValidatorTxns = exports.OPT_OUT_VALIDATOR_APP_PROCESS_TXN_COUNT = exports.optOutOfValidator = exports.generateOptIntoValidatorTxns = exports.OPT_IN_VALIDATOR_APP_PROCESS_TXN_COUNT = exports.optIntoValidator = exports.getvalidatorAppID = void 0;
 const algosdk_1 = __importDefault(require("algosdk"));
 const util_1 = require("./util");
 const constant_1 = require("./constant");
@@ -53,6 +53,7 @@ async function optIntoValidator({ client, validatorAppID, initiatorAddr, initiat
     return util_1.sendAndWaitRawTransaction(client, signedTxns);
 }
 exports.optIntoValidator = optIntoValidator;
+exports.OPT_IN_VALIDATOR_APP_PROCESS_TXN_COUNT = 1;
 async function generateOptIntoValidatorTxns({ client, validatorAppID, initiatorAddr }) {
     const suggestedParams = await client.getTransactionParams().do();
     const appOptInTxn = algosdk_1.default.makeApplicationOptInTxnFromObject({
@@ -83,6 +84,7 @@ async function optOutOfValidator({ client, validatorAppID, initiatorAddr, initia
     return util_1.sendAndWaitRawTransaction(client, signedTxns);
 }
 exports.optOutOfValidator = optOutOfValidator;
+exports.OPT_OUT_VALIDATOR_APP_PROCESS_TXN_COUNT = 1;
 async function generateOptOutOfValidatorTxns({ client, validatorAppID, initiatorAddr }) {
     const suggestedParams = await client.getTransactionParams().do();
     const appClearStateTxn = algosdk_1.default.makeApplicationClearStateTxnFromObject({

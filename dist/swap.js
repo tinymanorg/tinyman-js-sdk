@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.issueSwap = exports.getSwapQuote = exports.generateSwapTransactions = exports.signSwapTransactions = exports.SwapType = void 0;
+exports.issueSwap = exports.getSwapQuote = exports.generateSwapTransactions = exports.SWAP_PROCESS_TXN_COUNT = exports.signSwapTransactions = exports.SwapType = void 0;
 const algosdk_1 = __importDefault(require("algosdk"));
 const util_1 = require("./util");
 const pool_1 = require("./pool");
@@ -45,6 +45,7 @@ async function signSwapTransactions({ pool, txGroup, initiatorSigner }) {
     return signedTxns;
 }
 exports.signSwapTransactions = signSwapTransactions;
+exports.SWAP_PROCESS_TXN_COUNT = 4;
 async function generateSwapTransactions({ client, pool, swapType, assetIn, assetOut, slippage, initiatorAddr }) {
     const suggestedParams = await client.getTransactionParams().do();
     const validatorAppCallArgs = [

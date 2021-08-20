@@ -1,5 +1,6 @@
 import algosdk, {Algodv2} from "algosdk";
-import {AccountInformationData, InitiatorSigner} from "./common-types";
+import {InitiatorSigner} from "./common-types";
+import {AccountInformation} from "./account/accountTypes";
 /**
  * Get the Validator App ID for a network.
  *
@@ -32,6 +33,7 @@ export declare function optIntoValidator({
   confirmedRound: any;
   txnID: any;
 }>;
+export declare const OPT_IN_VALIDATOR_APP_PROCESS_TXN_COUNT = 1;
 export declare function generateOptIntoValidatorTxns({
   client,
   validatorAppID,
@@ -65,6 +67,7 @@ export declare function optOutOfValidator({
   confirmedRound: any;
   txnID: any;
 }>;
+export declare const OPT_OUT_VALIDATOR_APP_PROCESS_TXN_COUNT = 1;
 export declare function generateOptOutOfValidatorTxns({
   client,
   validatorAppID,
@@ -86,5 +89,5 @@ export declare function isOptedIntoValidator({
   accountAppsLocalState
 }: {
   validatorAppID: number;
-  accountAppsLocalState: AccountInformationData["apps-local-state"];
+  accountAppsLocalState: AccountInformation["apps-local-state"];
 }): boolean;

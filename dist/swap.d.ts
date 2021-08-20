@@ -61,6 +61,7 @@ export declare function signSwapTransactions({
   txGroup: Transaction[];
   initiatorSigner: InitiatorSigner;
 }): Promise<Uint8Array[]>;
+export declare const SWAP_PROCESS_TXN_COUNT = 4;
 export declare function generateSwapTransactions({
   client,
   pool,

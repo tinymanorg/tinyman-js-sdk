@@ -1,5 +1,6 @@
 import {Algodv2, Transaction} from "algosdk";
 import {InitiatorSigner} from "./common-types";
+export declare function getBootstrapProcessTxnCount(asset2ID: number): 5 | 4;
 export declare function generateBootstrapTransactions({
   client,
   poolLogicSig,

@@ -7,3 +7,6 @@ export declare const ALGO_ASSET_ID = 0;
 export declare const ALGO_ASSET: TinymanAnalyticsApiAsset;
 export declare const LIQUIDITY_TOKEN_UNIT_NAME = "TM1POOL";
 export declare const DEFAULT_FEE_TXN_NOTE: Uint8Array;
+export declare const BASE_MINIMUM_BALANCE = 100000;
+export declare const MINIMUM_BALANCE_REQUIRED_PER_ASSET = 100000;
+export declare const MINIMUM_BALANCE_REQUIRED_PER_APP = 100000;

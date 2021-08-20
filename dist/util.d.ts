@@ -1,12 +1,9 @@
 /// <reference types="node" />
 import algosdk, {Algodv2, Transaction} from "algosdk";
-import {
-  AccountInformationData,
-  TinymanAnalyticsApiAsset,
-  InitiatorSigner
-} from "./common-types";
+import {TinymanAnalyticsApiAsset, InitiatorSigner} from "./common-types";
+import {AccountInformation} from "./account/accountTypes";
 export declare function decodeState(
-  stateArray?: AccountInformationData["apps-local-state"][0]["key-value"]
+  stateArray?: AccountInformation["apps-local-state"][0]["key-value"]
 ): Record<string, number | string>;
 export declare function joinUint8Arrays(arrays: Uint8Array[]): Uint8Array;
 export declare function getMinBalanceForAccount(accountInfo: any): bigint;
@@ -30,6 +27,7 @@ export declare function optIntoAsset({
   confirmedRound: any;
   txnID: any;
 }>;
+export declare const ASSET_OPT_IN_PROCESS_TXN_COUNT = 1;
 export declare function generateOptIntoAssetTxns({
   client,
   assetID,

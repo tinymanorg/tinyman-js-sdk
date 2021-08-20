@@ -2,9 +2,11 @@ export {
   getvalidatorAppID,
   optIntoValidator,
   generateOptIntoValidatorTxns,
+  OPT_IN_VALIDATOR_APP_PROCESS_TXN_COUNT,
   isOptedIntoValidator,
   optOutOfValidator,
-  generateOptOutOfValidatorTxns
+  generateOptOutOfValidatorTxns,
+  OPT_OUT_VALIDATOR_APP_PROCESS_TXN_COUNT
 } from "./validator";
 export {
   PoolStatus,
@@ -20,14 +22,19 @@ export {
   isPoolNotCreated,
   isPoolReady
 } from "./pool";
-export {generateBootstrapTransactions, signBootstrapTransactions} from "./bootstrap";
+export {
+  generateBootstrapTransactions,
+  signBootstrapTransactions,
+  getBootstrapProcessTxnCount
+} from "./bootstrap";
 export {
   MintQuote,
   MintExecution,
   getMintLiquidityQuote,
   mintLiquidity,
   generateMintTxns,
-  signMintTxns
+  signMintTxns,
+  MINT_PROCESS_TXN_COUNT
 } from "./mint";
 export {
   BurnQuote,
@@ -35,7 +42,8 @@ export {
   getBurnLiquidityQuote,
   burnLiquidity,
   generateBurnTxns,
-  signBurnTxns
+  signBurnTxns,
+  BURN_PROCESS_TXN_COUNT
 } from "./burn";
 export {
   SwapQuote,
@@ -44,7 +52,8 @@ export {
   getSwapQuote,
   issueSwap,
   generateSwapTransactions,
-  signSwapTransactions
+  signSwapTransactions,
+  SWAP_PROCESS_TXN_COUNT
 } from "./swap";
 export {
   redeemExcessAsset,
@@ -53,23 +62,33 @@ export {
   getExcessAmountsWithPoolAssetDetails,
   ExcessAmountDataWithPoolAssetDetails,
   redeemAllExcessAsset,
-  generateRedeemTxns
+  generateRedeemTxns,
+  REDEEM_PROCESS_TXN_COUNT
 } from "./redeem";
 export {
   applySlippageToAmount,
   optIntoAsset,
   generateOptIntoAssetTxns,
+  ASSET_OPT_IN_PROCESS_TXN_COUNT,
   getAssetInformationById,
   convertFromBaseUnits,
   convertToBaseUnits,
   sendAndWaitRawTransaction,
-  getTxnGroupID
+  getTxnGroupID,
+  sumUpTxnFees
 } from "./util";
+export {AccountAsset, InitiatorSigner, TinymanAnalyticsApiAsset} from "./common-types";
 export {
-  AccountAsset,
-  AccountInformationData,
-  InitiatorSigner,
-  TinymanAnalyticsApiAsset
-} from "./common-types";
-export {ALGO_ASSET, ALGO_ASSET_ID} from "./constant";
+  ALGO_ASSET,
+  ALGO_ASSET_ID,
+  BASE_MINIMUM_BALANCE,
+  MINIMUM_BALANCE_REQUIRED_PER_ASSET,
+  MINIMUM_BALANCE_REQUIRED_PER_APP
+} from "./constant";
 export {getPoolLogicSig} from "./contracts";
+export {
+  getAccountInformation,
+  calculateAccountMinimumRequiredBalance,
+  hasSufficientMinimumBalance
+} from "./account/accountUtils";
+export {AccountInformationData} from "./account/accountTypes";

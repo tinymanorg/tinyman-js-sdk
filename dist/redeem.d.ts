@@ -60,6 +60,7 @@ export declare function redeemAllExcessAsset({
     txnID: string;
   }[]
 >;
+export declare const REDEEM_PROCESS_TXN_COUNT = 3;
 export declare function generateRedeemTxns({
   client,
   pool,

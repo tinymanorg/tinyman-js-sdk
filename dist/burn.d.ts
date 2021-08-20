@@ -67,6 +67,7 @@ export declare function getBurnLiquidityQuote({
   pool: PoolInfo;
   liquidityIn: number | bigint;
 }): Promise<BurnQuote>;
+export declare const BURN_PROCESS_TXN_COUNT = 5;
 export declare function generateBurnTxns({
   client,
   pool,
