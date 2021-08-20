@@ -131,6 +131,8 @@ export async function getMintLiquidityQuote({
 
 const MINT_ENCODED = Uint8Array.from([109, 105, 110, 116]); // 'mint'
 
+export const MINT_PROCESS_TXN_COUNT = 5;
+
 export async function generateMintTxns({
   client,
   pool,

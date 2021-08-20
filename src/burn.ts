@@ -2,14 +2,11 @@ import algosdk, {Transaction} from "algosdk";
 
 import {
   applySlippageToAmount,
-  bufferToBase64,
   getTxnGroupID,
   sendAndWaitRawTransaction,
-  sumUpTxnFees,
-  waitForTransaction
+  sumUpTxnFees
 } from "./util";
 import {PoolInfo, getPoolReserves, getAccountExcess} from "./pool";
-import {redeemExcessAsset} from "./redeem";
 import {InitiatorSigner} from "./common-types";
 import {ALGO_ASSET_ID, DEFAULT_FEE_TXN_NOTE} from "./constant";
 
@@ -111,6 +108,8 @@ export async function getBurnLiquidityQuote({
 }
 
 const BURN_ENCODED = Uint8Array.from([98, 117, 114, 110]); // 'burn'
+
+export const BURN_PROCESS_TXN_COUNT = 5;
 
 export async function generateBurnTxns({
   client,

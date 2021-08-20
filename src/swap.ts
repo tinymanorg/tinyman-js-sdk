@@ -2,12 +2,10 @@ import algosdk, {Algodv2, Transaction} from "algosdk";
 
 import {
   applySlippageToAmount,
-  bufferToBase64,
   convertFromBaseUnits,
   getTxnGroupID,
   sendAndWaitRawTransaction,
-  sumUpTxnFees,
-  waitForTransaction
+  sumUpTxnFees
 } from "./util";
 import {PoolInfo, getPoolReserves, getAccountExcess} from "./pool";
 import {InitiatorSigner} from "./common-types";
@@ -112,6 +110,8 @@ export async function signSwapTransactions({
 
   return signedTxns;
 }
+
+export const SWAP_PROCESS_TXN_COUNT = 4;
 
 export async function generateSwapTransactions({
   client,

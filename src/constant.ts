@@ -21,3 +21,7 @@ export const LIQUIDITY_TOKEN_UNIT_NAME = "TM1POOL";
 
 // The fee paying transaction at group index 0 should have a note value set to distinguish it from other Pay transactions in the group which might have the exact same value.
 export const DEFAULT_FEE_TXN_NOTE = Uint8Array.from([1]);
+
+export const BASE_MINIMUM_BALANCE = 100_000;
+export const MINIMUM_BALANCE_REQUIRED_PER_ASSET = 100_000;
+export const MINIMUM_BALANCE_REQUIRED_PER_APP = 100_000;
