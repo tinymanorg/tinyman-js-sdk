@@ -330,6 +330,14 @@ export function getPoolShare(totalLiquidity: bigint, ownedLiquidity: bigint) {
   return share;
 }
 
+interface GetPoolAssetsReturnedValue {
+  asset1ID: number;
+  asset2ID: number;
+  liquidityTokenID: number;
+}
+
+const POOL_ASSETS_CACHE: Record<string, GetPoolAssetsReturnedValue> = {};
+
 export async function getPoolAssets({
   client,
   address,
@@ -338,13 +346,16 @@ export async function getPoolAssets({
   client: any;
   address: string;
   validatorAppID: number;
-}) {
+}): Promise<GetPoolAssetsReturnedValue | null> {
+  if (POOL_ASSETS_CACHE[address]) {
+    return POOL_ASSETS_CACHE[address];
+  }
+
   const info = (await client.accountInformation(address).do()) as AccountInformation;
 
   // eslint-disable-next-line eqeqeq
   const appState = info["apps-local-state"].find((app) => app.id == validatorAppID);
-  let assets: {asset1ID: number; asset2ID: number; liquidityTokenID: number} | null =
-    null;
+  let assets: GetPoolAssetsReturnedValue | null = null;
 
   if (appState) {
     const keyValue = appState["key-value"];
@@ -362,6 +373,8 @@ export async function getPoolAssets({
       asset2ID: state[asset2Key] as number,
       liquidityTokenID
     };
+
+    POOL_ASSETS_CACHE[address] = assets;
   }
 
   return assets;
