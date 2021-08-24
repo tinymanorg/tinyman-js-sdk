@@ -1,7 +1,7 @@
 import algosdk, {Algodv2, Transaction} from "algosdk";
 
 import {VALIDATOR_APP_SCHEMA} from "./contracts";
-import {InitiatorSigner} from "./common-types";
+import {InitiatorSigner, SignerTransaction} from "./common-types";
 import {waitForTransaction} from "./util";
 import {ALGO_ASSET_ID, LIQUIDITY_TOKEN_UNIT_NAME} from "./constant";
 
@@ -38,7 +38,7 @@ export async function generateBootstrapTransactions({
   asset1UnitName: string;
   asset2UnitName: string;
   initiatorAddr: string;
-}): Promise<Transaction[]> {
+}): Promise<SignerTransaction[]> {
   const suggestedParams = await client.getTransactionParams().do();
 
   const validatorAppCallTxn = algosdk.makeApplicationOptInTxnFromObject({
@@ -119,7 +119,23 @@ export async function generateBootstrapTransactions({
     txns.push(asset2Optin);
   }
 
-  return algosdk.assignGroupID(txns);
+  const txGroup = algosdk.assignGroupID(txns);
+
+  let finalSignerTxns: SignerTransaction[] = [
+    {txn: txGroup[0], signers: [initiatorAddr]},
+    {txn: txGroup[1], signers: [poolLogicSig.addr]},
+    {txn: txGroup[2], signers: [poolLogicSig.addr]},
+    {txn: txGroup[3], signers: [poolLogicSig.addr]}
+  ];
+
+  if (txGroup[4]) {
+    finalSignerTxns.push({
+      txn: txGroup[4],
+      signers: [poolLogicSig.addr]
+    });
+  }
+
+  return finalSignerTxns;
 }
 
 export async function signBootstrapTransactions({
@@ -128,21 +144,19 @@ export async function signBootstrapTransactions({
   initiatorSigner
 }: {
   poolLogicSig: {addr: string; program: Uint8Array};
-  txGroup: Transaction[];
+  txGroup: SignerTransaction[];
   initiatorSigner: InitiatorSigner;
 }): Promise<{signedTxns: Uint8Array[]; txnIDs: string[]}> {
-  const [signedFundingTxn] = await initiatorSigner([
-    txGroup[BootstapTxnGroupIndices.FUNDING_TXN]
-  ]);
+  const [signedFundingTxn] = await initiatorSigner([txGroup]);
   const lsig = algosdk.makeLogicSig(poolLogicSig.program);
 
   const txnIDs: string[] = [];
-  const signedTxns = txGroup.map((txn, index) => {
+  const signedTxns = txGroup.map((txDetail, index) => {
     if (index === BootstapTxnGroupIndices.FUNDING_TXN) {
-      txnIDs.push(txn.txID().toString());
+      txnIDs.push(txDetail.txn.txID().toString());
       return signedFundingTxn;
     }
-    const {txID, blob} = algosdk.signLogicSigTransactionObject(txn, lsig);
+    const {txID, blob} = algosdk.signLogicSigTransactionObject(txDetail.txn, lsig);
 
     txnIDs.push(txID);
     return blob;

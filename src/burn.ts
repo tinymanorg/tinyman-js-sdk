@@ -7,7 +7,7 @@ import {
   sumUpTxnFees
 } from "./util";
 import {PoolInfo, getPoolReserves, getAccountExcess} from "./pool";
-import {InitiatorSigner} from "./common-types";
+import {InitiatorSigner, SignerTransaction} from "./common-types";
 import {ALGO_ASSET_ID, DEFAULT_FEE_TXN_NOTE} from "./constant";
 
 /** An object containing information about a burn quote. */
@@ -127,7 +127,7 @@ export async function generateBurnTxns({
   asset2Out: number | bigint;
   slippage: number;
   initiatorAddr: string;
-}) {
+}): Promise<SignerTransaction[]> {
   const suggestedParams = await client.getTransactionParams().do();
 
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
@@ -175,7 +175,7 @@ export async function generateBurnTxns({
   const liquidityInTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
     from: initiatorAddr,
     to: pool.addr,
-    assetIndex: <number>pool.liquidityTokenID,
+    assetIndex: pool.liquidityTokenID as number,
     amount: liquidityIn,
     suggestedParams
   });
@@ -192,13 +192,21 @@ export async function generateBurnTxns({
 
   txnFees += liquidityInTxn.fee + feeTxn.fee;
 
-  return algosdk.assignGroupID([
+  const txGroup = algosdk.assignGroupID([
     feeTxn,
     validatorAppCallTxn,
     asset1OutTxn,
     asset2OutTxn,
     liquidityInTxn
   ]);
+
+  return [
+    {txn: txGroup[BurnTxnIndices.FEE_TXN], signers: [initiatorAddr]},
+    {txn: txGroup[BurnTxnIndices.VALIDATOR_APP_CALL_TXN], signers: [pool.addr]},
+    {txn: txGroup[BurnTxnIndices.ASSET1_OUT_TXN], signers: [pool.addr]},
+    {txn: txGroup[BurnTxnIndices.ASSET2_OUT_TXN], signers: [pool.addr]},
+    {txn: txGroup[BurnTxnIndices.LIQUDITY_IN_TXN], signers: [initiatorAddr]}
+  ];
 }
 
 export async function signBurnTxns({
@@ -207,23 +215,20 @@ export async function signBurnTxns({
   initiatorSigner
 }: {
   pool: PoolInfo;
-  txGroup: Transaction[];
+  txGroup: SignerTransaction[];
   initiatorSigner: InitiatorSigner;
-}) {
-  const [signedFeeTxn, signedLiquidityInTxn] = await initiatorSigner([
-    txGroup[BurnTxnIndices.FEE_TXN],
-    txGroup[BurnTxnIndices.LIQUDITY_IN_TXN]
-  ]);
+}): Promise<Uint8Array[]> {
+  const [signedFeeTxn, signedLiquidityInTxn] = await initiatorSigner([txGroup]);
   const lsig = algosdk.makeLogicSig(pool.program);
 
-  const signedTxns = txGroup.map((txn, index) => {
+  const signedTxns = txGroup.map((txDetail, index) => {
     if (index === BurnTxnIndices.FEE_TXN) {
       return signedFeeTxn;
     }
     if (index === BurnTxnIndices.LIQUDITY_IN_TXN) {
       return signedLiquidityInTxn;
     }
-    const {blob} = algosdk.signLogicSigTransactionObject(txn, lsig);
+    const {blob} = algosdk.signLogicSigTransactionObject(txDetail.txn, lsig);
 
     return blob;
   });
@@ -256,13 +261,13 @@ export async function burnLiquidity({
 }: {
   client: any;
   pool: PoolInfo;
-  txGroup: Transaction[];
+  txGroup: SignerTransaction[];
   signedTxns: Uint8Array[];
   initiatorAddr: string;
 }): Promise<BurnExecution> {
-  const asset1Out = txGroup[BurnTxnIndices.ASSET1_OUT_TXN].amount;
-  const asset2Out = txGroup[BurnTxnIndices.ASSET2_OUT_TXN].amount;
-  const liquidityIn = txGroup[BurnTxnIndices.LIQUDITY_IN_TXN].amount;
+  const asset1Out = txGroup[BurnTxnIndices.ASSET1_OUT_TXN].txn.amount;
+  const asset2Out = txGroup[BurnTxnIndices.ASSET2_OUT_TXN].txn.amount;
+  const liquidityIn = txGroup[BurnTxnIndices.LIQUDITY_IN_TXN].txn.amount;
 
   const prevExcessAssets = await getAccountExcess({
     client,
@@ -270,7 +275,7 @@ export async function burnLiquidity({
     accountAddr: initiatorAddr
   });
 
-  const {confirmedRound, txnID} = await sendAndWaitRawTransaction(client, signedTxns);
+  const [{confirmedRound, txnID}] = await sendAndWaitRawTransaction(client, [signedTxns]);
 
   const excessAssets = await getAccountExcess({
     client,
