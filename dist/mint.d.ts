@@ -1,6 +1,5 @@
-import algosdk, {Transaction} from "algosdk";
 import {PoolInfo} from "./pool";
-import {InitiatorSigner} from "./common-types";
+import {InitiatorSigner, SignerTransaction} from "./common-types";
 /** An object containing information about a mint quote. */
 export interface MintQuote {
   /** The round that this quote is based on. */
@@ -81,14 +80,14 @@ export declare function generateMintTxns({
   liquidityOut: number | bigint;
   slippage: number;
   initiatorAddr: string;
-}): Promise<algosdk.Transaction[]>;
+}): Promise<SignerTransaction[]>;
 export declare function signMintTxns({
   pool,
   txGroup,
   initiatorSigner
 }: {
   pool: PoolInfo;
-  txGroup: Transaction[];
+  txGroup: SignerTransaction[];
   initiatorSigner: InitiatorSigner;
 }): Promise<Uint8Array[]>;
 /**
@@ -114,7 +113,7 @@ export declare function mintLiquidity({
 }: {
   client: any;
   pool: PoolInfo;
-  txGroup: Transaction[];
+  txGroup: SignerTransaction[];
   signedTxns: Uint8Array[];
   initiatorAddr: string;
 }): Promise<MintExecution>;

@@ -99,29 +99,33 @@ async function generateBurnTxns({ client, pool, liquidityIn, asset1Out, asset2Ou
         suggestedParams
     });
     txnFees += liquidityInTxn.fee + feeTxn.fee;
-    return algosdk_1.default.assignGroupID([
+    const txGroup = algosdk_1.default.assignGroupID([
         feeTxn,
         validatorAppCallTxn,
         asset1OutTxn,
         asset2OutTxn,
         liquidityInTxn
     ]);
+    return [
+        { txn: txGroup[BurnTxnIndices.FEE_TXN], signers: [initiatorAddr] },
+        { txn: txGroup[BurnTxnIndices.VALIDATOR_APP_CALL_TXN], signers: [pool.addr] },
+        { txn: txGroup[BurnTxnIndices.ASSET1_OUT_TXN], signers: [pool.addr] },
+        { txn: txGroup[BurnTxnIndices.ASSET2_OUT_TXN], signers: [pool.addr] },
+        { txn: txGroup[BurnTxnIndices.LIQUDITY_IN_TXN], signers: [initiatorAddr] }
+    ];
 }
 exports.generateBurnTxns = generateBurnTxns;
 async function signBurnTxns({ pool, txGroup, initiatorSigner }) {
-    const [signedFeeTxn, signedLiquidityInTxn] = await initiatorSigner([
-        txGroup[BurnTxnIndices.FEE_TXN],
-        txGroup[BurnTxnIndices.LIQUDITY_IN_TXN]
-    ]);
+    const [signedFeeTxn, signedLiquidityInTxn] = await initiatorSigner([txGroup]);
     const lsig = algosdk_1.default.makeLogicSig(pool.program);
-    const signedTxns = txGroup.map((txn, index) => {
+    const signedTxns = txGroup.map((txDetail, index) => {
         if (index === BurnTxnIndices.FEE_TXN) {
             return signedFeeTxn;
         }
         if (index === BurnTxnIndices.LIQUDITY_IN_TXN) {
             return signedLiquidityInTxn;
         }
-        const { blob } = algosdk_1.default.signLogicSigTransactionObject(txn, lsig);
+        const { blob } = algosdk_1.default.signLogicSigTransactionObject(txDetail.txn, lsig);
         return blob;
     });
     return signedTxns;
@@ -144,15 +148,15 @@ exports.signBurnTxns = signBurnTxns;
  *   account.
  */
 async function burnLiquidity({ client, pool, txGroup, signedTxns, initiatorAddr }) {
-    const asset1Out = txGroup[BurnTxnIndices.ASSET1_OUT_TXN].amount;
-    const asset2Out = txGroup[BurnTxnIndices.ASSET2_OUT_TXN].amount;
-    const liquidityIn = txGroup[BurnTxnIndices.LIQUDITY_IN_TXN].amount;
+    const asset1Out = txGroup[BurnTxnIndices.ASSET1_OUT_TXN].txn.amount;
+    const asset2Out = txGroup[BurnTxnIndices.ASSET2_OUT_TXN].txn.amount;
+    const liquidityIn = txGroup[BurnTxnIndices.LIQUDITY_IN_TXN].txn.amount;
     const prevExcessAssets = await pool_1.getAccountExcess({
         client,
         pool,
         accountAddr: initiatorAddr
     });
-    const { confirmedRound, txnID } = await util_1.sendAndWaitRawTransaction(client, signedTxns);
+    const [{ confirmedRound, txnID }] = await util_1.sendAndWaitRawTransaction(client, [signedTxns]);
     const excessAssets = await pool_1.getAccountExcess({
         client,
         pool,

@@ -20,9 +20,9 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getPoolLogicSig = exports.encodeVarInt = exports.VALIDATOR_APP_SCHEMA = exports.validatorClearStateContract = exports.validatorApprovalContract = void 0;
+const ascJson = __importStar(require("./asc.json"));
 const base64_js_1 = require("base64-js");
 const algosdk_1 = require("algosdk");
-const ascJson = __importStar(require("./asc.json"));
 const validator_app = ascJson.contracts.validator_app;
 const pool_logicsig = ascJson.contracts.pool_logicsig;
 const poolLogicSigContractTemplate = pool_logicsig.logic.bytecode;
@@ -37,6 +37,7 @@ exports.VALIDATOR_APP_SCHEMA = {
 };
 function encodeVarInt(number) {
     let buf = [];
+    // eslint-disable-next-line no-constant-condition
     while (true) {
         let towrite = number & 0x7f;
         number >>= 7;
@@ -91,3 +92,8 @@ function getPoolLogicSig({ validatorAppID, asset1ID, asset2ID }) {
     };
 }
 exports.getPoolLogicSig = getPoolLogicSig;
+/* eslint
+      no-param-reassign: "off",
+      no-bitwise: "off",
+      prefer-destructuring: "off"
+*/

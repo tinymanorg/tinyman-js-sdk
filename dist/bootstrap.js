@@ -88,21 +88,32 @@ async function generateBootstrapTransactions({ client, poolLogicSig, validatorAp
     if (asset2Optin) {
         txns.push(asset2Optin);
     }
-    return algosdk_1.default.assignGroupID(txns);
+    const txGroup = algosdk_1.default.assignGroupID(txns);
+    let finalSignerTxns = [
+        { txn: txGroup[0], signers: [initiatorAddr] },
+        { txn: txGroup[1], signers: [poolLogicSig.addr] },
+        { txn: txGroup[2], signers: [poolLogicSig.addr] },
+        { txn: txGroup[3], signers: [poolLogicSig.addr] }
+    ];
+    if (txGroup[4]) {
+        finalSignerTxns.push({
+            txn: txGroup[4],
+            signers: [poolLogicSig.addr]
+        });
+    }
+    return finalSignerTxns;
 }
 exports.generateBootstrapTransactions = generateBootstrapTransactions;
 async function signBootstrapTransactions({ poolLogicSig, txGroup, initiatorSigner }) {
-    const [signedFundingTxn] = await initiatorSigner([
-        txGroup[BootstapTxnGroupIndices.FUNDING_TXN]
-    ]);
+    const [signedFundingTxn] = await initiatorSigner([txGroup]);
     const lsig = algosdk_1.default.makeLogicSig(poolLogicSig.program);
     const txnIDs = [];
-    const signedTxns = txGroup.map((txn, index) => {
+    const signedTxns = txGroup.map((txDetail, index) => {
         if (index === BootstapTxnGroupIndices.FUNDING_TXN) {
-            txnIDs.push(txn.txID().toString());
+            txnIDs.push(txDetail.txn.txID().toString());
             return signedFundingTxn;
         }
-        const { txID, blob } = algosdk_1.default.signLogicSigTransactionObject(txn, lsig);
+        const { txID, blob } = algosdk_1.default.signLogicSigTransactionObject(txDetail.txn, lsig);
         txnIDs.push(txID);
         return blob;
     });

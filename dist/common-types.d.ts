@@ -1,4 +1,4 @@
-import algosdk from "algosdk";
+import {Transaction} from "algosdk";
 export interface AccountAsset {
   amount: number;
   "asset-id": number;
@@ -13,6 +13,15 @@ export interface TinymanAnalyticsApiAsset {
   decimals: number;
   url: string;
 }
+export interface SignerTransaction {
+  txn: Transaction;
+  /**
+   * Optional list of addresses that must sign the transactions.
+   * Wallet skips to sign this txn if signers is empty array.
+   * If undefined, wallet tries to sign it.
+   */
+  signers?: string[];
+}
 export declare type InitiatorSigner = (
-  txns: algosdk.Transaction[]
+  txGroupList: SignerTransaction[][]
 ) => Promise<Uint8Array[]>;

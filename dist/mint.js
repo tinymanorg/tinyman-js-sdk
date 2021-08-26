@@ -114,23 +114,43 @@ async function generateMintTxns({ client, pool, asset1In, asset2In, liquidityOut
         note: constant_1.DEFAULT_FEE_TXN_NOTE,
         suggestedParams
     });
-    return algosdk_1.default.assignGroupID([
+    const txGroup = algosdk_1.default.assignGroupID([
         feeTxn,
         validatorAppCallTxn,
         asset1InTxn,
         asset2InTxn,
         liquidityOutTxn
     ]);
+    return [
+        {
+            txn: txGroup[0],
+            signers: [initiatorAddr]
+        },
+        {
+            txn: txGroup[1],
+            signers: [pool.addr]
+        },
+        {
+            txn: txGroup[2],
+            signers: [initiatorAddr]
+        },
+        {
+            txn: txGroup[3],
+            signers: [initiatorAddr]
+        },
+        {
+            txn: txGroup[4],
+            signers: [pool.addr]
+        }
+    ];
 }
 exports.generateMintTxns = generateMintTxns;
 async function signMintTxns({ pool, txGroup, initiatorSigner }) {
     const lsig = algosdk_1.default.makeLogicSig(pool.program);
     const [signedFeeTxn, signedAsset1InTxn, signedAsset2InTxn] = await initiatorSigner([
-        txGroup[MintTxnIndices.FEE_TXN],
-        txGroup[MintTxnIndices.ASSET1_IN_TXN],
-        txGroup[MintTxnIndices.ASSET2_IN_TXN]
+        txGroup
     ]);
-    const signedTxns = txGroup.map((txn, index) => {
+    const signedTxns = txGroup.map((txDetail, index) => {
         if (index === MintTxnIndices.FEE_TXN) {
             return signedFeeTxn;
         }
@@ -140,7 +160,7 @@ async function signMintTxns({ pool, txGroup, initiatorSigner }) {
         if (index === MintTxnIndices.ASSET2_IN_TXN) {
             return signedAsset2InTxn;
         }
-        const { blob } = algosdk_1.default.signLogicSigTransactionObject(txn, lsig);
+        const { blob } = algosdk_1.default.signLogicSigTransactionObject(txDetail.txn, lsig);
         return blob;
     });
     return signedTxns;
@@ -161,13 +181,13 @@ exports.signMintTxns = signMintTxns;
  *   account.
  */
 async function mintLiquidity({ client, pool, txGroup, signedTxns, initiatorAddr }) {
-    const liquidityOutAmount = BigInt(txGroup[MintTxnIndices.LIQUDITY_OUT_TXN].amount);
+    const liquidityOutAmount = BigInt(txGroup[MintTxnIndices.LIQUDITY_OUT_TXN].txn.amount);
     const prevExcessAssets = await pool_1.getAccountExcess({
         client,
         pool,
         accountAddr: initiatorAddr
     });
-    const { confirmedRound, txnID } = await util_1.sendAndWaitRawTransaction(client, signedTxns);
+    const [{ confirmedRound, txnID }] = await util_1.sendAndWaitRawTransaction(client, [signedTxns]);
     const fees = util_1.sumUpTxnFees(txGroup);
     const groupID = util_1.getTxnGroupID(txGroup);
     const excessAssets = await pool_1.getAccountExcess({

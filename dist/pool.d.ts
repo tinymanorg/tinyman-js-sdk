@@ -91,6 +91,11 @@ export declare function getPoolShare(
   totalLiquidity: bigint,
   ownedLiquidity: bigint
 ): number;
+interface GetPoolAssetsReturnedValue {
+  asset1ID: number;
+  asset2ID: number;
+  liquidityTokenID: number;
+}
 export declare function getPoolAssets({
   client,
   address,
@@ -99,11 +104,7 @@ export declare function getPoolAssets({
   client: any;
   address: string;
   validatorAppID: number;
-}): Promise<{
-  asset1ID: number;
-  asset2ID: number;
-  liquidityTokenID: number;
-} | null>;
+}): Promise<GetPoolAssetsReturnedValue | null>;
 /**
  * Calculates the pair ratio for the pool reserves
  */
@@ -133,3 +134,4 @@ export declare function isPoolNotCreated(pool: undefined | null | PoolInfo): boo
  * @returns true if pool's status is READY, otherwise returns false
  */
 export declare function isPoolReady(pool: undefined | null | PoolInfo): boolean;
+export {};

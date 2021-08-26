@@ -28,23 +28,23 @@ async function redeemExcessAsset({ client, pool, txGroup, initiatorSigner }) {
         pool,
         initiatorSigner
     });
-    const { txnID, confirmedRound } = await util_1.sendAndWaitRawTransaction(client, signedTxns);
+    const [{ txnID, confirmedRound }] = await util_1.sendAndWaitRawTransaction(client, [signedTxns]);
     return {
         fees: util_1.sumUpTxnFees(txGroup),
         confirmedRound,
         txnID,
-        groupID: util_1.bufferToBase64(txGroup[0].group)
+        groupID: util_1.getTxnGroupID(txGroup)
     };
 }
 exports.redeemExcessAsset = redeemExcessAsset;
 async function signRedeemTxns({ txGroup, pool, initiatorSigner }) {
-    const [signedFeeTxn] = await initiatorSigner([txGroup[0]]);
+    const [signedFeeTxn] = await initiatorSigner([txGroup]);
     const lsig = algosdk_1.default.makeLogicSig(pool.program);
-    const signedTxns = txGroup.map((txn, index) => {
+    const signedTxns = txGroup.map((txDetail, index) => {
         if (index === 0) {
             return signedFeeTxn;
         }
-        const { blob } = algosdk_1.default.signLogicSigTransactionObject(txn, lsig);
+        const { blob } = algosdk_1.default.signLogicSigTransactionObject(txDetail.txn, lsig);
         return blob;
     });
     return signedTxns;
@@ -62,31 +62,31 @@ async function signRedeemTxns({ txGroup, pool, initiatorSigner }) {
  *   account.
  */
 async function redeemAllExcessAsset({ client, data, initiatorSigner }) {
-    const redeemItems = data.map(({ txGroup, pool }) => ({
-        txGroup,
-        txnFees: util_1.sumUpTxnFees(txGroup),
-        groupID: util_1.getTxnGroupID(txGroup),
-        lsig: algosdk_1.default.makeLogicSig(pool.program)
-    }));
-    // These are signed by the initiator
-    const transactionsToSign = redeemItems.map((item) => {
-        return item.txGroup[0]; // feeTxn;
+    const redeemGroups = data.map(({ txGroup, pool }) => {
+        return {
+            txns: txGroup,
+            txnFees: util_1.sumUpTxnFees(txGroup),
+            groupID: util_1.getTxnGroupID(txGroup),
+            lsig: algosdk_1.default.makeLogicSig(pool.program)
+        };
     });
-    const signedFeeTxns = await initiatorSigner(transactionsToSign);
-    const redeemTxnsPromise = Promise.all(redeemItems.map((item, index) => new Promise(async (resolve, reject) => {
+    const signedFeeTxns = await initiatorSigner(redeemGroups.map((item) => item.txns));
+    const redeemTxnsPromise = Promise.all(redeemGroups.map((redeemGroup, groupIndex) => new Promise(async (resolve, reject) => {
         try {
-            const signedTxns = item.txGroup.map((txn, txnIndex) => {
+            const signedTxns = redeemGroup.txns.map((txDetail, txnIndex) => {
                 if (txnIndex === 0) {
                     // Get the txn signed by initiator
-                    return signedFeeTxns[index];
+                    return signedFeeTxns[groupIndex];
                 }
-                const { blob } = algosdk_1.default.signLogicSigTransactionObject(txn, item.lsig);
+                const { blob } = algosdk_1.default.signLogicSigTransactionObject(txDetail.txn, redeemGroup.lsig);
                 return blob;
             });
-            const { txnID, confirmedRound } = await util_1.sendAndWaitRawTransaction(client, signedTxns);
+            const [{ txnID, confirmedRound }] = await util_1.sendAndWaitRawTransaction(client, [
+                signedTxns
+            ]);
             resolve({
-                fees: item.txnFees,
-                groupID: item.groupID,
+                fees: redeemGroup.txnFees,
+                groupID: redeemGroup.groupID,
                 txnID,
                 confirmedRound
             });
@@ -138,12 +138,21 @@ async function generateRedeemTxns({ client, pool, assetID, assetOut, initiatorAd
         note: constant_1.DEFAULT_FEE_TXN_NOTE,
         suggestedParams
     });
-    const txGroup = algosdk_1.default.assignGroupID([
-        feeTxn,
-        validatorAppCallTxn,
-        assetOutTxn
-    ]);
-    return txGroup;
+    const txGroup = algosdk_1.default.assignGroupID([feeTxn, validatorAppCallTxn, assetOutTxn]);
+    return [
+        {
+            txn: txGroup[0],
+            signers: [initiatorAddr]
+        },
+        {
+            txn: txGroup[1],
+            signers: [pool.addr]
+        },
+        {
+            txn: txGroup[2],
+            signers: [pool.addr]
+        }
+    ];
 }
 exports.generateRedeemTxns = generateRedeemTxns;
 /**

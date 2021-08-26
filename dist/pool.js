@@ -221,7 +221,11 @@ function getPoolShare(totalLiquidity, ownedLiquidity) {
     return share;
 }
 exports.getPoolShare = getPoolShare;
+const POOL_ASSETS_CACHE = {};
 async function getPoolAssets({ client, address, validatorAppID }) {
+    if (POOL_ASSETS_CACHE[address]) {
+        return POOL_ASSETS_CACHE[address];
+    }
     const info = (await client.accountInformation(address).do());
     // eslint-disable-next-line eqeqeq
     const appState = info["apps-local-state"].find((app) => app.id == validatorAppID);
@@ -239,6 +243,7 @@ async function getPoolAssets({ client, address, validatorAppID }) {
             asset2ID: state[asset2Key],
             liquidityTokenID
         };
+        POOL_ASSETS_CACHE[address] = assets;
     }
     return assets;
 }

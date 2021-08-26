@@ -1,10 +1,8 @@
 export {
   getvalidatorAppID,
-  optIntoValidator,
   generateOptIntoValidatorTxns,
   OPT_IN_VALIDATOR_APP_PROCESS_TXN_COUNT,
   isOptedIntoValidator,
-  optOutOfValidator,
   generateOptOutOfValidatorTxns,
   OPT_OUT_VALIDATOR_APP_PROCESS_TXN_COUNT
 } from "./validator";
@@ -67,7 +65,6 @@ export {
 } from "./redeem";
 export {
   applySlippageToAmount,
-  optIntoAsset,
   generateOptIntoAssetTxns,
   ASSET_OPT_IN_PROCESS_TXN_COUNT,
   getAssetInformationById,
@@ -77,7 +74,12 @@ export {
   getTxnGroupID,
   sumUpTxnFees
 } from "./util";
-export {AccountAsset, InitiatorSigner, TinymanAnalyticsApiAsset} from "./common-types";
+export {
+  AccountAsset,
+  InitiatorSigner,
+  TinymanAnalyticsApiAsset,
+  SignerTransaction
+} from "./common-types";
 export {
   ALGO_ASSET,
   ALGO_ASSET_ID,

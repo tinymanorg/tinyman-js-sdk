@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getTxnGroupID = exports.sumUpTxnFees = exports.sendAndWaitRawTransaction = exports.convertToBaseUnits = exports.convertFromBaseUnits = exports.getAssetInformationById = exports.bufferToBase64 = exports.generateOptIntoAssetTxns = exports.ASSET_OPT_IN_PROCESS_TXN_COUNT = exports.optIntoAsset = exports.applySlippageToAmount = exports.waitForTransaction = exports.getMinBalanceForAccount = exports.joinUint8Arrays = exports.decodeState = void 0;
+exports.getTxnGroupID = exports.sumUpTxnFees = exports.sendAndWaitRawTransaction = exports.convertToBaseUnits = exports.convertFromBaseUnits = exports.getAssetInformationById = exports.bufferToBase64 = exports.generateOptIntoAssetTxns = exports.ASSET_OPT_IN_PROCESS_TXN_COUNT = exports.applySlippageToAmount = exports.waitForTransaction = exports.getMinBalanceForAccount = exports.joinUint8Arrays = exports.decodeState = void 0;
 const algosdk_1 = __importDefault(require("algosdk"));
 const constant_1 = require("./constant");
 const CACHED_ASSETS = new Map();
@@ -98,16 +98,6 @@ function applySlippageToAmount(type, slippage, amount) {
     return final;
 }
 exports.applySlippageToAmount = applySlippageToAmount;
-async function optIntoAsset({ client, assetID, initiatorAddr, initiatorSigner }) {
-    const optInTxns = await generateOptIntoAssetTxns({
-        client,
-        assetID,
-        initiatorAddr
-    });
-    const signedTxns = await initiatorSigner(optInTxns);
-    return sendAndWaitRawTransaction(client, signedTxns);
-}
-exports.optIntoAsset = optIntoAsset;
 exports.ASSET_OPT_IN_PROCESS_TXN_COUNT = 1;
 async function generateOptIntoAssetTxns({ client, assetID, initiatorAddr }) {
     const suggestedParams = await client.getTransactionParams().do();
@@ -118,7 +108,7 @@ async function generateOptIntoAssetTxns({ client, assetID, initiatorAddr }) {
         amount: 0,
         suggestedParams
     });
-    return [optInTxn];
+    return [{ txn: optInTxn, signers: [initiatorAddr] }];
 }
 exports.generateOptIntoAssetTxns = generateOptIntoAssetTxns;
 function bufferToBase64(arrayBuffer) {
@@ -199,21 +189,25 @@ function roundNumber({ decimalPlaces = 0 }, x) {
  * @param groupID - Txn Group's ID
  * @returns Confirmed round and txnID
  */
-async function sendAndWaitRawTransaction(client, signedTxns) {
-    const { txId } = await client.sendRawTransaction(signedTxns).do();
-    const status = await waitForTransaction(client, txId);
-    const confirmedRound = status["confirmed-round"];
-    return {
-        confirmedRound,
-        txnID: txId
-    };
+async function sendAndWaitRawTransaction(client, signedTxnGroups) {
+    let networkResponse = [];
+    for (let signedTxnGroup of signedTxnGroups) {
+        const { txId } = await client.sendRawTransaction(signedTxnGroup).do();
+        const status = await waitForTransaction(client, txId);
+        const confirmedRound = status["confirmed-round"];
+        networkResponse.push({
+            confirmedRound,
+            txnID: txId
+        });
+    }
+    return networkResponse;
 }
 exports.sendAndWaitRawTransaction = sendAndWaitRawTransaction;
 function sumUpTxnFees(txns) {
-    return txns.reduce((totalFee, txn) => totalFee + txn.fee, 0);
+    return txns.reduce((totalFee, txDetail) => totalFee + txDetail.txn.fee, 0);
 }
 exports.sumUpTxnFees = sumUpTxnFees;
 function getTxnGroupID(txns) {
-    return bufferToBase64(txns[0].group);
+    return bufferToBase64(txns[0].txn.group);
 }
 exports.getTxnGroupID = getTxnGroupID;

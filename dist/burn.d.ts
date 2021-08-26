@@ -1,6 +1,5 @@
-import algosdk, {Transaction} from "algosdk";
 import {PoolInfo} from "./pool";
-import {InitiatorSigner} from "./common-types";
+import {InitiatorSigner, SignerTransaction} from "./common-types";
 /** An object containing information about a burn quote. */
 export interface BurnQuote {
   /** The round that this quote is based on. */
@@ -84,14 +83,14 @@ export declare function generateBurnTxns({
   asset2Out: number | bigint;
   slippage: number;
   initiatorAddr: string;
-}): Promise<algosdk.Transaction[]>;
+}): Promise<SignerTransaction[]>;
 export declare function signBurnTxns({
   pool,
   txGroup,
   initiatorSigner
 }: {
   pool: PoolInfo;
-  txGroup: Transaction[];
+  txGroup: SignerTransaction[];
   initiatorSigner: InitiatorSigner;
 }): Promise<Uint8Array[]>;
 /**
@@ -119,7 +118,7 @@ export declare function burnLiquidity({
 }: {
   client: any;
   pool: PoolInfo;
-  txGroup: Transaction[];
+  txGroup: SignerTransaction[];
   signedTxns: Uint8Array[];
   initiatorAddr: string;
 }): Promise<BurnExecution>;

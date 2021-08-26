@@ -1,5 +1,5 @@
-import {Algodv2, Transaction} from "algosdk";
-import {InitiatorSigner} from "./common-types";
+import {Algodv2} from "algosdk";
+import {InitiatorSigner, SignerTransaction} from "./common-types";
 export declare function getBootstrapProcessTxnCount(asset2ID: number): 5 | 4;
 export declare function generateBootstrapTransactions({
   client,
@@ -22,7 +22,7 @@ export declare function generateBootstrapTransactions({
   asset1UnitName: string;
   asset2UnitName: string;
   initiatorAddr: string;
-}): Promise<Transaction[]>;
+}): Promise<SignerTransaction[]>;
 export declare function signBootstrapTransactions({
   poolLogicSig,
   txGroup,
@@ -32,7 +32,7 @@ export declare function signBootstrapTransactions({
     addr: string;
     program: Uint8Array;
   };
-  txGroup: Transaction[];
+  txGroup: SignerTransaction[];
   initiatorSigner: InitiatorSigner;
 }): Promise<{
   signedTxns: Uint8Array[];

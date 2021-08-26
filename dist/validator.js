@@ -3,9 +3,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isOptedIntoValidator = exports.generateOptOutOfValidatorTxns = exports.OPT_OUT_VALIDATOR_APP_PROCESS_TXN_COUNT = exports.optOutOfValidator = exports.generateOptIntoValidatorTxns = exports.OPT_IN_VALIDATOR_APP_PROCESS_TXN_COUNT = exports.optIntoValidator = exports.getvalidatorAppID = void 0;
+exports.isOptedIntoValidator = exports.generateOptOutOfValidatorTxns = exports.OPT_OUT_VALIDATOR_APP_PROCESS_TXN_COUNT = exports.generateOptIntoValidatorTxns = exports.OPT_IN_VALIDATOR_APP_PROCESS_TXN_COUNT = exports.getvalidatorAppID = void 0;
 const algosdk_1 = __importDefault(require("algosdk"));
-const util_1 = require("./util");
 const constant_1 = require("./constant");
 const CREATE_ENCODED = Uint8Array.from([99, 114, 101, 97, 116, 101]); // 'create'
 /**
@@ -34,25 +33,6 @@ async function getvalidatorAppID(client) {
     throw new Error(`No Validator App exists for network ${genesisID}`);
 }
 exports.getvalidatorAppID = getvalidatorAppID;
-/**
- * Opt into the validator app.
- *
- * @param params.client An Algodv2 client.
- * @param params.validatorAppID The ID of the Validator App for the network.
- * @param params.initiatorAddr The address of the account opting in.
- * @param params.initiatorSigner A function that will sign  transactions from the initiator's
- *   account.
- */
-async function optIntoValidator({ client, validatorAppID, initiatorAddr, initiatorSigner }) {
-    const appOptInTxns = await generateOptIntoValidatorTxns({
-        client,
-        validatorAppID,
-        initiatorAddr
-    });
-    const signedTxns = await initiatorSigner(appOptInTxns);
-    return util_1.sendAndWaitRawTransaction(client, signedTxns);
-}
-exports.optIntoValidator = optIntoValidator;
 exports.OPT_IN_VALIDATOR_APP_PROCESS_TXN_COUNT = 1;
 async function generateOptIntoValidatorTxns({ client, validatorAppID, initiatorAddr }) {
     const suggestedParams = await client.getTransactionParams().do();
@@ -61,29 +41,9 @@ async function generateOptIntoValidatorTxns({ client, validatorAppID, initiatorA
         appIndex: validatorAppID,
         suggestedParams
     });
-    return [appOptInTxn];
+    return [{ txn: appOptInTxn, signers: [initiatorAddr] }];
 }
 exports.generateOptIntoValidatorTxns = generateOptIntoValidatorTxns;
-/**
- * Close out of the Validator app. WARNING: Make sure to redeem ALL excess asset amounts
- * before closing out of the validator, otherwise those assets will be returned to Pools.
- *
- * @param params.client An Algodv2 client.
- * @param params.validatorAppID The ID of the Validator App for the network.
- * @param params.initiatorAddr The address of the account closing out.
- * @param params.initiatorSigner A function that will sign transactions from the initiator's
- *   account.
- */
-async function optOutOfValidator({ client, validatorAppID, initiatorAddr, initiatorSigner }) {
-    const appClearStateTxns = await generateOptOutOfValidatorTxns({
-        client,
-        validatorAppID,
-        initiatorAddr
-    });
-    const signedTxns = await initiatorSigner(appClearStateTxns);
-    return util_1.sendAndWaitRawTransaction(client, signedTxns);
-}
-exports.optOutOfValidator = optOutOfValidator;
 exports.OPT_OUT_VALIDATOR_APP_PROCESS_TXN_COUNT = 1;
 async function generateOptOutOfValidatorTxns({ client, validatorAppID, initiatorAddr }) {
     const suggestedParams = await client.getTransactionParams().do();
@@ -92,7 +52,7 @@ async function generateOptOutOfValidatorTxns({ client, validatorAppID, initiator
         appIndex: validatorAppID,
         suggestedParams
     });
-    return [appClearStateTxn];
+    return [{ txn: appClearStateTxn, signers: [initiatorAddr] }];
 }
 exports.generateOptOutOfValidatorTxns = generateOptOutOfValidatorTxns;
 /**

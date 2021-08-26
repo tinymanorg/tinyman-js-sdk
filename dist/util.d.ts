@@ -1,6 +1,6 @@
 /// <reference types="node" />
-import algosdk, {Algodv2, Transaction} from "algosdk";
-import {TinymanAnalyticsApiAsset, InitiatorSigner} from "./common-types";
+import algosdk, {Algodv2} from "algosdk";
+import {TinymanAnalyticsApiAsset, SignerTransaction} from "./common-types";
 import {AccountInformation} from "./account/accountTypes";
 export declare function decodeState(
   stateArray?: AccountInformation["apps-local-state"][0]["key-value"]
@@ -13,20 +13,6 @@ export declare function applySlippageToAmount(
   slippage: number,
   amount: number | bigint
 ): bigint;
-export declare function optIntoAsset({
-  client,
-  assetID,
-  initiatorAddr,
-  initiatorSigner
-}: {
-  client: Algodv2;
-  assetID: number;
-  initiatorAddr: string;
-  initiatorSigner: InitiatorSigner;
-}): Promise<{
-  confirmedRound: any;
-  txnID: any;
-}>;
 export declare const ASSET_OPT_IN_PROCESS_TXN_COUNT = 1;
 export declare function generateOptIntoAssetTxns({
   client,
@@ -36,7 +22,7 @@ export declare function generateOptIntoAssetTxns({
   client: any;
   assetID: any;
   initiatorAddr: any;
-}): Promise<algosdk.Transaction[]>;
+}): Promise<SignerTransaction[]>;
 export declare function bufferToBase64(
   arrayBuffer: undefined | null | WithImplicitCoercion<ArrayBuffer | SharedArrayBuffer>
 ): string;
@@ -75,10 +61,12 @@ export declare function convertToBaseUnits(
  */
 export declare function sendAndWaitRawTransaction(
   client: Algodv2,
-  signedTxns: any[]
-): Promise<{
-  confirmedRound: any;
-  txnID: any;
-}>;
-export declare function sumUpTxnFees(txns: Transaction[]): number;
-export declare function getTxnGroupID(txns: Transaction[]): string;
+  signedTxnGroups: Uint8Array[][]
+): Promise<
+  {
+    confirmedRound: number;
+    txnID: string;
+  }[]
+>;
+export declare function sumUpTxnFees(txns: SignerTransaction[]): number;
+export declare function getTxnGroupID(txns: SignerTransaction[]): string;

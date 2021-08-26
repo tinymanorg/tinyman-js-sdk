@@ -28,18 +28,15 @@ var SwapTxnGroupIndices;
 })(SwapTxnGroupIndices || (SwapTxnGroupIndices = {}));
 async function signSwapTransactions({ pool, txGroup, initiatorSigner }) {
     const lsig = algosdk_1.default.makeLogicSig(pool.program);
-    const [signedFeeTxn, signedAssetInTxn] = await initiatorSigner([
-        txGroup[SwapTxnGroupIndices.FEE_TXN_INDEX],
-        txGroup[SwapTxnGroupIndices.ASSET_IN_TXN_INDEX]
-    ]);
-    const signedTxns = txGroup.map((txn, index) => {
+    const [signedFeeTxn, signedAssetInTxn] = await initiatorSigner([txGroup]);
+    const signedTxns = txGroup.map((txDetail, index) => {
         if (index === SwapTxnGroupIndices.FEE_TXN_INDEX) {
             return signedFeeTxn;
         }
         if (index === SwapTxnGroupIndices.ASSET_IN_TXN_INDEX) {
             return signedAssetInTxn;
         }
-        const { blob } = algosdk_1.default.signLogicSigTransactionObject(txn, lsig);
+        const { blob } = algosdk_1.default.signLogicSigTransactionObject(txDetail.txn, lsig);
         return blob;
     });
     return signedTxns;
@@ -117,7 +114,12 @@ async function generateSwapTransactions({ client, pool, swapType, assetIn, asset
         assetInTxn,
         assetOutTxn
     ]);
-    return txGroup;
+    return [
+        { txn: txGroup[0], signers: [initiatorAddr] },
+        { txn: txGroup[1], signers: [pool.addr] },
+        { txn: txGroup[2], signers: [initiatorAddr] },
+        { txn: txGroup[3], signers: [pool.addr] }
+    ];
 }
 exports.generateSwapTransactions = generateSwapTransactions;
 /**
@@ -186,7 +188,7 @@ async function fixedInputSwap({ client, pool, signedTxns, assetIn, assetOut, ini
         pool,
         accountAddr: initiatorAddr
     });
-    let { confirmedRound, txnID } = await util_1.sendAndWaitRawTransaction(client, signedTxns);
+    let [{ confirmedRound, txnID }] = await util_1.sendAndWaitRawTransaction(client, [signedTxns]);
     const excessAssets = await pool_1.getAccountExcess({
         client,
         pool,
@@ -319,7 +321,7 @@ async function fixedOutputSwap({ client, pool, signedTxns, assetIn, assetOut, in
         pool,
         accountAddr: initiatorAddr
     });
-    let { confirmedRound, txnID } = await util_1.sendAndWaitRawTransaction(client, signedTxns);
+    let [{ confirmedRound, txnID }] = await util_1.sendAndWaitRawTransaction(client, [signedTxns]);
     const excessAssets = await pool_1.getAccountExcess({
         client,
         pool,
@@ -370,12 +372,12 @@ async function fixedOutputSwap({ client, pool, signedTxns, assetIn, assetOut, in
  */
 async function issueSwap({ client, pool, swapType, txGroup, signedTxns, initiatorAddr }) {
     const assetIn = {
-        assetID: txGroup[SwapTxnGroupIndices.ASSET_IN_TXN_INDEX].assetIndex || constant_1.ALGO_ASSET_ID,
-        amount: txGroup[SwapTxnGroupIndices.ASSET_IN_TXN_INDEX].amount
+        assetID: txGroup[SwapTxnGroupIndices.ASSET_IN_TXN_INDEX].txn.assetIndex || constant_1.ALGO_ASSET_ID,
+        amount: txGroup[SwapTxnGroupIndices.ASSET_IN_TXN_INDEX].txn.amount
     };
     const assetOut = {
-        assetID: txGroup[SwapTxnGroupIndices.ASSET_OUT_TXN_INDEX].assetIndex || constant_1.ALGO_ASSET_ID,
-        amount: txGroup[SwapTxnGroupIndices.ASSET_OUT_TXN_INDEX].amount
+        assetID: txGroup[SwapTxnGroupIndices.ASSET_OUT_TXN_INDEX].txn.assetIndex || constant_1.ALGO_ASSET_ID,
+        amount: txGroup[SwapTxnGroupIndices.ASSET_OUT_TXN_INDEX].txn.amount
     };
     let swapData;
     if (swapType === SwapType.FixedInput) {

@@ -1,6 +1,6 @@
-import algosdk, {Algodv2, Transaction} from "algosdk";
+import {Algodv2} from "algosdk";
 import {PoolInfo} from "./pool";
-import {InitiatorSigner} from "./common-types";
+import {InitiatorSigner, SignerTransaction} from "./common-types";
 export declare enum SwapType {
   FixedInput = "fixed-input",
   FixedOutput = "fixed-output"
@@ -58,7 +58,7 @@ export declare function signSwapTransactions({
   initiatorSigner
 }: {
   pool: PoolInfo;
-  txGroup: Transaction[];
+  txGroup: SignerTransaction[];
   initiatorSigner: InitiatorSigner;
 }): Promise<Uint8Array[]>;
 export declare const SWAP_PROCESS_TXN_COUNT = 4;
@@ -84,7 +84,7 @@ export declare function generateSwapTransactions({
   };
   slippage: number;
   initiatorAddr: string;
-}): Promise<algosdk.Transaction[]>;
+}): Promise<SignerTransaction[]>;
 /**
  *
  * @param type - Type of the swap
@@ -134,7 +134,7 @@ export declare function issueSwap({
   client: Algodv2;
   pool: PoolInfo;
   swapType: SwapType;
-  txGroup: Transaction[];
+  txGroup: SignerTransaction[];
   signedTxns: Uint8Array[];
   initiatorAddr: string;
 }): Promise<SwapExecution>;

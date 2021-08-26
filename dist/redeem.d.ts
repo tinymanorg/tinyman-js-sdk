@@ -1,6 +1,10 @@
-import {Algodv2, Transaction} from "algosdk";
+import {Algodv2} from "algosdk";
 import {PoolInfo} from "./pool";
-import {TinymanAnalyticsApiAsset, InitiatorSigner} from "./common-types";
+import {
+  TinymanAnalyticsApiAsset,
+  InitiatorSigner,
+  SignerTransaction
+} from "./common-types";
 /**
  * Execute a redeem operation to collect excess assets from previous operations.
  *
@@ -21,7 +25,7 @@ export declare function redeemExcessAsset({
 }: {
   client: any;
   pool: PoolInfo;
-  txGroup: Transaction[];
+  txGroup: SignerTransaction[];
   initiatorSigner: InitiatorSigner;
 }): Promise<{
   fees: number;
@@ -49,7 +53,7 @@ export declare function redeemAllExcessAsset({
   client: any;
   data: {
     pool: PoolInfo;
-    txGroup: Transaction[];
+    txGroup: SignerTransaction[];
   }[];
   initiatorSigner: InitiatorSigner;
 }): Promise<
@@ -73,7 +77,7 @@ export declare function generateRedeemTxns({
   assetID: number;
   assetOut: number | bigint;
   initiatorAddr: string;
-}): Promise<Transaction[]>;
+}): Promise<SignerTransaction[]>;
 export interface ExcessAmountData {
   poolAddress: string;
   assetID: number;
