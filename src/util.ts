@@ -1,7 +1,11 @@
 import algosdk, {Algodv2, Transaction} from "algosdk";
 import {AssetParams} from "algosdk/dist/types/src/client/v2/algod/models/types";
 
-import {TinymanAnalyticsApiAsset, InitiatorSigner} from "./common-types";
+import {
+  TinymanAnalyticsApiAsset,
+  InitiatorSigner,
+  SignerTransaction
+} from "./common-types";
 import {AccountInformation} from "./account/accountTypes";
 import {ALGO_ASSET, ALGO_ASSET_ID} from "./constant";
 
@@ -119,31 +123,13 @@ export function applySlippageToAmount(
   return final;
 }
 
-export async function optIntoAsset({
-  client,
-  assetID,
-  initiatorAddr,
-  initiatorSigner
-}: {
-  client: Algodv2;
-  assetID: number;
-  initiatorAddr: string;
-  initiatorSigner: InitiatorSigner;
-}) {
-  const optInTxns = await generateOptIntoAssetTxns({
-    client,
-    assetID,
-    initiatorAddr
-  });
-
-  const signedTxns = await initiatorSigner(optInTxns);
-
-  return sendAndWaitRawTransaction(client, signedTxns);
-}
-
 export const ASSET_OPT_IN_PROCESS_TXN_COUNT = 1;
 
-export async function generateOptIntoAssetTxns({client, assetID, initiatorAddr}) {
+export async function generateOptIntoAssetTxns({
+  client,
+  assetID,
+  initiatorAddr
+}): Promise<SignerTransaction[]> {
   const suggestedParams = await client.getTransactionParams().do();
 
   const optInTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
@@ -154,7 +140,7 @@ export async function generateOptIntoAssetTxns({client, assetID, initiatorAddr})
     suggestedParams
   });
 
-  return [optInTxn];
+  return [{txn: optInTxn, signers: [initiatorAddr]}];
 }
 
 export function bufferToBase64(
@@ -258,22 +244,34 @@ function roundNumber({decimalPlaces = 0}, x: number): number {
  * @param groupID - Txn Group's ID
  * @returns Confirmed round and txnID
  */
-export async function sendAndWaitRawTransaction(client: Algodv2, signedTxns: any[]) {
-  const {txId} = await client.sendRawTransaction(signedTxns).do();
+export async function sendAndWaitRawTransaction(
+  client: Algodv2,
+  signedTxnGroups: Uint8Array[][]
+) {
+  let networkResponse: {
+    confirmedRound: number;
+    txnID: string;
+  }[] = [];
 
-  const status = await waitForTransaction(client, txId);
-  const confirmedRound = status["confirmed-round"];
+  for (let signedTxnGroup of signedTxnGroups) {
+    const {txId} = await client.sendRawTransaction(signedTxnGroup).do();
 
-  return {
-    confirmedRound,
-    txnID: txId
-  };
+    const status = await waitForTransaction(client, txId);
+    const confirmedRound = status["confirmed-round"];
+
+    networkResponse.push({
+      confirmedRound,
+      txnID: txId
+    });
+  }
+
+  return networkResponse;
 }
 
-export function sumUpTxnFees(txns: Transaction[]): number {
-  return txns.reduce((totalFee, txn) => totalFee + txn.fee, 0);
+export function sumUpTxnFees(txns: SignerTransaction[]): number {
+  return txns.reduce((totalFee, txDetail) => totalFee + txDetail.txn.fee, 0);
 }
 
-export function getTxnGroupID(txns: Transaction[]) {
-  return bufferToBase64(txns[0].group);
+export function getTxnGroupID(txns: SignerTransaction[]) {
+  return bufferToBase64(txns[0].txn.group);
 }

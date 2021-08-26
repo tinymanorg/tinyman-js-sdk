@@ -1,7 +1,6 @@
 import algosdk, {Algodv2} from "algosdk";
 
-import {sendAndWaitRawTransaction} from "./util";
-import {InitiatorSigner} from "./common-types";
+import {SignerTransaction} from "./common-types";
 import {
   TESTNET_VALIDATOR_APP_ID,
   HIPONET_VALIDATOR_APP_ID,
@@ -47,37 +46,6 @@ export async function getvalidatorAppID(client: any): Promise<number> {
   throw new Error(`No Validator App exists for network ${genesisID}`);
 }
 
-/**
- * Opt into the validator app.
- *
- * @param params.client An Algodv2 client.
- * @param params.validatorAppID The ID of the Validator App for the network.
- * @param params.initiatorAddr The address of the account opting in.
- * @param params.initiatorSigner A function that will sign  transactions from the initiator's
- *   account.
- */
-export async function optIntoValidator({
-  client,
-  validatorAppID,
-  initiatorAddr,
-  initiatorSigner
-}: {
-  client: Algodv2;
-  validatorAppID: number;
-  initiatorAddr: string;
-  initiatorSigner: InitiatorSigner;
-}) {
-  const appOptInTxns = await generateOptIntoValidatorTxns({
-    client,
-    validatorAppID,
-    initiatorAddr
-  });
-
-  const signedTxns = await initiatorSigner(appOptInTxns);
-
-  return sendAndWaitRawTransaction(client, signedTxns);
-}
-
 export const OPT_IN_VALIDATOR_APP_PROCESS_TXN_COUNT = 1;
 
 export async function generateOptIntoValidatorTxns({
@@ -88,7 +56,7 @@ export async function generateOptIntoValidatorTxns({
   client: Algodv2;
   validatorAppID: number;
   initiatorAddr: string;
-}) {
+}): Promise<SignerTransaction[]> {
   const suggestedParams = await client.getTransactionParams().do();
 
   const appOptInTxn = algosdk.makeApplicationOptInTxnFromObject({
@@ -97,39 +65,7 @@ export async function generateOptIntoValidatorTxns({
     suggestedParams
   });
 
-  return [appOptInTxn];
-}
-
-/**
- * Close out of the Validator app. WARNING: Make sure to redeem ALL excess asset amounts
- * before closing out of the validator, otherwise those assets will be returned to Pools.
- *
- * @param params.client An Algodv2 client.
- * @param params.validatorAppID The ID of the Validator App for the network.
- * @param params.initiatorAddr The address of the account closing out.
- * @param params.initiatorSigner A function that will sign transactions from the initiator's
- *   account.
- */
-export async function optOutOfValidator({
-  client,
-  validatorAppID,
-  initiatorAddr,
-  initiatorSigner
-}: {
-  client: Algodv2;
-  validatorAppID: number;
-  initiatorAddr: string;
-  initiatorSigner: InitiatorSigner;
-}) {
-  const appClearStateTxns = await generateOptOutOfValidatorTxns({
-    client,
-    validatorAppID,
-    initiatorAddr
-  });
-
-  const signedTxns = await initiatorSigner(appClearStateTxns);
-
-  return sendAndWaitRawTransaction(client, signedTxns);
+  return [{txn: appOptInTxn, signers: [initiatorAddr]}];
 }
 
 export const OPT_OUT_VALIDATOR_APP_PROCESS_TXN_COUNT = 1;
@@ -142,7 +78,7 @@ export async function generateOptOutOfValidatorTxns({
   client: Algodv2;
   validatorAppID: number;
   initiatorAddr: string;
-}) {
+}): Promise<SignerTransaction[]> {
   const suggestedParams = await client.getTransactionParams().do();
 
   const appClearStateTxn = algosdk.makeApplicationClearStateTxnFromObject({
@@ -151,7 +87,7 @@ export async function generateOptOutOfValidatorTxns({
     suggestedParams
   });
 
-  return [appClearStateTxn];
+  return [{txn: appClearStateTxn, signers: [initiatorAddr]}];
 }
 
 /**

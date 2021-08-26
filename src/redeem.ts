@@ -10,7 +10,11 @@ import {
   sumUpTxnFees
 } from "./util";
 import {getPoolAssets, getPoolInfo, PoolInfo} from "./pool";
-import {TinymanAnalyticsApiAsset, InitiatorSigner} from "./common-types";
+import {
+  TinymanAnalyticsApiAsset,
+  InitiatorSigner,
+  SignerTransaction
+} from "./common-types";
 import {AccountInformation} from "./account/accountTypes";
 import {DEFAULT_FEE_TXN_NOTE} from "./constant";
 
@@ -36,7 +40,7 @@ export async function redeemExcessAsset({
 }: {
   client: any;
   pool: PoolInfo;
-  txGroup: Transaction[];
+  txGroup: SignerTransaction[];
   initiatorSigner: InitiatorSigner;
 }): Promise<{
   fees: number;
@@ -50,13 +54,13 @@ export async function redeemExcessAsset({
     initiatorSigner
   });
 
-  const {txnID, confirmedRound} = await sendAndWaitRawTransaction(client, signedTxns);
+  const [{txnID, confirmedRound}] = await sendAndWaitRawTransaction(client, [signedTxns]);
 
   return {
     fees: sumUpTxnFees(txGroup),
     confirmedRound,
     txnID,
-    groupID: bufferToBase64(txGroup[0].group)
+    groupID: getTxnGroupID(txGroup)
   };
 }
 
@@ -65,18 +69,18 @@ async function signRedeemTxns({
   pool,
   initiatorSigner
 }: {
-  txGroup: Transaction[];
+  txGroup: SignerTransaction[];
   pool: PoolInfo;
   initiatorSigner: InitiatorSigner;
-}) {
-  const [signedFeeTxn] = await initiatorSigner([txGroup[0]]);
+}): Promise<Uint8Array[]> {
+  const [signedFeeTxn] = await initiatorSigner([txGroup]);
   const lsig = algosdk.makeLogicSig(pool.program);
 
-  const signedTxns = txGroup.map((txn, index) => {
+  const signedTxns = txGroup.map((txDetail, index) => {
     if (index === 0) {
       return signedFeeTxn;
     }
-    const {blob} = algosdk.signLogicSigTransactionObject(txn, lsig);
+    const {blob} = algosdk.signLogicSigTransactionObject(txDetail.txn, lsig);
 
     return blob;
   });
@@ -102,7 +106,7 @@ export async function redeemAllExcessAsset({
   initiatorSigner
 }: {
   client: any;
-  data: {pool: PoolInfo; txGroup: Transaction[]}[];
+  data: {pool: PoolInfo; txGroup: SignerTransaction[]}[];
   initiatorSigner: InitiatorSigner;
 }): Promise<
   {
@@ -112,23 +116,20 @@ export async function redeemAllExcessAsset({
     txnID: string;
   }[]
 > {
-  const redeemItems = data.map(({txGroup, pool}) => ({
-    txGroup,
-    txnFees: sumUpTxnFees(txGroup),
-    groupID: getTxnGroupID(txGroup),
-    lsig: algosdk.makeLogicSig(pool.program)
-  }));
-
-  // These are signed by the initiator
-  const transactionsToSign = redeemItems.map((item) => {
-    return item.txGroup[0]; // feeTxn;
+  const redeemGroups = data.map(({txGroup, pool}) => {
+    return {
+      txns: txGroup,
+      txnFees: sumUpTxnFees(txGroup),
+      groupID: getTxnGroupID(txGroup),
+      lsig: algosdk.makeLogicSig(pool.program)
+    };
   });
 
-  const signedFeeTxns = await initiatorSigner(transactionsToSign);
+  const signedFeeTxns = await initiatorSigner(redeemGroups.map((item) => item.txns));
 
   const redeemTxnsPromise = Promise.all(
-    redeemItems.map(
-      (item, index) =>
+    redeemGroups.map(
+      (redeemGroup, groupIndex) =>
         new Promise<{
           fees: number;
           confirmedRound: number;
@@ -136,24 +137,26 @@ export async function redeemAllExcessAsset({
           txnID: string;
         }>(async (resolve, reject) => {
           try {
-            const signedTxns = item.txGroup.map((txn, txnIndex) => {
+            const signedTxns = redeemGroup.txns.map((txDetail, txnIndex) => {
               if (txnIndex === 0) {
                 // Get the txn signed by initiator
-                return signedFeeTxns[index];
+                return signedFeeTxns[groupIndex];
               }
-              const {blob} = algosdk.signLogicSigTransactionObject(txn, item.lsig);
+              const {blob} = algosdk.signLogicSigTransactionObject(
+                txDetail.txn,
+                redeemGroup.lsig
+              );
 
               return blob;
             });
 
-            const {txnID, confirmedRound} = await sendAndWaitRawTransaction(
-              client,
+            const [{txnID, confirmedRound}] = await sendAndWaitRawTransaction(client, [
               signedTxns
-            );
+            ]);
 
             resolve({
-              fees: item.txnFees,
-              groupID: item.groupID,
+              fees: redeemGroup.txnFees,
+              groupID: redeemGroup.groupID,
               txnID,
               confirmedRound
             });
@@ -181,7 +184,7 @@ export async function generateRedeemTxns({
   assetID: number;
   assetOut: number | bigint;
   initiatorAddr: string;
-}): Promise<Transaction[]> {
+}): Promise<SignerTransaction[]> {
   const suggestedParams = await client.getTransactionParams().do();
 
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
@@ -224,13 +227,22 @@ export async function generateRedeemTxns({
     suggestedParams
   });
 
-  const txGroup: any[] = algosdk.assignGroupID([
-    feeTxn,
-    validatorAppCallTxn,
-    assetOutTxn
-  ]);
+  const txGroup = algosdk.assignGroupID([feeTxn, validatorAppCallTxn, assetOutTxn]);
 
-  return txGroup;
+  return [
+    {
+      txn: txGroup[0],
+      signers: [initiatorAddr]
+    },
+    {
+      txn: txGroup[1],
+      signers: [pool.addr]
+    },
+    {
+      txn: txGroup[2],
+      signers: [pool.addr]
+    }
+  ];
 }
 
 export interface ExcessAmountData {

@@ -1,6 +1,7 @@
+import * as ascJson from "./asc.json";
+
 import {toByteArray} from "base64-js";
 import {makeLogicSig} from "algosdk";
-import * as ascJson from "./asc.json";
 
 const validator_app = ascJson.contracts.validator_app;
 const pool_logicsig = ascJson.contracts.pool_logicsig;
@@ -24,9 +25,13 @@ export const VALIDATOR_APP_SCHEMA = {
 
 export function encodeVarInt(number) {
   let buf: number[] = [];
+
+  // eslint-disable-next-line no-constant-condition
   while (true) {
     let towrite = number & 0x7f;
+
     number >>= 7;
+
     if (number) {
       buf.push(towrite | 0x80);
     } else {
@@ -52,6 +57,7 @@ export function getPoolLogicSig({
 
   if (asset2ID > asset1ID) {
     const tmp = asset1ID;
+
     asset1ID = asset2ID;
     asset2ID = tmp;
   }
@@ -65,6 +71,7 @@ export function getPoolLogicSig({
   };
 
   let offset = 0;
+
   templateVariables.sort((a, b) => a.index - b.index);
   for (let i = 0; i < templateVariables.length; i++) {
     const v = templateVariables[i];
@@ -75,6 +82,7 @@ export function getPoolLogicSig({
     // All of the template variables are ints
     let value_encoded = encodeVarInt(value);
     let diff = v.length - value_encoded.length;
+
     offset += diff;
 
     programArray = programArray
@@ -86,8 +94,15 @@ export function getPoolLogicSig({
   const program = new Uint8Array(programArray);
 
   const lsig = makeLogicSig(program);
+
   return {
     addr: lsig.address(),
     program
   };
 }
+
+/* eslint
+      no-param-reassign: "off",
+      no-bitwise: "off",
+      prefer-destructuring: "off"
+*/

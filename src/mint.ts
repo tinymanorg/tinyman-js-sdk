@@ -1,4 +1,4 @@
-import algosdk, {Transaction} from "algosdk";
+import algosdk from "algosdk";
 
 import {
   applySlippageToAmount,
@@ -13,7 +13,7 @@ import {
   getAccountExcess,
   getPoolShare
 } from "./pool";
-import {InitiatorSigner} from "./common-types";
+import {InitiatorSigner, SignerTransaction} from "./common-types";
 import {ALGO_ASSET_ID, DEFAULT_FEE_TXN_NOTE} from "./constant";
 
 /** An object containing information about a mint quote. */
@@ -149,7 +149,7 @@ export async function generateMintTxns({
   liquidityOut: number | bigint;
   slippage: number;
   initiatorAddr: string;
-}) {
+}): Promise<SignerTransaction[]> {
   // apply slippage to liquidity out amount
   const liquidityOutAmount = applySlippageToAmount("negative", slippage, liquidityOut);
 
@@ -210,13 +210,36 @@ export async function generateMintTxns({
     suggestedParams
   });
 
-  return algosdk.assignGroupID([
+  const txGroup = algosdk.assignGroupID([
     feeTxn,
     validatorAppCallTxn,
     asset1InTxn,
     asset2InTxn,
     liquidityOutTxn
   ]);
+
+  return [
+    {
+      txn: txGroup[0],
+      signers: [initiatorAddr]
+    },
+    {
+      txn: txGroup[1],
+      signers: [pool.addr]
+    },
+    {
+      txn: txGroup[2],
+      signers: [initiatorAddr]
+    },
+    {
+      txn: txGroup[3],
+      signers: [initiatorAddr]
+    },
+    {
+      txn: txGroup[4],
+      signers: [pool.addr]
+    }
+  ];
 }
 
 export async function signMintTxns({
@@ -225,17 +248,15 @@ export async function signMintTxns({
   initiatorSigner
 }: {
   pool: PoolInfo;
-  txGroup: Transaction[];
+  txGroup: SignerTransaction[];
   initiatorSigner: InitiatorSigner;
-}) {
+}): Promise<Uint8Array[]> {
   const lsig = algosdk.makeLogicSig(pool.program);
   const [signedFeeTxn, signedAsset1InTxn, signedAsset2InTxn] = await initiatorSigner([
-    txGroup[MintTxnIndices.FEE_TXN],
-    txGroup[MintTxnIndices.ASSET1_IN_TXN],
-    txGroup[MintTxnIndices.ASSET2_IN_TXN]
+    txGroup
   ]);
 
-  const signedTxns = txGroup.map((txn, index) => {
+  const signedTxns = txGroup.map((txDetail, index) => {
     if (index === MintTxnIndices.FEE_TXN) {
       return signedFeeTxn;
     }
@@ -245,7 +266,7 @@ export async function signMintTxns({
     if (index === MintTxnIndices.ASSET2_IN_TXN) {
       return signedAsset2InTxn;
     }
-    const {blob} = algosdk.signLogicSigTransactionObject(txn, lsig);
+    const {blob} = algosdk.signLogicSigTransactionObject(txDetail.txn, lsig);
 
     return blob;
   });
@@ -276,11 +297,11 @@ export async function mintLiquidity({
 }: {
   client: any;
   pool: PoolInfo;
-  txGroup: Transaction[];
+  txGroup: SignerTransaction[];
   signedTxns: Uint8Array[];
   initiatorAddr: string;
 }): Promise<MintExecution> {
-  const liquidityOutAmount = BigInt(txGroup[MintTxnIndices.LIQUDITY_OUT_TXN].amount);
+  const liquidityOutAmount = BigInt(txGroup[MintTxnIndices.LIQUDITY_OUT_TXN].txn.amount);
 
   const prevExcessAssets = await getAccountExcess({
     client,
@@ -288,7 +309,7 @@ export async function mintLiquidity({
     accountAddr: initiatorAddr
   });
 
-  const {confirmedRound, txnID} = await sendAndWaitRawTransaction(client, signedTxns);
+  const [{confirmedRound, txnID}] = await sendAndWaitRawTransaction(client, [signedTxns]);
   const fees = sumUpTxnFees(txGroup);
   const groupID = getTxnGroupID(txGroup);
 
