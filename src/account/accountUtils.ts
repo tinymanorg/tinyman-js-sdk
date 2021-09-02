@@ -3,7 +3,10 @@ import {Algodv2} from "algosdk";
 import {
   BASE_MINIMUM_BALANCE,
   MINIMUM_BALANCE_REQUIRED_PER_APP,
-  MINIMUM_BALANCE_REQUIRED_PER_ASSET
+  MINIMUM_BALANCE_REQUIRED_PER_ASSET,
+  MINIMUM_BALANCE_REQUIRED_PER_BYTE_SCHEMA,
+  MINIMUM_BALANCE_REQUIRED_PER_CREATED_APP,
+  MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE
 } from "../constant";
 import {AccountInformation, AccountInformationData} from "./accountTypes";
 
@@ -31,10 +34,14 @@ export function calculateAccountMinimumRequiredBalance(
 
   return (
     BASE_MINIMUM_BALANCE +
-    (account.assets || []).length * MINIMUM_BALANCE_REQUIRED_PER_ASSET +
-    (account["apps-local-state"] || []).length * MINIMUM_BALANCE_REQUIRED_PER_APP +
-    ((totalSchema && totalSchema["num-byte-slice"]) || 0) * 50000 +
-    ((totalSchema && totalSchema["num-uint"]) || 0) * 28500
+    MINIMUM_BALANCE_REQUIRED_PER_ASSET * (account.assets || []).length +
+    MINIMUM_BALANCE_REQUIRED_PER_CREATED_APP * (account["created-apps"] || []).length +
+    MINIMUM_BALANCE_REQUIRED_PER_APP * (account["apps-local-state"] || []).length +
+    MINIMUM_BALANCE_REQUIRED_PER_BYTE_SCHEMA *
+      ((totalSchema && totalSchema["num-byte-slice"]) || 0) +
+    MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE *
+      ((totalSchema && totalSchema["num-uint"]) || 0) +
+    MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE * account["apps-total-extra-pages"]
   );
 }
 
