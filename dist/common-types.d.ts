@@ -12,6 +12,9 @@ export interface TinymanAnalyticsApiAsset {
   unit_name: string;
   decimals: number;
   url: string;
+  liquidity_in_usd?: number;
+  last_day_volume_in_usd?: number;
+  last_day_price_change?: number;
 }
 export interface SignerTransaction {
   txn: Transaction;
