@@ -6,6 +6,7 @@ import {
   MINIMUM_BALANCE_REQUIRED_PER_ASSET,
   MINIMUM_BALANCE_REQUIRED_PER_BYTE_SCHEMA,
   MINIMUM_BALANCE_REQUIRED_PER_CREATED_APP,
+  MINIMUM_BALANCE_REQUIRED_PER_EXTRA_APP_PAGE,
   MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE
 } from "../constant";
 import {AccountInformation, AccountInformationData} from "./accountTypes";
@@ -41,7 +42,7 @@ export function calculateAccountMinimumRequiredBalance(
       ((totalSchema && totalSchema["num-byte-slice"]) || 0) +
     MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE *
       ((totalSchema && totalSchema["num-uint"]) || 0) +
-    MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE * account["apps-total-extra-pages"]
+    MINIMUM_BALANCE_REQUIRED_PER_EXTRA_APP_PAGE * account["apps-total-extra-pages"]
   );
 }
 
