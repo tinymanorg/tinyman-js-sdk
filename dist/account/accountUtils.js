@@ -22,10 +22,14 @@ exports.getAccountInformation = getAccountInformation;
 function calculateAccountMinimumRequiredBalance(account) {
     const totalSchema = account["apps-total-schema"];
     return (constant_1.BASE_MINIMUM_BALANCE +
-        (account.assets || []).length * constant_1.MINIMUM_BALANCE_REQUIRED_PER_ASSET +
-        (account["apps-local-state"] || []).length * constant_1.MINIMUM_BALANCE_REQUIRED_PER_APP +
-        ((totalSchema && totalSchema["num-byte-slice"]) || 0) * 50000 +
-        ((totalSchema && totalSchema["num-uint"]) || 0) * 28500);
+        constant_1.MINIMUM_BALANCE_REQUIRED_PER_ASSET * (account.assets || []).length +
+        constant_1.MINIMUM_BALANCE_REQUIRED_PER_CREATED_APP * (account["created-apps"] || []).length +
+        constant_1.MINIMUM_BALANCE_REQUIRED_PER_APP * (account["apps-local-state"] || []).length +
+        constant_1.MINIMUM_BALANCE_REQUIRED_PER_BYTE_SCHEMA *
+            ((totalSchema && totalSchema["num-byte-slice"]) || 0) +
+        constant_1.MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE *
+            ((totalSchema && totalSchema["num-uint"]) || 0) +
+        constant_1.MINIMUM_BALANCE_REQUIRED_PER_EXTRA_APP_PAGE * account["apps-total-extra-pages"]);
 }
 exports.calculateAccountMinimumRequiredBalance = calculateAccountMinimumRequiredBalance;
 function hasSufficientMinimumBalance(accountData) {
