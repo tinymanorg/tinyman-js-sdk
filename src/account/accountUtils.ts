@@ -42,7 +42,7 @@ export function calculateAccountMinimumRequiredBalance(
       ((totalSchema && totalSchema["num-byte-slice"]) || 0) +
     MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE *
       ((totalSchema && totalSchema["num-uint"]) || 0) +
-    MINIMUM_BALANCE_REQUIRED_PER_EXTRA_APP_PAGE * account["apps-total-extra-pages"]
+    MINIMUM_BALANCE_REQUIRED_PER_EXTRA_APP_PAGE * (account["apps-total-extra-pages"] || 0)
   );
 }
 

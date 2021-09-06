@@ -8,6 +8,7 @@ function getAccountInformation(client, address) {
             const accountInfo = await client
                 .accountInformation(address)
                 .do();
+            console.log(calculateAccountMinimumRequiredBalance(accountInfo));
             resolve({
                 ...accountInfo,
                 minimum_required_balance: calculateAccountMinimumRequiredBalance(accountInfo)
@@ -29,7 +30,7 @@ function calculateAccountMinimumRequiredBalance(account) {
             ((totalSchema && totalSchema["num-byte-slice"]) || 0) +
         constant_1.MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE *
             ((totalSchema && totalSchema["num-uint"]) || 0) +
-        constant_1.MINIMUM_BALANCE_REQUIRED_PER_EXTRA_APP_PAGE * account["apps-total-extra-pages"]);
+        constant_1.MINIMUM_BALANCE_REQUIRED_PER_EXTRA_APP_PAGE * (account["apps-total-extra-pages"] || 0));
 }
 exports.calculateAccountMinimumRequiredBalance = calculateAccountMinimumRequiredBalance;
 function hasSufficientMinimumBalance(accountData) {
