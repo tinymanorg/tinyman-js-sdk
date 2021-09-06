@@ -8,7 +8,6 @@ function getAccountInformation(client, address) {
             const accountInfo = await client
                 .accountInformation(address)
                 .do();
-            console.log(calculateAccountMinimumRequiredBalance(accountInfo));
             resolve({
                 ...accountInfo,
                 minimum_required_balance: calculateAccountMinimumRequiredBalance(accountInfo)
