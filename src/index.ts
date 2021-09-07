@@ -94,10 +94,12 @@ export {
   ALGO_ASSET_ID,
   BASE_MINIMUM_BALANCE,
   MINIMUM_BALANCE_REQUIRED_PER_ASSET,
-  MINIMUM_BALANCE_REQUIRED_PER_APP
+  MINIMUM_BALANCE_REQUIRED_PER_APP,
+  MINIMUM_BALANCE_REQUIRED_PER_BYTE_SCHEMA,
+  MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE
 } from "./constant";
 
-export {getPoolLogicSig} from "./contracts";
+export {getPoolLogicSig, VALIDATOR_APP_SCHEMA} from "./contracts";
 
 export {
   getAccountInformation,
