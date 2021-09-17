@@ -1,4 +1,4 @@
-import {PoolInfo} from "./pool";
+import {PoolInfo, PoolReserves} from "./pool";
 import {InitiatorSigner, SignerTransaction} from "./common-types";
 /** An object containing information about a burn quote. */
 export interface BurnQuote {
@@ -53,19 +53,19 @@ export interface BurnExecution {
  * Get a quote for how many of assets 1 and 2 a deposit of liquidityIn is worth at this moment. This
  * does not execute any transactions.
  *
- * @param params.client An Algodv2 client.
  * @param params.pool Information for the pool.
+ * @param params.reserves Pool reserves.
  * @param params.liquidityIn The quantity of the liquidity being deposited.
  */
 export declare function getBurnLiquidityQuote({
-  client,
   pool,
+  reserves,
   liquidityIn
 }: {
-  client: any;
   pool: PoolInfo;
+  reserves: PoolReserves;
   liquidityIn: number | bigint;
-}): Promise<BurnQuote>;
+}): BurnQuote;
 export declare const BURN_PROCESS_TXN_COUNT = 5;
 export declare function generateBurnTxns({
   client,

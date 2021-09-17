@@ -20,12 +20,11 @@ var BurnTxnIndices;
  * Get a quote for how many of assets 1 and 2 a deposit of liquidityIn is worth at this moment. This
  * does not execute any transactions.
  *
- * @param params.client An Algodv2 client.
  * @param params.pool Information for the pool.
+ * @param params.reserves Pool reserves.
  * @param params.liquidityIn The quantity of the liquidity being deposited.
  */
-async function getBurnLiquidityQuote({ client, pool, liquidityIn }) {
-    const reserves = await pool_1.getPoolReserves(client, pool);
+function getBurnLiquidityQuote({ pool, reserves, liquidityIn }) {
     const liquidityIn_bigInt = BigInt(liquidityIn);
     const asset1Out = reserves.issuedLiquidity &&
         (liquidityIn_bigInt * reserves.asset1) / reserves.issuedLiquidity;

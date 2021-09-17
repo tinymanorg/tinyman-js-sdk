@@ -1,5 +1,5 @@
 import {Algodv2} from "algosdk";
-import {PoolInfo} from "./pool";
+import {PoolInfo, PoolReserves} from "./pool";
 import {InitiatorSigner, SignerTransaction} from "./common-types";
 export declare enum SwapType {
   FixedInput = "fixed-input",
@@ -89,6 +89,7 @@ export declare function generateSwapTransactions({
  *
  * @param type - Type of the swap
  * @param pool - Information for the pool.
+ * @param reserves - Pool reserves.
  * @param asset.assetID - ID of the asset to be swapped
  * @param asset.amount - Amount of the asset to be swapped
  * @param decimals.assetIn - Decimals quantity for the input asset
@@ -96,9 +97,9 @@ export declare function generateSwapTransactions({
  * @returns A promise for the Swap quote
  */
 export declare function getSwapQuote(
-  client: Algodv2,
   type: SwapType,
   pool: PoolInfo,
+  reserves: PoolReserves,
   asset: {
     assetID: number;
     amount: number | bigint;
@@ -107,7 +108,7 @@ export declare function getSwapQuote(
     assetIn: number;
     assetOut: number;
   }
-): Promise<SwapQuote>;
+): SwapQuote;
 /**
  * Execute a swap with the desired quantities.
  *

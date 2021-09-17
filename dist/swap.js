@@ -125,14 +125,13 @@ exports.generateSwapTransactions = generateSwapTransactions;
 /**
  * Get a quote for a fixed input swap This does not execute any transactions.
  *
- * @param params.client An Algodv2 client.
  * @param params.pool Information for the pool.
+ * @param params.reserves Pool Reserves.
  * @param params.assetIn.assetID The ID of the input asset. Must be one of the pool's asset1ID
  *   or asset2ID.
  * @param params.assetIn.amount The quantity of the input asset.
  */
-async function getFixedInputSwapQuote({ client, pool, assetIn, decimals }) {
-    const reserves = await pool_1.getPoolReserves(client, pool);
+function getFixedInputSwapQuote({ pool, reserves, assetIn, decimals }) {
     const assetInAmount = BigInt(assetIn.amount);
     let assetOutID;
     let inputSupply;
@@ -225,14 +224,13 @@ async function fixedInputSwap({ client, pool, signedTxns, assetIn, assetOut, ini
 /**
  * Get a quote for a fixed output swap This does not execute any transactions.
  *
- * @param params.client An Algodv2 client.
  * @param params.pool Information for the pool.
+ * @param params.reserves Pool Reserves
  * @param params.assetOut.assetID The ID of the output asset. Must be one of the pool's asset1ID
  *   or asset2ID.
  * @param params.assetOut.amount The quantity of the output asset.
  */
-async function getFixedOutputSwapQuote({ client, pool, assetOut, decimals }) {
-    const reserves = await pool_1.getPoolReserves(client, pool);
+function getFixedOutputSwapQuote({ pool, reserves, assetOut, decimals }) {
     const assetOutAmount = BigInt(assetOut.amount);
     let assetInID;
     let inputSupply;
@@ -271,31 +269,32 @@ async function getFixedOutputSwapQuote({ client, pool, assetOut, decimals }) {
  *
  * @param type - Type of the swap
  * @param pool - Information for the pool.
+ * @param reserves - Pool reserves.
  * @param asset.assetID - ID of the asset to be swapped
  * @param asset.amount - Amount of the asset to be swapped
  * @param decimals.assetIn - Decimals quantity for the input asset
  * @param decimals.assetOut - Decimals quantity for the output asset
  * @returns A promise for the Swap quote
  */
-function getSwapQuote(client, type, pool, asset, decimals) {
-    let promise;
+function getSwapQuote(type, pool, reserves, asset, decimals) {
+    let quote;
     if (type === "fixed-input") {
-        promise = getFixedInputSwapQuote({
-            client,
+        quote = getFixedInputSwapQuote({
             pool,
+            reserves,
             assetIn: asset,
             decimals
         });
     }
     else {
-        promise = getFixedOutputSwapQuote({
-            client,
+        quote = getFixedOutputSwapQuote({
             pool,
+            reserves,
             assetOut: asset,
             decimals
         });
     }
-    return promise;
+    return quote;
 }
 exports.getSwapQuote = getSwapQuote;
 /**

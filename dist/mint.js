@@ -20,13 +20,12 @@ var MintTxnIndices;
  * Get a quote for how many liquidity tokens a deposit of asset1In and asset2In is worth at this
  * moment. This does not execute any transactions.
  *
- * @param params.client An Algodv2 client.
  * @param params.pool Information for the pool.
+ * @param params.reserves Pool reserves.
  * @param params.asset1In The quantity of the first asset being deposited.
  * @param params.asset2In The quantity of the second asset being deposited.
  */
-async function getMintLiquidityQuote({ client, pool, asset1In, asset2In }) {
-    const reserves = await pool_1.getPoolReserves(client, pool);
+function getMintLiquidityQuote({ pool, reserves, asset1In, asset2In }) {
     if (reserves.issuedLiquidity === 0n) {
         // TODO: compute sqrt on bigints
         const geoMean = BigInt(Math.floor(Math.sqrt(Number(asset1In) * Number(asset2In))));

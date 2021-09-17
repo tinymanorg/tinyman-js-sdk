@@ -1,4 +1,4 @@
-import {PoolInfo} from "./pool";
+import {PoolInfo, PoolReserves} from "./pool";
 import {InitiatorSigner, SignerTransaction} from "./common-types";
 /** An object containing information about a mint quote. */
 export interface MintQuote {
@@ -47,22 +47,22 @@ export interface MintExecution {
  * Get a quote for how many liquidity tokens a deposit of asset1In and asset2In is worth at this
  * moment. This does not execute any transactions.
  *
- * @param params.client An Algodv2 client.
  * @param params.pool Information for the pool.
+ * @param params.reserves Pool reserves.
  * @param params.asset1In The quantity of the first asset being deposited.
  * @param params.asset2In The quantity of the second asset being deposited.
  */
 export declare function getMintLiquidityQuote({
-  client,
   pool,
+  reserves,
   asset1In,
   asset2In
 }: {
-  client: any;
   pool: PoolInfo;
+  reserves: PoolReserves;
   asset1In: number | bigint;
   asset2In: number | bigint;
-}): Promise<MintQuote>;
+}): MintQuote;
 export declare const MINT_PROCESS_TXN_COUNT = 5;
 export declare function generateMintTxns({
   client,
