@@ -22,6 +22,8 @@ export enum SwapType {
 
 /** An object containing information about a swap quote. */
 export interface SwapQuote {
+  /** The round that this quote is based on. */
+  round: number;
   /** The ID of the input asset in this quote. */
   assetInID: number;
   /** The quantity of the input asset in this quote. */
@@ -276,6 +278,7 @@ function getFixedInputSwapQuote({
     convertFromBaseUnits(decimals.assetIn, Number(assetInAmount));
 
   return {
+    round: reserves.round,
     assetInID: assetIn.assetID,
     assetInAmount,
     assetOutID,
@@ -423,6 +426,7 @@ function getFixedOutputSwapQuote({
     convertFromBaseUnits(decimals.assetIn, Number(assetInAmountPlusFee));
 
   return {
+    round: reserves.round,
     assetInID,
     assetInAmount: assetInAmountPlusFee,
     assetOutID: assetOut.assetID,

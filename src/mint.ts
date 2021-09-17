@@ -19,6 +19,8 @@ import {ALGO_ASSET_ID, DEFAULT_FEE_TXN_NOTE} from "./constant";
 
 /** An object containing information about a mint quote. */
 export interface MintQuote {
+  /** The round that this quote is based on. */
+  round: number;
   /** The ID of the first input asset in this quote. */
   asset1ID: number;
   /** The quantity of the first input asset in this quote. */
@@ -99,6 +101,7 @@ export function getMintLiquidityQuote({
     }
 
     return {
+      round: reserves.round,
       asset1ID: pool.asset1ID,
       asset1In: BigInt(asset1In),
       asset2ID: pool.asset2ID,
@@ -114,6 +117,7 @@ export function getMintLiquidityQuote({
   const liquidityOut = asset1Ratio < asset2Ratio ? asset1Ratio : asset2Ratio;
 
   return {
+    round: reserves.round,
     asset1ID: pool.asset1ID,
     asset1In: BigInt(asset1In),
     asset2ID: pool.asset2ID,
