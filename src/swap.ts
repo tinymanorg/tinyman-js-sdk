@@ -7,7 +7,7 @@ import {
   sendAndWaitRawTransaction,
   sumUpTxnFees
 } from "./util";
-import {PoolInfo, getPoolReserves, getAccountExcess} from "./pool";
+import {PoolInfo, getPoolReserves, getAccountExcess, PoolReserves} from "./pool";
 import {InitiatorSigner, SignerTransaction} from "./common-types";
 import {ALGO_ASSET_ID, DEFAULT_FEE_TXN_NOTE} from "./constant";
 
@@ -224,20 +224,20 @@ export async function generateSwapTransactions({
 /**
  * Get a quote for a fixed input swap This does not execute any transactions.
  *
- * @param params.client An Algodv2 client.
  * @param params.pool Information for the pool.
+ * @param params.reserves Pool Reserves.
  * @param params.assetIn.assetID The ID of the input asset. Must be one of the pool's asset1ID
  *   or asset2ID.
  * @param params.assetIn.amount The quantity of the input asset.
  */
-async function getFixedInputSwapQuote({
-  client,
+function getFixedInputSwapQuote({
   pool,
+  reserves,
   assetIn,
   decimals
 }: {
-  client: any;
   pool: PoolInfo;
+  reserves: PoolReserves;
   assetIn: {
     assetID: number;
     amount: number | bigint;
@@ -246,9 +246,7 @@ async function getFixedInputSwapQuote({
     assetIn: number;
     assetOut: number;
   };
-}): Promise<SwapQuote> {
-  const reserves = await getPoolReserves(client, pool);
-
+}): SwapQuote {
   const assetInAmount = BigInt(assetIn.amount);
 
   let assetOutID: number;
@@ -374,20 +372,20 @@ async function fixedInputSwap({
 /**
  * Get a quote for a fixed output swap This does not execute any transactions.
  *
- * @param params.client An Algodv2 client.
  * @param params.pool Information for the pool.
+ * @param params.reserves Pool Reserves
  * @param params.assetOut.assetID The ID of the output asset. Must be one of the pool's asset1ID
  *   or asset2ID.
  * @param params.assetOut.amount The quantity of the output asset.
  */
-async function getFixedOutputSwapQuote({
-  client,
+function getFixedOutputSwapQuote({
   pool,
+  reserves,
   assetOut,
   decimals
 }: {
-  client: any;
   pool: PoolInfo;
+  reserves: PoolReserves;
   assetOut: {
     assetID: number;
     amount: number | bigint;
@@ -396,9 +394,7 @@ async function getFixedOutputSwapQuote({
     assetIn: number;
     assetOut: number;
   };
-}): Promise<SwapQuote> {
-  const reserves = await getPoolReserves(client, pool);
-
+}): SwapQuote {
   const assetOutAmount = BigInt(assetOut.amount);
 
   let assetInID: number;
@@ -444,6 +440,7 @@ async function getFixedOutputSwapQuote({
  *
  * @param type - Type of the swap
  * @param pool - Information for the pool.
+ * @param reserves - Pool reserves.
  * @param asset.assetID - ID of the asset to be swapped
  * @param asset.amount - Amount of the asset to be swapped
  * @param decimals.assetIn - Decimals quantity for the input asset
@@ -451,9 +448,9 @@ async function getFixedOutputSwapQuote({
  * @returns A promise for the Swap quote
  */
 export function getSwapQuote(
-  client: Algodv2,
   type: SwapType,
   pool: PoolInfo,
+  reserves: PoolReserves,
   asset: {
     assetID: number;
     amount: number | bigint;
@@ -462,26 +459,26 @@ export function getSwapQuote(
     assetIn: number;
     assetOut: number;
   }
-): Promise<SwapQuote> {
-  let promise;
+): SwapQuote {
+  let quote;
 
   if (type === "fixed-input") {
-    promise = getFixedInputSwapQuote({
-      client,
+    quote = getFixedInputSwapQuote({
       pool,
+      reserves,
       assetIn: asset,
       decimals
     });
   } else {
-    promise = getFixedOutputSwapQuote({
-      client,
+    quote = getFixedOutputSwapQuote({
       pool,
+      reserves,
       assetOut: asset,
       decimals
     });
   }
 
-  return promise;
+  return quote;
 }
 
 /**

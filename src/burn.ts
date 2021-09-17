@@ -6,7 +6,7 @@ import {
   sendAndWaitRawTransaction,
   sumUpTxnFees
 } from "./util";
-import {PoolInfo, getPoolReserves, getAccountExcess} from "./pool";
+import {PoolInfo, getPoolReserves, getAccountExcess, PoolReserves} from "./pool";
 import {InitiatorSigner, SignerTransaction} from "./common-types";
 import {ALGO_ASSET_ID, DEFAULT_FEE_TXN_NOTE} from "./constant";
 
@@ -73,20 +73,19 @@ enum BurnTxnIndices {
  * Get a quote for how many of assets 1 and 2 a deposit of liquidityIn is worth at this moment. This
  * does not execute any transactions.
  *
- * @param params.client An Algodv2 client.
  * @param params.pool Information for the pool.
+ * @param params.reserves Pool reserves.
  * @param params.liquidityIn The quantity of the liquidity being deposited.
  */
-export async function getBurnLiquidityQuote({
-  client,
+export function getBurnLiquidityQuote({
   pool,
+  reserves,
   liquidityIn
 }: {
-  client: any;
   pool: PoolInfo;
+  reserves: PoolReserves;
   liquidityIn: number | bigint;
-}): Promise<BurnQuote> {
-  const reserves = await getPoolReserves(client, pool);
+}): BurnQuote {
   const liquidityIn_bigInt = BigInt(liquidityIn);
 
   const asset1Out =
