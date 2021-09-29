@@ -4,7 +4,7 @@ export const MAX_SLIPPAGE_FRACTION_DIGITS = 6;
 
 export const TESTNET_VALIDATOR_APP_ID = 21580889;
 export const HIPONET_VALIDATOR_APP_ID = 448;
-export const MAINNET_VALIDATOR_APP_ID = 0;
+export const MAINNET_VALIDATOR_APP_ID = 350338509;
 
 export const ALGO_ASSET_ID = 0;
 

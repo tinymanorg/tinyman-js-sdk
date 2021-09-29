@@ -13,37 +13,33 @@ const CREATE_ENCODED = Uint8Array.from([99, 114, 101, 97, 116, 101]); // 'create
 /**
  * Get the Validator App ID for a network.
  *
- * @param client An Algodv2 client.
+ * @param network "mainnet" | "testnet" | "hiponet".
  *
- * @returns A Promise that resolves to the Validator App ID for the network that client is connected
- *   to.
+ * @returns the Validator App ID for the network
  */
-export async function getvalidatorAppID(client: any): Promise<number> {
-  const params = await client.getTransactionParams().do();
-  const {genesisHash, genesisID} = params;
+export function getValidatorAppIDForNetwork(
+  network: "mainnet" | "testnet" | "hiponet"
+): number {
+  let id;
 
-  if (
-    genesisID === "mainnet-v1.0" &&
-    genesisHash === "wGHE2Pwdvd7S12BL5FaOP20EGYesN73ktiC1qzkkit8="
-  ) {
-    return MAINNET_VALIDATOR_APP_ID;
+  switch (network) {
+    case "mainnet":
+      id = MAINNET_VALIDATOR_APP_ID;
+      break;
+
+    case "testnet":
+      id = TESTNET_VALIDATOR_APP_ID;
+      break;
+
+    case "hiponet":
+      id = HIPONET_VALIDATOR_APP_ID;
+      break;
+
+    default:
+      throw new Error(`No Validator App exists for network ${network}`);
   }
 
-  if (
-    genesisID === "testnet-v1.0" &&
-    genesisHash === "SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI="
-  ) {
-    return TESTNET_VALIDATOR_APP_ID;
-  }
-
-  if (
-    genesisID === "hiponet-v1" &&
-    genesisHash === "1Ok6UoiCtb3ppI8rWSXxB3ddULOkqugfCB4FGcPFkpE="
-  ) {
-    return HIPONET_VALIDATOR_APP_ID;
-  }
-
-  throw new Error(`No Validator App exists for network ${genesisID}`);
+  return id;
 }
 
 export const OPT_IN_VALIDATOR_APP_PROCESS_TXN_COUNT = 1;
