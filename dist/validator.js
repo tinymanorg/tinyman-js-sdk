@@ -3,36 +3,35 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isOptedIntoValidator = exports.generateOptOutOfValidatorTxns = exports.OPT_OUT_VALIDATOR_APP_PROCESS_TXN_COUNT = exports.generateOptIntoValidatorTxns = exports.OPT_IN_VALIDATOR_APP_PROCESS_TXN_COUNT = exports.getvalidatorAppID = void 0;
+exports.isOptedIntoValidator = exports.generateOptOutOfValidatorTxns = exports.OPT_OUT_VALIDATOR_APP_PROCESS_TXN_COUNT = exports.generateOptIntoValidatorTxns = exports.OPT_IN_VALIDATOR_APP_PROCESS_TXN_COUNT = exports.getValidatorAppIDForNetwork = void 0;
 const algosdk_1 = __importDefault(require("algosdk"));
 const constant_1 = require("./constant");
 const CREATE_ENCODED = Uint8Array.from([99, 114, 101, 97, 116, 101]); // 'create'
 /**
  * Get the Validator App ID for a network.
  *
- * @param client An Algodv2 client.
+ * @param network "mainnet" | "testnet" | "hiponet".
  *
- * @returns A Promise that resolves to the Validator App ID for the network that client is connected
- *   to.
+ * @returns the Validator App ID for the network
  */
-async function getvalidatorAppID(client) {
-    const params = await client.getTransactionParams().do();
-    const { genesisHash, genesisID } = params;
-    if (genesisID === "mainnet-v1.0" &&
-        genesisHash === "wGHE2Pwdvd7S12BL5FaOP20EGYesN73ktiC1qzkkit8=") {
-        return constant_1.MAINNET_VALIDATOR_APP_ID;
+function getValidatorAppIDForNetwork(network) {
+    let id;
+    switch (network) {
+        case "mainnet":
+            id = constant_1.MAINNET_VALIDATOR_APP_ID;
+            break;
+        case "testnet":
+            id = constant_1.TESTNET_VALIDATOR_APP_ID;
+            break;
+        case "hiponet":
+            id = constant_1.HIPONET_VALIDATOR_APP_ID;
+            break;
+        default:
+            throw new Error(`No Validator App exists for network ${network}`);
     }
-    if (genesisID === "testnet-v1.0" &&
-        genesisHash === "SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI=") {
-        return constant_1.TESTNET_VALIDATOR_APP_ID;
-    }
-    if (genesisID === "hiponet-v1" &&
-        genesisHash === "1Ok6UoiCtb3ppI8rWSXxB3ddULOkqugfCB4FGcPFkpE=") {
-        return constant_1.HIPONET_VALIDATOR_APP_ID;
-    }
-    throw new Error(`No Validator App exists for network ${genesisID}`);
+    return id;
 }
-exports.getvalidatorAppID = getvalidatorAppID;
+exports.getValidatorAppIDForNetwork = getValidatorAppIDForNetwork;
 exports.OPT_IN_VALIDATOR_APP_PROCESS_TXN_COUNT = 1;
 async function generateOptIntoValidatorTxns({ client, validatorAppID, initiatorAddr }) {
     const suggestedParams = await client.getTransactionParams().do();

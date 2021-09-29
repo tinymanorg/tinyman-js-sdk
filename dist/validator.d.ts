@@ -4,12 +4,13 @@ import {AccountInformation} from "./account/accountTypes";
 /**
  * Get the Validator App ID for a network.
  *
- * @param client An Algodv2 client.
+ * @param network "mainnet" | "testnet" | "hiponet".
  *
- * @returns A Promise that resolves to the Validator App ID for the network that client is connected
- *   to.
+ * @returns the Validator App ID for the network
  */
-export declare function getvalidatorAppID(client: any): Promise<number>;
+export declare function getValidatorAppIDForNetwork(
+  network: "mainnet" | "testnet" | "hiponet"
+): number;
 export declare const OPT_IN_VALIDATOR_APP_PROCESS_TXN_COUNT = 1;
 export declare function generateOptIntoValidatorTxns({
   client,

@@ -1,5 +1,5 @@
 export {
-  getvalidatorAppID,
+  getValidatorAppIDForNetwork,
   generateOptIntoValidatorTxns,
   OPT_IN_VALIDATOR_APP_PROCESS_TXN_COUNT,
   isOptedIntoValidator,
