@@ -9,6 +9,7 @@ import {
 import {PoolInfo, getPoolReserves, getAccountExcess, PoolReserves} from "./pool";
 import {InitiatorSigner, SignerTransaction} from "./common-types";
 import {ALGO_ASSET_ID, DEFAULT_FEE_TXN_NOTE} from "./constant";
+import TinymanError from "./error/TinymanError";
 
 /** An object containing information about a burn quote. */
 export interface BurnQuote {
@@ -264,58 +265,77 @@ export async function burnLiquidity({
   signedTxns: Uint8Array[];
   initiatorAddr: string;
 }): Promise<BurnExecution> {
-  const asset1Out = txGroup[BurnTxnIndices.ASSET1_OUT_TXN].txn.amount;
-  const asset2Out = txGroup[BurnTxnIndices.ASSET2_OUT_TXN].txn.amount;
-  const liquidityIn = txGroup[BurnTxnIndices.LIQUDITY_IN_TXN].txn.amount;
+  try {
+    const asset1Out = txGroup[BurnTxnIndices.ASSET1_OUT_TXN].txn.amount;
+    const asset2Out = txGroup[BurnTxnIndices.ASSET2_OUT_TXN].txn.amount;
+    const liquidityIn = txGroup[BurnTxnIndices.LIQUDITY_IN_TXN].txn.amount;
 
-  const prevExcessAssets = await getAccountExcess({
-    client,
-    pool,
-    accountAddr: initiatorAddr
-  });
+    const prevExcessAssets = await getAccountExcess({
+      client,
+      pool,
+      accountAddr: initiatorAddr
+    });
 
-  const [{confirmedRound, txnID}] = await sendAndWaitRawTransaction(client, [signedTxns]);
+    const [{confirmedRound, txnID}] = await sendAndWaitRawTransaction(client, [
+      signedTxns
+    ]);
 
-  const excessAssets = await getAccountExcess({
-    client,
-    pool,
-    accountAddr: initiatorAddr
-  });
+    const excessAssets = await getAccountExcess({
+      client,
+      pool,
+      accountAddr: initiatorAddr
+    });
 
-  let excessAmountDeltaAsset1 = excessAssets.excessAsset1 - prevExcessAssets.excessAsset1;
+    let excessAmountDeltaAsset1 =
+      excessAssets.excessAsset1 - prevExcessAssets.excessAsset1;
 
-  if (excessAmountDeltaAsset1 < 0n) {
-    excessAmountDeltaAsset1 = 0n;
+    if (excessAmountDeltaAsset1 < 0n) {
+      excessAmountDeltaAsset1 = 0n;
+    }
+
+    let excessAmountDeltaAsset2 =
+      excessAssets.excessAsset2 - prevExcessAssets.excessAsset2;
+
+    if (excessAmountDeltaAsset2 < 0n) {
+      excessAmountDeltaAsset2 = 0n;
+    }
+
+    return {
+      round: confirmedRound,
+      fees: sumUpTxnFees(txGroup),
+      asset1ID: pool.asset1ID,
+      asset1Out: BigInt(asset1Out) + excessAmountDeltaAsset1,
+      asset2ID: pool.asset2ID,
+      asset2Out: BigInt(asset2Out) + excessAmountDeltaAsset2,
+      liquidityID: pool.liquidityTokenID!,
+      liquidityIn: BigInt(liquidityIn),
+      excessAmounts: [
+        {
+          assetID: pool.asset1ID,
+          excessAmountForBurning: excessAmountDeltaAsset1,
+          totalExcessAmount: excessAssets.excessAsset1
+        },
+        {
+          assetID: pool.asset2ID,
+          excessAmountForBurning: excessAmountDeltaAsset2,
+          totalExcessAmount: excessAssets.excessAsset2
+        }
+      ],
+      txnID,
+      groupID: getTxnGroupID(txGroup)
+    };
+  } catch (error) {
+    const parsedError = new TinymanError(
+      error,
+      "We encountered something unexpected while burning liquidity. Try again later."
+    );
+
+    if (parsedError.type === "SlippageTolerance") {
+      parsedError.setMessage(
+        "The burn failed due to too much slippage in the price. Please adjust the slippage tolerance and try again."
+      );
+    }
+
+    throw parsedError;
   }
-
-  let excessAmountDeltaAsset2 = excessAssets.excessAsset2 - prevExcessAssets.excessAsset2;
-
-  if (excessAmountDeltaAsset2 < 0n) {
-    excessAmountDeltaAsset2 = 0n;
-  }
-
-  return {
-    round: confirmedRound,
-    fees: sumUpTxnFees(txGroup),
-    asset1ID: pool.asset1ID,
-    asset1Out: BigInt(asset1Out) + excessAmountDeltaAsset1,
-    asset2ID: pool.asset2ID,
-    asset2Out: BigInt(asset2Out) + excessAmountDeltaAsset2,
-    liquidityID: pool.liquidityTokenID!,
-    liquidityIn: BigInt(liquidityIn),
-    excessAmounts: [
-      {
-        assetID: pool.asset1ID,
-        excessAmountForBurning: excessAmountDeltaAsset1,
-        totalExcessAmount: excessAssets.excessAsset1
-      },
-      {
-        assetID: pool.asset2ID,
-        excessAmountForBurning: excessAmountDeltaAsset2,
-        totalExcessAmount: excessAssets.excessAsset2
-      }
-    ],
-    txnID,
-    groupID: getTxnGroupID(txGroup)
-  };
 }

@@ -10,6 +10,7 @@ import {
 import {PoolInfo, getPoolReserves, getAccountExcess, PoolReserves} from "./pool";
 import {InitiatorSigner, SignerTransaction} from "./common-types";
 import {ALGO_ASSET_ID, DEFAULT_FEE_TXN_NOTE} from "./constant";
+import TinymanError from "./error/TinymanError";
 
 // FEE = %0.3 or 3/1000
 const FEE_NUMERATOR = 3n;
@@ -595,37 +596,52 @@ export async function issueSwap({
   signedTxns: Uint8Array[];
   initiatorAddr: string;
 }): Promise<SwapExecution> {
-  const assetIn = {
-    assetID:
-      txGroup[SwapTxnGroupIndices.ASSET_IN_TXN_INDEX].txn.assetIndex || ALGO_ASSET_ID,
-    amount: txGroup[SwapTxnGroupIndices.ASSET_IN_TXN_INDEX].txn.amount
-  };
-  const assetOut = {
-    assetID:
-      txGroup[SwapTxnGroupIndices.ASSET_OUT_TXN_INDEX].txn.assetIndex || ALGO_ASSET_ID,
-    amount: txGroup[SwapTxnGroupIndices.ASSET_OUT_TXN_INDEX].txn.amount
-  };
-  let swapData: Omit<SwapExecution, "fees" | "groupID">;
+  try {
+    const assetIn = {
+      assetID:
+        txGroup[SwapTxnGroupIndices.ASSET_IN_TXN_INDEX].txn.assetIndex || ALGO_ASSET_ID,
+      amount: txGroup[SwapTxnGroupIndices.ASSET_IN_TXN_INDEX].txn.amount
+    };
+    const assetOut = {
+      assetID:
+        txGroup[SwapTxnGroupIndices.ASSET_OUT_TXN_INDEX].txn.assetIndex || ALGO_ASSET_ID,
+      amount: txGroup[SwapTxnGroupIndices.ASSET_OUT_TXN_INDEX].txn.amount
+    };
+    let swapData: Omit<SwapExecution, "fees" | "groupID">;
 
-  if (swapType === SwapType.FixedInput) {
-    swapData = await fixedInputSwap({
-      client,
-      pool,
-      signedTxns,
-      assetIn,
-      assetOut,
-      initiatorAddr
-    });
-  } else {
-    swapData = await fixedOutputSwap({
-      client,
-      pool,
-      signedTxns,
-      assetIn,
-      assetOut,
-      initiatorAddr
-    });
+    if (swapType === SwapType.FixedInput) {
+      swapData = await fixedInputSwap({
+        client,
+        pool,
+        signedTxns,
+        assetIn,
+        assetOut,
+        initiatorAddr
+      });
+    } else {
+      swapData = await fixedOutputSwap({
+        client,
+        pool,
+        signedTxns,
+        assetIn,
+        assetOut,
+        initiatorAddr
+      });
+    }
+
+    return {...swapData, groupID: getTxnGroupID(txGroup), fees: sumUpTxnFees(txGroup)};
+  } catch (error) {
+    const parsedError = new TinymanError(
+      error,
+      "We encountered something unexpected while swapping. Try again later."
+    );
+
+    if (parsedError.type === "SlippageTolerance") {
+      parsedError.setMessage(
+        "The swap failed due to too much slippage in the price. Please adjust the slippage tolerance and try again."
+      );
+    }
+
+    throw parsedError;
   }
-
-  return {...swapData, groupID: getTxnGroupID(txGroup), fees: sumUpTxnFees(txGroup)};
 }

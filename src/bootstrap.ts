@@ -4,6 +4,7 @@ import {VALIDATOR_APP_SCHEMA} from "./contracts";
 import {InitiatorSigner, SignerTransaction} from "./common-types";
 import {waitForTransaction} from "./util";
 import {ALGO_ASSET_ID, LIQUIDITY_TOKEN_UNIT_NAME} from "./constant";
+import TinymanError from "./error/TinymanError";
 
 const BOOTSTRAP_ENCODED = Uint8Array.from([98, 111, 111, 116, 115, 116, 114, 97, 112]); // 'bootstrap'
 
@@ -176,27 +177,25 @@ export async function doBootstrap({
 }): Promise<{liquidityTokenID: number}> {
   try {
     await client.sendRawTransaction(signedTxns).do();
-  } catch (err) {
-    if (err.response) {
-      throw new Error(
-        `Response ${err.response.status}: ${err.response.text}\nTxIDs are: ${txnIDs}`
-      );
+
+    const assetCreationResult = await waitForTransaction(
+      client,
+      txnIDs[BootstapTxnGroupIndices.LIQUIDITY_TOKEN_CREATE]
+    );
+
+    const liquidityTokenID = assetCreationResult["asset-index"];
+
+    if (typeof liquidityTokenID !== "number") {
+      throw new Error(`Generated ID is not valid: got ${liquidityTokenID}`);
     }
-    throw err;
+
+    return {
+      liquidityTokenID
+    };
+  } catch (error) {
+    throw new TinymanError(
+      error,
+      "We encountered something unexpected while bootstraping the pool. Try again later."
+    );
   }
-
-  const assetCreationResult = await waitForTransaction(
-    client,
-    txnIDs[BootstapTxnGroupIndices.LIQUIDITY_TOKEN_CREATE]
-  );
-
-  const liquidityTokenID = assetCreationResult["asset-index"];
-
-  if (typeof liquidityTokenID !== "number") {
-    throw new Error(`Generated ID is not valid: got ${liquidityTokenID}`);
-  }
-
-  return {
-    liquidityTokenID
-  };
 }

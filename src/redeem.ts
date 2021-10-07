@@ -17,6 +17,7 @@ import {
 } from "./common-types";
 import {AccountInformation} from "./account/accountTypes";
 import {DEFAULT_FEE_TXN_NOTE} from "./constant";
+import TinymanError from "./error/TinymanError";
 
 const REDEEM_ENCODED = Uint8Array.from([114, 101, 100, 101, 101, 109]); // 'redeem'
 
@@ -48,20 +49,28 @@ export async function redeemExcessAsset({
   groupID: string;
   txnID: string;
 }> {
-  const signedTxns = await signRedeemTxns({
-    txGroup,
-    pool,
-    initiatorSigner
-  });
+  try {
+    const signedTxns = await signRedeemTxns({
+      txGroup,
+      pool,
+      initiatorSigner
+    });
+    const [{txnID, confirmedRound}] = await sendAndWaitRawTransaction(client, [
+      signedTxns
+    ]);
 
-  const [{txnID, confirmedRound}] = await sendAndWaitRawTransaction(client, [signedTxns]);
-
-  return {
-    fees: sumUpTxnFees(txGroup),
-    confirmedRound,
-    txnID,
-    groupID: getTxnGroupID(txGroup)
-  };
+    return {
+      fees: sumUpTxnFees(txGroup),
+      confirmedRound,
+      txnID,
+      groupID: getTxnGroupID(txGroup)
+    };
+  } catch (error) {
+    throw new TinymanError(
+      error,
+      "We encountered something unexpected while redeeming. Try again later."
+    );
+  }
 }
 
 async function signRedeemTxns({
@@ -116,58 +125,65 @@ export async function redeemAllExcessAsset({
     txnID: string;
   }[]
 > {
-  const redeemGroups = data.map(({txGroup, pool}) => {
-    return {
-      txns: txGroup,
-      txnFees: sumUpTxnFees(txGroup),
-      groupID: getTxnGroupID(txGroup),
-      lsig: algosdk.makeLogicSig(pool.program)
-    };
-  });
+  try {
+    const redeemGroups = data.map(({txGroup, pool}) => {
+      return {
+        txns: txGroup,
+        txnFees: sumUpTxnFees(txGroup),
+        groupID: getTxnGroupID(txGroup),
+        lsig: algosdk.makeLogicSig(pool.program)
+      };
+    });
 
-  const signedFeeTxns = await initiatorSigner(redeemGroups.map((item) => item.txns));
+    const signedFeeTxns = await initiatorSigner(redeemGroups.map((item) => item.txns));
 
-  const redeemTxnsPromise = Promise.all(
-    redeemGroups.map(
-      (redeemGroup, groupIndex) =>
-        new Promise<{
-          fees: number;
-          confirmedRound: number;
-          groupID: string;
-          txnID: string;
-        }>(async (resolve, reject) => {
-          try {
-            const signedTxns = redeemGroup.txns.map((txDetail, txnIndex) => {
-              if (txnIndex === 0) {
-                // Get the txn signed by initiator
-                return signedFeeTxns[groupIndex];
-              }
-              const {blob} = algosdk.signLogicSigTransactionObject(
-                txDetail.txn,
-                redeemGroup.lsig
-              );
+    const redeemTxnsPromise = Promise.all(
+      redeemGroups.map(
+        (redeemGroup, groupIndex) =>
+          new Promise<{
+            fees: number;
+            confirmedRound: number;
+            groupID: string;
+            txnID: string;
+          }>(async (resolve, reject) => {
+            try {
+              const signedTxns = redeemGroup.txns.map((txDetail, txnIndex) => {
+                if (txnIndex === 0) {
+                  // Get the txn signed by initiator
+                  return signedFeeTxns[groupIndex];
+                }
+                const {blob} = algosdk.signLogicSigTransactionObject(
+                  txDetail.txn,
+                  redeemGroup.lsig
+                );
 
-              return blob;
-            });
+                return blob;
+              });
 
-            const [{txnID, confirmedRound}] = await sendAndWaitRawTransaction(client, [
-              signedTxns
-            ]);
+              const [{txnID, confirmedRound}] = await sendAndWaitRawTransaction(client, [
+                signedTxns
+              ]);
 
-            resolve({
-              fees: redeemGroup.txnFees,
-              groupID: redeemGroup.groupID,
-              txnID,
-              confirmedRound
-            });
-          } catch (error) {
-            reject(error);
-          }
-        })
-    )
-  );
+              resolve({
+                fees: redeemGroup.txnFees,
+                groupID: redeemGroup.groupID,
+                txnID,
+                confirmedRound
+              });
+            } catch (error) {
+              reject(error);
+            }
+          })
+      )
+    );
 
-  return redeemTxnsPromise;
+    return redeemTxnsPromise;
+  } catch (error) {
+    throw new TinymanError(
+      error,
+      "We encountered something unexpected while redeeming. Try again later."
+    );
+  }
 }
 
 export const REDEEM_PROCESS_TXN_COUNT = 3;

@@ -8,6 +8,7 @@ import {
 } from "./common-types";
 import {AccountInformation} from "./account/accountTypes";
 import {ALGO_ASSET, ALGO_ASSET_ID} from "./constant";
+import TinymanError from "./error/TinymanError";
 
 const CACHED_ASSETS: Map<string, TinymanAnalyticsApiAsset> = new Map();
 
@@ -130,17 +131,24 @@ export async function generateOptIntoAssetTxns({
   assetID,
   initiatorAddr
 }): Promise<SignerTransaction[]> {
-  const suggestedParams = await client.getTransactionParams().do();
+  try {
+    const suggestedParams = await client.getTransactionParams().do();
 
-  const optInTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-    from: initiatorAddr,
-    to: initiatorAddr,
-    assetIndex: assetID,
-    amount: 0,
-    suggestedParams
-  });
+    const optInTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
+      from: initiatorAddr,
+      to: initiatorAddr,
+      assetIndex: assetID,
+      amount: 0,
+      suggestedParams
+    });
 
-  return [{txn: optInTxn, signers: [initiatorAddr]}];
+    return [{txn: optInTxn, signers: [initiatorAddr]}];
+  } catch (error) {
+    throw new TinymanError(
+      error,
+      "We encountered something unexpected while opting into this asset. Try again later."
+    );
+  }
 }
 
 export function bufferToBase64(
@@ -248,24 +256,31 @@ export async function sendAndWaitRawTransaction(
   client: Algodv2,
   signedTxnGroups: Uint8Array[][]
 ) {
-  let networkResponse: {
-    confirmedRound: number;
-    txnID: string;
-  }[] = [];
+  try {
+    let networkResponse: {
+      confirmedRound: number;
+      txnID: string;
+    }[] = [];
 
-  for (let signedTxnGroup of signedTxnGroups) {
-    const {txId} = await client.sendRawTransaction(signedTxnGroup).do();
+    for (let signedTxnGroup of signedTxnGroups) {
+      const {txId} = await client.sendRawTransaction(signedTxnGroup).do();
 
-    const status = await waitForTransaction(client, txId);
-    const confirmedRound = status["confirmed-round"];
+      const status = await waitForTransaction(client, txId);
+      const confirmedRound = status["confirmed-round"];
 
-    networkResponse.push({
-      confirmedRound,
-      txnID: txId
-    });
+      networkResponse.push({
+        confirmedRound,
+        txnID: txId
+      });
+    }
+
+    return networkResponse;
+  } catch (error) {
+    throw new TinymanError(
+      error,
+      "We encountered an error while processing this transaction. Try again later."
+    );
   }
-
-  return networkResponse;
 }
 
 export function sumUpTxnFees(txns: SignerTransaction[]): number {

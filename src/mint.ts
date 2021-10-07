@@ -16,6 +16,7 @@ import {
 } from "./pool";
 import {InitiatorSigner, SignerTransaction} from "./common-types";
 import {ALGO_ASSET_ID, DEFAULT_FEE_TXN_NOTE} from "./constant";
+import TinymanError from "./error/TinymanError";
 
 /** An object containing information about a mint quote. */
 export interface MintQuote {
@@ -300,41 +301,60 @@ export async function mintLiquidity({
   signedTxns: Uint8Array[];
   initiatorAddr: string;
 }): Promise<MintExecution> {
-  const liquidityOutAmount = BigInt(txGroup[MintTxnIndices.LIQUDITY_OUT_TXN].txn.amount);
+  try {
+    const liquidityOutAmount = BigInt(
+      txGroup[MintTxnIndices.LIQUDITY_OUT_TXN].txn.amount
+    );
 
-  const prevExcessAssets = await getAccountExcess({
-    client,
-    pool,
-    accountAddr: initiatorAddr
-  });
+    const prevExcessAssets = await getAccountExcess({
+      client,
+      pool,
+      accountAddr: initiatorAddr
+    });
 
-  const [{confirmedRound, txnID}] = await sendAndWaitRawTransaction(client, [signedTxns]);
-  const fees = sumUpTxnFees(txGroup);
-  const groupID = getTxnGroupID(txGroup);
+    const [{confirmedRound, txnID}] = await sendAndWaitRawTransaction(client, [
+      signedTxns
+    ]);
+    const fees = sumUpTxnFees(txGroup);
+    const groupID = getTxnGroupID(txGroup);
 
-  const excessAssets = await getAccountExcess({
-    client,
-    pool,
-    accountAddr: initiatorAddr
-  });
+    const excessAssets = await getAccountExcess({
+      client,
+      pool,
+      accountAddr: initiatorAddr
+    });
 
-  let excessAmountDelta =
-    excessAssets.excessLiquidityTokens - prevExcessAssets.excessLiquidityTokens;
+    let excessAmountDelta =
+      excessAssets.excessLiquidityTokens - prevExcessAssets.excessLiquidityTokens;
 
-  if (excessAmountDelta < 0n) {
-    excessAmountDelta = 0n;
+    if (excessAmountDelta < 0n) {
+      excessAmountDelta = 0n;
+    }
+
+    return {
+      round: confirmedRound,
+      fees,
+      liquidityID: pool.liquidityTokenID!,
+      liquidityOut: liquidityOutAmount + excessAmountDelta,
+      excessAmount: {
+        excessAmountForMinting: excessAmountDelta,
+        totalExcessAmount: excessAssets.excessLiquidityTokens
+      },
+      txnID,
+      groupID
+    };
+  } catch (error) {
+    const parsedError = new TinymanError(
+      error,
+      "We encountered something unexpected while minting liquidity. Try again later."
+    );
+
+    if (parsedError.type === "SlippageTolerance") {
+      parsedError.setMessage(
+        "Minting failed due to too much slippage in the price. Please adjust the slippage tolerance and try again."
+      );
+    }
+
+    throw parsedError;
   }
-
-  return {
-    round: confirmedRound,
-    fees,
-    liquidityID: pool.liquidityTokenID!,
-    liquidityOut: liquidityOutAmount + excessAmountDelta,
-    excessAmount: {
-      excessAmountForMinting: excessAmountDelta,
-      totalExcessAmount: excessAssets.excessLiquidityTokens
-    },
-    txnID,
-    groupID
-  };
 }
