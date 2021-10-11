@@ -1,18 +1,23 @@
-import algosdk, {Algodv2, Transaction} from "algosdk";
-import {AssetParams} from "algosdk/dist/types/src/client/v2/algod/models/types";
+import algosdk, {Algodv2} from "algosdk";
 
 import {
   TinymanAnalyticsApiAsset,
-  InitiatorSigner,
   SignerTransaction,
   IndexerAssetInformation,
   SupportedNetwork
 } from "./common-types";
 import {AccountInformation} from "./account/accountTypes";
 import {ALGO_ASSET, ALGO_ASSET_ID} from "./constant";
+import WebStorage from "./web-storage/WebStorage";
 
-const CACHED_ASSETS: Map<string, {asset: TinymanAnalyticsApiAsset; isDeleted: boolean}> =
-  new Map();
+const cachedAssetsStoredValue = WebStorage.getFromWebStorage(
+  WebStorage.STORED_KEYS.TINYMAN_CACHED_ASSETS
+);
+
+const CACHED_ASSETS: Record<
+  string,
+  {asset: TinymanAnalyticsApiAsset; isDeleted: boolean}
+> = (typeof cachedAssetsStoredValue === "object" ? cachedAssetsStoredValue : null) || {};
 
 export function decodeState(
   stateArray: AccountInformation["apps-local-state"][0]["key-value"] = []
@@ -172,7 +177,7 @@ export function getAssetInformationById(
           return;
         }
 
-        const memoizedValue = CACHED_ASSETS.get(`${id}`);
+        const memoizedValue = CACHED_ASSETS[`${id}`];
 
         if (memoizedValue && !alwaysFetch) {
           resolve(memoizedValue);
@@ -193,7 +198,12 @@ export function getAssetInformationById(
           url: ""
         };
 
-        CACHED_ASSETS.set(`${id}`, {asset: assetData, isDeleted: asset.deleted});
+        CACHED_ASSETS[`${id}`] = {asset: assetData, isDeleted: asset.deleted};
+        WebStorage.local.setItem(
+          WebStorage.STORED_KEYS.TINYMAN_CACHED_ASSETS,
+          CACHED_ASSETS
+        );
+
         resolve({asset: assetData, isDeleted: asset.deleted});
       } catch (error) {
         reject(new Error(error.message || "Failed to fetch asset information"));
