@@ -4,12 +4,15 @@ import {AssetParams} from "algosdk/dist/types/src/client/v2/algod/models/types";
 import {
   TinymanAnalyticsApiAsset,
   InitiatorSigner,
-  SignerTransaction
+  SignerTransaction,
+  IndexerAssetInformation,
+  SupportedNetwork
 } from "./common-types";
 import {AccountInformation} from "./account/accountTypes";
 import {ALGO_ASSET, ALGO_ASSET_ID} from "./constant";
 
-const CACHED_ASSETS: Map<string, TinymanAnalyticsApiAsset> = new Map();
+const CACHED_ASSETS: Map<string, {asset: TinymanAnalyticsApiAsset; isDeleted: boolean}> =
+  new Map();
 
 export function decodeState(
   stateArray: AccountInformation["apps-local-state"][0]["key-value"] = []
@@ -151,49 +154,52 @@ export function bufferToBase64(
 
 /**
  * Fetches asset data and caches it in a Map.
- * @param algodClient - Algodv2 client
+ * @param network "mainnet" | "testnet" | "hiponet".
  * @param {number} id - id of the asset
  * @param {boolean} alwaysFetch - Determines whether to always fetch the information of the asset or read it from the cache
  * @returns a promise that resolves with TinymanAnalyticsApiAsset
  */
 export function getAssetInformationById(
-  algodClient: algosdk.Algodv2,
+  network: SupportedNetwork,
   id: number,
   alwaysFetch?: boolean
 ) {
-  return new Promise<TinymanAnalyticsApiAsset>(async (resolve, reject) => {
-    try {
-      if (id === ALGO_ASSET_ID) {
-        resolve(ALGO_ASSET);
-        return;
+  return new Promise<{asset: TinymanAnalyticsApiAsset; isDeleted: boolean}>(
+    async (resolve, reject) => {
+      try {
+        if (id === ALGO_ASSET_ID) {
+          resolve({asset: ALGO_ASSET, isDeleted: false});
+          return;
+        }
+
+        const memoizedValue = CACHED_ASSETS.get(`${id}`);
+
+        if (memoizedValue && !alwaysFetch) {
+          resolve(memoizedValue);
+          return;
+        }
+
+        const response = await fetch(
+          `${getIndexerBaseURLForNetwork(network)}/assets/${id}?include-all=true`
+        );
+        const {asset} = (await response.json()) as IndexerAssetInformation;
+
+        const assetData = {
+          id: `${asset.index}`,
+          decimals: Number(asset.params.decimals),
+          is_liquidity_token: false,
+          name: asset.params.name || "",
+          unit_name: asset.params["unit-name"] || "",
+          url: ""
+        };
+
+        CACHED_ASSETS.set(`${id}`, {asset: assetData, isDeleted: asset.deleted});
+        resolve({asset: assetData, isDeleted: asset.deleted});
+      } catch (error) {
+        reject(new Error(error.message || "Failed to fetch asset information"));
       }
-
-      const memoizedValue = CACHED_ASSETS.get(`${id}`);
-
-      if (memoizedValue && !alwaysFetch) {
-        resolve(memoizedValue);
-        return;
-      }
-
-      const algodAsset = (await algodClient.getAssetByID(id).do()) as {
-        index: number;
-        params: AssetParams;
-      };
-      const assetData = {
-        id: `${algodAsset.index}`,
-        decimals: Number(algodAsset.params.decimals),
-        is_liquidity_token: false,
-        name: algodAsset.params.name || "",
-        unit_name: algodAsset.params["unit-name"] || "",
-        url: ""
-      };
-
-      CACHED_ASSETS.set(`${id}`, assetData);
-      resolve(assetData);
-    } catch (error) {
-      reject(new Error(error.message || "Failed to fetch asset information"));
     }
-  });
+  );
 }
 
 /**
@@ -274,4 +280,27 @@ export function sumUpTxnFees(txns: SignerTransaction[]): number {
 
 export function getTxnGroupID(txns: SignerTransaction[]) {
   return bufferToBase64(txns[0].txn.group);
+}
+
+export function getIndexerBaseURLForNetwork(network: SupportedNetwork) {
+  let baseUrl;
+
+  switch (network) {
+    case "mainnet":
+      baseUrl = "https://indexer.algoexplorerapi.io/v2/";
+      break;
+
+    case "testnet":
+      baseUrl = "https://indexer.testnet.algoexplorerapi.io/v2/";
+      break;
+
+    case "hiponet":
+      baseUrl = "https://algorand-hiponet.hipolabs.com/indexer/";
+      break;
+
+    default:
+      throw new Error(`Network provided is not supported: ${network}`);
+  }
+
+  return baseUrl;
 }

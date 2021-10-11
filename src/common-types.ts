@@ -19,6 +19,37 @@ export interface TinymanAnalyticsApiAsset {
   last_day_price_change?: null | string;
 }
 
+export interface IndexerAssetInformation {
+  asset: {
+    "asset-tx-counter": number;
+    "created-at": number;
+    "created-at-round": number;
+    "creation-txid": "QOOBRVQMX4HW5QZ2EGLQDQCQTKRF3UP3JKDGKYPCXMI6AVV35KQA";
+    deleted: true;
+    "destroyed-at-round": number;
+    index: number;
+    params: IndexerAssetParams;
+  };
+  "current-round": number;
+}
+
+interface IndexerAssetParams {
+  "circulating-supply": number;
+  clawback: string;
+  creator: string;
+  decimals: number;
+  "default-frozen": boolean;
+  freeze: string;
+  manager: string;
+  name: string;
+  reserve: string;
+  score: number;
+  total: number;
+  "unit-name": string;
+  url: string;
+  verified: boolean;
+}
+
 export interface SignerTransaction {
   txn: Transaction;
   /**
@@ -32,3 +63,5 @@ export interface SignerTransaction {
 export type InitiatorSigner = (
   txGroupList: SignerTransaction[][]
 ) => Promise<Uint8Array[]>;
+
+export type SupportedNetwork = "hiponet" | "testnet" | "mainnet";

@@ -1,6 +1,6 @@
 import algosdk, {Algodv2} from "algosdk";
 
-import {SignerTransaction} from "./common-types";
+import {SignerTransaction, SupportedNetwork} from "./common-types";
 import {
   TESTNET_VALIDATOR_APP_ID,
   HIPONET_VALIDATOR_APP_ID,
@@ -17,9 +17,7 @@ const CREATE_ENCODED = Uint8Array.from([99, 114, 101, 97, 116, 101]); // 'create
  *
  * @returns the Validator App ID for the network
  */
-export function getValidatorAppIDForNetwork(
-  network: "mainnet" | "testnet" | "hiponet"
-): number {
+export function getValidatorAppIDForNetwork(network: SupportedNetwork): number {
   let id;
 
   switch (network) {
