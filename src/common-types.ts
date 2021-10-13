@@ -24,7 +24,7 @@ export interface IndexerAssetInformation {
     "asset-tx-counter": number;
     "created-at": number;
     "created-at-round": number;
-    "creation-txid": "QOOBRVQMX4HW5QZ2EGLQDQCQTKRF3UP3JKDGKYPCXMI6AVV35KQA";
+    "creation-txid": string;
     deleted: true;
     "destroyed-at-round": number;
     index: number;
