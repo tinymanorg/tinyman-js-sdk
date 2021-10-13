@@ -1,6 +1,10 @@
 /// <reference types="node" />
-import algosdk, {Algodv2} from "algosdk";
-import {TinymanAnalyticsApiAsset, SignerTransaction} from "./common-types";
+import {Algodv2} from "algosdk";
+import {
+  TinymanAnalyticsApiAsset,
+  SignerTransaction,
+  SupportedNetwork
+} from "./common-types";
 import {AccountInformation} from "./account/accountTypes";
 export declare function decodeState(
   stateArray?: AccountInformation["apps-local-state"][0]["key-value"]
@@ -28,16 +32,19 @@ export declare function bufferToBase64(
 ): string;
 /**
  * Fetches asset data and caches it in a Map.
- * @param algodClient - Algodv2 client
+ * @param network "mainnet" | "testnet" | "hiponet".
  * @param {number} id - id of the asset
  * @param {boolean} alwaysFetch - Determines whether to always fetch the information of the asset or read it from the cache
  * @returns a promise that resolves with TinymanAnalyticsApiAsset
  */
 export declare function getAssetInformationById(
-  algodClient: algosdk.Algodv2,
+  network: SupportedNetwork,
   id: number,
   alwaysFetch?: boolean
-): Promise<TinymanAnalyticsApiAsset>;
+): Promise<{
+  asset: TinymanAnalyticsApiAsset;
+  isDeleted: boolean;
+}>;
 /**
  * Computes quantity * 10^(-assetDecimals) and rounds the result
  */
@@ -70,3 +77,4 @@ export declare function sendAndWaitRawTransaction(
 >;
 export declare function sumUpTxnFees(txns: SignerTransaction[]): number;
 export declare function getTxnGroupID(txns: SignerTransaction[]): string;
+export declare function getIndexerBaseURLForNetwork(network: SupportedNetwork): any;

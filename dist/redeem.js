@@ -218,21 +218,21 @@ async function getExcessAmountsWithPoolAssetDetails({ client, accountAddr, valid
                 util_1.getAssetInformationById(client, poolAssets.asset2ID),
                 util_1.getAssetInformationById(client, poolInfo.liquidityTokenID)
             ]);
-            let excessAsset = assetDetails[0];
-            if (assetID === Number(assetDetails[1].id)) {
-                excessAsset = assetDetails[1];
+            let excessAsset = assetDetails[0].asset;
+            if (assetID === Number(assetDetails[1].asset.id)) {
+                excessAsset = assetDetails[1].asset;
             }
-            else if (assetID === Number(assetDetails[2]?.id)) {
-                excessAsset = assetDetails[2];
+            else if (assetID === Number(assetDetails[2]?.asset.id)) {
+                excessAsset = assetDetails[2].asset;
             }
             excessDataWithDetail.push({
                 amount,
                 asset: excessAsset,
                 pool: {
                     info: poolInfo,
-                    asset1: assetDetails[0],
-                    asset2: assetDetails[1],
-                    liquidityAsset: assetDetails[2]
+                    asset1: assetDetails[0].asset,
+                    asset2: assetDetails[1].asset,
+                    liquidityAsset: assetDetails[2].asset
                 }
             });
         }

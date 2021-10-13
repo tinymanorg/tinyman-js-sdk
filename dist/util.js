@@ -3,10 +3,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getTxnGroupID = exports.sumUpTxnFees = exports.sendAndWaitRawTransaction = exports.convertToBaseUnits = exports.convertFromBaseUnits = exports.getAssetInformationById = exports.bufferToBase64 = exports.generateOptIntoAssetTxns = exports.ASSET_OPT_IN_PROCESS_TXN_COUNT = exports.applySlippageToAmount = exports.waitForTransaction = exports.getMinBalanceForAccount = exports.joinUint8Arrays = exports.decodeState = void 0;
+exports.getIndexerBaseURLForNetwork = exports.getTxnGroupID = exports.sumUpTxnFees = exports.sendAndWaitRawTransaction = exports.convertToBaseUnits = exports.convertFromBaseUnits = exports.getAssetInformationById = exports.bufferToBase64 = exports.generateOptIntoAssetTxns = exports.ASSET_OPT_IN_PROCESS_TXN_COUNT = exports.applySlippageToAmount = exports.waitForTransaction = exports.getMinBalanceForAccount = exports.joinUint8Arrays = exports.decodeState = void 0;
 const algosdk_1 = __importDefault(require("algosdk"));
 const constant_1 = require("./constant");
-const CACHED_ASSETS = new Map();
+const WebStorage_1 = __importDefault(require("./web-storage/WebStorage"));
+const cachedAssetsStoredValue = WebStorage_1.default.getFromWebStorage(WebStorage_1.default.STORED_KEYS.TINYMAN_CACHED_ASSETS);
+const CACHED_ASSETS = (typeof cachedAssetsStoredValue === "object" ? cachedAssetsStoredValue : null) || {};
 function decodeState(stateArray = []) {
     const state = {};
     for (const pair of stateArray) {
@@ -117,34 +119,36 @@ function bufferToBase64(arrayBuffer) {
 exports.bufferToBase64 = bufferToBase64;
 /**
  * Fetches asset data and caches it in a Map.
- * @param algodClient - Algodv2 client
+ * @param network "mainnet" | "testnet" | "hiponet".
  * @param {number} id - id of the asset
  * @param {boolean} alwaysFetch - Determines whether to always fetch the information of the asset or read it from the cache
  * @returns a promise that resolves with TinymanAnalyticsApiAsset
  */
-function getAssetInformationById(algodClient, id, alwaysFetch) {
+function getAssetInformationById(network, id, alwaysFetch) {
     return new Promise(async (resolve, reject) => {
         try {
             if (id === constant_1.ALGO_ASSET_ID) {
-                resolve(constant_1.ALGO_ASSET);
+                resolve({ asset: constant_1.ALGO_ASSET, isDeleted: false });
                 return;
             }
-            const memoizedValue = CACHED_ASSETS.get(`${id}`);
+            const memoizedValue = CACHED_ASSETS[`${id}`];
             if (memoizedValue && !alwaysFetch) {
                 resolve(memoizedValue);
                 return;
             }
-            const algodAsset = (await algodClient.getAssetByID(id).do());
+            const response = await fetch(`${getIndexerBaseURLForNetwork(network)}/assets/${id}?include-all=true`);
+            const { asset } = (await response.json());
             const assetData = {
-                id: `${algodAsset.index}`,
-                decimals: Number(algodAsset.params.decimals),
+                id: `${asset.index}`,
+                decimals: Number(asset.params.decimals),
                 is_liquidity_token: false,
-                name: algodAsset.params.name || "",
-                unit_name: algodAsset.params["unit-name"] || "",
+                name: asset.params.name || "",
+                unit_name: asset.params["unit-name"] || "",
                 url: ""
             };
-            CACHED_ASSETS.set(`${id}`, assetData);
-            resolve(assetData);
+            CACHED_ASSETS[`${id}`] = { asset: assetData, isDeleted: asset.deleted };
+            WebStorage_1.default.local.setItem(WebStorage_1.default.STORED_KEYS.TINYMAN_CACHED_ASSETS, CACHED_ASSETS);
+            resolve({ asset: assetData, isDeleted: asset.deleted });
         }
         catch (error) {
             reject(new Error(error.message || "Failed to fetch asset information"));
@@ -211,3 +215,21 @@ function getTxnGroupID(txns) {
     return bufferToBase64(txns[0].txn.group);
 }
 exports.getTxnGroupID = getTxnGroupID;
+function getIndexerBaseURLForNetwork(network) {
+    let baseUrl;
+    switch (network) {
+        case "mainnet":
+            baseUrl = "https://indexer.algoexplorerapi.io/v2/";
+            break;
+        case "testnet":
+            baseUrl = "https://indexer.testnet.algoexplorerapi.io/v2/";
+            break;
+        case "hiponet":
+            baseUrl = "https://algorand-hiponet.hipolabs.com/indexer/";
+            break;
+        default:
+            throw new Error(`Network provided is not supported: ${network}`);
+    }
+    return baseUrl;
+}
+exports.getIndexerBaseURLForNetwork = getIndexerBaseURLForNetwork;
