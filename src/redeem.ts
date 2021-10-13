@@ -349,12 +349,12 @@ export async function getExcessAmountsWithPoolAssetDetails({
         getAssetInformationById(client, poolAssets.asset2ID),
         getAssetInformationById(client, poolInfo.liquidityTokenID!)
       ]);
-      let excessAsset = assetDetails[0];
+      let excessAsset = assetDetails[0].asset;
 
-      if (assetID === Number(assetDetails[1].id)) {
-        excessAsset = assetDetails[1];
-      } else if (assetID === Number(assetDetails[2]?.id)) {
-        excessAsset = assetDetails[2];
+      if (assetID === Number(assetDetails[1].asset.id)) {
+        excessAsset = assetDetails[1].asset;
+      } else if (assetID === Number(assetDetails[2]?.asset.id)) {
+        excessAsset = assetDetails[2].asset;
       }
 
       excessDataWithDetail.push({
@@ -362,9 +362,9 @@ export async function getExcessAmountsWithPoolAssetDetails({
         asset: excessAsset,
         pool: {
           info: poolInfo,
-          asset1: assetDetails[0],
-          asset2: assetDetails[1],
-          liquidityAsset: assetDetails[2]
+          asset1: assetDetails[0].asset,
+          asset2: assetDetails[1].asset,
+          liquidityAsset: assetDetails[2].asset
         }
       });
     }
