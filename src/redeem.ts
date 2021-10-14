@@ -1,8 +1,7 @@
-import algosdk, {Algodv2, Transaction} from "algosdk";
+import algosdk, {Algodv2} from "algosdk";
 import {toByteArray} from "base64-js";
 
 import {
-  bufferToBase64,
   decodeState,
   getAssetInformationById,
   getTxnGroupID,
@@ -13,7 +12,8 @@ import {getPoolAssets, getPoolInfo, PoolInfo} from "./pool";
 import {
   TinymanAnalyticsApiAsset,
   InitiatorSigner,
-  SignerTransaction
+  SignerTransaction,
+  SupportedNetwork
 } from "./common-types";
 import {AccountInformation} from "./account/accountTypes";
 import {DEFAULT_FEE_TXN_NOTE} from "./constant";
@@ -320,10 +320,12 @@ export interface ExcessAmountDataWithPoolAssetDetails {
  */
 export async function getExcessAmountsWithPoolAssetDetails({
   client,
+  network,
   accountAddr,
   validatorAppID
 }: {
-  client: any;
+  client: Algodv2;
+  network: SupportedNetwork;
   accountAddr: string;
   validatorAppID: number;
 }) {
@@ -345,9 +347,9 @@ export async function getExcessAmountsWithPoolAssetDetails({
         asset2ID: poolAssets.asset2ID
       });
       const assetDetails = await Promise.all([
-        getAssetInformationById(client, poolAssets.asset1ID),
-        getAssetInformationById(client, poolAssets.asset2ID),
-        getAssetInformationById(client, poolInfo.liquidityTokenID!)
+        getAssetInformationById(network, poolAssets.asset1ID),
+        getAssetInformationById(network, poolAssets.asset2ID),
+        getAssetInformationById(network, poolInfo.liquidityTokenID!)
       ]);
       let excessAsset = assetDetails[0].asset;
 
