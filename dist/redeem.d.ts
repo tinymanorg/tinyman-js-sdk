@@ -3,7 +3,8 @@ import {PoolInfo} from "./pool";
 import {
   TinymanAnalyticsApiAsset,
   InitiatorSigner,
-  SignerTransaction
+  SignerTransaction,
+  SupportedNetwork
 } from "./common-types";
 /**
  * Execute a redeem operation to collect excess assets from previous operations.
@@ -118,10 +119,12 @@ export interface ExcessAmountDataWithPoolAssetDetails {
  */
 export declare function getExcessAmountsWithPoolAssetDetails({
   client,
+  network,
   accountAddr,
   validatorAppID
 }: {
-  client: any;
+  client: Algodv2;
+  network: SupportedNetwork;
   accountAddr: string;
   validatorAppID: number;
 }): Promise<ExcessAmountDataWithPoolAssetDetails[]>;
