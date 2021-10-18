@@ -80,7 +80,11 @@ export {
   sumUpTxnFees
 } from "./util";
 
-export {generateOptIntoAssetTxns, getAssetInformationById} from "./asset/assetUtils";
+export {
+  generateOptIntoAssetTxns,
+  getAssetInformationById,
+  isNFT
+} from "./asset/assetUtils";
 
 export {AccountAsset, TinymanAnalyticsApiAsset} from "./asset/assetModels";
 

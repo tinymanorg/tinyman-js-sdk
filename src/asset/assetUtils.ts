@@ -84,3 +84,7 @@ export function getAssetInformationById(
     }
   );
 }
+
+export function isNFT(asset: TinymanAnalyticsApiAsset): boolean {
+  return parseFloat(asset.total_amount) === 1;
+}
