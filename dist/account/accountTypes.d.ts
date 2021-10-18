@@ -1,4 +1,4 @@
-import {AccountAsset} from "../common-types";
+import {AccountAsset} from "../asset/assetModels";
 export interface AccountInformation {
   address: string;
   amount: number;

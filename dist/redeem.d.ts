@@ -1,11 +1,7 @@
 import {Algodv2} from "algosdk";
 import {PoolInfo} from "./pool";
-import {
-  TinymanAnalyticsApiAsset,
-  InitiatorSigner,
-  SignerTransaction,
-  SupportedNetwork
-} from "./common-types";
+import {InitiatorSigner, SignerTransaction, SupportedNetwork} from "./common-types";
+import {TinymanAnalyticsApiAsset} from "./asset/assetModels";
 /**
  * Execute a redeem operation to collect excess assets from previous operations.
  *

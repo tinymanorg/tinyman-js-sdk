@@ -9,6 +9,7 @@ const base64_js_1 = require("base64-js");
 const util_1 = require("./util");
 const pool_1 = require("./pool");
 const constant_1 = require("./constant");
+const assetUtils_1 = require("./asset/assetUtils");
 const REDEEM_ENCODED = Uint8Array.from([114, 101, 100, 101, 101, 109]); // 'redeem'
 /**
  * Execute a redeem operation to collect excess assets from previous operations.
@@ -214,9 +215,9 @@ async function getExcessAmountsWithPoolAssetDetails({ client, network, accountAd
                 asset2ID: poolAssets.asset2ID
             });
             const assetDetails = await Promise.all([
-                util_1.getAssetInformationById(network, poolAssets.asset1ID),
-                util_1.getAssetInformationById(network, poolAssets.asset2ID),
-                util_1.getAssetInformationById(network, poolInfo.liquidityTokenID)
+                assetUtils_1.getAssetInformationById(network, poolAssets.asset1ID),
+                assetUtils_1.getAssetInformationById(network, poolAssets.asset2ID),
+                assetUtils_1.getAssetInformationById(network, poolInfo.liquidityTokenID)
             ]);
             let excessAsset = assetDetails[0].asset;
             if (assetID === Number(assetDetails[1].asset.id)) {

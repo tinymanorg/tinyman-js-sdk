@@ -1,10 +1,6 @@
 /// <reference types="node" />
 import {Algodv2} from "algosdk";
-import {
-  TinymanAnalyticsApiAsset,
-  SignerTransaction,
-  SupportedNetwork
-} from "./common-types";
+import {SignerTransaction, SupportedNetwork} from "./common-types";
 import {AccountInformation} from "./account/accountTypes";
 export declare function decodeState(
   stateArray?: AccountInformation["apps-local-state"][0]["key-value"]
@@ -18,33 +14,9 @@ export declare function applySlippageToAmount(
   amount: number | bigint
 ): bigint;
 export declare const ASSET_OPT_IN_PROCESS_TXN_COUNT = 1;
-export declare function generateOptIntoAssetTxns({
-  client,
-  assetID,
-  initiatorAddr
-}: {
-  client: any;
-  assetID: any;
-  initiatorAddr: any;
-}): Promise<SignerTransaction[]>;
 export declare function bufferToBase64(
   arrayBuffer: undefined | null | WithImplicitCoercion<ArrayBuffer | SharedArrayBuffer>
 ): string;
-/**
- * Fetches asset data and caches it in a Map.
- * @param network "mainnet" | "testnet" | "hiponet".
- * @param {number} id - id of the asset
- * @param {boolean} alwaysFetch - Determines whether to always fetch the information of the asset or read it from the cache
- * @returns a promise that resolves with TinymanAnalyticsApiAsset
- */
-export declare function getAssetInformationById(
-  network: SupportedNetwork,
-  id: number,
-  alwaysFetch?: boolean
-): Promise<{
-  asset: TinymanAnalyticsApiAsset;
-  isDeleted: boolean;
-}>;
 /**
  * Computes quantity * 10^(-assetDecimals) and rounds the result
  */

@@ -1,14 +1,6 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getIndexerBaseURLForNetwork = exports.getTxnGroupID = exports.sumUpTxnFees = exports.sendAndWaitRawTransaction = exports.convertToBaseUnits = exports.convertFromBaseUnits = exports.getAssetInformationById = exports.bufferToBase64 = exports.generateOptIntoAssetTxns = exports.ASSET_OPT_IN_PROCESS_TXN_COUNT = exports.applySlippageToAmount = exports.waitForTransaction = exports.getMinBalanceForAccount = exports.joinUint8Arrays = exports.decodeState = void 0;
-const algosdk_1 = __importDefault(require("algosdk"));
-const constant_1 = require("./constant");
-const WebStorage_1 = __importDefault(require("./web-storage/WebStorage"));
-const cachedAssetsStoredValue = WebStorage_1.default.getFromWebStorage(WebStorage_1.default.STORED_KEYS.TINYMAN_CACHED_ASSETS);
-const CACHED_ASSETS = (typeof cachedAssetsStoredValue === "object" ? cachedAssetsStoredValue : null) || {};
+exports.getIndexerBaseURLForNetwork = exports.getTxnGroupID = exports.sumUpTxnFees = exports.sendAndWaitRawTransaction = exports.convertToBaseUnits = exports.convertFromBaseUnits = exports.bufferToBase64 = exports.ASSET_OPT_IN_PROCESS_TXN_COUNT = exports.applySlippageToAmount = exports.waitForTransaction = exports.getMinBalanceForAccount = exports.joinUint8Arrays = exports.decodeState = void 0;
 function decodeState(stateArray = []) {
     const state = {};
     for (const pair of stateArray) {
@@ -101,61 +93,10 @@ function applySlippageToAmount(type, slippage, amount) {
 }
 exports.applySlippageToAmount = applySlippageToAmount;
 exports.ASSET_OPT_IN_PROCESS_TXN_COUNT = 1;
-async function generateOptIntoAssetTxns({ client, assetID, initiatorAddr }) {
-    const suggestedParams = await client.getTransactionParams().do();
-    const optInTxn = algosdk_1.default.makeAssetTransferTxnWithSuggestedParamsFromObject({
-        from: initiatorAddr,
-        to: initiatorAddr,
-        assetIndex: assetID,
-        amount: 0,
-        suggestedParams
-    });
-    return [{ txn: optInTxn, signers: [initiatorAddr] }];
-}
-exports.generateOptIntoAssetTxns = generateOptIntoAssetTxns;
 function bufferToBase64(arrayBuffer) {
     return arrayBuffer ? Buffer.from(arrayBuffer).toString("base64") : "";
 }
 exports.bufferToBase64 = bufferToBase64;
-/**
- * Fetches asset data and caches it in a Map.
- * @param network "mainnet" | "testnet" | "hiponet".
- * @param {number} id - id of the asset
- * @param {boolean} alwaysFetch - Determines whether to always fetch the information of the asset or read it from the cache
- * @returns a promise that resolves with TinymanAnalyticsApiAsset
- */
-function getAssetInformationById(network, id, alwaysFetch) {
-    return new Promise(async (resolve, reject) => {
-        try {
-            if (id === constant_1.ALGO_ASSET_ID) {
-                resolve({ asset: constant_1.ALGO_ASSET, isDeleted: false });
-                return;
-            }
-            const memoizedValue = CACHED_ASSETS[`${id}`];
-            if (memoizedValue && !alwaysFetch) {
-                resolve(memoizedValue);
-                return;
-            }
-            const response = await fetch(`${getIndexerBaseURLForNetwork(network)}/assets/${id}?include-all=true`);
-            const { asset } = (await response.json());
-            const assetData = {
-                id: `${asset.index}`,
-                decimals: Number(asset.params.decimals),
-                is_liquidity_token: false,
-                name: asset.params.name || "",
-                unit_name: asset.params["unit-name"] || "",
-                url: ""
-            };
-            CACHED_ASSETS[`${id}`] = { asset: assetData, isDeleted: asset.deleted };
-            WebStorage_1.default.local.setItem(WebStorage_1.default.STORED_KEYS.TINYMAN_CACHED_ASSETS, CACHED_ASSETS);
-            resolve({ asset: assetData, isDeleted: asset.deleted });
-        }
-        catch (error) {
-            reject(new Error(error.message || "Failed to fetch asset information"));
-        }
-    });
-}
-exports.getAssetInformationById = getAssetInformationById;
 /**
  * Computes quantity * 10^(-assetDecimals) and rounds the result
  */
