@@ -14,7 +14,8 @@ export const ALGO_ASSET: TinymanAnalyticsApiAsset = {
   unit_name: "ALGO",
   decimals: 6,
   url: "https://algorand.org",
-  is_liquidity_token: false
+  is_liquidity_token: false,
+  total_amount: "6615503326932151"
 };
 
 export const LIQUIDITY_TOKEN_UNIT_NAME = "TM1POOL";

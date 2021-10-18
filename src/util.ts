@@ -179,7 +179,12 @@ export function getAssetInformationById(
 
         const memoizedValue = CACHED_ASSETS[`${id}`];
 
-        if (memoizedValue && !alwaysFetch) {
+        if (
+          memoizedValue &&
+          // invalidate cache for this asset if total_amount is not available in the cached data
+          memoizedValue.asset.total_amount != null &&
+          !alwaysFetch
+        ) {
           resolve(memoizedValue);
           return;
         }
@@ -189,13 +194,14 @@ export function getAssetInformationById(
         );
         const {asset} = (await response.json()) as IndexerAssetInformation;
 
-        const assetData = {
+        const assetData: TinymanAnalyticsApiAsset = {
           id: `${asset.index}`,
           decimals: Number(asset.params.decimals),
           is_liquidity_token: false,
           name: asset.params.name || "",
           unit_name: asset.params["unit-name"] || "",
-          url: ""
+          url: "",
+          total_amount: String(asset.params.total)
         };
 
         CACHED_ASSETS[`${id}`] = {asset: assetData, isDeleted: asset.deleted};
