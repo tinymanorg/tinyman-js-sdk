@@ -3,20 +3,16 @@ import {toByteArray} from "base64-js";
 
 import {
   decodeState,
-  getAssetInformationById,
   getTxnGroupID,
   sendAndWaitRawTransaction,
   sumUpTxnFees
 } from "./util";
 import {getPoolAssets, getPoolInfo, PoolInfo} from "./pool";
-import {
-  TinymanAnalyticsApiAsset,
-  InitiatorSigner,
-  SignerTransaction,
-  SupportedNetwork
-} from "./common-types";
+import {InitiatorSigner, SignerTransaction, SupportedNetwork} from "./common-types";
 import {AccountInformation} from "./account/accountTypes";
 import {DEFAULT_FEE_TXN_NOTE} from "./constant";
+import {TinymanAnalyticsApiAsset} from "./asset/assetModels";
+import {getAssetInformationById} from "./asset/assetUtils";
 
 const REDEEM_ENCODED = Uint8Array.from([114, 101, 100, 101, 101, 109]); // 'redeem'
 

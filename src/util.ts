@@ -1,23 +1,7 @@
-import algosdk, {Algodv2} from "algosdk";
+import {Algodv2} from "algosdk";
 
-import {
-  TinymanAnalyticsApiAsset,
-  SignerTransaction,
-  IndexerAssetInformation,
-  SupportedNetwork
-} from "./common-types";
+import {SignerTransaction, SupportedNetwork} from "./common-types";
 import {AccountInformation} from "./account/accountTypes";
-import {ALGO_ASSET, ALGO_ASSET_ID} from "./constant";
-import WebStorage from "./web-storage/WebStorage";
-
-const cachedAssetsStoredValue = WebStorage.getFromWebStorage(
-  WebStorage.STORED_KEYS.TINYMAN_CACHED_ASSETS
-);
-
-const CACHED_ASSETS: Record<
-  string,
-  {asset: TinymanAnalyticsApiAsset; isDeleted: boolean}
-> = (typeof cachedAssetsStoredValue === "object" ? cachedAssetsStoredValue : null) || {};
 
 export function decodeState(
   stateArray: AccountInformation["apps-local-state"][0]["key-value"] = []
@@ -133,89 +117,10 @@ export function applySlippageToAmount(
 
 export const ASSET_OPT_IN_PROCESS_TXN_COUNT = 1;
 
-export async function generateOptIntoAssetTxns({
-  client,
-  assetID,
-  initiatorAddr
-}): Promise<SignerTransaction[]> {
-  const suggestedParams = await client.getTransactionParams().do();
-
-  const optInTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-    from: initiatorAddr,
-    to: initiatorAddr,
-    assetIndex: assetID,
-    amount: 0,
-    suggestedParams
-  });
-
-  return [{txn: optInTxn, signers: [initiatorAddr]}];
-}
-
 export function bufferToBase64(
   arrayBuffer: undefined | null | WithImplicitCoercion<ArrayBuffer | SharedArrayBuffer>
 ) {
   return arrayBuffer ? Buffer.from(arrayBuffer).toString("base64") : "";
-}
-
-/**
- * Fetches asset data and caches it in a Map.
- * @param network "mainnet" | "testnet" | "hiponet".
- * @param {number} id - id of the asset
- * @param {boolean} alwaysFetch - Determines whether to always fetch the information of the asset or read it from the cache
- * @returns a promise that resolves with TinymanAnalyticsApiAsset
- */
-export function getAssetInformationById(
-  network: SupportedNetwork,
-  id: number,
-  alwaysFetch?: boolean
-) {
-  return new Promise<{asset: TinymanAnalyticsApiAsset; isDeleted: boolean}>(
-    async (resolve, reject) => {
-      try {
-        if (id === ALGO_ASSET_ID) {
-          resolve({asset: ALGO_ASSET, isDeleted: false});
-          return;
-        }
-
-        const memoizedValue = CACHED_ASSETS[`${id}`];
-
-        if (
-          memoizedValue &&
-          // invalidate cache for this asset if total_amount is not available in the cached data
-          memoizedValue.asset.total_amount != null &&
-          !alwaysFetch
-        ) {
-          resolve(memoizedValue);
-          return;
-        }
-
-        const response = await fetch(
-          `${getIndexerBaseURLForNetwork(network)}/assets/${id}?include-all=true`
-        );
-        const {asset} = (await response.json()) as IndexerAssetInformation;
-
-        const assetData: TinymanAnalyticsApiAsset = {
-          id: `${asset.index}`,
-          decimals: Number(asset.params.decimals),
-          is_liquidity_token: false,
-          name: asset.params.name || "",
-          unit_name: asset.params["unit-name"] || "",
-          url: "",
-          total_amount: String(asset.params.total)
-        };
-
-        CACHED_ASSETS[`${id}`] = {asset: assetData, isDeleted: asset.deleted};
-        WebStorage.local.setItem(
-          WebStorage.STORED_KEYS.TINYMAN_CACHED_ASSETS,
-          CACHED_ASSETS
-        );
-
-        resolve({asset: assetData, isDeleted: asset.deleted});
-      } catch (error) {
-        reject(new Error(error.message || "Failed to fetch asset information"));
-      }
-    }
-  );
 }
 
 /**

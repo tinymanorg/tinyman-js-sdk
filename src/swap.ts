@@ -7,9 +7,10 @@ import {
   sendAndWaitRawTransaction,
   sumUpTxnFees
 } from "./util";
-import {PoolInfo, getPoolReserves, getAccountExcess, PoolReserves} from "./pool";
+import {PoolInfo, getAccountExcess, PoolReserves} from "./pool";
 import {InitiatorSigner, SignerTransaction} from "./common-types";
-import {ALGO_ASSET_ID, DEFAULT_FEE_TXN_NOTE} from "./constant";
+import {DEFAULT_FEE_TXN_NOTE} from "./constant";
+import {ALGO_ASSET_ID} from "./asset/assetConstants";
 
 // FEE = %0.3 or 3/1000
 const FEE_NUMERATOR = 3n;
