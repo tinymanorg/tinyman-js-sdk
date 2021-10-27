@@ -157,6 +157,10 @@ function getFixedInputSwapQuote({ pool, reserves, assetIn, decimals }) {
     }
     const rate = util_1.convertFromBaseUnits(decimals.assetOut, Number(assetOutAmount)) /
         util_1.convertFromBaseUnits(decimals.assetIn, Number(assetInAmount));
+    const swapPrice = 1 / rate;
+    const poolPrice = util_1.convertFromBaseUnits(decimals.assetIn, Number(inputSupply)) /
+        util_1.convertFromBaseUnits(decimals.assetOut, Number(outputSupply));
+    const priceImpact = Math.abs(swapPrice / poolPrice - 1);
     return {
         round: reserves.round,
         assetInID: assetIn.assetID,
@@ -164,7 +168,8 @@ function getFixedInputSwapQuote({ pool, reserves, assetIn, decimals }) {
         assetOutID,
         assetOutAmount,
         swapFee: Number(swapFee),
-        rate
+        rate,
+        priceImpact
     };
 }
 /**
@@ -256,6 +261,10 @@ function getFixedOutputSwapQuote({ pool, reserves, assetOut, decimals }) {
     const assetInAmountPlusFee = assetInAmount + swapFee;
     const rate = util_1.convertFromBaseUnits(decimals.assetOut, Number(assetOutAmount)) /
         util_1.convertFromBaseUnits(decimals.assetIn, Number(assetInAmountPlusFee));
+    const swapPrice = 1 / rate;
+    const poolPrice = util_1.convertFromBaseUnits(decimals.assetIn, Number(inputSupply)) /
+        util_1.convertFromBaseUnits(decimals.assetOut, Number(outputSupply));
+    const priceImpact = Math.abs(swapPrice / poolPrice - 1);
     return {
         round: reserves.round,
         assetInID,
@@ -263,7 +272,8 @@ function getFixedOutputSwapQuote({ pool, reserves, assetOut, decimals }) {
         assetOutID: assetOut.assetID,
         assetOutAmount,
         swapFee: Number(swapFee),
-        rate
+        rate,
+        priceImpact
     };
 }
 /**
