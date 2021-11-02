@@ -1,5 +1,5 @@
 import {Algodv2} from "algosdk";
-import {SignerTransaction} from "./common-types";
+import {SignerTransaction, SupportedNetwork} from "./common-types";
 import {AccountInformation} from "./account/accountTypes";
 /**
  * Get the Validator App ID for a network.
@@ -8,9 +8,7 @@ import {AccountInformation} from "./account/accountTypes";
  *
  * @returns the Validator App ID for the network
  */
-export declare function getValidatorAppIDForNetwork(
-  network: "mainnet" | "testnet" | "hiponet"
-): number;
+export declare function getValidatorAppIDForNetwork(network: SupportedNetwork): number;
 export declare const OPT_IN_VALIDATOR_APP_PROCESS_TXN_COUNT = 1;
 export declare function generateOptIntoValidatorTxns({
   client,

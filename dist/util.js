@@ -1,12 +1,6 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getTxnGroupID = exports.sumUpTxnFees = exports.sendAndWaitRawTransaction = exports.convertToBaseUnits = exports.convertFromBaseUnits = exports.getAssetInformationById = exports.bufferToBase64 = exports.generateOptIntoAssetTxns = exports.ASSET_OPT_IN_PROCESS_TXN_COUNT = exports.applySlippageToAmount = exports.waitForTransaction = exports.getMinBalanceForAccount = exports.joinUint8Arrays = exports.decodeState = void 0;
-const algosdk_1 = __importDefault(require("algosdk"));
-const constant_1 = require("./constant");
-const CACHED_ASSETS = new Map();
+exports.getIndexerBaseURLForNetwork = exports.getTxnGroupID = exports.sumUpTxnFees = exports.sendAndWaitRawTransaction = exports.convertToBaseUnits = exports.convertFromBaseUnits = exports.bufferToBase64 = exports.ASSET_OPT_IN_PROCESS_TXN_COUNT = exports.applySlippageToAmount = exports.waitForTransaction = exports.getMinBalanceForAccount = exports.joinUint8Arrays = exports.decodeState = void 0;
 function decodeState(stateArray = []) {
     const state = {};
     for (const pair of stateArray) {
@@ -99,59 +93,10 @@ function applySlippageToAmount(type, slippage, amount) {
 }
 exports.applySlippageToAmount = applySlippageToAmount;
 exports.ASSET_OPT_IN_PROCESS_TXN_COUNT = 1;
-async function generateOptIntoAssetTxns({ client, assetID, initiatorAddr }) {
-    const suggestedParams = await client.getTransactionParams().do();
-    const optInTxn = algosdk_1.default.makeAssetTransferTxnWithSuggestedParamsFromObject({
-        from: initiatorAddr,
-        to: initiatorAddr,
-        assetIndex: assetID,
-        amount: 0,
-        suggestedParams
-    });
-    return [{ txn: optInTxn, signers: [initiatorAddr] }];
-}
-exports.generateOptIntoAssetTxns = generateOptIntoAssetTxns;
 function bufferToBase64(arrayBuffer) {
     return arrayBuffer ? Buffer.from(arrayBuffer).toString("base64") : "";
 }
 exports.bufferToBase64 = bufferToBase64;
-/**
- * Fetches asset data and caches it in a Map.
- * @param algodClient - Algodv2 client
- * @param {number} id - id of the asset
- * @param {boolean} alwaysFetch - Determines whether to always fetch the information of the asset or read it from the cache
- * @returns a promise that resolves with TinymanAnalyticsApiAsset
- */
-function getAssetInformationById(algodClient, id, alwaysFetch) {
-    return new Promise(async (resolve, reject) => {
-        try {
-            if (id === constant_1.ALGO_ASSET_ID) {
-                resolve(constant_1.ALGO_ASSET);
-                return;
-            }
-            const memoizedValue = CACHED_ASSETS.get(`${id}`);
-            if (memoizedValue && !alwaysFetch) {
-                resolve(memoizedValue);
-                return;
-            }
-            const algodAsset = (await algodClient.getAssetByID(id).do());
-            const assetData = {
-                id: `${algodAsset.index}`,
-                decimals: Number(algodAsset.params.decimals),
-                is_liquidity_token: false,
-                name: algodAsset.params.name || "",
-                unit_name: algodAsset.params["unit-name"] || "",
-                url: ""
-            };
-            CACHED_ASSETS.set(`${id}`, assetData);
-            resolve(assetData);
-        }
-        catch (error) {
-            reject(new Error(error.message || "Failed to fetch asset information"));
-        }
-    });
-}
-exports.getAssetInformationById = getAssetInformationById;
 /**
  * Computes quantity * 10^(-assetDecimals) and rounds the result
  */
@@ -211,3 +156,21 @@ function getTxnGroupID(txns) {
     return bufferToBase64(txns[0].txn.group);
 }
 exports.getTxnGroupID = getTxnGroupID;
+function getIndexerBaseURLForNetwork(network) {
+    let baseUrl;
+    switch (network) {
+        case "mainnet":
+            baseUrl = "https://indexer.algoexplorerapi.io/v2/";
+            break;
+        case "testnet":
+            baseUrl = "https://indexer.testnet.algoexplorerapi.io/v2/";
+            break;
+        case "hiponet":
+            baseUrl = "https://algorand-hiponet.hipolabs.com/indexer/";
+            break;
+        default:
+            throw new Error(`Network provided is not supported: ${network}`);
+    }
+    return baseUrl;
+}
+exports.getIndexerBaseURLForNetwork = getIndexerBaseURLForNetwork;

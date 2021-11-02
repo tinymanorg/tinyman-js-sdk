@@ -1,16 +1,8 @@
-import algosdk, {Algodv2, Transaction} from "algosdk";
-import {AssetParams} from "algosdk/dist/types/src/client/v2/algod/models/types";
+import {Algodv2} from "algosdk";
 
-import {
-  TinymanAnalyticsApiAsset,
-  InitiatorSigner,
-  SignerTransaction
-} from "./common-types";
+import {SignerTransaction, SupportedNetwork} from "./common-types";
 import {AccountInformation} from "./account/accountTypes";
-import {ALGO_ASSET, ALGO_ASSET_ID} from "./constant";
 import TinymanError from "./error/TinymanError";
-
-const CACHED_ASSETS: Map<string, TinymanAnalyticsApiAsset> = new Map();
 
 export function decodeState(
   stateArray: AccountInformation["apps-local-state"][0]["key-value"] = []
@@ -126,82 +118,10 @@ export function applySlippageToAmount(
 
 export const ASSET_OPT_IN_PROCESS_TXN_COUNT = 1;
 
-export async function generateOptIntoAssetTxns({
-  client,
-  assetID,
-  initiatorAddr
-}): Promise<SignerTransaction[]> {
-  try {
-    const suggestedParams = await client.getTransactionParams().do();
-
-    const optInTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-      from: initiatorAddr,
-      to: initiatorAddr,
-      assetIndex: assetID,
-      amount: 0,
-      suggestedParams
-    });
-
-    return [{txn: optInTxn, signers: [initiatorAddr]}];
-  } catch (error) {
-    throw new TinymanError(
-      error,
-      "We encountered something unexpected while opting into this asset. Try again later."
-    );
-  }
-}
-
 export function bufferToBase64(
   arrayBuffer: undefined | null | WithImplicitCoercion<ArrayBuffer | SharedArrayBuffer>
 ) {
   return arrayBuffer ? Buffer.from(arrayBuffer).toString("base64") : "";
-}
-
-/**
- * Fetches asset data and caches it in a Map.
- * @param algodClient - Algodv2 client
- * @param {number} id - id of the asset
- * @param {boolean} alwaysFetch - Determines whether to always fetch the information of the asset or read it from the cache
- * @returns a promise that resolves with TinymanAnalyticsApiAsset
- */
-export function getAssetInformationById(
-  algodClient: algosdk.Algodv2,
-  id: number,
-  alwaysFetch?: boolean
-) {
-  return new Promise<TinymanAnalyticsApiAsset>(async (resolve, reject) => {
-    try {
-      if (id === ALGO_ASSET_ID) {
-        resolve(ALGO_ASSET);
-        return;
-      }
-
-      const memoizedValue = CACHED_ASSETS.get(`${id}`);
-
-      if (memoizedValue && !alwaysFetch) {
-        resolve(memoizedValue);
-        return;
-      }
-
-      const algodAsset = (await algodClient.getAssetByID(id).do()) as {
-        index: number;
-        params: AssetParams;
-      };
-      const assetData = {
-        id: `${algodAsset.index}`,
-        decimals: Number(algodAsset.params.decimals),
-        is_liquidity_token: false,
-        name: algodAsset.params.name || "",
-        unit_name: algodAsset.params["unit-name"] || "",
-        url: ""
-      };
-
-      CACHED_ASSETS.set(`${id}`, assetData);
-      resolve(assetData);
-    } catch (error) {
-      reject(new Error(error.message || "Failed to fetch asset information"));
-    }
-  });
 }
 
 /**
@@ -289,4 +209,27 @@ export function sumUpTxnFees(txns: SignerTransaction[]): number {
 
 export function getTxnGroupID(txns: SignerTransaction[]) {
   return bufferToBase64(txns[0].txn.group);
+}
+
+export function getIndexerBaseURLForNetwork(network: SupportedNetwork) {
+  let baseUrl;
+
+  switch (network) {
+    case "mainnet":
+      baseUrl = "https://indexer.algoexplorerapi.io/v2/";
+      break;
+
+    case "testnet":
+      baseUrl = "https://indexer.testnet.algoexplorerapi.io/v2/";
+      break;
+
+    case "hiponet":
+      baseUrl = "https://algorand-hiponet.hipolabs.com/indexer/";
+      break;
+
+    default:
+      throw new Error(`Network provided is not supported: ${network}`);
+  }
+
+  return baseUrl;
 }

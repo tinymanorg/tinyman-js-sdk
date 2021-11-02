@@ -1,10 +1,7 @@
 import {Algodv2} from "algosdk";
 import {PoolInfo} from "./pool";
-import {
-  TinymanAnalyticsApiAsset,
-  InitiatorSigner,
-  SignerTransaction
-} from "./common-types";
+import {InitiatorSigner, SignerTransaction, SupportedNetwork} from "./common-types";
+import {TinymanAnalyticsApiAsset} from "./asset/assetModels";
 /**
  * Execute a redeem operation to collect excess assets from previous operations.
  *
@@ -118,10 +115,12 @@ export interface ExcessAmountDataWithPoolAssetDetails {
  */
 export declare function getExcessAmountsWithPoolAssetDetails({
   client,
+  network,
   accountAddr,
   validatorAppID
 }: {
-  client: any;
+  client: Algodv2;
+  network: SupportedNetwork;
   accountAddr: string;
   validatorAppID: number;
 }): Promise<ExcessAmountDataWithPoolAssetDetails[]>;

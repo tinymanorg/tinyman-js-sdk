@@ -1,23 +1,4 @@
-import algosdk, {Transaction} from "algosdk";
-
-export interface AccountAsset {
-  amount: number;
-  "asset-id": number;
-  creator: string;
-  "is-frozen": boolean;
-}
-
-export interface TinymanAnalyticsApiAsset {
-  id: string;
-  is_liquidity_token: boolean;
-  name: string;
-  unit_name: string;
-  decimals: number;
-  url: string;
-  liquidity_in_usd?: null | string;
-  last_day_volume_in_usd?: null | string;
-  last_day_price_change?: null | string;
-}
+import {Transaction} from "algosdk";
 
 export interface SignerTransaction {
   txn: Transaction;
@@ -32,3 +13,5 @@ export interface SignerTransaction {
 export type InitiatorSigner = (
   txGroupList: SignerTransaction[][]
 ) => Promise<Uint8Array[]>;
+
+export type SupportedNetwork = "hiponet" | "testnet" | "mainnet";

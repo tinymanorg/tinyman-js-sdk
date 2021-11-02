@@ -1,23 +1,19 @@
-import algosdk, {Algodv2, Transaction} from "algosdk";
+import algosdk, {Algodv2} from "algosdk";
 import {toByteArray} from "base64-js";
 
 import {
-  bufferToBase64,
   decodeState,
-  getAssetInformationById,
   getTxnGroupID,
   sendAndWaitRawTransaction,
   sumUpTxnFees
 } from "./util";
 import {getPoolAssets, getPoolInfo, PoolInfo} from "./pool";
-import {
-  TinymanAnalyticsApiAsset,
-  InitiatorSigner,
-  SignerTransaction
-} from "./common-types";
+import {InitiatorSigner, SignerTransaction, SupportedNetwork} from "./common-types";
 import {AccountInformation} from "./account/accountTypes";
 import {DEFAULT_FEE_TXN_NOTE} from "./constant";
 import TinymanError from "./error/TinymanError";
+import {TinymanAnalyticsApiAsset} from "./asset/assetModels";
+import {getAssetInformationById} from "./asset/assetUtils";
 
 const REDEEM_ENCODED = Uint8Array.from([114, 101, 100, 101, 101, 109]); // 'redeem'
 
@@ -336,10 +332,12 @@ export interface ExcessAmountDataWithPoolAssetDetails {
  */
 export async function getExcessAmountsWithPoolAssetDetails({
   client,
+  network,
   accountAddr,
   validatorAppID
 }: {
-  client: any;
+  client: Algodv2;
+  network: SupportedNetwork;
   accountAddr: string;
   validatorAppID: number;
 }) {
@@ -361,16 +359,16 @@ export async function getExcessAmountsWithPoolAssetDetails({
         asset2ID: poolAssets.asset2ID
       });
       const assetDetails = await Promise.all([
-        getAssetInformationById(client, poolAssets.asset1ID),
-        getAssetInformationById(client, poolAssets.asset2ID),
-        getAssetInformationById(client, poolInfo.liquidityTokenID!)
+        getAssetInformationById(network, poolAssets.asset1ID),
+        getAssetInformationById(network, poolAssets.asset2ID),
+        getAssetInformationById(network, poolInfo.liquidityTokenID!)
       ]);
-      let excessAsset = assetDetails[0];
+      let excessAsset = assetDetails[0].asset;
 
-      if (assetID === Number(assetDetails[1].id)) {
-        excessAsset = assetDetails[1];
-      } else if (assetID === Number(assetDetails[2]?.id)) {
-        excessAsset = assetDetails[2];
+      if (assetID === Number(assetDetails[1].asset.id)) {
+        excessAsset = assetDetails[1].asset;
+      } else if (assetID === Number(assetDetails[2]?.asset.id)) {
+        excessAsset = assetDetails[2].asset;
       }
 
       excessDataWithDetail.push({
@@ -378,9 +376,9 @@ export async function getExcessAmountsWithPoolAssetDetails({
         asset: excessAsset,
         pool: {
           info: poolInfo,
-          asset1: assetDetails[0],
-          asset2: assetDetails[1],
-          liquidityAsset: assetDetails[2]
+          asset1: assetDetails[0].asset,
+          asset2: assetDetails[1].asset,
+          liquidityAsset: assetDetails[2].asset
         }
       });
     }

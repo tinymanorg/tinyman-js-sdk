@@ -9,6 +9,7 @@ const base64_js_1 = require("base64-js");
 const util_1 = require("./util");
 const pool_1 = require("./pool");
 const constant_1 = require("./constant");
+const assetUtils_1 = require("./asset/assetUtils");
 const REDEEM_ENCODED = Uint8Array.from([114, 101, 100, 101, 101, 109]); // 'redeem'
 /**
  * Execute a redeem operation to collect excess assets from previous operations.
@@ -197,7 +198,7 @@ exports.getExcessAmounts = getExcessAmounts;
  * @param params.validatorAppID Validator APP ID
  * @returns List of excess amounts
  */
-async function getExcessAmountsWithPoolAssetDetails({ client, accountAddr, validatorAppID }) {
+async function getExcessAmountsWithPoolAssetDetails({ client, network, accountAddr, validatorAppID }) {
     const excessData = await getExcessAmounts({ client, accountAddr, validatorAppID });
     let excessDataWithDetail = [];
     for (let data of excessData) {
@@ -214,25 +215,25 @@ async function getExcessAmountsWithPoolAssetDetails({ client, accountAddr, valid
                 asset2ID: poolAssets.asset2ID
             });
             const assetDetails = await Promise.all([
-                util_1.getAssetInformationById(client, poolAssets.asset1ID),
-                util_1.getAssetInformationById(client, poolAssets.asset2ID),
-                util_1.getAssetInformationById(client, poolInfo.liquidityTokenID)
+                assetUtils_1.getAssetInformationById(network, poolAssets.asset1ID),
+                assetUtils_1.getAssetInformationById(network, poolAssets.asset2ID),
+                assetUtils_1.getAssetInformationById(network, poolInfo.liquidityTokenID)
             ]);
-            let excessAsset = assetDetails[0];
-            if (assetID === Number(assetDetails[1].id)) {
-                excessAsset = assetDetails[1];
+            let excessAsset = assetDetails[0].asset;
+            if (assetID === Number(assetDetails[1].asset.id)) {
+                excessAsset = assetDetails[1].asset;
             }
-            else if (assetID === Number(assetDetails[2]?.id)) {
-                excessAsset = assetDetails[2];
+            else if (assetID === Number(assetDetails[2]?.asset.id)) {
+                excessAsset = assetDetails[2].asset;
             }
             excessDataWithDetail.push({
                 amount,
                 asset: excessAsset,
                 pool: {
                     info: poolInfo,
-                    asset1: assetDetails[0],
-                    asset2: assetDetails[1],
-                    liquidityAsset: assetDetails[2]
+                    asset1: assetDetails[0].asset,
+                    asset2: assetDetails[1].asset,
+                    liquidityAsset: assetDetails[2].asset
                 }
             });
         }

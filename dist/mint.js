@@ -8,6 +8,7 @@ const algosdk_1 = __importDefault(require("algosdk"));
 const util_1 = require("./util");
 const pool_1 = require("./pool");
 const constant_1 = require("./constant");
+const assetConstants_1 = require("./asset/assetConstants");
 var MintTxnIndices;
 (function (MintTxnIndices) {
     MintTxnIndices[MintTxnIndices["FEE_TXN"] = 0] = "FEE_TXN";
@@ -69,7 +70,7 @@ async function generateMintTxns({ client, pool, asset1In, asset2In, liquidityOut
         appIndex: pool.validatorAppID,
         appArgs: [MINT_ENCODED],
         accounts: [initiatorAddr],
-        foreignAssets: pool.asset2ID == constant_1.ALGO_ASSET_ID
+        foreignAssets: pool.asset2ID == assetConstants_1.ALGO_ASSET_ID
             ? [pool.asset1ID, pool.liquidityTokenID]
             : [pool.asset1ID, pool.asset2ID, pool.liquidityTokenID],
         suggestedParams
@@ -82,7 +83,7 @@ async function generateMintTxns({ client, pool, asset1In, asset2In, liquidityOut
         suggestedParams
     });
     let asset2InTxn;
-    if (pool.asset2ID === constant_1.ALGO_ASSET_ID) {
+    if (pool.asset2ID === assetConstants_1.ALGO_ASSET_ID) {
         asset2InTxn = algosdk_1.default.makePaymentTxnWithSuggestedParamsFromObject({
             from: initiatorAddr,
             to: pool.addr,

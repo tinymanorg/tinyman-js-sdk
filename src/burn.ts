@@ -1,4 +1,4 @@
-import algosdk, {Transaction} from "algosdk";
+import algosdk from "algosdk";
 
 import {
   applySlippageToAmount,
@@ -6,10 +6,11 @@ import {
   sendAndWaitRawTransaction,
   sumUpTxnFees
 } from "./util";
-import {PoolInfo, getPoolReserves, getAccountExcess, PoolReserves} from "./pool";
+import {PoolInfo, getAccountExcess, PoolReserves} from "./pool";
 import {InitiatorSigner, SignerTransaction} from "./common-types";
-import {ALGO_ASSET_ID, DEFAULT_FEE_TXN_NOTE} from "./constant";
 import TinymanError from "./error/TinymanError";
+import {DEFAULT_FEE_TXN_NOTE} from "./constant";
+import {ALGO_ASSET_ID} from "./asset/assetConstants";
 
 /** An object containing information about a burn quote. */
 export interface BurnQuote {

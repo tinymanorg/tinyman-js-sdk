@@ -7,7 +7,7 @@ exports.doBootstrap = exports.signBootstrapTransactions = exports.generateBootst
 const algosdk_1 = __importDefault(require("algosdk"));
 const contracts_1 = require("./contracts");
 const util_1 = require("./util");
-const constant_1 = require("./constant");
+const assetConstants_1 = require("./asset/assetConstants");
 const BOOTSTRAP_ENCODED = Uint8Array.from([98, 111, 111, 116, 115, 116, 114, 97, 112]); // 'bootstrap'
 var BootstapTxnGroupIndices;
 (function (BootstapTxnGroupIndices) {
@@ -19,7 +19,7 @@ var BootstapTxnGroupIndices;
 })(BootstapTxnGroupIndices || (BootstapTxnGroupIndices = {}));
 function getBootstrapProcessTxnCount(asset2ID) {
     // IF asset2 is ALGO, there won't be `asset2Optin` txn within the bootstrap txn group
-    return constant_1.ALGO_ASSET_ID === asset2ID ? 4 : 5;
+    return assetConstants_1.ALGO_ASSET_ID === asset2ID ? 4 : 5;
 }
 exports.getBootstrapProcessTxnCount = getBootstrapProcessTxnCount;
 async function generateBootstrapTransactions({ client, poolLogicSig, validatorAppID, asset1ID, asset2ID, asset1UnitName, asset2UnitName, initiatorAddr }) {
@@ -40,7 +40,7 @@ async function generateBootstrapTransactions({ client, poolLogicSig, validatorAp
         total: 0xffffffffffffffffn,
         decimals: 6,
         defaultFrozen: false,
-        unitName: constant_1.LIQUIDITY_TOKEN_UNIT_NAME,
+        unitName: assetConstants_1.LIQUIDITY_TOKEN_UNIT_NAME,
         assetName: `Tinyman Pool ${asset1UnitName}-${asset2UnitName}`,
         assetURL: "https://tinyman.org",
         suggestedParams

@@ -7,10 +7,11 @@ import {
   sendAndWaitRawTransaction,
   sumUpTxnFees
 } from "./util";
-import {PoolInfo, getPoolReserves, getAccountExcess, PoolReserves} from "./pool";
+import {PoolInfo, getAccountExcess, PoolReserves} from "./pool";
 import {InitiatorSigner, SignerTransaction} from "./common-types";
-import {ALGO_ASSET_ID, DEFAULT_FEE_TXN_NOTE} from "./constant";
 import TinymanError from "./error/TinymanError";
+import {DEFAULT_FEE_TXN_NOTE} from "./constant";
+import {ALGO_ASSET_ID} from "./asset/assetConstants";
 
 // FEE = %0.3 or 3/1000
 const FEE_NUMERATOR = 3n;
@@ -37,6 +38,8 @@ export interface SwapQuote {
   swapFee: number;
   /** The final exchange rate for this swap expressed as  assetOutAmount / assetInAmount */
   rate: number;
+  /** The price impact of the swap */
+  priceImpact: number;
 }
 
 /** An object containing information about a successfully executed swap. */
@@ -278,6 +281,14 @@ function getFixedInputSwapQuote({
     convertFromBaseUnits(decimals.assetOut, Number(assetOutAmount)) /
     convertFromBaseUnits(decimals.assetIn, Number(assetInAmount));
 
+  const swapPrice = 1 / rate;
+
+  const poolPrice =
+    convertFromBaseUnits(decimals.assetIn, Number(inputSupply)) /
+    convertFromBaseUnits(decimals.assetOut, Number(outputSupply));
+
+  const priceImpact = Math.abs(swapPrice / poolPrice - 1);
+
   return {
     round: reserves.round,
     assetInID: assetIn.assetID,
@@ -285,7 +296,8 @@ function getFixedInputSwapQuote({
     assetOutID,
     assetOutAmount,
     swapFee: Number(swapFee),
-    rate
+    rate,
+    priceImpact
   };
 }
 
@@ -426,6 +438,14 @@ function getFixedOutputSwapQuote({
     convertFromBaseUnits(decimals.assetOut, Number(assetOutAmount)) /
     convertFromBaseUnits(decimals.assetIn, Number(assetInAmountPlusFee));
 
+  const swapPrice = 1 / rate;
+
+  const poolPrice =
+    convertFromBaseUnits(decimals.assetIn, Number(inputSupply)) /
+    convertFromBaseUnits(decimals.assetOut, Number(outputSupply));
+
+  const priceImpact = Math.abs(swapPrice / poolPrice - 1);
+
   return {
     round: reserves.round,
     assetInID,
@@ -433,7 +453,8 @@ function getFixedOutputSwapQuote({
     assetOutID: assetOut.assetID,
     assetOutAmount,
     swapFee: Number(swapFee),
-    rate
+    rate,
+    priceImpact
   };
 }
 

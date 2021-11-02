@@ -3,8 +3,8 @@ import algosdk, {Algodv2, Transaction} from "algosdk";
 import {VALIDATOR_APP_SCHEMA} from "./contracts";
 import {InitiatorSigner, SignerTransaction} from "./common-types";
 import {waitForTransaction} from "./util";
-import {ALGO_ASSET_ID, LIQUIDITY_TOKEN_UNIT_NAME} from "./constant";
 import TinymanError from "./error/TinymanError";
+import {ALGO_ASSET_ID, LIQUIDITY_TOKEN_UNIT_NAME} from "./asset/assetConstants";
 
 const BOOTSTRAP_ENCODED = Uint8Array.from([98, 111, 111, 116, 115, 116, 114, 97, 112]); // 'bootstrap'
 

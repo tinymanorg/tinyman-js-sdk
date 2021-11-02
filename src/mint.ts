@@ -9,14 +9,14 @@ import {
 import {
   MINIMUM_LIQUIDITY,
   PoolInfo,
-  getPoolReserves,
   getAccountExcess,
   getPoolShare,
   PoolReserves
 } from "./pool";
 import {InitiatorSigner, SignerTransaction} from "./common-types";
-import {ALGO_ASSET_ID, DEFAULT_FEE_TXN_NOTE} from "./constant";
 import TinymanError from "./error/TinymanError";
+import {DEFAULT_FEE_TXN_NOTE} from "./constant";
+import {ALGO_ASSET_ID} from "./asset/assetConstants";
 
 /** An object containing information about a mint quote. */
 export interface MintQuote {

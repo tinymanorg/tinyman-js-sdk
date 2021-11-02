@@ -65,9 +65,7 @@ export {
 } from "./redeem";
 export {
   applySlippageToAmount,
-  generateOptIntoAssetTxns,
   ASSET_OPT_IN_PROCESS_TXN_COUNT,
-  getAssetInformationById,
   convertFromBaseUnits,
   convertToBaseUnits,
   sendAndWaitRawTransaction,
@@ -75,14 +73,14 @@ export {
   sumUpTxnFees
 } from "./util";
 export {
-  AccountAsset,
-  InitiatorSigner,
-  TinymanAnalyticsApiAsset,
-  SignerTransaction
-} from "./common-types";
+  generateOptIntoAssetTxns,
+  getAssetInformationById,
+  isNFT
+} from "./asset/assetUtils";
+export {AccountAsset, TinymanAnalyticsApiAsset} from "./asset/assetModels";
+export {ALGO_ASSET, ALGO_ASSET_ID} from "./asset/assetConstants";
+export {InitiatorSigner, SignerTransaction} from "./common-types";
 export {
-  ALGO_ASSET,
-  ALGO_ASSET_ID,
   BASE_MINIMUM_BALANCE,
   MINIMUM_BALANCE_REQUIRED_PER_ASSET,
   MINIMUM_BALANCE_REQUIRED_PER_APP,

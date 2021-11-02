@@ -8,6 +8,7 @@ const algosdk_1 = __importDefault(require("algosdk"));
 const util_1 = require("./util");
 const pool_1 = require("./pool");
 const constant_1 = require("./constant");
+const assetConstants_1 = require("./asset/assetConstants");
 // FEE = %0.3 or 3/1000
 const FEE_NUMERATOR = 3n;
 const FEE_DENOMINATOR = 1000n;
@@ -54,7 +55,7 @@ async function generateSwapTransactions({ client, pool, swapType, assetIn, asset
         appIndex: pool.validatorAppID,
         appArgs: validatorAppCallArgs,
         accounts: [initiatorAddr],
-        foreignAssets: pool.asset2ID == constant_1.ALGO_ASSET_ID
+        foreignAssets: pool.asset2ID == assetConstants_1.ALGO_ASSET_ID
             ? [pool.asset1ID, pool.liquidityTokenID]
             : [pool.asset1ID, pool.asset2ID, pool.liquidityTokenID],
         suggestedParams
@@ -63,7 +64,7 @@ async function generateSwapTransactions({ client, pool, swapType, assetIn, asset
         ? util_1.applySlippageToAmount("positive", slippage, assetIn.amount)
         : assetIn.amount;
     let assetInTxn;
-    if (assetIn.assetID === constant_1.ALGO_ASSET_ID) {
+    if (assetIn.assetID === assetConstants_1.ALGO_ASSET_ID) {
         assetInTxn = algosdk_1.default.makePaymentTxnWithSuggestedParamsFromObject({
             from: initiatorAddr,
             to: pool.addr,
@@ -84,7 +85,7 @@ async function generateSwapTransactions({ client, pool, swapType, assetIn, asset
         ? util_1.applySlippageToAmount("negative", slippage, assetOut.amount)
         : assetOut.amount;
     let assetOutTxn;
-    if (assetOut.assetID === constant_1.ALGO_ASSET_ID) {
+    if (assetOut.assetID === assetConstants_1.ALGO_ASSET_ID) {
         assetOutTxn = algosdk_1.default.makePaymentTxnWithSuggestedParamsFromObject({
             from: pool.addr,
             to: initiatorAddr,
@@ -156,6 +157,10 @@ function getFixedInputSwapQuote({ pool, reserves, assetIn, decimals }) {
     }
     const rate = util_1.convertFromBaseUnits(decimals.assetOut, Number(assetOutAmount)) /
         util_1.convertFromBaseUnits(decimals.assetIn, Number(assetInAmount));
+    const swapPrice = 1 / rate;
+    const poolPrice = util_1.convertFromBaseUnits(decimals.assetIn, Number(inputSupply)) /
+        util_1.convertFromBaseUnits(decimals.assetOut, Number(outputSupply));
+    const priceImpact = Math.abs(swapPrice / poolPrice - 1);
     return {
         round: reserves.round,
         assetInID: assetIn.assetID,
@@ -163,7 +168,8 @@ function getFixedInputSwapQuote({ pool, reserves, assetIn, decimals }) {
         assetOutID,
         assetOutAmount,
         swapFee: Number(swapFee),
-        rate
+        rate,
+        priceImpact
     };
 }
 /**
@@ -255,6 +261,10 @@ function getFixedOutputSwapQuote({ pool, reserves, assetOut, decimals }) {
     const assetInAmountPlusFee = assetInAmount + swapFee;
     const rate = util_1.convertFromBaseUnits(decimals.assetOut, Number(assetOutAmount)) /
         util_1.convertFromBaseUnits(decimals.assetIn, Number(assetInAmountPlusFee));
+    const swapPrice = 1 / rate;
+    const poolPrice = util_1.convertFromBaseUnits(decimals.assetIn, Number(inputSupply)) /
+        util_1.convertFromBaseUnits(decimals.assetOut, Number(outputSupply));
+    const priceImpact = Math.abs(swapPrice / poolPrice - 1);
     return {
         round: reserves.round,
         assetInID,
@@ -262,7 +272,8 @@ function getFixedOutputSwapQuote({ pool, reserves, assetOut, decimals }) {
         assetOutID: assetOut.assetID,
         assetOutAmount,
         swapFee: Number(swapFee),
-        rate
+        rate,
+        priceImpact
     };
 }
 /**
@@ -371,11 +382,11 @@ async function fixedOutputSwap({ client, pool, signedTxns, assetIn, assetOut, in
  */
 async function issueSwap({ client, pool, swapType, txGroup, signedTxns, initiatorAddr }) {
     const assetIn = {
-        assetID: txGroup[SwapTxnGroupIndices.ASSET_IN_TXN_INDEX].txn.assetIndex || constant_1.ALGO_ASSET_ID,
+        assetID: txGroup[SwapTxnGroupIndices.ASSET_IN_TXN_INDEX].txn.assetIndex || assetConstants_1.ALGO_ASSET_ID,
         amount: txGroup[SwapTxnGroupIndices.ASSET_IN_TXN_INDEX].txn.amount
     };
     const assetOut = {
-        assetID: txGroup[SwapTxnGroupIndices.ASSET_OUT_TXN_INDEX].txn.assetIndex || constant_1.ALGO_ASSET_ID,
+        assetID: txGroup[SwapTxnGroupIndices.ASSET_OUT_TXN_INDEX].txn.assetIndex || assetConstants_1.ALGO_ASSET_ID,
         amount: txGroup[SwapTxnGroupIndices.ASSET_OUT_TXN_INDEX].txn.amount
     };
     let swapData;

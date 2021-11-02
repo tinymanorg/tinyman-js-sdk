@@ -8,6 +8,7 @@ const algosdk_1 = __importDefault(require("algosdk"));
 const util_1 = require("./util");
 const pool_1 = require("./pool");
 const constant_1 = require("./constant");
+const assetConstants_1 = require("./asset/assetConstants");
 var BurnTxnIndices;
 (function (BurnTxnIndices) {
     BurnTxnIndices[BurnTxnIndices["FEE_TXN"] = 0] = "FEE_TXN";
@@ -50,7 +51,7 @@ async function generateBurnTxns({ client, pool, liquidityIn, asset1Out, asset2Ou
         appIndex: pool.validatorAppID,
         appArgs: [BURN_ENCODED],
         accounts: [initiatorAddr],
-        foreignAssets: pool.asset2ID == constant_1.ALGO_ASSET_ID
+        foreignAssets: pool.asset2ID == assetConstants_1.ALGO_ASSET_ID
             ? [pool.asset1ID, pool.liquidityTokenID]
             : [pool.asset1ID, pool.asset2ID, pool.liquidityTokenID],
         suggestedParams
@@ -65,7 +66,7 @@ async function generateBurnTxns({ client, pool, liquidityIn, asset1Out, asset2Ou
     });
     const asset2OutAmount = util_1.applySlippageToAmount("negative", slippage, asset2Out);
     let asset2OutTxn;
-    if (pool.asset2ID === constant_1.ALGO_ASSET_ID) {
+    if (pool.asset2ID === assetConstants_1.ALGO_ASSET_ID) {
         asset2OutTxn = algosdk_1.default.makePaymentTxnWithSuggestedParamsFromObject({
             from: pool.addr,
             to: initiatorAddr,
