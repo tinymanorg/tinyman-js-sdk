@@ -1,6 +1,10 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getIndexerBaseURLForNetwork = exports.getTxnGroupID = exports.sumUpTxnFees = exports.sendAndWaitRawTransaction = exports.convertToBaseUnits = exports.convertFromBaseUnits = exports.bufferToBase64 = exports.ASSET_OPT_IN_PROCESS_TXN_COUNT = exports.applySlippageToAmount = exports.waitForTransaction = exports.getMinBalanceForAccount = exports.joinUint8Arrays = exports.decodeState = void 0;
+const TinymanError_1 = __importDefault(require("./error/TinymanError"));
 function decodeState(stateArray = []) {
     const state = {};
     for (const pair of stateArray) {
@@ -135,17 +139,22 @@ function roundNumber({ decimalPlaces = 0 }, x) {
  * @returns Confirmed round and txnID
  */
 async function sendAndWaitRawTransaction(client, signedTxnGroups) {
-    let networkResponse = [];
-    for (let signedTxnGroup of signedTxnGroups) {
-        const { txId } = await client.sendRawTransaction(signedTxnGroup).do();
-        const status = await waitForTransaction(client, txId);
-        const confirmedRound = status["confirmed-round"];
-        networkResponse.push({
-            confirmedRound,
-            txnID: txId
-        });
+    try {
+        let networkResponse = [];
+        for (let signedTxnGroup of signedTxnGroups) {
+            const { txId } = await client.sendRawTransaction(signedTxnGroup).do();
+            const status = await waitForTransaction(client, txId);
+            const confirmedRound = status["confirmed-round"];
+            networkResponse.push({
+                confirmedRound,
+                txnID: txId
+            });
+        }
+        return networkResponse;
     }
-    return networkResponse;
+    catch (error) {
+        throw new TinymanError_1.default(error, "We encountered an error while processing this transaction. Try again later.");
+    }
 }
 exports.sendAndWaitRawTransaction = sendAndWaitRawTransaction;
 function sumUpTxnFees(txns) {

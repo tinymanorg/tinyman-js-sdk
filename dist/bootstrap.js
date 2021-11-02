@@ -7,6 +7,7 @@ exports.doBootstrap = exports.signBootstrapTransactions = exports.generateBootst
 const algosdk_1 = __importDefault(require("algosdk"));
 const contracts_1 = require("./contracts");
 const util_1 = require("./util");
+const TinymanError_1 = __importDefault(require("./error/TinymanError"));
 const assetConstants_1 = require("./asset/assetConstants");
 const BOOTSTRAP_ENCODED = Uint8Array.from([98, 111, 111, 116, 115, 116, 114, 97, 112]); // 'bootstrap'
 var BootstapTxnGroupIndices;
@@ -123,20 +124,17 @@ exports.signBootstrapTransactions = signBootstrapTransactions;
 async function doBootstrap({ client, signedTxns, txnIDs }) {
     try {
         await client.sendRawTransaction(signedTxns).do();
-    }
-    catch (err) {
-        if (err.response) {
-            throw new Error(`Response ${err.response.status}: ${err.response.text}\nTxIDs are: ${txnIDs}`);
+        const assetCreationResult = await util_1.waitForTransaction(client, txnIDs[BootstapTxnGroupIndices.LIQUIDITY_TOKEN_CREATE]);
+        const liquidityTokenID = assetCreationResult["asset-index"];
+        if (typeof liquidityTokenID !== "number") {
+            throw new Error(`Generated ID is not valid: got ${liquidityTokenID}`);
         }
-        throw err;
+        return {
+            liquidityTokenID
+        };
     }
-    const assetCreationResult = await util_1.waitForTransaction(client, txnIDs[BootstapTxnGroupIndices.LIQUIDITY_TOKEN_CREATE]);
-    const liquidityTokenID = assetCreationResult["asset-index"];
-    if (typeof liquidityTokenID !== "number") {
-        throw new Error(`Generated ID is not valid: got ${liquidityTokenID}`);
+    catch (error) {
+        throw new TinymanError_1.default(error, "We encountered something unexpected while bootstraping the pool. Try again later.");
     }
-    return {
-        liquidityTokenID
-    };
 }
 exports.doBootstrap = doBootstrap;

@@ -7,6 +7,7 @@ exports.mintLiquidity = exports.signMintTxns = exports.generateMintTxns = export
 const algosdk_1 = __importDefault(require("algosdk"));
 const util_1 = require("./util");
 const pool_1 = require("./pool");
+const TinymanError_1 = __importDefault(require("./error/TinymanError"));
 const constant_1 = require("./constant");
 const assetConstants_1 = require("./asset/assetConstants");
 var MintTxnIndices;
@@ -181,35 +182,46 @@ exports.signMintTxns = signMintTxns;
  *   account.
  */
 async function mintLiquidity({ client, pool, txGroup, signedTxns, initiatorAddr }) {
-    const liquidityOutAmount = BigInt(txGroup[MintTxnIndices.LIQUDITY_OUT_TXN].txn.amount);
-    const prevExcessAssets = await pool_1.getAccountExcess({
-        client,
-        pool,
-        accountAddr: initiatorAddr
-    });
-    const [{ confirmedRound, txnID }] = await util_1.sendAndWaitRawTransaction(client, [signedTxns]);
-    const fees = util_1.sumUpTxnFees(txGroup);
-    const groupID = util_1.getTxnGroupID(txGroup);
-    const excessAssets = await pool_1.getAccountExcess({
-        client,
-        pool,
-        accountAddr: initiatorAddr
-    });
-    let excessAmountDelta = excessAssets.excessLiquidityTokens - prevExcessAssets.excessLiquidityTokens;
-    if (excessAmountDelta < 0n) {
-        excessAmountDelta = 0n;
+    try {
+        const liquidityOutAmount = BigInt(txGroup[MintTxnIndices.LIQUDITY_OUT_TXN].txn.amount);
+        const prevExcessAssets = await pool_1.getAccountExcess({
+            client,
+            pool,
+            accountAddr: initiatorAddr
+        });
+        const [{ confirmedRound, txnID }] = await util_1.sendAndWaitRawTransaction(client, [
+            signedTxns
+        ]);
+        const fees = util_1.sumUpTxnFees(txGroup);
+        const groupID = util_1.getTxnGroupID(txGroup);
+        const excessAssets = await pool_1.getAccountExcess({
+            client,
+            pool,
+            accountAddr: initiatorAddr
+        });
+        let excessAmountDelta = excessAssets.excessLiquidityTokens - prevExcessAssets.excessLiquidityTokens;
+        if (excessAmountDelta < 0n) {
+            excessAmountDelta = 0n;
+        }
+        return {
+            round: confirmedRound,
+            fees,
+            liquidityID: pool.liquidityTokenID,
+            liquidityOut: liquidityOutAmount + excessAmountDelta,
+            excessAmount: {
+                excessAmountForMinting: excessAmountDelta,
+                totalExcessAmount: excessAssets.excessLiquidityTokens
+            },
+            txnID,
+            groupID
+        };
     }
-    return {
-        round: confirmedRound,
-        fees,
-        liquidityID: pool.liquidityTokenID,
-        liquidityOut: liquidityOutAmount + excessAmountDelta,
-        excessAmount: {
-            excessAmountForMinting: excessAmountDelta,
-            totalExcessAmount: excessAssets.excessLiquidityTokens
-        },
-        txnID,
-        groupID
-    };
+    catch (error) {
+        const parsedError = new TinymanError_1.default(error, "We encountered something unexpected while minting liquidity. Try again later.");
+        if (parsedError.type === "SlippageTolerance") {
+            parsedError.setMessage("Minting failed due to too much slippage in the price. Please adjust the slippage tolerance and try again.");
+        }
+        throw parsedError;
+    }
 }
 exports.mintLiquidity = mintLiquidity;

@@ -7,6 +7,7 @@ exports.issueSwap = exports.getSwapQuote = exports.generateSwapTransactions = ex
 const algosdk_1 = __importDefault(require("algosdk"));
 const util_1 = require("./util");
 const pool_1 = require("./pool");
+const TinymanError_1 = __importDefault(require("./error/TinymanError"));
 const constant_1 = require("./constant");
 const assetConstants_1 = require("./asset/assetConstants");
 // FEE = %0.3 or 3/1000
@@ -381,35 +382,44 @@ async function fixedOutputSwap({ client, pool, signedTxns, assetIn, assetOut, in
  * @param params.initiatorAddr The address of the account performing the swap operation.
  */
 async function issueSwap({ client, pool, swapType, txGroup, signedTxns, initiatorAddr }) {
-    const assetIn = {
-        assetID: txGroup[SwapTxnGroupIndices.ASSET_IN_TXN_INDEX].txn.assetIndex || assetConstants_1.ALGO_ASSET_ID,
-        amount: txGroup[SwapTxnGroupIndices.ASSET_IN_TXN_INDEX].txn.amount
-    };
-    const assetOut = {
-        assetID: txGroup[SwapTxnGroupIndices.ASSET_OUT_TXN_INDEX].txn.assetIndex || assetConstants_1.ALGO_ASSET_ID,
-        amount: txGroup[SwapTxnGroupIndices.ASSET_OUT_TXN_INDEX].txn.amount
-    };
-    let swapData;
-    if (swapType === SwapType.FixedInput) {
-        swapData = await fixedInputSwap({
-            client,
-            pool,
-            signedTxns,
-            assetIn,
-            assetOut,
-            initiatorAddr
-        });
+    try {
+        const assetIn = {
+            assetID: txGroup[SwapTxnGroupIndices.ASSET_IN_TXN_INDEX].txn.assetIndex || assetConstants_1.ALGO_ASSET_ID,
+            amount: txGroup[SwapTxnGroupIndices.ASSET_IN_TXN_INDEX].txn.amount
+        };
+        const assetOut = {
+            assetID: txGroup[SwapTxnGroupIndices.ASSET_OUT_TXN_INDEX].txn.assetIndex || assetConstants_1.ALGO_ASSET_ID,
+            amount: txGroup[SwapTxnGroupIndices.ASSET_OUT_TXN_INDEX].txn.amount
+        };
+        let swapData;
+        if (swapType === SwapType.FixedInput) {
+            swapData = await fixedInputSwap({
+                client,
+                pool,
+                signedTxns,
+                assetIn,
+                assetOut,
+                initiatorAddr
+            });
+        }
+        else {
+            swapData = await fixedOutputSwap({
+                client,
+                pool,
+                signedTxns,
+                assetIn,
+                assetOut,
+                initiatorAddr
+            });
+        }
+        return { ...swapData, groupID: util_1.getTxnGroupID(txGroup), fees: util_1.sumUpTxnFees(txGroup) };
     }
-    else {
-        swapData = await fixedOutputSwap({
-            client,
-            pool,
-            signedTxns,
-            assetIn,
-            assetOut,
-            initiatorAddr
-        });
+    catch (error) {
+        const parsedError = new TinymanError_1.default(error, "We encountered something unexpected while swapping. Try again later.");
+        if (parsedError.type === "SlippageTolerance") {
+            parsedError.setMessage("The swap failed due to too much slippage in the price. Please adjust the slippage tolerance and try again.");
+        }
+        throw parsedError;
     }
-    return { ...swapData, groupID: util_1.getTxnGroupID(txGroup), fees: util_1.sumUpTxnFees(txGroup) };
 }
 exports.issueSwap = issueSwap;

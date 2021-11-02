@@ -8,16 +8,22 @@ const algosdk_1 = __importDefault(require("algosdk"));
 const assetConstants_1 = require("./assetConstants");
 const util_1 = require("../util");
 const WebStorage_1 = __importDefault(require("../web-storage/WebStorage"));
+const TinymanError_1 = __importDefault(require("../error/TinymanError"));
 async function generateOptIntoAssetTxns({ client, assetID, initiatorAddr }) {
-    const suggestedParams = await client.getTransactionParams().do();
-    const optInTxn = algosdk_1.default.makeAssetTransferTxnWithSuggestedParamsFromObject({
-        from: initiatorAddr,
-        to: initiatorAddr,
-        assetIndex: assetID,
-        amount: 0,
-        suggestedParams
-    });
-    return [{ txn: optInTxn, signers: [initiatorAddr] }];
+    try {
+        const suggestedParams = await client.getTransactionParams().do();
+        const optInTxn = algosdk_1.default.makeAssetTransferTxnWithSuggestedParamsFromObject({
+            from: initiatorAddr,
+            to: initiatorAddr,
+            assetIndex: assetID,
+            amount: 0,
+            suggestedParams
+        });
+        return [{ txn: optInTxn, signers: [initiatorAddr] }];
+    }
+    catch (error) {
+        throw new TinymanError_1.default(error, "We encountered something unexpected while opting into this asset. Try again later.");
+    }
 }
 exports.generateOptIntoAssetTxns = generateOptIntoAssetTxns;
 /**
