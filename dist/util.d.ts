@@ -32,6 +32,20 @@ export declare function convertToBaseUnits(
   quantity: number | bigint
 ): number;
 /**
+ * Rounds a number up to the provided decimal places limit
+ * @param {Object} options -
+ * @param {number} x -
+ * @returns {number} Rounded number
+ */
+export declare function roundNumber(
+  {
+    decimalPlaces
+  }: {
+    decimalPlaces?: number | undefined;
+  },
+  x: number
+): number;
+/**
  * @param client - An Algodv2 client.
  * @param signedTxns - Signed txns to send
  * @param txnFees - Total transaction fees

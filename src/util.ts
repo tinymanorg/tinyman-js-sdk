@@ -159,7 +159,7 @@ export function convertToBaseUnits(
  * @param {number} x -
  * @returns {number} Rounded number
  */
-function roundNumber({decimalPlaces = 0}, x: number): number {
+export function roundNumber({decimalPlaces = 0}, x: number): number {
   // eslint-disable-next-line prefer-template
   return Number(Math.round(Number(x + `e+${decimalPlaces}`)) + `e-${decimalPlaces}`);
 }
