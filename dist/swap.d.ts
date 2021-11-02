@@ -21,6 +21,8 @@ export interface SwapQuote {
   swapFee: number;
   /** The final exchange rate for this swap expressed as  assetOutAmount / assetInAmount */
   rate: number;
+  /** The price impact of the swap */
+  priceImpact: number;
 }
 /** An object containing information about a successfully executed swap. */
 export interface SwapExecution {
