@@ -30,14 +30,6 @@ function calculateAccountMinimumRequiredBalance(account) {
         constant_1.MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE *
             ((totalSchema && totalSchema["num-uint"]) || 0) +
         constant_1.MINIMUM_BALANCE_REQUIRED_PER_EXTRA_APP_PAGE * (account["apps-total-extra-pages"] || 0));
-    // const minBalance =
-    //   100000 + // min account balance 
-    //   100000 + // min balance to create asset
-    //   100000 + // fee + min balance to opt into asset 1
-    //   (asset2Optin ? 100000 : 0) + // min balance to opt into asset 2
-    //   100000 +
-    //   (25000 + 3500) * VALIDATOR_APP_SCHEMA.numLocalInts +
-    //   (25000 + 25000) * VALIDATOR_APP_SCHEMA.numLocalByteSlices; // min balance to opt into validator app
 }
 exports.calculateAccountMinimumRequiredBalance = calculateAccountMinimumRequiredBalance;
 function hasSufficientMinimumBalance(accountData) {
