@@ -2,7 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const ALGOSDK_ERROR_MESSAGE_KEYWORDS = {
     SLIPPAGE_TOLERANCE_ERROR_INDICATOR: "- would result negative",
-    LOGIC_ERROR_INDICATOR: "logic eval error:"
+    LOGIC_ERROR_INDICATOR: "logic eval error:",
+    TRANSACTION_ERROR_INDICATOR: /transaction \w+:/
 };
 class TinymanError extends Error {
     constructor(data, defaultMessage, ...args) {
@@ -23,6 +24,9 @@ class TinymanError extends Error {
         else if (algoSDKMessage.includes(ALGOSDK_ERROR_MESSAGE_KEYWORDS.LOGIC_ERROR_INDICATOR)) {
             type = "LogicError";
         }
+        else if (algoSDKMessage.match(ALGOSDK_ERROR_MESSAGE_KEYWORDS.TRANSACTION_ERROR_INDICATOR)) {
+            type = "TransactionError";
+        }
         return type;
     }
     getErrorMessage(algoSDKMessage, type, defaultMessage) {
@@ -34,6 +38,9 @@ class TinymanError extends Error {
                 break;
             case "LogicError":
                 message = algoSDKMessage.split(ALGOSDK_ERROR_MESSAGE_KEYWORDS.LOGIC_ERROR_INDICATOR)[1];
+                break;
+            case "TransactionError":
+                message = algoSDKMessage.split(ALGOSDK_ERROR_MESSAGE_KEYWORDS.TRANSACTION_ERROR_INDICATOR)[1];
                 break;
             case "Unknown":
                 if (algoSDKMessage) {

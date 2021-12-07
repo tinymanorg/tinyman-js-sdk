@@ -25,7 +25,8 @@ export {
 export {
   generateBootstrapTransactions,
   signBootstrapTransactions,
-  getBootstrapProcessTxnCount
+  getBootstrapProcessTxnCount,
+  calculatePoolBootstrapFundingTxnAmount
 } from "./bootstrap";
 
 export {

@@ -5,6 +5,13 @@ import {InitiatorSigner, SignerTransaction} from "./common-types";
 import {waitForTransaction} from "./util";
 import TinymanError from "./error/TinymanError";
 import {ALGO_ASSET_ID, LIQUIDITY_TOKEN_UNIT_NAME} from "./asset/assetConstants";
+import {
+  BASE_MINIMUM_BALANCE,
+  MINIMUM_BALANCE_REQUIRED_PER_APP,
+  MINIMUM_BALANCE_REQUIRED_PER_ASSET,
+  MINIMUM_BALANCE_REQUIRED_PER_BYTE_SCHEMA,
+  MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE
+} from "./constant";
 
 const BOOTSTRAP_ENCODED = Uint8Array.from([98, 111, 111, 116, 115, 116, 114, 97, 112]); // 'bootstrap'
 
@@ -19,6 +26,33 @@ enum BootstapTxnGroupIndices {
 export function getBootstrapProcessTxnCount(asset2ID: number) {
   // IF asset2 is ALGO, there won't be `asset2Optin` txn within the bootstrap txn group
   return ALGO_ASSET_ID === asset2ID ? 4 : 5;
+}
+
+export function calculatePoolBootstrapFundingTxnAmount(
+  asset2ID: number,
+  fees: {
+    liquidityTokenCreateTxn: number;
+    asset1OptinTxn: number;
+    asset2OptinTxn: number;
+    validatorAppCallTxn: number;
+  }
+) {
+  const poolAccountMinBalance =
+    BASE_MINIMUM_BALANCE +
+    MINIMUM_BALANCE_REQUIRED_PER_ASSET + // min balance to create asset
+    MINIMUM_BALANCE_REQUIRED_PER_ASSET + // fee + min balance to opt into asset 1
+    (asset2ID === 0 ? 0 : MINIMUM_BALANCE_REQUIRED_PER_ASSET) + // min balance to opt into asset 2
+    MINIMUM_BALANCE_REQUIRED_PER_APP + // min balance to opt into validator app
+    MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE * VALIDATOR_APP_SCHEMA.numLocalInts +
+    MINIMUM_BALANCE_REQUIRED_PER_BYTE_SCHEMA * VALIDATOR_APP_SCHEMA.numLocalByteSlices;
+
+  return (
+    poolAccountMinBalance +
+    fees.liquidityTokenCreateTxn +
+    fees.asset1OptinTxn +
+    fees.asset2OptinTxn +
+    fees.validatorAppCallTxn
+  );
 }
 
 export async function generateBootstrapTransactions({
@@ -86,26 +120,15 @@ export async function generateBootstrapTransactions({
           suggestedParams
         });
 
-  const minBalance =
-    100000 + // min account balance
-    100000 + // min balance to create asset
-    100000 + // fee + min balance to opt into asset 1
-    (asset2Optin ? 100000 : 0) + // min balance to opt into asset 2
-    100000 +
-    (25000 + 3500) * VALIDATOR_APP_SCHEMA.numLocalInts +
-    (25000 + 25000) * VALIDATOR_APP_SCHEMA.numLocalByteSlices; // min balance to opt into validator app
-
-  const fundingAmount =
-    minBalance +
-    liquidityTokenCreateTxn.fee +
-    asset1Optin.fee +
-    (asset2Optin ? asset2Optin.fee : 0) +
-    validatorAppCallTxn.fee;
-
   const fundingTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
     from: initiatorAddr,
     to: poolLogicSig.addr,
-    amount: fundingAmount,
+    amount: calculatePoolBootstrapFundingTxnAmount(asset2ID, {
+      liquidityTokenCreateTxn: liquidityTokenCreateTxn.fee,
+      asset1OptinTxn: asset1Optin.fee,
+      asset2OptinTxn: asset2Optin ? asset2Optin.fee : 0,
+      validatorAppCallTxn: validatorAppCallTxn.fee
+    }),
     suggestedParams
   });
 

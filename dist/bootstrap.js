@@ -3,12 +3,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.doBootstrap = exports.signBootstrapTransactions = exports.generateBootstrapTransactions = exports.getBootstrapProcessTxnCount = void 0;
+exports.doBootstrap = exports.signBootstrapTransactions = exports.generateBootstrapTransactions = exports.calculatePoolBootstrapFundingTxnAmount = exports.getBootstrapProcessTxnCount = void 0;
 const algosdk_1 = __importDefault(require("algosdk"));
 const contracts_1 = require("./contracts");
 const util_1 = require("./util");
 const TinymanError_1 = __importDefault(require("./error/TinymanError"));
 const assetConstants_1 = require("./asset/assetConstants");
+const constant_1 = require("./constant");
 const BOOTSTRAP_ENCODED = Uint8Array.from([98, 111, 111, 116, 115, 116, 114, 97, 112]); // 'bootstrap'
 var BootstapTxnGroupIndices;
 (function (BootstapTxnGroupIndices) {
@@ -23,6 +24,21 @@ function getBootstrapProcessTxnCount(asset2ID) {
     return assetConstants_1.ALGO_ASSET_ID === asset2ID ? 4 : 5;
 }
 exports.getBootstrapProcessTxnCount = getBootstrapProcessTxnCount;
+function calculatePoolBootstrapFundingTxnAmount(asset2ID, fees) {
+    const poolAccountMinBalance = constant_1.BASE_MINIMUM_BALANCE +
+        constant_1.MINIMUM_BALANCE_REQUIRED_PER_ASSET + // min balance to create asset
+        constant_1.MINIMUM_BALANCE_REQUIRED_PER_ASSET + // fee + min balance to opt into asset 1
+        (asset2ID === 0 ? 0 : constant_1.MINIMUM_BALANCE_REQUIRED_PER_ASSET) + // min balance to opt into asset 2
+        constant_1.MINIMUM_BALANCE_REQUIRED_PER_APP + // min balance to opt into validator app
+        constant_1.MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE * contracts_1.VALIDATOR_APP_SCHEMA.numLocalInts +
+        constant_1.MINIMUM_BALANCE_REQUIRED_PER_BYTE_SCHEMA * contracts_1.VALIDATOR_APP_SCHEMA.numLocalByteSlices;
+    return (poolAccountMinBalance +
+        fees.liquidityTokenCreateTxn +
+        fees.asset1OptinTxn +
+        fees.asset2OptinTxn +
+        fees.validatorAppCallTxn);
+}
+exports.calculatePoolBootstrapFundingTxnAmount = calculatePoolBootstrapFundingTxnAmount;
 async function generateBootstrapTransactions({ client, poolLogicSig, validatorAppID, asset1ID, asset2ID, asset1UnitName, asset2UnitName, initiatorAddr }) {
     const suggestedParams = await client.getTransactionParams().do();
     const validatorAppCallTxn = algosdk_1.default.makeApplicationOptInTxnFromObject({
@@ -62,22 +78,15 @@ async function generateBootstrapTransactions({ client, poolLogicSig, validatorAp
             amount: 0,
             suggestedParams
         });
-    const minBalance = 100000 + // min account balance
-        100000 + // min balance to create asset
-        100000 + // fee + min balance to opt into asset 1
-        (asset2Optin ? 100000 : 0) + // min balance to opt into asset 2
-        100000 +
-        (25000 + 3500) * contracts_1.VALIDATOR_APP_SCHEMA.numLocalInts +
-        (25000 + 25000) * contracts_1.VALIDATOR_APP_SCHEMA.numLocalByteSlices; // min balance to opt into validator app
-    const fundingAmount = minBalance +
-        liquidityTokenCreateTxn.fee +
-        asset1Optin.fee +
-        (asset2Optin ? asset2Optin.fee : 0) +
-        validatorAppCallTxn.fee;
     const fundingTxn = algosdk_1.default.makePaymentTxnWithSuggestedParamsFromObject({
         from: initiatorAddr,
         to: poolLogicSig.addr,
-        amount: fundingAmount,
+        amount: calculatePoolBootstrapFundingTxnAmount(asset2ID, {
+            liquidityTokenCreateTxn: liquidityTokenCreateTxn.fee,
+            asset1OptinTxn: asset1Optin.fee,
+            asset2OptinTxn: asset2Optin ? asset2Optin.fee : 0,
+            validatorAppCallTxn: validatorAppCallTxn.fee
+        }),
         suggestedParams
     });
     let txns = [
