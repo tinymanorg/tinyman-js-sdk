@@ -5,7 +5,8 @@ import {
   convertFromBaseUnits,
   getTxnGroupID,
   sendAndWaitRawTransaction,
-  sumUpTxnFees
+  sumUpTxnFees,
+  roundNumber
 } from "./util";
 import {PoolInfo, getAccountExcess, PoolReserves} from "./pool";
 import {InitiatorSigner, SignerTransaction} from "./common-types";
@@ -287,7 +288,10 @@ function getFixedInputSwapQuote({
     convertFromBaseUnits(decimals.assetIn, Number(inputSupply)) /
     convertFromBaseUnits(decimals.assetOut, Number(outputSupply));
 
-  const priceImpact = Math.abs(swapPrice / poolPrice - 1);
+  const priceImpact = roundNumber(
+    {decimalPlaces: 5},
+    Math.abs(swapPrice / poolPrice - 1)
+  );
 
   return {
     round: reserves.round,
@@ -444,7 +448,10 @@ function getFixedOutputSwapQuote({
     convertFromBaseUnits(decimals.assetIn, Number(inputSupply)) /
     convertFromBaseUnits(decimals.assetOut, Number(outputSupply));
 
-  const priceImpact = Math.abs(swapPrice / poolPrice - 1);
+  const priceImpact = roundNumber(
+    {decimalPlaces: 5},
+    Math.abs(swapPrice / poolPrice - 1)
+  );
 
   return {
     round: reserves.round,
