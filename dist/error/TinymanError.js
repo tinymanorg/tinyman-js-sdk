@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const ALGOSDK_ERROR_MESSAGE_KEYWORDS = {
     SLIPPAGE_TOLERANCE_ERROR_INDICATOR: "- would result negative",
     LOGIC_ERROR_INDICATOR: "logic eval error:",
+    EXCEEDING_EXCESS_AMOUNT_COUNT_ERROR_INDICATOR: "exceeds schema integer count",
     TRANSACTION_ERROR_INDICATOR: /transaction \w+:/
 };
 class TinymanError extends Error {
@@ -21,6 +22,9 @@ class TinymanError extends Error {
         if (algoSDKMessage.includes(ALGOSDK_ERROR_MESSAGE_KEYWORDS.SLIPPAGE_TOLERANCE_ERROR_INDICATOR)) {
             type = "SlippageTolerance";
         }
+        else if (algoSDKMessage.includes(ALGOSDK_ERROR_MESSAGE_KEYWORDS.EXCEEDING_EXCESS_AMOUNT_COUNT_ERROR_INDICATOR)) {
+            type = "ExceedingExcessAmountCount";
+        }
         else if (algoSDKMessage.includes(ALGOSDK_ERROR_MESSAGE_KEYWORDS.LOGIC_ERROR_INDICATOR)) {
             type = "LogicError";
         }
@@ -35,6 +39,10 @@ class TinymanError extends Error {
             case "SlippageTolerance":
                 message =
                     "The process failed due to too much slippage in the price. Please adjust the slippage tolerance and try again.";
+                break;
+            case "ExceedingExcessAmountCount":
+                message =
+                    "The process failed due to the number of excess amounts accumulated for your account in the Tinyman app.";
                 break;
             case "LogicError":
                 message = algoSDKMessage.split(ALGOSDK_ERROR_MESSAGE_KEYWORDS.LOGIC_ERROR_INDICATOR)[1];
