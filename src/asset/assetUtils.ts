@@ -1,10 +1,10 @@
 import algosdk, {Indexer} from "algosdk";
 
-import {SignerTransaction, SupportedNetwork} from "../common-types";
+import {SignerTransaction} from "../common-types";
 import {IndexerAssetInformation, TinymanAnalyticsApiAsset} from "./assetModels";
 import {ALGO_ASSET_ID, ALGO_ASSET, CACHED_ASSETS} from "./assetConstants";
-import {getIndexerBaseURLForNetwork} from "../util";
 import WebStorage from "../web-storage/WebStorage";
+import {generateIndexerAssetInformationEndpointURL} from "../util";
 
 export async function generateOptIntoAssetTxns({
   client,
@@ -24,20 +24,21 @@ export async function generateOptIntoAssetTxns({
   return [{txn: optInTxn, signers: [initiatorAddr]}];
 }
 
+export interface GetAssetInformationByIdOptions {
+  alwaysFetch?: boolean;
+}
+
 /**
  * Fetches asset data and caches it in a Map.
- * @param network "mainnet" | "testnet" | "hiponet".
+ * @param indexer algosdk.indexer
  * @param {number} id - id of the asset
- * @param {boolean} alwaysFetch - Determines whether to always fetch the information of the asset or read it from the cache
+ * @param {boolean} options.alwaysFetch - Determines whether to always fetch the information of the asset or read it from the cache
  * @returns a promise that resolves with TinymanAnalyticsApiAsset
  */
 export function getAssetInformationById(
-  network: SupportedNetwork,
+  indexer: Indexer,
   id: number,
-  options?: {
-    alwaysFetch?: boolean;
-    indexer?: Indexer;
-  }
+  options?: GetAssetInformationByIdOptions
 ) {
   return new Promise<{asset: TinymanAnalyticsApiAsset; isDeleted: boolean}>(
     async (resolve, reject) => {
@@ -59,25 +60,23 @@ export function getAssetInformationById(
           return;
         }
 
-        let asset = {} as IndexerAssetInformation["asset"];
+        // @ts-ignore
+        const baseURL = `${indexer.c.baseURL.origin}/v2`;
+        // @ts-ignore
+        const indexerToken = indexer.c.tokenHeader["X-Indexer-API-Token"];
 
-        // see https://github.com/tinymanorg/tinyman-js-sdk/pull/47#discussion_r765561762
-        if (options?.indexer) {
-          const data = (await options.indexer
-            .lookupAssetByID(id)
-            .includeAll(true)
-            .do()) as IndexerAssetInformation;
-
-          asset = data.asset;
-        } else {
-          const response = await fetch(
-            `${getIndexerBaseURLForNetwork(network)}assets/${id}?include-all=true`
-          );
-          const {asset: fetchedAssetData} =
-            (await response.json()) as IndexerAssetInformation;
-
-          asset = fetchedAssetData;
-        }
+        const response = await fetch(
+          generateIndexerAssetInformationEndpointURL(baseURL, id),
+          {
+            headers: {
+              // @ts-ignore
+              ...indexer.c.defaultHeaders,
+              // @ts-ignore
+              ...(indexerToken ? indexer.c.tokenHeader : {})
+            }
+          }
+        );
+        const {asset} = (await response.json()) as IndexerAssetInformation;
 
         const assetData: TinymanAnalyticsApiAsset = {
           id: `${asset.index}`,

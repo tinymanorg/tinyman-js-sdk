@@ -12,7 +12,10 @@ import {InitiatorSigner, SignerTransaction, SupportedNetwork} from "./common-typ
 import {AccountInformation} from "./account/accountTypes";
 import {DEFAULT_FEE_TXN_NOTE} from "./constant";
 import {TinymanAnalyticsApiAsset} from "./asset/assetModels";
-import {getAssetInformationById} from "./asset/assetUtils";
+import {
+  getAssetInformationById,
+  GetAssetInformationByIdOptions
+} from "./asset/assetUtils";
 
 const REDEEM_ENCODED = Uint8Array.from([114, 101, 100, 101, 101, 109]); // 'redeem'
 
@@ -317,15 +320,15 @@ export interface ExcessAmountDataWithPoolAssetDetails {
 export async function getExcessAmountsWithPoolAssetDetails({
   client,
   indexer,
-  network,
   accountAddr,
-  validatorAppID
+  validatorAppID,
+  assetInformationHelperOptions
 }: {
   client: Algodv2;
   indexer: Indexer;
-  network: SupportedNetwork;
   accountAddr: string;
   validatorAppID: number;
+  assetInformationHelperOptions?: GetAssetInformationByIdOptions;
 }) {
   const excessData = await getExcessAmounts({client, accountAddr, validatorAppID});
   let excessDataWithDetail: ExcessAmountDataWithPoolAssetDetails[] = [];
@@ -345,15 +348,21 @@ export async function getExcessAmountsWithPoolAssetDetails({
         asset2ID: poolAssets.asset2ID
       });
       const assetDetails = await Promise.all([
-        getAssetInformationById(network, poolAssets.asset1ID, {
-          indexer
-        }),
-        getAssetInformationById(network, poolAssets.asset2ID, {
-          indexer
-        }),
-        getAssetInformationById(network, poolInfo.liquidityTokenID!, {
-          indexer
-        })
+        getAssetInformationById(
+          indexer,
+          poolAssets.asset1ID,
+          assetInformationHelperOptions
+        ),
+        getAssetInformationById(
+          indexer,
+          poolAssets.asset2ID,
+          assetInformationHelperOptions
+        ),
+        getAssetInformationById(
+          indexer,
+          poolInfo.liquidityTokenID!,
+          assetInformationHelperOptions
+        )
       ]);
       let excessAsset = assetDetails[0].asset;
 

@@ -6,7 +6,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.isNFT = exports.getAssetInformationById = exports.generateOptIntoAssetTxns = void 0;
 const algosdk_1 = __importDefault(require("algosdk"));
 const assetConstants_1 = require("./assetConstants");
-const util_1 = require("../util");
 const WebStorage_1 = __importDefault(require("../web-storage/WebStorage"));
 async function generateOptIntoAssetTxns({ client, assetID, initiatorAddr }) {
     const suggestedParams = await client.getTransactionParams().do();
@@ -22,12 +21,13 @@ async function generateOptIntoAssetTxns({ client, assetID, initiatorAddr }) {
 exports.generateOptIntoAssetTxns = generateOptIntoAssetTxns;
 /**
  * Fetches asset data and caches it in a Map.
- * @param network "mainnet" | "testnet" | "hiponet".
+ * @param indexer algosdk.indexer
  * @param {number} id - id of the asset
- * @param {boolean} alwaysFetch - Determines whether to always fetch the information of the asset or read it from the cache
+ * @param {boolean} options.alwaysFetch - Determines whether to always fetch the information of the asset or read it from the cache
+ * @param {boolean} options.customRequestURL - Uses this URL with Fetch API to fetch asset information
  * @returns a promise that resolves with TinymanAnalyticsApiAsset
  */
-function getAssetInformationById(network, id, options) {
+function getAssetInformationById(indexer, id, options) {
     return new Promise(async (resolve, reject) => {
         try {
             if (id === assetConstants_1.ALGO_ASSET_ID) {
@@ -43,18 +43,17 @@ function getAssetInformationById(network, id, options) {
                 return;
             }
             let asset = {};
-            // see https://github.com/tinymanorg/tinyman-js-sdk/pull/47#discussion_r765561762
-            if (options?.indexer) {
-                const data = (await options.indexer
+            if (options?.customRequestURL) {
+                const response = await fetch(options.customRequestURL);
+                const { asset: fetchedAssetData } = (await response.json());
+                asset = fetchedAssetData;
+            }
+            else {
+                const data = (await indexer
                     .lookupAssetByID(id)
                     .includeAll(true)
                     .do());
                 asset = data.asset;
-            }
-            else {
-                const response = await fetch(`${util_1.getIndexerBaseURLForNetwork(network)}assets/${id}?include-all=true`);
-                const { asset: fetchedAssetData } = (await response.json());
-                asset = fetchedAssetData;
             }
             const assetData = {
                 id: `${asset.index}`,
