@@ -1,4 +1,4 @@
-import algosdk, {Algodv2} from "algosdk";
+import algosdk, {Algodv2, Indexer} from "algosdk";
 import {toByteArray} from "base64-js";
 
 import {
@@ -316,11 +316,13 @@ export interface ExcessAmountDataWithPoolAssetDetails {
  */
 export async function getExcessAmountsWithPoolAssetDetails({
   client,
+  indexer,
   network,
   accountAddr,
   validatorAppID
 }: {
   client: Algodv2;
+  indexer: Indexer;
   network: SupportedNetwork;
   accountAddr: string;
   validatorAppID: number;
@@ -343,9 +345,15 @@ export async function getExcessAmountsWithPoolAssetDetails({
         asset2ID: poolAssets.asset2ID
       });
       const assetDetails = await Promise.all([
-        getAssetInformationById(network, poolAssets.asset1ID),
-        getAssetInformationById(network, poolAssets.asset2ID),
-        getAssetInformationById(network, poolInfo.liquidityTokenID!)
+        getAssetInformationById(network, poolAssets.asset1ID, {
+          indexer
+        }),
+        getAssetInformationById(network, poolAssets.asset2ID, {
+          indexer
+        }),
+        getAssetInformationById(network, poolInfo.liquidityTokenID!, {
+          indexer
+        })
       ]);
       let excessAsset = assetDetails[0].asset;
 

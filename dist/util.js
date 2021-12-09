@@ -161,10 +161,10 @@ function getIndexerBaseURLForNetwork(network) {
     let baseUrl;
     switch (network) {
         case "mainnet":
-            baseUrl = "https://indexer.algoexplorerapi.io/v2/";
+            baseUrl = "https://indexer-mainnet.aws.algodev.network/v2/";
             break;
         case "testnet":
-            baseUrl = "https://indexer.testnet.algoexplorerapi.io/v2/";
+            baseUrl = "https://indexer-testnet.aws.algodev.network/v2/";
             break;
         case "hiponet":
             baseUrl = "https://algorand-hiponet.hipolabs.com/indexer/";

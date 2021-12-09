@@ -1,3 +1,4 @@
+import {Indexer} from "algosdk";
 import {SignerTransaction, SupportedNetwork} from "../common-types";
 import {TinymanAnalyticsApiAsset} from "./assetModels";
 export declare function generateOptIntoAssetTxns({
@@ -19,7 +20,10 @@ export declare function generateOptIntoAssetTxns({
 export declare function getAssetInformationById(
   network: SupportedNetwork,
   id: number,
-  alwaysFetch?: boolean
+  options?: {
+    alwaysFetch?: boolean;
+    indexer?: Indexer;
+  }
 ): Promise<{
   asset: TinymanAnalyticsApiAsset;
   isDeleted: boolean;

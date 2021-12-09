@@ -1,4 +1,4 @@
-import {Algodv2} from "algosdk";
+import {Algodv2, Indexer} from "algosdk";
 import {PoolInfo} from "./pool";
 import {InitiatorSigner, SignerTransaction, SupportedNetwork} from "./common-types";
 import {TinymanAnalyticsApiAsset} from "./asset/assetModels";
@@ -115,11 +115,13 @@ export interface ExcessAmountDataWithPoolAssetDetails {
  */
 export declare function getExcessAmountsWithPoolAssetDetails({
   client,
+  indexer,
   network,
   accountAddr,
   validatorAppID
 }: {
   client: Algodv2;
+  indexer: Indexer;
   network: SupportedNetwork;
   accountAddr: string;
   validatorAppID: number;

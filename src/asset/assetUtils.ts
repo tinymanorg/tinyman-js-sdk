@@ -1,4 +1,4 @@
-import algosdk from "algosdk";
+import algosdk, {Indexer} from "algosdk";
 
 import {SignerTransaction, SupportedNetwork} from "../common-types";
 import {IndexerAssetInformation, TinymanAnalyticsApiAsset} from "./assetModels";
@@ -34,7 +34,10 @@ export async function generateOptIntoAssetTxns({
 export function getAssetInformationById(
   network: SupportedNetwork,
   id: number,
-  alwaysFetch?: boolean
+  options?: {
+    alwaysFetch?: boolean;
+    indexer?: Indexer;
+  }
 ) {
   return new Promise<{asset: TinymanAnalyticsApiAsset; isDeleted: boolean}>(
     async (resolve, reject) => {
@@ -50,16 +53,30 @@ export function getAssetInformationById(
           memoizedValue &&
           // invalidate cache for this asset if total_amount is not available in the cached data
           memoizedValue.asset.total_amount != null &&
-          !alwaysFetch
+          !options?.alwaysFetch
         ) {
           resolve(memoizedValue);
           return;
         }
 
-        const response = await fetch(
-          `${getIndexerBaseURLForNetwork(network)}/assets/${id}?include-all=true`
-        );
-        const {asset} = (await response.json()) as IndexerAssetInformation;
+        let asset = {} as IndexerAssetInformation["asset"];
+
+        if (options?.indexer) {
+          const data = (await options.indexer
+            .lookupAssetByID(id)
+            .includeAll(true)
+            .do()) as IndexerAssetInformation;
+
+          asset = data.asset;
+        } else {
+          const response = await fetch(
+            `${getIndexerBaseURLForNetwork(network)}assets/${id}?include-all=true`
+          );
+          const {asset: fetchedAssetData} =
+            (await response.json()) as IndexerAssetInformation;
+
+          asset = fetchedAssetData;
+        }
 
         const assetData: TinymanAnalyticsApiAsset = {
           id: `${asset.index}`,

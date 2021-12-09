@@ -27,7 +27,7 @@ exports.generateOptIntoAssetTxns = generateOptIntoAssetTxns;
  * @param {boolean} alwaysFetch - Determines whether to always fetch the information of the asset or read it from the cache
  * @returns a promise that resolves with TinymanAnalyticsApiAsset
  */
-function getAssetInformationById(network, id, alwaysFetch) {
+function getAssetInformationById(network, id, options) {
     return new Promise(async (resolve, reject) => {
         try {
             if (id === assetConstants_1.ALGO_ASSET_ID) {
@@ -38,12 +38,23 @@ function getAssetInformationById(network, id, alwaysFetch) {
             if (memoizedValue &&
                 // invalidate cache for this asset if total_amount is not available in the cached data
                 memoizedValue.asset.total_amount != null &&
-                !alwaysFetch) {
+                !options?.alwaysFetch) {
                 resolve(memoizedValue);
                 return;
             }
-            const response = await fetch(`${util_1.getIndexerBaseURLForNetwork(network)}/assets/${id}?include-all=true`);
-            const { asset } = (await response.json());
+            let asset = {};
+            if (options?.indexer) {
+                const data = (await options.indexer
+                    .lookupAssetByID(id)
+                    .includeAll(true)
+                    .do());
+                asset = data.asset;
+            }
+            else {
+                const response = await fetch(`${util_1.getIndexerBaseURLForNetwork(network)}assets/${id}?include-all=true`);
+                const { asset: fetchedAssetData } = (await response.json());
+                asset = fetchedAssetData;
+            }
             const assetData = {
                 id: `${asset.index}`,
                 decimals: Number(asset.params.decimals),
