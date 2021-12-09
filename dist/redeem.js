@@ -198,7 +198,7 @@ exports.getExcessAmounts = getExcessAmounts;
  * @param params.validatorAppID Validator APP ID
  * @returns List of excess amounts
  */
-async function getExcessAmountsWithPoolAssetDetails({ client, indexer, network, accountAddr, validatorAppID, assetInformationHelperOptions }) {
+async function getExcessAmountsWithPoolAssetDetails({ client, indexer, accountAddr, validatorAppID, assetInformationHelperOptions }) {
     const excessData = await getExcessAmounts({ client, accountAddr, validatorAppID });
     let excessDataWithDetail = [];
     for (let data of excessData) {

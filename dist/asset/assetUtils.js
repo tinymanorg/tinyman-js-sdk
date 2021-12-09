@@ -7,6 +7,7 @@ exports.isNFT = exports.getAssetInformationById = exports.generateOptIntoAssetTx
 const algosdk_1 = __importDefault(require("algosdk"));
 const assetConstants_1 = require("./assetConstants");
 const WebStorage_1 = __importDefault(require("../web-storage/WebStorage"));
+const util_1 = require("../util");
 async function generateOptIntoAssetTxns({ client, assetID, initiatorAddr }) {
     const suggestedParams = await client.getTransactionParams().do();
     const optInTxn = algosdk_1.default.makeAssetTransferTxnWithSuggestedParamsFromObject({
@@ -24,7 +25,6 @@ exports.generateOptIntoAssetTxns = generateOptIntoAssetTxns;
  * @param indexer algosdk.indexer
  * @param {number} id - id of the asset
  * @param {boolean} options.alwaysFetch - Determines whether to always fetch the information of the asset or read it from the cache
- * @param {boolean} options.customRequestURL - Uses this URL with Fetch API to fetch asset information
  * @returns a promise that resolves with TinymanAnalyticsApiAsset
  */
 function getAssetInformationById(indexer, id, options) {
@@ -42,19 +42,19 @@ function getAssetInformationById(indexer, id, options) {
                 resolve(memoizedValue);
                 return;
             }
-            let asset = {};
-            if (options?.customRequestURL) {
-                const response = await fetch(options.customRequestURL);
-                const { asset: fetchedAssetData } = (await response.json());
-                asset = fetchedAssetData;
-            }
-            else {
-                const data = (await indexer
-                    .lookupAssetByID(id)
-                    .includeAll(true)
-                    .do());
-                asset = data.asset;
-            }
+            // @ts-ignore
+            const baseURL = `${indexer.c.baseURL.origin}/v2`;
+            // @ts-ignore
+            const indexerToken = indexer.c.tokenHeader["X-Indexer-API-Token"];
+            const response = await fetch(util_1.generateIndexerAssetInformationEndpointURL(baseURL, id), {
+                headers: {
+                    // @ts-ignore
+                    ...indexer.c.defaultHeaders,
+                    // @ts-ignore
+                    ...(indexerToken ? indexer.c.tokenHeader : {})
+                }
+            });
+            const { asset } = (await response.json());
             const assetData = {
                 id: `${asset.index}`,
                 decimals: Number(asset.params.decimals),

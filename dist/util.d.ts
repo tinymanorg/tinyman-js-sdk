@@ -63,3 +63,7 @@ export declare function sendAndWaitRawTransaction(
 >;
 export declare function sumUpTxnFees(txns: SignerTransaction[]): number;
 export declare function getTxnGroupID(txns: SignerTransaction[]): string;
+export declare function generateIndexerAssetInformationEndpointURL(
+  baseURL: string,
+  assetId: string | number
+): string;

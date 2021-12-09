@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getTxnGroupID = exports.sumUpTxnFees = exports.sendAndWaitRawTransaction = exports.roundNumber = exports.convertToBaseUnits = exports.convertFromBaseUnits = exports.bufferToBase64 = exports.ASSET_OPT_IN_PROCESS_TXN_COUNT = exports.applySlippageToAmount = exports.waitForTransaction = exports.getMinBalanceForAccount = exports.joinUint8Arrays = exports.decodeState = void 0;
+exports.generateIndexerAssetInformationEndpointURL = exports.getTxnGroupID = exports.sumUpTxnFees = exports.sendAndWaitRawTransaction = exports.roundNumber = exports.convertToBaseUnits = exports.convertFromBaseUnits = exports.bufferToBase64 = exports.ASSET_OPT_IN_PROCESS_TXN_COUNT = exports.applySlippageToAmount = exports.waitForTransaction = exports.getMinBalanceForAccount = exports.joinUint8Arrays = exports.decodeState = void 0;
 function decodeState(stateArray = []) {
     const state = {};
     for (const pair of stateArray) {
@@ -157,3 +157,7 @@ function getTxnGroupID(txns) {
     return bufferToBase64(txns[0].txn.group);
 }
 exports.getTxnGroupID = getTxnGroupID;
+function generateIndexerAssetInformationEndpointURL(baseURL, assetId) {
+    return `${baseURL}/assets/${assetId}?include-all=true`;
+}
+exports.generateIndexerAssetInformationEndpointURL = generateIndexerAssetInformationEndpointURL;
