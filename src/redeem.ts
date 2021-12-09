@@ -320,14 +320,12 @@ export interface ExcessAmountDataWithPoolAssetDetails {
 export async function getExcessAmountsWithPoolAssetDetails({
   client,
   indexer,
-  network,
   accountAddr,
   validatorAppID,
   assetInformationHelperOptions
 }: {
   client: Algodv2;
   indexer: Indexer;
-  network: SupportedNetwork;
   accountAddr: string;
   validatorAppID: number;
   assetInformationHelperOptions?: GetAssetInformationByIdOptions;

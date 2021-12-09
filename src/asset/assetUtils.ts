@@ -4,6 +4,7 @@ import {SignerTransaction} from "../common-types";
 import {IndexerAssetInformation, TinymanAnalyticsApiAsset} from "./assetModels";
 import {ALGO_ASSET_ID, ALGO_ASSET, CACHED_ASSETS} from "./assetConstants";
 import WebStorage from "../web-storage/WebStorage";
+import {generateIndexerAssetInformationEndpointURL} from "../util";
 
 export async function generateOptIntoAssetTxns({
   client,
@@ -25,7 +26,7 @@ export async function generateOptIntoAssetTxns({
 
 export interface GetAssetInformationByIdOptions {
   alwaysFetch?: boolean;
-  customRequestURL?: string;
+  customRequestBaseURL?: string;
 }
 
 /**
@@ -33,7 +34,7 @@ export interface GetAssetInformationByIdOptions {
  * @param indexer algosdk.indexer
  * @param {number} id - id of the asset
  * @param {boolean} options.alwaysFetch - Determines whether to always fetch the information of the asset or read it from the cache
- * @param {boolean} options.customRequestURL - Uses this URL with Fetch API to fetch asset information
+ * @param {boolean} options.customRequestBaseURL - Constructs asset information request URL from this and uses it with Fetch API instead of using indexer directly
  * @returns a promise that resolves with TinymanAnalyticsApiAsset
  */
 export function getAssetInformationById(
@@ -63,8 +64,10 @@ export function getAssetInformationById(
 
         let asset = {} as IndexerAssetInformation["asset"];
 
-        if (options?.customRequestURL) {
-          const response = await fetch(options.customRequestURL);
+        if (options?.customRequestBaseURL) {
+          const response = await fetch(
+            generateIndexerAssetInformationEndpointURL(options.customRequestBaseURL, id)
+          );
           const {asset: fetchedAssetData} =
             (await response.json()) as IndexerAssetInformation;
 

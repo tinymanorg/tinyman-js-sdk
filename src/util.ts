@@ -202,3 +202,10 @@ export function sumUpTxnFees(txns: SignerTransaction[]): number {
 export function getTxnGroupID(txns: SignerTransaction[]) {
   return bufferToBase64(txns[0].txn.group);
 }
+
+export function generateIndexerAssetInformationEndpointURL(
+  baseURL: string,
+  assetId: string | number
+) {
+  return `${baseURL}/assets/${assetId}?include-all=true`;
+}
