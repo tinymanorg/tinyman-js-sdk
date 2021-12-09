@@ -198,7 +198,7 @@ exports.getExcessAmounts = getExcessAmounts;
  * @param params.validatorAppID Validator APP ID
  * @returns List of excess amounts
  */
-async function getExcessAmountsWithPoolAssetDetails({ client, indexer, network, accountAddr, validatorAppID }) {
+async function getExcessAmountsWithPoolAssetDetails({ client, indexer, network, accountAddr, validatorAppID, assetInformationHelperOptions }) {
     const excessData = await getExcessAmounts({ client, accountAddr, validatorAppID });
     let excessDataWithDetail = [];
     for (let data of excessData) {
@@ -215,15 +215,9 @@ async function getExcessAmountsWithPoolAssetDetails({ client, indexer, network, 
                 asset2ID: poolAssets.asset2ID
             });
             const assetDetails = await Promise.all([
-                assetUtils_1.getAssetInformationById(network, poolAssets.asset1ID, {
-                    indexer
-                }),
-                assetUtils_1.getAssetInformationById(network, poolAssets.asset2ID, {
-                    indexer
-                }),
-                assetUtils_1.getAssetInformationById(network, poolInfo.liquidityTokenID, {
-                    indexer
-                })
+                assetUtils_1.getAssetInformationById(indexer, poolAssets.asset1ID, assetInformationHelperOptions),
+                assetUtils_1.getAssetInformationById(indexer, poolAssets.asset2ID, assetInformationHelperOptions),
+                assetUtils_1.getAssetInformationById(indexer, poolInfo.liquidityTokenID, assetInformationHelperOptions)
             ]);
             let excessAsset = assetDetails[0].asset;
             if (assetID === Number(assetDetails[1].asset.id)) {

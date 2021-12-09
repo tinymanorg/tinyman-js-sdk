@@ -1,9 +1,8 @@
 import algosdk, {Indexer} from "algosdk";
 
-import {SignerTransaction, SupportedNetwork} from "../common-types";
+import {SignerTransaction} from "../common-types";
 import {IndexerAssetInformation, TinymanAnalyticsApiAsset} from "./assetModels";
 import {ALGO_ASSET_ID, ALGO_ASSET, CACHED_ASSETS} from "./assetConstants";
-import {getIndexerBaseURLForNetwork} from "../util";
 import WebStorage from "../web-storage/WebStorage";
 
 export async function generateOptIntoAssetTxns({
@@ -24,20 +23,23 @@ export async function generateOptIntoAssetTxns({
   return [{txn: optInTxn, signers: [initiatorAddr]}];
 }
 
+export interface GetAssetInformationByIdOptions {
+  alwaysFetch?: boolean;
+  customRequestURL?: string;
+}
+
 /**
  * Fetches asset data and caches it in a Map.
- * @param network "mainnet" | "testnet" | "hiponet".
+ * @param indexer algosdk.indexer
  * @param {number} id - id of the asset
- * @param {boolean} alwaysFetch - Determines whether to always fetch the information of the asset or read it from the cache
+ * @param {boolean} options.alwaysFetch - Determines whether to always fetch the information of the asset or read it from the cache
+ * @param {boolean} options.customRequestURL - Uses this URL with Fetch API to fetch asset information
  * @returns a promise that resolves with TinymanAnalyticsApiAsset
  */
 export function getAssetInformationById(
-  network: SupportedNetwork,
+  indexer: Indexer,
   id: number,
-  options?: {
-    alwaysFetch?: boolean;
-    indexer?: Indexer;
-  }
+  options?: GetAssetInformationByIdOptions
 ) {
   return new Promise<{asset: TinymanAnalyticsApiAsset; isDeleted: boolean}>(
     async (resolve, reject) => {
@@ -61,22 +63,19 @@ export function getAssetInformationById(
 
         let asset = {} as IndexerAssetInformation["asset"];
 
-        // see https://github.com/tinymanorg/tinyman-js-sdk/pull/47#discussion_r765561762
-        if (options?.indexer) {
-          const data = (await options.indexer
+        if (options?.customRequestURL) {
+          const response = await fetch(options.customRequestURL);
+          const {asset: fetchedAssetData} =
+            (await response.json()) as IndexerAssetInformation;
+
+          asset = fetchedAssetData;
+        } else {
+          const data = (await indexer
             .lookupAssetByID(id)
             .includeAll(true)
             .do()) as IndexerAssetInformation;
 
           asset = data.asset;
-        } else {
-          const response = await fetch(
-            `${getIndexerBaseURLForNetwork(network)}assets/${id}?include-all=true`
-          );
-          const {asset: fetchedAssetData} =
-            (await response.json()) as IndexerAssetInformation;
-
-          asset = fetchedAssetData;
         }
 
         const assetData: TinymanAnalyticsApiAsset = {
