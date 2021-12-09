@@ -43,6 +43,7 @@ function getAssetInformationById(network, id, options) {
                 return;
             }
             let asset = {};
+            // see https://github.com/tinymanorg/tinyman-js-sdk/pull/47#discussion_r765561762
             if (options?.indexer) {
                 const data = (await options.indexer
                     .lookupAssetByID(id)
