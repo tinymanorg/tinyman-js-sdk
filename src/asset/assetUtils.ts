@@ -26,7 +26,6 @@ export async function generateOptIntoAssetTxns({
 
 export interface GetAssetInformationByIdOptions {
   alwaysFetch?: boolean;
-  customRequestBaseURL?: string;
 }
 
 /**
@@ -34,7 +33,6 @@ export interface GetAssetInformationByIdOptions {
  * @param indexer algosdk.indexer
  * @param {number} id - id of the asset
  * @param {boolean} options.alwaysFetch - Determines whether to always fetch the information of the asset or read it from the cache
- * @param {boolean} options.customRequestBaseURL - Constructs asset information request URL from this and uses it with Fetch API instead of using indexer directly
  * @returns a promise that resolves with TinymanAnalyticsApiAsset
  */
 export function getAssetInformationById(
@@ -62,24 +60,23 @@ export function getAssetInformationById(
           return;
         }
 
-        let asset = {} as IndexerAssetInformation["asset"];
+        // @ts-ignore
+        const baseURL = `${indexer.c.baseURL.origin}/v2`;
+        // @ts-ignore
+        const indexerToken = indexer.c.tokenHeader["X-Indexer-API-Token"];
 
-        if (options?.customRequestBaseURL) {
-          const response = await fetch(
-            generateIndexerAssetInformationEndpointURL(options.customRequestBaseURL, id)
-          );
-          const {asset: fetchedAssetData} =
-            (await response.json()) as IndexerAssetInformation;
-
-          asset = fetchedAssetData;
-        } else {
-          const data = (await indexer
-            .lookupAssetByID(id)
-            .includeAll(true)
-            .do()) as IndexerAssetInformation;
-
-          asset = data.asset;
-        }
+        const response = await fetch(
+          generateIndexerAssetInformationEndpointURL(baseURL, id),
+          {
+            headers: {
+              // @ts-ignore
+              ...indexer.c.defaultHeaders,
+              // @ts-ignore
+              ...(indexerToken ? indexer.c.tokenHeader : {})
+            }
+          }
+        );
+        const {asset} = (await response.json()) as IndexerAssetInformation;
 
         const assetData: TinymanAnalyticsApiAsset = {
           id: `${asset.index}`,
