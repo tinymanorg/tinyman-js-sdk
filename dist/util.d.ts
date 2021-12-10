@@ -1,6 +1,6 @@
 /// <reference types="node" />
 import {Algodv2} from "algosdk";
-import {SignerTransaction, SupportedNetwork} from "./common-types";
+import {SignerTransaction} from "./common-types";
 import {AccountInformation} from "./account/accountTypes";
 export declare function decodeState(
   stateArray?: AccountInformation["apps-local-state"][0]["key-value"]
@@ -63,4 +63,7 @@ export declare function sendAndWaitRawTransaction(
 >;
 export declare function sumUpTxnFees(txns: SignerTransaction[]): number;
 export declare function getTxnGroupID(txns: SignerTransaction[]): string;
-export declare function getIndexerBaseURLForNetwork(network: SupportedNetwork): any;
+export declare function generateIndexerAssetInformationEndpointURL(
+  baseURL: string,
+  assetId: string | number
+): string;

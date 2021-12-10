@@ -1,11 +1,11 @@
-import algosdk from "algosdk";
+import algosdk, {Indexer} from "algosdk";
 
-import {SignerTransaction, SupportedNetwork} from "../common-types";
+import {SignerTransaction} from "../common-types";
 import {IndexerAssetInformation, TinymanAnalyticsApiAsset} from "./assetModels";
 import {ALGO_ASSET_ID, ALGO_ASSET, CACHED_ASSETS} from "./assetConstants";
-import {getIndexerBaseURLForNetwork} from "../util";
 import WebStorage from "../web-storage/WebStorage";
 import TinymanError from "../error/TinymanError";
+import {generateIndexerAssetInformationEndpointURL} from "../util";
 
 export async function generateOptIntoAssetTxns({
   client,
@@ -32,17 +32,21 @@ export async function generateOptIntoAssetTxns({
   }
 }
 
+export interface GetAssetInformationByIdOptions {
+  alwaysFetch?: boolean;
+}
+
 /**
  * Fetches asset data and caches it in a Map.
- * @param network "mainnet" | "testnet" | "hiponet".
+ * @param indexer algosdk.indexer
  * @param {number} id - id of the asset
- * @param {boolean} alwaysFetch - Determines whether to always fetch the information of the asset or read it from the cache
+ * @param {boolean} options.alwaysFetch - Determines whether to always fetch the information of the asset or read it from the cache
  * @returns a promise that resolves with TinymanAnalyticsApiAsset
  */
 export function getAssetInformationById(
-  network: SupportedNetwork,
+  indexer: Indexer,
   id: number,
-  alwaysFetch?: boolean
+  options?: GetAssetInformationByIdOptions
 ) {
   return new Promise<{asset: TinymanAnalyticsApiAsset; isDeleted: boolean}>(
     async (resolve, reject) => {
@@ -58,14 +62,27 @@ export function getAssetInformationById(
           memoizedValue &&
           // invalidate cache for this asset if total_amount is not available in the cached data
           memoizedValue.asset.total_amount != null &&
-          !alwaysFetch
+          !options?.alwaysFetch
         ) {
           resolve(memoizedValue);
           return;
         }
 
+        // @ts-ignore
+        const baseURL = `${indexer.c.baseURL.origin}/v2`;
+        // @ts-ignore
+        const indexerToken = indexer.c.tokenHeader["X-Indexer-API-Token"];
+
         const response = await fetch(
-          `${getIndexerBaseURLForNetwork(network)}/assets/${id}?include-all=true`
+          generateIndexerAssetInformationEndpointURL(baseURL, id),
+          {
+            headers: {
+              // @ts-ignore
+              ...indexer.c.defaultHeaders,
+              // @ts-ignore
+              ...(indexerToken ? indexer.c.tokenHeader : {})
+            }
+          }
         );
         const {asset} = (await response.json()) as IndexerAssetInformation;
 

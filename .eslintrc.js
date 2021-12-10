@@ -27,6 +27,7 @@ module.exports = {
   },
   globals: {},
   rules: {
+    "@typescript-eslint/ban-ts-comment": "off",
     "valid-jsdoc": "off",
     "no-debugger": "warn",
     "arrow-body-style": "off",

@@ -1,4 +1,5 @@
-import {SignerTransaction, SupportedNetwork} from "../common-types";
+import {Indexer} from "algosdk";
+import {SignerTransaction} from "../common-types";
 import {TinymanAnalyticsApiAsset} from "./assetModels";
 export declare function generateOptIntoAssetTxns({
   client,
@@ -9,17 +10,20 @@ export declare function generateOptIntoAssetTxns({
   assetID: any;
   initiatorAddr: any;
 }): Promise<SignerTransaction[]>;
+export interface GetAssetInformationByIdOptions {
+  alwaysFetch?: boolean;
+}
 /**
  * Fetches asset data and caches it in a Map.
- * @param network "mainnet" | "testnet" | "hiponet".
+ * @param indexer algosdk.indexer
  * @param {number} id - id of the asset
- * @param {boolean} alwaysFetch - Determines whether to always fetch the information of the asset or read it from the cache
+ * @param {boolean} options.alwaysFetch - Determines whether to always fetch the information of the asset or read it from the cache
  * @returns a promise that resolves with TinymanAnalyticsApiAsset
  */
 export declare function getAssetInformationById(
-  network: SupportedNetwork,
+  indexer: Indexer,
   id: number,
-  alwaysFetch?: boolean
+  options?: GetAssetInformationByIdOptions
 ): Promise<{
   asset: TinymanAnalyticsApiAsset;
   isDeleted: boolean;

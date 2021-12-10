@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getIndexerBaseURLForNetwork = exports.getTxnGroupID = exports.sumUpTxnFees = exports.sendAndWaitRawTransaction = exports.roundNumber = exports.convertToBaseUnits = exports.convertFromBaseUnits = exports.bufferToBase64 = exports.ASSET_OPT_IN_PROCESS_TXN_COUNT = exports.applySlippageToAmount = exports.waitForTransaction = exports.getMinBalanceForAccount = exports.joinUint8Arrays = exports.decodeState = void 0;
+exports.generateIndexerAssetInformationEndpointURL = exports.getTxnGroupID = exports.sumUpTxnFees = exports.sendAndWaitRawTransaction = exports.roundNumber = exports.convertToBaseUnits = exports.convertFromBaseUnits = exports.bufferToBase64 = exports.ASSET_OPT_IN_PROCESS_TXN_COUNT = exports.applySlippageToAmount = exports.waitForTransaction = exports.getMinBalanceForAccount = exports.joinUint8Arrays = exports.decodeState = void 0;
 const TinymanError_1 = __importDefault(require("./error/TinymanError"));
 function decodeState(stateArray = []) {
     const state = {};
@@ -166,21 +166,7 @@ function getTxnGroupID(txns) {
     return bufferToBase64(txns[0].txn.group);
 }
 exports.getTxnGroupID = getTxnGroupID;
-function getIndexerBaseURLForNetwork(network) {
-    let baseUrl;
-    switch (network) {
-        case "mainnet":
-            baseUrl = "https://indexer.algoexplorerapi.io/v2/";
-            break;
-        case "testnet":
-            baseUrl = "https://indexer.testnet.algoexplorerapi.io/v2/";
-            break;
-        case "hiponet":
-            baseUrl = "https://algorand-hiponet.hipolabs.com/indexer/";
-            break;
-        default:
-            throw new Error(`Network provided is not supported: ${network}`);
-    }
-    return baseUrl;
+function generateIndexerAssetInformationEndpointURL(baseURL, assetId) {
+    return `${baseURL}/assets/${assetId}?include-all=true`;
 }
-exports.getIndexerBaseURLForNetwork = getIndexerBaseURLForNetwork;
+exports.generateIndexerAssetInformationEndpointURL = generateIndexerAssetInformationEndpointURL;

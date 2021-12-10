@@ -211,25 +211,9 @@ export function getTxnGroupID(txns: SignerTransaction[]) {
   return bufferToBase64(txns[0].txn.group);
 }
 
-export function getIndexerBaseURLForNetwork(network: SupportedNetwork) {
-  let baseUrl;
-
-  switch (network) {
-    case "mainnet":
-      baseUrl = "https://indexer.algoexplorerapi.io/v2/";
-      break;
-
-    case "testnet":
-      baseUrl = "https://indexer.testnet.algoexplorerapi.io/v2/";
-      break;
-
-    case "hiponet":
-      baseUrl = "https://algorand-hiponet.hipolabs.com/indexer/";
-      break;
-
-    default:
-      throw new Error(`Network provided is not supported: ${network}`);
-  }
-
-  return baseUrl;
+export function generateIndexerAssetInformationEndpointURL(
+  baseURL: string,
+  assetId: string | number
+) {
+  return `${baseURL}/assets/${assetId}?include-all=true`;
 }

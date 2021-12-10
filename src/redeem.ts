@@ -1,4 +1,4 @@
-import algosdk, {Algodv2} from "algosdk";
+import algosdk, {Algodv2, Indexer} from "algosdk";
 import {toByteArray} from "base64-js";
 
 import {
@@ -13,7 +13,10 @@ import {AccountInformation} from "./account/accountTypes";
 import {DEFAULT_FEE_TXN_NOTE} from "./constant";
 import TinymanError from "./error/TinymanError";
 import {TinymanAnalyticsApiAsset} from "./asset/assetModels";
-import {getAssetInformationById} from "./asset/assetUtils";
+import {
+  getAssetInformationById,
+  GetAssetInformationByIdOptions
+} from "./asset/assetUtils";
 
 const REDEEM_ENCODED = Uint8Array.from([114, 101, 100, 101, 101, 109]); // 'redeem'
 
@@ -332,14 +335,16 @@ export interface ExcessAmountDataWithPoolAssetDetails {
  */
 export async function getExcessAmountsWithPoolAssetDetails({
   client,
-  network,
+  indexer,
   accountAddr,
-  validatorAppID
+  validatorAppID,
+  assetInformationHelperOptions
 }: {
   client: Algodv2;
-  network: SupportedNetwork;
+  indexer: Indexer;
   accountAddr: string;
   validatorAppID: number;
+  assetInformationHelperOptions?: GetAssetInformationByIdOptions;
 }) {
   const excessData = await getExcessAmounts({client, accountAddr, validatorAppID});
   let excessDataWithDetail: ExcessAmountDataWithPoolAssetDetails[] = [];
@@ -359,9 +364,21 @@ export async function getExcessAmountsWithPoolAssetDetails({
         asset2ID: poolAssets.asset2ID
       });
       const assetDetails = await Promise.all([
-        getAssetInformationById(network, poolAssets.asset1ID),
-        getAssetInformationById(network, poolAssets.asset2ID),
-        getAssetInformationById(network, poolInfo.liquidityTokenID!)
+        getAssetInformationById(
+          indexer,
+          poolAssets.asset1ID,
+          assetInformationHelperOptions
+        ),
+        getAssetInformationById(
+          indexer,
+          poolAssets.asset2ID,
+          assetInformationHelperOptions
+        ),
+        getAssetInformationById(
+          indexer,
+          poolInfo.liquidityTokenID!,
+          assetInformationHelperOptions
+        )
       ]);
       let excessAsset = assetDetails[0].asset;
 
