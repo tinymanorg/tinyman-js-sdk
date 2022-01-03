@@ -125,6 +125,7 @@ export async function createPool(
 const OUTSTANDING_ENCODED = Uint8Array.from([111]); // 'o'
 const TOTAL_LIQUIDITY = 0xffffffffffffffffn;
 
+/* eslint-disable complexity */
 export async function getPoolReserves(
   client: any,
   pool: PoolInfo
@@ -217,11 +218,19 @@ export async function getPoolReserves(
     reserves.issuedLiquidity < 0n ||
     reserves.issuedLiquidity > TOTAL_LIQUIDITY
   ) {
-    throw new Error(`Invalid reserves: ${reserves}`);
+    // @ts-ignore: Type 'number' is not assignable to type 'bigint'
+    reserves.asset1 = Number(reserves.asset1);
+    // @ts-ignore: Type 'number' is not assignable to type 'bigint'
+    reserves.asset2 = Number(reserves.asset2);
+    // @ts-ignore: Type 'number' is not assignable to type 'bigint'
+    reserves.issuedLiquidity = Number(reserves.issuedLiquidity);
+
+    throw new Error(`Invalid pool reserves: ${JSON.stringify(reserves)}`);
   }
 
   return reserves;
 }
+/* eslint-enable complexity */
 
 const EXCESS_ENCODED = Uint8Array.from([101]); // 'e'
 
