@@ -14,4 +14,4 @@ export type InitiatorSigner = (
   txGroupList: SignerTransaction[][]
 ) => Promise<Uint8Array[]>;
 
-export type SupportedNetwork = "hiponet" | "testnet" | "mainnet";
+export type SupportedNetwork = "testnet" | "mainnet";

@@ -1,7 +1,6 @@
 import algosdk, {Algodv2} from "algosdk";
 import {fromByteArray} from "base64-js";
 
-import {getPoolLogicSig} from "./contracts";
 import {
   decodeState,
   joinUint8Arrays,
@@ -10,6 +9,7 @@ import {
 } from "./util";
 import {doBootstrap} from "./bootstrap";
 import {AccountInformation} from "./account/accountTypes";
+import {TinymanContract} from "./contracts/contracts";
 
 export enum PoolStatus {
   NOT_CREATED = "not created",
@@ -54,13 +54,14 @@ export const MINIMUM_LIQUIDITY = 1000;
  */
 export async function getPoolInfo(
   client: any,
+  contract: TinymanContract,
   pool: {
     validatorAppID: number;
     asset1ID: number;
     asset2ID: number;
   }
 ): Promise<PoolInfo> {
-  const poolLogicSig = getPoolLogicSig(pool);
+  const poolLogicSig = contract.getPoolLogicSig(pool);
 
   let result: PoolInfo = {
     addr: poolLogicSig.addr,
@@ -96,19 +97,16 @@ export async function getPoolInfo(
  * @param pool.validatorAppID The ID of the Validator App for the network.
  * @param pool.asset1ID The ID of the first asset in the pool pair.
  * @param pool.asset2ID The ID of the second asset in the pool pair.
- * @param pool.asset1UnitName The unit name of the first asset in the pool.
- * @param pool.asset2UnitName The unit name of the second asset in the pool.
  * @param signedTxns Signed transactions
  * @param txnIDs Transaction IDs
  */
 export async function createPool(
   client: Algodv2,
+  contract: TinymanContract,
   pool: {
     validatorAppID: number;
     asset1ID: number;
     asset2ID: number;
-    asset1UnitName: string;
-    asset2UnitName: string;
   },
   signedTxns: Uint8Array[],
   txnIDs: string[]
@@ -119,7 +117,7 @@ export async function createPool(
     txnIDs
   });
 
-  return getPoolInfo(client, pool);
+  return getPoolInfo(client, contract, pool);
 }
 
 const OUTSTANDING_ENCODED = Uint8Array.from([111]); // 'o'

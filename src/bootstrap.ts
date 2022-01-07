@@ -1,6 +1,6 @@
 import algosdk, {Algodv2, Transaction} from "algosdk";
 
-import {VALIDATOR_APP_SCHEMA} from "./contracts";
+import {TinymanContract} from "./contracts/contracts";
 import {InitiatorSigner, SignerTransaction} from "./common-types";
 import {waitForTransaction} from "./util";
 import TinymanError from "./error/TinymanError";
@@ -29,6 +29,7 @@ export function getBootstrapProcessTxnCount(asset2ID: number) {
 }
 
 export function calculatePoolBootstrapFundingTxnAmount(
+  validatorAppSchema: TinymanContract["schema"],
   asset2ID: number,
   fees: {
     liquidityTokenCreateTxn: number;
@@ -43,8 +44,8 @@ export function calculatePoolBootstrapFundingTxnAmount(
     MINIMUM_BALANCE_REQUIRED_PER_ASSET + // fee + min balance to opt into asset 1
     (asset2ID === 0 ? 0 : MINIMUM_BALANCE_REQUIRED_PER_ASSET) + // min balance to opt into asset 2
     MINIMUM_BALANCE_REQUIRED_PER_APP + // min balance to opt into validator app
-    MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE * VALIDATOR_APP_SCHEMA.numLocalInts +
-    MINIMUM_BALANCE_REQUIRED_PER_BYTE_SCHEMA * VALIDATOR_APP_SCHEMA.numLocalByteSlices;
+    MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE * validatorAppSchema.numLocalInts +
+    MINIMUM_BALANCE_REQUIRED_PER_BYTE_SCHEMA * validatorAppSchema.numLocalByteSlices;
 
   return (
     poolAccountMinBalance +
@@ -57,6 +58,7 @@ export function calculatePoolBootstrapFundingTxnAmount(
 
 export async function generateBootstrapTransactions({
   client,
+  validatorAppSchema,
   poolLogicSig,
   validatorAppID,
   asset1ID,
@@ -66,6 +68,7 @@ export async function generateBootstrapTransactions({
   initiatorAddr
 }: {
   client: Algodv2;
+  validatorAppSchema: TinymanContract["schema"];
   poolLogicSig: {addr: string; program: Uint8Array};
   validatorAppID: number;
   asset1ID: number;
@@ -123,7 +126,7 @@ export async function generateBootstrapTransactions({
   const fundingTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
     from: initiatorAddr,
     to: poolLogicSig.addr,
-    amount: calculatePoolBootstrapFundingTxnAmount(asset2ID, {
+    amount: calculatePoolBootstrapFundingTxnAmount(validatorAppSchema, asset2ID, {
       liquidityTokenCreateTxn: liquidityTokenCreateTxn.fee,
       asset1OptinTxn: asset1Optin.fee,
       asset2OptinTxn: asset2Optin ? asset2Optin.fee : 0,
