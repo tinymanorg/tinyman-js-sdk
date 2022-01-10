@@ -9,7 +9,7 @@ import {
 } from "./util";
 import {doBootstrap} from "./bootstrap";
 import {AccountInformation} from "./account/accountTypes";
-import {TinymanContract} from "./contracts/contracts";
+import {tinymanContract, TinymanContract} from "./contract/contract";
 
 export enum PoolStatus {
   NOT_CREATED = "not created",
@@ -54,14 +54,13 @@ export const MINIMUM_LIQUIDITY = 1000;
  */
 export async function getPoolInfo(
   client: any,
-  contract: TinymanContract,
   pool: {
     validatorAppID: number;
     asset1ID: number;
     asset2ID: number;
   }
 ): Promise<PoolInfo> {
-  const poolLogicSig = contract.getPoolLogicSig(pool);
+  const poolLogicSig = tinymanContract.getPoolLogicSig(pool);
 
   let result: PoolInfo = {
     addr: poolLogicSig.addr,
@@ -102,7 +101,6 @@ export async function getPoolInfo(
  */
 export async function createPool(
   client: Algodv2,
-  contract: TinymanContract,
   pool: {
     validatorAppID: number;
     asset1ID: number;
@@ -117,7 +115,7 @@ export async function createPool(
     txnIDs
   });
 
-  return getPoolInfo(client, contract, pool);
+  return getPoolInfo(client, pool);
 }
 
 const OUTSTANDING_ENCODED = Uint8Array.from([111]); // 'o'

@@ -17,7 +17,6 @@ import {
   getAssetInformationById,
   GetAssetInformationByIdOptions
 } from "./asset/assetUtils";
-import {TinymanContract} from "./contracts/contracts";
 
 const REDEEM_ENCODED = Uint8Array.from([114, 101, 100, 101, 101, 109]); // 'redeem'
 
@@ -338,14 +337,12 @@ export async function getExcessAmountsWithPoolAssetDetails({
   client,
   indexer,
   accountAddr,
-  contract,
   validatorAppID,
   assetInformationHelperOptions
 }: {
   client: Algodv2;
   indexer: Indexer;
   accountAddr: string;
-  contract: TinymanContract;
   validatorAppID: number;
   assetInformationHelperOptions?: GetAssetInformationByIdOptions;
 }) {
@@ -361,7 +358,7 @@ export async function getExcessAmountsWithPoolAssetDetails({
     });
 
     if (poolAssets) {
-      const poolInfo = await getPoolInfo(client, contract, {
+      const poolInfo = await getPoolInfo(client, {
         validatorAppID,
         asset1ID: poolAssets.asset1ID,
         asset2ID: poolAssets.asset2ID

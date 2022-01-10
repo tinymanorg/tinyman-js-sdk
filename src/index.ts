@@ -1,4 +1,5 @@
 export {
+  getValidatorAppID,
   generateOptIntoValidatorTxns,
   OPT_IN_VALIDATOR_APP_PROCESS_TXN_COUNT,
   isOptedIntoValidator,
@@ -101,16 +102,11 @@ export {
 } from "./constant";
 
 export {
-  TinymanContractVersion,
-  ValidatorAppSchema,
-  TinymanContract_V1,
-  getValidatorAppID
-} from "./contracts/contracts";
-
-export {
   getAccountInformation,
   calculateAccountMinimumRequiredBalance,
   hasSufficientMinimumBalance
 } from "./account/accountUtils";
 
 export {AccountInformationData} from "./account/accountTypes";
+
+export {validatorAppSchema} from "./contract/contract";

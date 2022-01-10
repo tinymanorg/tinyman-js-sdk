@@ -1,16 +1,13 @@
-import * as ascV1Json from "./asc.v1.json";
+import * as ascJson from "./asc.json";
 
 import {toByteArray} from "base64-js";
 import {LogicSigAccount} from "algosdk";
 
-import {SupportedNetwork} from "../common-types";
-
-type ValidatorApp = typeof ascV1Json.contracts.validator_app;
-type PoolLogicSig = typeof ascV1Json.contracts.pool_logicsig;
+type ValidatorApp = typeof ascJson.contracts.validator_app;
+type PoolLogicSig = typeof ascJson.contracts.pool_logicsig;
 type PoolLogicSigVariables = PoolLogicSig["logic"]["variables"];
 
-export type TinymanContractVersion = "v1";
-export interface ValidatorAppSchema {
+interface ValidatorAppSchema {
   numLocalInts: any;
   numLocalByteSlices: any;
   numGlobalInts: any;
@@ -101,10 +98,12 @@ export class TinymanContract {
   }
 }
 
-export const TinymanContract_V1 = new TinymanContract(
-  ascV1Json.contracts.validator_app,
-  ascV1Json.contracts.pool_logicsig
+export const tinymanContract = new TinymanContract(
+  ascJson.contracts.validator_app,
+  ascJson.contracts.pool_logicsig
 );
+
+export const validatorAppSchema = tinymanContract.schema;
 
 function encodeVarInt(number) {
   let buf: number[] = [];
@@ -123,37 +122,6 @@ function encodeVarInt(number) {
     }
   }
   return buf;
-}
-
-const VALIDATOR_APP_ID: Record<TinymanContractVersion, Record<SupportedNetwork, number>> =
-  {
-    v1: {
-      testnet: 21580889,
-      mainnet: 350338509
-    }
-  };
-
-/**
- * Get the Validator App ID for a network.
- *
- * @param contractVersion "v1" | "v1.1".
- * @param network "mainnet" | "testnet".
- *
- * @returns the Validator App ID
- */
-export function getValidatorAppID(
-  contractVersion: TinymanContractVersion,
-  network: SupportedNetwork
-): number {
-  const id = VALIDATOR_APP_ID[contractVersion][network];
-
-  if (!id) {
-    throw new Error(
-      `No Validator App exists for network ${network} and contract version ${contractVersion}`
-    );
-  }
-
-  return id;
 }
 
 /* eslint
