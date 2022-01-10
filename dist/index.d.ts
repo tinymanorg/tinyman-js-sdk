@@ -79,7 +79,11 @@ export {
   isNFT
 } from "./asset/assetUtils";
 export {AccountAsset, TinymanAnalyticsApiAsset} from "./asset/assetModels";
-export {ALGO_ASSET, ALGO_ASSET_ID} from "./asset/assetConstants";
+export {
+  ALGO_ASSET,
+  ALGO_ASSET_ID,
+  LIQUIDITY_TOKEN_UNIT_NAME
+} from "./asset/assetConstants";
 export {InitiatorSigner, SignerTransaction} from "./common-types";
 export {
   BASE_MINIMUM_BALANCE,

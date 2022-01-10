@@ -8,4 +8,4 @@ export declare const CACHED_ASSETS: Record<
 >;
 export declare const ALGO_ASSET_ID = 0;
 export declare const ALGO_ASSET: TinymanAnalyticsApiAsset;
-export declare const LIQUIDITY_TOKEN_UNIT_NAME = "TM1POOL";
+export declare const LIQUIDITY_TOKEN_UNIT_NAME = "TMPOOL11";

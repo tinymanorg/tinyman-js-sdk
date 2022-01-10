@@ -63,7 +63,7 @@ async function generateBootstrapTransactions({ client, validatorAppID, asset1ID,
         decimals: 6,
         defaultFrozen: false,
         unitName: assetConstants_1.LIQUIDITY_TOKEN_UNIT_NAME,
-        assetName: `Tinyman Pool ${asset1UnitName}-${asset2UnitName}`,
+        assetName: `TinymanPool1.1 ${asset1UnitName}-${asset2UnitName}`,
         assetURL: "https://tinyman.org",
         suggestedParams
     });

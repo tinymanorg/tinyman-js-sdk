@@ -17,4 +17,4 @@ exports.ALGO_ASSET = {
     is_liquidity_token: false,
     total_amount: "6615503326932151"
 };
-exports.LIQUIDITY_TOKEN_UNIT_NAME = "TM1POOL";
+exports.LIQUIDITY_TOKEN_UNIT_NAME = "TMPOOL11";
