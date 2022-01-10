@@ -6,9 +6,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.isPoolReady = exports.isPoolNotCreated = exports.isPoolEmpty = exports.getPoolPairRatio = exports.getPoolAssets = exports.getPoolShare = exports.getAccountExcess = exports.getPoolReserves = exports.createPool = exports.getPoolInfo = exports.MINIMUM_LIQUIDITY = exports.PoolStatus = void 0;
 const algosdk_1 = __importDefault(require("algosdk"));
 const base64_js_1 = require("base64-js");
-const contracts_1 = require("./contracts");
 const util_1 = require("./util");
 const bootstrap_1 = require("./bootstrap");
+const contract_1 = require("./contract/contract");
 var PoolStatus;
 (function (PoolStatus) {
     PoolStatus["NOT_CREATED"] = "not created";
@@ -27,7 +27,7 @@ exports.MINIMUM_LIQUIDITY = 1000;
  * @param pool.asset2ID The ID of the second asset in the pool pair.
  */
 async function getPoolInfo(client, pool) {
-    const poolLogicSig = contracts_1.getPoolLogicSig(pool);
+    const poolLogicSig = contract_1.tinymanContract.getPoolLogicSig(pool);
     let result = {
         addr: poolLogicSig.addr,
         program: poolLogicSig.program,
@@ -59,8 +59,6 @@ exports.getPoolInfo = getPoolInfo;
  * @param pool.validatorAppID The ID of the Validator App for the network.
  * @param pool.asset1ID The ID of the first asset in the pool pair.
  * @param pool.asset2ID The ID of the second asset in the pool pair.
- * @param pool.asset1UnitName The unit name of the first asset in the pool.
- * @param pool.asset2UnitName The unit name of the second asset in the pool.
  * @param signedTxns Signed transactions
  * @param txnIDs Transaction IDs
  */

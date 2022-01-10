@@ -12,7 +12,6 @@ export declare function calculatePoolBootstrapFundingTxnAmount(
 ): number;
 export declare function generateBootstrapTransactions({
   client,
-  poolLogicSig,
   validatorAppID,
   asset1ID,
   asset2ID,
@@ -21,10 +20,6 @@ export declare function generateBootstrapTransactions({
   initiatorAddr
 }: {
   client: Algodv2;
-  poolLogicSig: {
-    addr: string;
-    program: Uint8Array;
-  };
   validatorAppID: number;
   asset1ID: number;
   asset2ID: number;
@@ -33,16 +28,17 @@ export declare function generateBootstrapTransactions({
   initiatorAddr: string;
 }): Promise<SignerTransaction[]>;
 export declare function signBootstrapTransactions({
-  poolLogicSig,
   txGroup,
-  initiatorSigner
+  initiatorSigner,
+  validatorAppID,
+  asset1ID,
+  asset2ID
 }: {
-  poolLogicSig: {
-    addr: string;
-    program: Uint8Array;
-  };
   txGroup: SignerTransaction[];
   initiatorSigner: InitiatorSigner;
+  validatorAppID: number;
+  asset1ID: number;
+  asset2ID: number;
 }): Promise<{
   signedTxns: Uint8Array[];
   txnIDs: string[];

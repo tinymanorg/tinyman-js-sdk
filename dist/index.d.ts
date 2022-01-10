@@ -1,5 +1,5 @@
 export {
-  getValidatorAppIDForNetwork,
+  getValidatorAppID,
   generateOptIntoValidatorTxns,
   OPT_IN_VALIDATOR_APP_PROCESS_TXN_COUNT,
   isOptedIntoValidator,
@@ -88,10 +88,10 @@ export {
   MINIMUM_BALANCE_REQUIRED_PER_BYTE_SCHEMA,
   MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE
 } from "./constant";
-export {getPoolLogicSig, VALIDATOR_APP_SCHEMA} from "./contracts";
 export {
   getAccountInformation,
   calculateAccountMinimumRequiredBalance,
   hasSufficientMinimumBalance
 } from "./account/accountUtils";
 export {AccountInformationData} from "./account/accountTypes";
+export {validatorAppSchema} from "./contract/contract";

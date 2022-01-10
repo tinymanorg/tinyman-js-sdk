@@ -11,4 +11,4 @@ export interface SignerTransaction {
 export declare type InitiatorSigner = (
   txGroupList: SignerTransaction[][]
 ) => Promise<Uint8Array[]>;
-export declare type SupportedNetwork = "hiponet" | "testnet" | "mainnet";
+export declare type SupportedNetwork = "testnet" | "mainnet";
