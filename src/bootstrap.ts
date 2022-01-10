@@ -99,7 +99,7 @@ export async function generateBootstrapTransactions({
       decimals: 6,
       defaultFrozen: false,
       unitName: LIQUIDITY_TOKEN_UNIT_NAME,
-      assetName: `Tinyman Pool ${asset1UnitName}-${asset2UnitName}`,
+      assetName: `TinymanPool1.1 ${asset1UnitName}-${asset2UnitName}`,
       assetURL: "https://tinyman.org",
       suggestedParams
     }
