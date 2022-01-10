@@ -1,46 +1,33 @@
 import algosdk, {Algodv2} from "algosdk";
 
 import {SignerTransaction, SupportedNetwork} from "./common-types";
-import {
-  TESTNET_VALIDATOR_APP_ID,
-  HIPONET_VALIDATOR_APP_ID,
-  MAINNET_VALIDATOR_APP_ID
-} from "./constant";
 import {AccountInformation} from "./account/accountTypes";
 
 const CREATE_ENCODED = Uint8Array.from([99, 114, 101, 97, 116, 101]); // 'create'
 
+export const OPT_IN_VALIDATOR_APP_PROCESS_TXN_COUNT = 1;
+
+const VALIDATOR_APP_ID: Record<SupportedNetwork, number> = {
+  testnet: 21580889,
+  mainnet: 350338509
+};
+
 /**
  * Get the Validator App ID for a network.
  *
- * @param network "mainnet" | "testnet" | "hiponet".
+ * @param network "mainnet" | "testnet".
  *
- * @returns the Validator App ID for the network
+ * @returns the Validator App ID
  */
-export function getValidatorAppIDForNetwork(network: SupportedNetwork): number {
-  let id;
+export function getValidatorAppID(network: SupportedNetwork): number {
+  const id = VALIDATOR_APP_ID[network];
 
-  switch (network) {
-    case "mainnet":
-      id = MAINNET_VALIDATOR_APP_ID;
-      break;
-
-    case "testnet":
-      id = TESTNET_VALIDATOR_APP_ID;
-      break;
-
-    case "hiponet":
-      id = HIPONET_VALIDATOR_APP_ID;
-      break;
-
-    default:
-      throw new Error(`No Validator App exists for network ${network}`);
+  if (!id) {
+    throw new Error(`No Validator App exists for network ${network}`);
   }
 
   return id;
 }
-
-export const OPT_IN_VALIDATOR_APP_PROCESS_TXN_COUNT = 1;
 
 export async function generateOptIntoValidatorTxns({
   client,

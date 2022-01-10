@@ -1,6 +1,6 @@
 import algosdk, {Algodv2, Transaction} from "algosdk";
 
-import {VALIDATOR_APP_SCHEMA} from "./contracts";
+import {tinymanContract} from "./contract/contract";
 import {InitiatorSigner, SignerTransaction} from "./common-types";
 import {waitForTransaction} from "./util";
 import TinymanError from "./error/TinymanError";
@@ -43,8 +43,8 @@ export function calculatePoolBootstrapFundingTxnAmount(
     MINIMUM_BALANCE_REQUIRED_PER_ASSET + // fee + min balance to opt into asset 1
     (asset2ID === 0 ? 0 : MINIMUM_BALANCE_REQUIRED_PER_ASSET) + // min balance to opt into asset 2
     MINIMUM_BALANCE_REQUIRED_PER_APP + // min balance to opt into validator app
-    MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE * VALIDATOR_APP_SCHEMA.numLocalInts +
-    MINIMUM_BALANCE_REQUIRED_PER_BYTE_SCHEMA * VALIDATOR_APP_SCHEMA.numLocalByteSlices;
+    MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE * tinymanContract.schema.numLocalInts +
+    MINIMUM_BALANCE_REQUIRED_PER_BYTE_SCHEMA * tinymanContract.schema.numLocalByteSlices;
 
   return (
     poolAccountMinBalance +
@@ -57,7 +57,6 @@ export function calculatePoolBootstrapFundingTxnAmount(
 
 export async function generateBootstrapTransactions({
   client,
-  poolLogicSig,
   validatorAppID,
   asset1ID,
   asset2ID,
@@ -66,7 +65,6 @@ export async function generateBootstrapTransactions({
   initiatorAddr
 }: {
   client: Algodv2;
-  poolLogicSig: {addr: string; program: Uint8Array};
   validatorAppID: number;
   asset1ID: number;
   asset2ID: number;
@@ -75,6 +73,12 @@ export async function generateBootstrapTransactions({
   initiatorAddr: string;
 }): Promise<SignerTransaction[]> {
   const suggestedParams = await client.getTransactionParams().do();
+
+  const poolLogicSig = tinymanContract.getPoolLogicSig({
+    asset1ID,
+    asset2ID,
+    validatorAppID
+  });
 
   const validatorAppCallTxn = algosdk.makeApplicationOptInTxnFromObject({
     from: poolLogicSig.addr,
@@ -163,15 +167,25 @@ export async function generateBootstrapTransactions({
 }
 
 export async function signBootstrapTransactions({
-  poolLogicSig,
   txGroup,
-  initiatorSigner
+  initiatorSigner,
+  validatorAppID,
+  asset1ID,
+  asset2ID
 }: {
-  poolLogicSig: {addr: string; program: Uint8Array};
   txGroup: SignerTransaction[];
   initiatorSigner: InitiatorSigner;
+  validatorAppID: number;
+  asset1ID: number;
+  asset2ID: number;
 }): Promise<{signedTxns: Uint8Array[]; txnIDs: string[]}> {
   const [signedFundingTxn] = await initiatorSigner([txGroup]);
+
+  const poolLogicSig = tinymanContract.getPoolLogicSig({
+    asset1ID,
+    asset2ID,
+    validatorAppID
+  });
   const lsig = algosdk.makeLogicSig(poolLogicSig.program);
 
   const txnIDs: string[] = [];
