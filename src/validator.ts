@@ -8,7 +8,7 @@ const CREATE_ENCODED = Uint8Array.from([99, 114, 101, 97, 116, 101]); // 'create
 export const OPT_IN_VALIDATOR_APP_PROCESS_TXN_COUNT = 1;
 
 const VALIDATOR_APP_ID: Record<SupportedNetwork, number> = {
-  testnet: 57743973,
+  testnet: 62368684,
   mainnet: 350338509
 };
 
