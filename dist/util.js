@@ -72,7 +72,7 @@ function delay(timeout) {
     });
 }
 async function waitForTransaction(client, txId) {
-    await delay(3000);
+    await delay(1000);
     let lastStatus;
     let lastRound;
     try {
