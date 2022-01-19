@@ -64,7 +64,15 @@ function getMinBalanceForAccount(accountInfo) {
         MIN_BALANCE_PER_APP_BYTESLICE * totalByteSlices);
 }
 exports.getMinBalanceForAccount = getMinBalanceForAccount;
+function delay(timeout) {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve(null);
+        }, timeout);
+    });
+}
 async function waitForTransaction(client, txId) {
+    await delay(3000);
     let lastStatus = await client.status().do();
     let lastRound = lastStatus["last-round"];
     // eslint-disable-next-line no-constant-condition

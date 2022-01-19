@@ -75,7 +75,17 @@ export function getMinBalanceForAccount(accountInfo: any): bigint {
   );
 }
 
+function delay(timeout: number) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(null);
+    }, timeout);
+  });
+}
+
 export async function waitForTransaction(client: any, txId: string): Promise<any> {
+  await delay(3000);
+
   let lastStatus = await client.status().do();
   let lastRound = lastStatus["last-round"];
 
