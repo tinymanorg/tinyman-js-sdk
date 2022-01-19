@@ -84,7 +84,7 @@ function delay(timeout: number) {
 }
 
 export async function waitForTransaction(client: any, txId: string): Promise<any> {
-  await delay(3000);
+  await delay(1000);
 
   let lastStatus;
   let lastRound;
