@@ -86,21 +86,34 @@ function delay(timeout: number) {
 export async function waitForTransaction(client: any, txId: string): Promise<any> {
   await delay(3000);
 
-  let lastStatus = await client.status().do();
-  let lastRound = lastStatus["last-round"];
+  let lastStatus;
+  let lastRound;
+
+  try {
+    lastStatus = await client.status().do();
+    lastRound = lastStatus["last-round"];
+  } catch (error) {
+    throw new Error(
+      "Your transaction is already sent to the ledger but we failed to get the latest Node status."
+    );
+  }
 
   // eslint-disable-next-line no-constant-condition
   while (true) {
-    const status = await client.pendingTransactionInformation(txId).do();
+    try {
+      const status = await client.pendingTransactionInformation(txId).do();
 
-    if (status["pool-error"]) {
-      throw new Error(`Transaction Pool Error: ${status["pool-error"]}`);
+      if (status["pool-error"]) {
+        throw new Error(`Transaction Pool Error: ${status["pool-error"]}`);
+      }
+      if (status["confirmed-round"]) {
+        return status;
+      }
+      lastStatus = await client.statusAfterBlock(lastRound + 1).do();
+      lastRound = lastStatus["last-round"];
+    } catch (error) {
+      // continue looping
     }
-    if (status["confirmed-round"]) {
-      return status;
-    }
-    lastStatus = await client.statusAfterBlock(lastRound + 1).do();
-    lastRound = lastStatus["last-round"];
   }
 }
 
