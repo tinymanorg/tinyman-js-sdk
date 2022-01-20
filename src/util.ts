@@ -75,22 +75,51 @@ export function getMinBalanceForAccount(accountInfo: any): bigint {
   );
 }
 
-export async function waitForTransaction(client: any, txId: string): Promise<any> {
-  let lastStatus = await client.status().do();
-  let lastRound = lastStatus["last-round"];
+function delay(timeout: number) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(null);
+    }, timeout);
+  });
+}
+
+/**
+ * Wait until a transaction has been confirmed or rejected by the network
+ * @param client - An Algodv2 client
+ * @param txid - The ID of the transaction to wait for.
+ * @returns PendingTransactionInformation
+ */
+export async function waitForConfirmation(
+  client: Algodv2,
+  txId: string
+): Promise<Record<string, any>> {
+  await delay(1000);
 
   // eslint-disable-next-line no-constant-condition
   while (true) {
-    const status = await client.pendingTransactionInformation(txId).do();
+    let pendingTransactionInfo: Record<string, any> | null = null;
 
-    if (status["pool-error"]) {
-      throw new Error(`Transaction Pool Error: ${status["pool-error"]}`);
+    try {
+      pendingTransactionInfo = (await client
+        .pendingTransactionInformation(txId)
+        .do()) as Record<string, any> | null;
+    } catch (error) {
+      // Ignore errors from PendingTransactionInformation, since it may return 404 if the algod
+      // instance is behind a load balancer and the request goes to a different algod than the
+      // one we submitted the transaction to
     }
-    if (status["confirmed-round"]) {
-      return status;
+
+    if (pendingTransactionInfo) {
+      if (pendingTransactionInfo["confirmed-round"]) {
+        // Got the completed Transaction
+        return pendingTransactionInfo;
+      }
+
+      if (pendingTransactionInfo["pool-error"]) {
+        // If there was a pool error, then the transaction has been rejected
+        throw new Error(`Transaction Rejected: ${pendingTransactionInfo["pool-error"]}`);
+      }
     }
-    lastStatus = await client.statusAfterBlock(lastRound + 1).do();
-    lastRound = lastStatus["last-round"];
   }
 }
 
@@ -185,7 +214,7 @@ export async function sendAndWaitRawTransaction(
     for (let signedTxnGroup of signedTxnGroups) {
       const {txId} = await client.sendRawTransaction(signedTxnGroup).do();
 
-      const status = await waitForTransaction(client, txId);
+      const status = await waitForConfirmation(client, txId);
       const confirmedRound = status["confirmed-round"];
 
       networkResponse.push({

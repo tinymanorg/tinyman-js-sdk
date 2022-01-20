@@ -7,7 +7,16 @@ export declare function decodeState(
 ): Record<string, number | string>;
 export declare function joinUint8Arrays(arrays: Uint8Array[]): Uint8Array;
 export declare function getMinBalanceForAccount(accountInfo: any): bigint;
-export declare function waitForTransaction(client: any, txId: string): Promise<any>;
+/**
+ * Wait until a transaction has been confirmed or rejected by the network
+ * @param client - An Algodv2 client
+ * @param txid - The ID of the transaction to wait for.
+ * @returns PendingTransactionInformation
+ */
+export declare function waitForConfirmation(
+  client: Algodv2,
+  txId: string
+): Promise<Record<string, any>>;
 export declare function applySlippageToAmount(
   type: "positive" | "negative",
   slippage: number,

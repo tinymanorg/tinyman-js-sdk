@@ -143,7 +143,7 @@ exports.signBootstrapTransactions = signBootstrapTransactions;
 async function doBootstrap({ client, signedTxns, txnIDs }) {
     try {
         await client.sendRawTransaction(signedTxns).do();
-        const assetCreationResult = await util_1.waitForTransaction(client, txnIDs[BootstapTxnGroupIndices.LIQUIDITY_TOKEN_CREATE]);
+        const assetCreationResult = await util_1.waitForConfirmation(client, txnIDs[BootstapTxnGroupIndices.LIQUIDITY_TOKEN_CREATE]);
         const liquidityTokenID = assetCreationResult["asset-index"];
         if (typeof liquidityTokenID !== "number") {
             throw new Error(`Generated ID is not valid: got ${liquidityTokenID}`);
