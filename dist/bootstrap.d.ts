@@ -48,7 +48,7 @@ export declare function doBootstrap({
   signedTxns,
   txnIDs
 }: {
-  client: any;
+  client: Algodv2;
   signedTxns: Uint8Array[];
   txnIDs: string[];
 }): Promise<{

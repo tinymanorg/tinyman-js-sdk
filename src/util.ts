@@ -1,6 +1,6 @@
 import {Algodv2} from "algosdk";
 
-import {SignerTransaction, SupportedNetwork} from "./common-types";
+import {SignerTransaction} from "./common-types";
 import {AccountInformation} from "./account/accountTypes";
 import TinymanError from "./error/TinymanError";
 
@@ -83,36 +83,42 @@ function delay(timeout: number) {
   });
 }
 
-export async function waitForTransaction(client: any, txId: string): Promise<any> {
+/**
+ * Wait until a transaction has been confirmed or rejected by the network
+ * @param client - An Algodv2 client
+ * @param txid - The ID of the transaction to wait for.
+ * @returns PendingTransactionInformation
+ */
+export async function waitForConfirmation(
+  client: Algodv2,
+  txId: string
+): Promise<Record<string, any>> {
   await delay(1000);
-
-  let lastStatus;
-  let lastRound;
-
-  try {
-    lastStatus = await client.status().do();
-    lastRound = lastStatus["last-round"];
-  } catch (error) {
-    throw new Error(
-      "Your transaction is already sent to the ledger but we failed to get the latest Node status."
-    );
-  }
 
   // eslint-disable-next-line no-constant-condition
   while (true) {
-    try {
-      const status = await client.pendingTransactionInformation(txId).do();
+    let pendingTransactionInfo: Record<string, any> | null = null;
 
-      if (status["pool-error"]) {
-        throw new Error(`Transaction Pool Error: ${status["pool-error"]}`);
-      }
-      if (status["confirmed-round"]) {
-        return status;
-      }
-      lastStatus = await client.statusAfterBlock(lastRound + 1).do();
-      lastRound = lastStatus["last-round"];
+    try {
+      pendingTransactionInfo = (await client
+        .pendingTransactionInformation(txId)
+        .do()) as Record<string, any> | null;
     } catch (error) {
-      // continue looping
+      // Ignore errors from PendingTransactionInformation, since it may return 404 if the algod
+      // instance is behind a load balancer and the request goes to a different algod than the
+      // one we submitted the transaction to
+    }
+
+    if (pendingTransactionInfo) {
+      if (pendingTransactionInfo["confirmed-round"]) {
+        // Got the completed Transaction
+        return pendingTransactionInfo;
+      }
+
+      if (pendingTransactionInfo["pool-error"]) {
+        // If there was a pool error, then the transaction has been rejected
+        throw new Error(`Transaction Rejected: ${pendingTransactionInfo["pool-error"]}`);
+      }
     }
   }
 }
@@ -208,7 +214,7 @@ export async function sendAndWaitRawTransaction(
     for (let signedTxnGroup of signedTxnGroups) {
       const {txId} = await client.sendRawTransaction(signedTxnGroup).do();
 
-      const status = await waitForTransaction(client, txId);
+      const status = await waitForConfirmation(client, txId);
       const confirmedRound = status["confirmed-round"];
 
       networkResponse.push({

@@ -2,7 +2,7 @@ import algosdk, {Algodv2, Transaction} from "algosdk";
 
 import {tinymanContract} from "./contract/contract";
 import {InitiatorSigner, SignerTransaction} from "./common-types";
-import {waitForTransaction} from "./util";
+import {waitForConfirmation} from "./util";
 import TinymanError from "./error/TinymanError";
 import {ALGO_ASSET_ID, LIQUIDITY_TOKEN_UNIT_NAME} from "./asset/assetConstants";
 import {
@@ -208,14 +208,14 @@ export async function doBootstrap({
   signedTxns,
   txnIDs
 }: {
-  client: any;
+  client: Algodv2;
   signedTxns: Uint8Array[];
   txnIDs: string[];
 }): Promise<{liquidityTokenID: number}> {
   try {
     await client.sendRawTransaction(signedTxns).do();
 
-    const assetCreationResult = await waitForTransaction(
+    const assetCreationResult = await waitForConfirmation(
       client,
       txnIDs[BootstapTxnGroupIndices.LIQUIDITY_TOKEN_CREATE]
     );

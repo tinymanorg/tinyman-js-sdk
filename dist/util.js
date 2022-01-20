@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.generateIndexerAssetInformationEndpointURL = exports.getTxnGroupID = exports.sumUpTxnFees = exports.sendAndWaitRawTransaction = exports.roundNumber = exports.convertToBaseUnits = exports.convertFromBaseUnits = exports.bufferToBase64 = exports.ASSET_OPT_IN_PROCESS_TXN_COUNT = exports.applySlippageToAmount = exports.waitForTransaction = exports.getMinBalanceForAccount = exports.joinUint8Arrays = exports.decodeState = void 0;
+exports.generateIndexerAssetInformationEndpointURL = exports.getTxnGroupID = exports.sumUpTxnFees = exports.sendAndWaitRawTransaction = exports.roundNumber = exports.convertToBaseUnits = exports.convertFromBaseUnits = exports.bufferToBase64 = exports.ASSET_OPT_IN_PROCESS_TXN_COUNT = exports.applySlippageToAmount = exports.waitForConfirmation = exports.getMinBalanceForAccount = exports.joinUint8Arrays = exports.decodeState = void 0;
 const TinymanError_1 = __importDefault(require("./error/TinymanError"));
 function decodeState(stateArray = []) {
     const state = {};
@@ -71,36 +71,40 @@ function delay(timeout) {
         }, timeout);
     });
 }
-async function waitForTransaction(client, txId) {
+/**
+ * Wait until a transaction has been confirmed or rejected by the network
+ * @param client - An Algodv2 client
+ * @param txid - The ID of the transaction to wait for.
+ * @returns PendingTransactionInformation
+ */
+async function waitForConfirmation(client, txId) {
     await delay(1000);
-    let lastStatus;
-    let lastRound;
-    try {
-        lastStatus = await client.status().do();
-        lastRound = lastStatus["last-round"];
-    }
-    catch (error) {
-        throw new Error("Your transaction is already sent to the ledger but we failed to get the latest Node status.");
-    }
     // eslint-disable-next-line no-constant-condition
     while (true) {
+        let pendingTransactionInfo = null;
         try {
-            const status = await client.pendingTransactionInformation(txId).do();
-            if (status["pool-error"]) {
-                throw new Error(`Transaction Pool Error: ${status["pool-error"]}`);
-            }
-            if (status["confirmed-round"]) {
-                return status;
-            }
-            lastStatus = await client.statusAfterBlock(lastRound + 1).do();
-            lastRound = lastStatus["last-round"];
+            pendingTransactionInfo = (await client
+                .pendingTransactionInformation(txId)
+                .do());
         }
         catch (error) {
-            // continue looping
+            // Ignore errors from PendingTransactionInformation, since it may return 404 if the algod
+            // instance is behind a load balancer and the request goes to a different algod than the
+            // one we submitted the transaction to
+        }
+        if (pendingTransactionInfo) {
+            if (pendingTransactionInfo["confirmed-round"]) {
+                // Got the completed Transaction
+                return pendingTransactionInfo;
+            }
+            if (pendingTransactionInfo["pool-error"]) {
+                // If there was a pool error, then the transaction has been rejected
+                throw new Error(`Transaction Rejected: ${pendingTransactionInfo["pool-error"]}`);
+            }
         }
     }
 }
-exports.waitForTransaction = waitForTransaction;
+exports.waitForConfirmation = waitForConfirmation;
 function applySlippageToAmount(type, slippage, amount) {
     if (slippage > 1 || slippage < 0) {
         throw new Error(`Invalid slippage value. Must be between 0 and 1, got ${slippage}`);
@@ -164,7 +168,7 @@ async function sendAndWaitRawTransaction(client, signedTxnGroups) {
         let networkResponse = [];
         for (let signedTxnGroup of signedTxnGroups) {
             const { txId } = await client.sendRawTransaction(signedTxnGroup).do();
-            const status = await waitForTransaction(client, txId);
+            const status = await waitForConfirmation(client, txId);
             const confirmedRound = status["confirmed-round"];
             networkResponse.push({
                 confirmedRound,
