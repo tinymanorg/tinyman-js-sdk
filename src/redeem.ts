@@ -3,6 +3,7 @@ import {toByteArray} from "base64-js";
 
 import {
   decodeState,
+  encodeString,
   getTxnGroupID,
   sendAndWaitRawTransaction,
   sumUpTxnFees
@@ -17,8 +18,6 @@ import {
   getAssetInformationById,
   GetAssetInformationByIdOptions
 } from "./asset/assetUtils";
-
-const REDEEM_ENCODED = Uint8Array.from([114, 101, 100, 101, 101, 109]); // 'redeem'
 
 /**
  * Execute a redeem operation to collect excess assets from previous operations.
@@ -205,7 +204,7 @@ export async function generateRedeemTxns({
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
     from: pool.addr,
     appIndex: pool.validatorAppID,
-    appArgs: [REDEEM_ENCODED],
+    appArgs: [encodeString("redeem")],
     accounts: [initiatorAddr],
     foreignAssets:
       // eslint-disable-next-line eqeqeq

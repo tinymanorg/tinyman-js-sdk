@@ -3,13 +3,14 @@ import {fromByteArray} from "base64-js";
 
 import {
   decodeState,
-  joinUint8Arrays,
+  joinByteArrays,
   getMinBalanceForAccount,
-  convertFromBaseUnits
+  convertFromBaseUnits,
+  encodeString
 } from "./util";
 import {doBootstrap} from "./bootstrap";
 import {AccountInformation} from "./account/accountTypes";
-import {tinymanContract, TinymanContract} from "./contract/contract";
+import {tinymanContract} from "./contract/contract";
 
 export enum PoolStatus {
   NOT_CREATED = "not created",
@@ -118,7 +119,7 @@ export async function createPool(
   return getPoolInfo(client, pool);
 }
 
-const OUTSTANDING_ENCODED = Uint8Array.from([111]); // 'o'
+const OUTSTANDING_ENCODED = encodeString("o");
 const TOTAL_LIQUIDITY = 0xffffffffffffffffn;
 
 /* eslint-disable complexity */
@@ -150,13 +151,13 @@ export async function getPoolReserves(
     const state = decodeState(keyValue);
 
     const outstandingAsset1Key = fromByteArray(
-      joinUint8Arrays([OUTSTANDING_ENCODED, algosdk.encodeUint64(pool.asset1ID)])
+      joinByteArrays([OUTSTANDING_ENCODED, algosdk.encodeUint64(pool.asset1ID)])
     );
     const outstandingAsset2Key = fromByteArray(
-      joinUint8Arrays([OUTSTANDING_ENCODED, algosdk.encodeUint64(pool.asset2ID)])
+      joinByteArrays([OUTSTANDING_ENCODED, algosdk.encodeUint64(pool.asset2ID)])
     );
     const outstandingLiquidityTokenKey = fromByteArray(
-      joinUint8Arrays([OUTSTANDING_ENCODED, algosdk.encodeUint64(pool.liquidityTokenID!)])
+      joinByteArrays([OUTSTANDING_ENCODED, algosdk.encodeUint64(pool.liquidityTokenID!)])
     );
 
     const outstandingAsset1Value = state[outstandingAsset1Key];
@@ -228,7 +229,7 @@ export async function getPoolReserves(
 }
 /* eslint-enable complexity */
 
-const EXCESS_ENCODED = Uint8Array.from([101]); // 'e'
+const EXCESS_ENCODED = encodeString("e");
 
 export async function getAccountExcess({
   client,
@@ -265,21 +266,21 @@ export async function getAccountExcess({
     const state = decodeState(keyValue);
 
     const excessAsset1Key = fromByteArray(
-      joinUint8Arrays([
+      joinByteArrays([
         algosdk.decodeAddress(pool.addr).publicKey,
         EXCESS_ENCODED,
         algosdk.encodeUint64(pool.asset1ID)
       ])
     );
     const excessAsset2Key = fromByteArray(
-      joinUint8Arrays([
+      joinByteArrays([
         algosdk.decodeAddress(pool.addr).publicKey,
         EXCESS_ENCODED,
         algosdk.encodeUint64(pool.asset2ID)
       ])
     );
     const excessLiquidityTokenKey = fromByteArray(
-      joinUint8Arrays([
+      joinByteArrays([
         algosdk.decodeAddress(pool.addr).publicKey,
         EXCESS_ENCODED,
         algosdk.encodeUint64(pool.liquidityTokenID!)

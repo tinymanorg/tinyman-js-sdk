@@ -2,6 +2,7 @@ import algosdk from "algosdk";
 
 import {
   applySlippageToAmount,
+  encodeString,
   getTxnGroupID,
   sendAndWaitRawTransaction,
   sumUpTxnFees
@@ -129,8 +130,6 @@ export function getMintLiquidityQuote({
   };
 }
 
-const MINT_ENCODED = Uint8Array.from([109, 105, 110, 116]); // 'mint'
-
 export const MINT_PROCESS_TXN_COUNT = 5;
 
 export async function generateMintTxns({
@@ -158,7 +157,7 @@ export async function generateMintTxns({
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
     from: pool.addr,
     appIndex: pool.validatorAppID,
-    appArgs: [MINT_ENCODED],
+    appArgs: [encodeString("mint")],
     accounts: [initiatorAddr],
     foreignAssets:
       pool.asset2ID == ALGO_ASSET_ID

@@ -6,7 +6,8 @@ import {
   getTxnGroupID,
   sendAndWaitRawTransaction,
   sumUpTxnFees,
-  roundNumber
+  roundNumber,
+  encodeString
 } from "./util";
 import {PoolInfo, getAccountExcess, PoolReserves} from "./pool";
 import {InitiatorSigner, SignerTransaction} from "./common-types";
@@ -74,10 +75,6 @@ export interface SwapExecution {
   groupID: string;
 }
 
-const SWAP_ENCODED = Uint8Array.from([115, 119, 97, 112]); // 'swap'
-const FIXED_INPUT_ENCODED = Uint8Array.from([102, 105]); // 'fi'
-const FIXED_OUTPUT_ENCODED = Uint8Array.from([102, 111]); // 'fo'
-
 enum SwapTxnGroupIndices {
   FEE_TXN_INDEX = 0,
   VALIDATOR_APP_CALL_TXN_INDEX,
@@ -141,8 +138,8 @@ export async function generateSwapTransactions({
   const suggestedParams = await client.getTransactionParams().do();
 
   const validatorAppCallArgs = [
-    SWAP_ENCODED,
-    swapType === SwapType.FixedInput ? FIXED_INPUT_ENCODED : FIXED_OUTPUT_ENCODED
+    encodeString("swap"),
+    swapType === SwapType.FixedInput ? encodeString("fi") : encodeString("fo")
   ];
 
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({

@@ -2,7 +2,7 @@ import algosdk, {Algodv2, Transaction} from "algosdk";
 
 import {tinymanContract} from "./contract/contract";
 import {InitiatorSigner, SignerTransaction} from "./common-types";
-import {waitForConfirmation} from "./util";
+import {encodeString, waitForConfirmation} from "./util";
 import TinymanError from "./error/TinymanError";
 import {ALGO_ASSET_ID, LIQUIDITY_TOKEN_UNIT_NAME} from "./asset/assetConstants";
 import {
@@ -12,8 +12,6 @@ import {
   MINIMUM_BALANCE_REQUIRED_PER_BYTE_SCHEMA,
   MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE
 } from "./constant";
-
-const BOOTSTRAP_ENCODED = Uint8Array.from([98, 111, 111, 116, 115, 116, 114, 97, 112]); // 'bootstrap'
 
 enum BootstapTxnGroupIndices {
   FUNDING_TXN = 0,
@@ -84,7 +82,7 @@ export async function generateBootstrapTransactions({
     from: poolLogicSig.addr,
     appIndex: validatorAppID,
     appArgs: [
-      BOOTSTRAP_ENCODED,
+      encodeString("bootstrap"),
       algosdk.encodeUint64(asset1ID),
       algosdk.encodeUint64(asset2ID)
     ],

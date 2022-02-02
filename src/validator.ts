@@ -3,8 +3,6 @@ import algosdk, {Algodv2} from "algosdk";
 import {SignerTransaction, SupportedNetwork} from "./common-types";
 import {AccountInformation} from "./account/accountTypes";
 
-const CREATE_ENCODED = Uint8Array.from([99, 114, 101, 97, 116, 101]); // 'create'
-
 export const OPT_IN_VALIDATOR_APP_PROCESS_TXN_COUNT = 1;
 
 const VALIDATOR_APP_ID: Record<SupportedNetwork, number> = {

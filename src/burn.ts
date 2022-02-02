@@ -2,6 +2,7 @@ import algosdk from "algosdk";
 
 import {
   applySlippageToAmount,
+  encodeString,
   getTxnGroupID,
   sendAndWaitRawTransaction,
   sumUpTxnFees
@@ -108,8 +109,6 @@ export function getBurnLiquidityQuote({
   };
 }
 
-const BURN_ENCODED = Uint8Array.from([98, 117, 114, 110]); // 'burn'
-
 export const BURN_PROCESS_TXN_COUNT = 5;
 
 export async function generateBurnTxns({
@@ -134,7 +133,7 @@ export async function generateBurnTxns({
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
     from: pool.addr,
     appIndex: pool.validatorAppID,
-    appArgs: [BURN_ENCODED],
+    appArgs: [encodeString("burn")],
     accounts: [initiatorAddr],
     foreignAssets:
       pool.asset2ID == ALGO_ASSET_ID

@@ -32,14 +32,21 @@ export function decodeState(
   return state;
 }
 
-export function joinUint8Arrays(arrays: Uint8Array[]) {
-  const joined: number[] = [];
+export function joinByteArrays(arrays: Uint8Array[]) {
+  let totalLength = arrays.reduce((sum, value) => sum + value.length, 0);
 
-  for (const array of arrays) {
-    joined.push(...array);
+  let result = new Uint8Array(totalLength);
+
+  // for each array - copy it over result
+  // next array is copied right after the previous one
+  let length = 0;
+
+  for (let array of arrays) {
+    result.set(array, length);
+    length += array.length;
   }
 
-  return Uint8Array.from(joined);
+  return result;
 }
 
 const MIN_BALANCE_PER_ACCOUNT = 100000n;
@@ -245,4 +252,11 @@ export function generateIndexerAssetInformationEndpointURL(
   assetId: string | number
 ) {
   return `${baseURL}/assets/${assetId}?include-all=true`;
+}
+
+/**
+ * Converts a text into bytes
+ */
+export function encodeString(text: string) {
+  return new TextEncoder().encode(text);
 }
