@@ -5,14 +5,14 @@ import {encodeString, joinByteArrays} from "../util";
 
 async function prepareCommitTransactions({
   client,
-  validatorAppID,
+  stakingAppID,
   initiatorAddr,
   liquidityAssetID,
   program,
   amount
 }: {
   client: Algodv2;
-  validatorAppID: number;
+  stakingAppID: number;
   initiatorAddr: string;
   liquidityAssetID: number;
   program: {
@@ -29,7 +29,7 @@ async function prepareCommitTransactions({
   return [
     {
       txn: makeApplicationNoOpTxnFromObject({
-        appIndex: validatorAppID,
+        appIndex: stakingAppID,
         from: initiatorAddr,
         suggestedParams,
         foreignAssets: [liquidityAssetID],
