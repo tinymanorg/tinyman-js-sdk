@@ -5,7 +5,7 @@ import {AccountInformation} from "./account/accountTypes";
 export declare function decodeState(
   stateArray?: AccountInformation["apps-local-state"][0]["key-value"]
 ): Record<string, number | string>;
-export declare function joinUint8Arrays(arrays: Uint8Array[]): Uint8Array;
+export declare function joinByteArrays(arrays: Uint8Array[]): Uint8Array;
 export declare function getMinBalanceForAccount(accountInfo: any): bigint;
 /**
  * Wait until a transaction has been confirmed or rejected by the network
@@ -76,3 +76,7 @@ export declare function generateIndexerAssetInformationEndpointURL(
   baseURL: string,
   assetId: string | number
 ): string;
+/**
+ * Converts a text into bytes
+ */
+export declare function encodeString(text: string): Uint8Array;

@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.generateIndexerAssetInformationEndpointURL = exports.getTxnGroupID = exports.sumUpTxnFees = exports.sendAndWaitRawTransaction = exports.roundNumber = exports.convertToBaseUnits = exports.convertFromBaseUnits = exports.bufferToBase64 = exports.ASSET_OPT_IN_PROCESS_TXN_COUNT = exports.applySlippageToAmount = exports.waitForConfirmation = exports.getMinBalanceForAccount = exports.joinUint8Arrays = exports.decodeState = void 0;
+exports.encodeString = exports.generateIndexerAssetInformationEndpointURL = exports.getTxnGroupID = exports.sumUpTxnFees = exports.sendAndWaitRawTransaction = exports.roundNumber = exports.convertToBaseUnits = exports.convertFromBaseUnits = exports.bufferToBase64 = exports.ASSET_OPT_IN_PROCESS_TXN_COUNT = exports.applySlippageToAmount = exports.waitForConfirmation = exports.getMinBalanceForAccount = exports.joinByteArrays = exports.decodeState = void 0;
 const TinymanError_1 = __importDefault(require("./error/TinymanError"));
 function decodeState(stateArray = []) {
     const state = {};
@@ -29,14 +29,19 @@ function decodeState(stateArray = []) {
     return state;
 }
 exports.decodeState = decodeState;
-function joinUint8Arrays(arrays) {
-    const joined = [];
-    for (const array of arrays) {
-        joined.push(...array);
+function joinByteArrays(arrays) {
+    let totalLength = arrays.reduce((sum, value) => sum + value.length, 0);
+    let result = new Uint8Array(totalLength);
+    // for each array - copy it over result
+    // next array is copied right after the previous one
+    let length = 0;
+    for (let array of arrays) {
+        result.set(array, length);
+        length += array.length;
     }
-    return Uint8Array.from(joined);
+    return result;
 }
-exports.joinUint8Arrays = joinUint8Arrays;
+exports.joinByteArrays = joinByteArrays;
 const MIN_BALANCE_PER_ACCOUNT = 100000n;
 const MIN_BALANCE_PER_ASSET = 100000n;
 const MIN_BALANCE_PER_APP = 100000n;
@@ -194,3 +199,10 @@ function generateIndexerAssetInformationEndpointURL(baseURL, assetId) {
     return `${baseURL}/assets/${assetId}?include-all=true`;
 }
 exports.generateIndexerAssetInformationEndpointURL = generateIndexerAssetInformationEndpointURL;
+/**
+ * Converts a text into bytes
+ */
+function encodeString(text) {
+    return new TextEncoder().encode(text);
+}
+exports.encodeString = encodeString;

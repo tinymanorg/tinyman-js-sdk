@@ -43,14 +43,13 @@ function getBurnLiquidityQuote({ pool, reserves, liquidityIn }) {
     };
 }
 exports.getBurnLiquidityQuote = getBurnLiquidityQuote;
-const BURN_ENCODED = Uint8Array.from([98, 117, 114, 110]); // 'burn'
 exports.BURN_PROCESS_TXN_COUNT = 5;
 async function generateBurnTxns({ client, pool, liquidityIn, asset1Out, asset2Out, slippage, initiatorAddr }) {
     const suggestedParams = await client.getTransactionParams().do();
     const validatorAppCallTxn = algosdk_1.default.makeApplicationNoOpTxnFromObject({
         from: pool.addr,
         appIndex: pool.validatorAppID,
-        appArgs: [BURN_ENCODED],
+        appArgs: [util_1.encodeString("burn")],
         accounts: [initiatorAddr],
         foreignAssets: pool.asset2ID == assetConstants_1.ALGO_ASSET_ID
             ? [pool.asset1ID, pool.liquidityTokenID]

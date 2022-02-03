@@ -5,7 +5,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.isOptedIntoValidator = exports.generateOptOutOfValidatorTxns = exports.OPT_OUT_VALIDATOR_APP_PROCESS_TXN_COUNT = exports.generateOptIntoValidatorTxns = exports.getValidatorAppID = exports.OPT_IN_VALIDATOR_APP_PROCESS_TXN_COUNT = void 0;
 const algosdk_1 = __importDefault(require("algosdk"));
-const CREATE_ENCODED = Uint8Array.from([99, 114, 101, 97, 116, 101]); // 'create'
 exports.OPT_IN_VALIDATOR_APP_PROCESS_TXN_COUNT = 1;
 const VALIDATOR_APP_ID = {
     testnet: 62368684,

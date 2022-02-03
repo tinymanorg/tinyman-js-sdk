@@ -18,9 +18,6 @@ var SwapType;
     SwapType["FixedInput"] = "fixed-input";
     SwapType["FixedOutput"] = "fixed-output";
 })(SwapType = exports.SwapType || (exports.SwapType = {}));
-const SWAP_ENCODED = Uint8Array.from([115, 119, 97, 112]); // 'swap'
-const FIXED_INPUT_ENCODED = Uint8Array.from([102, 105]); // 'fi'
-const FIXED_OUTPUT_ENCODED = Uint8Array.from([102, 111]); // 'fo'
 var SwapTxnGroupIndices;
 (function (SwapTxnGroupIndices) {
     SwapTxnGroupIndices[SwapTxnGroupIndices["FEE_TXN_INDEX"] = 0] = "FEE_TXN_INDEX";
@@ -48,8 +45,8 @@ exports.SWAP_PROCESS_TXN_COUNT = 4;
 async function generateSwapTransactions({ client, pool, swapType, assetIn, assetOut, slippage, initiatorAddr }) {
     const suggestedParams = await client.getTransactionParams().do();
     const validatorAppCallArgs = [
-        SWAP_ENCODED,
-        swapType === SwapType.FixedInput ? FIXED_INPUT_ENCODED : FIXED_OUTPUT_ENCODED
+        util_1.encodeString("swap"),
+        swapType === SwapType.FixedInput ? util_1.encodeString("fi") : util_1.encodeString("fo")
     ];
     const validatorAppCallTxn = algosdk_1.default.makeApplicationNoOpTxnFromObject({
         from: pool.addr,

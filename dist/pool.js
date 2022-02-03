@@ -71,7 +71,7 @@ async function createPool(client, pool, signedTxns, txnIDs) {
     return getPoolInfo(client, pool);
 }
 exports.createPool = createPool;
-const OUTSTANDING_ENCODED = Uint8Array.from([111]); // 'o'
+const OUTSTANDING_ENCODED = util_1.encodeString("o");
 const TOTAL_LIQUIDITY = 0xffffffffffffffffn;
 /* eslint-disable complexity */
 async function getPoolReserves(client, pool) {
@@ -93,9 +93,9 @@ async function getPoolReserves(client, pool) {
             break;
         }
         const state = util_1.decodeState(keyValue);
-        const outstandingAsset1Key = base64_js_1.fromByteArray(util_1.joinUint8Arrays([OUTSTANDING_ENCODED, algosdk_1.default.encodeUint64(pool.asset1ID)]));
-        const outstandingAsset2Key = base64_js_1.fromByteArray(util_1.joinUint8Arrays([OUTSTANDING_ENCODED, algosdk_1.default.encodeUint64(pool.asset2ID)]));
-        const outstandingLiquidityTokenKey = base64_js_1.fromByteArray(util_1.joinUint8Arrays([OUTSTANDING_ENCODED, algosdk_1.default.encodeUint64(pool.liquidityTokenID)]));
+        const outstandingAsset1Key = base64_js_1.fromByteArray(util_1.joinByteArrays([OUTSTANDING_ENCODED, algosdk_1.default.encodeUint64(pool.asset1ID)]));
+        const outstandingAsset2Key = base64_js_1.fromByteArray(util_1.joinByteArrays([OUTSTANDING_ENCODED, algosdk_1.default.encodeUint64(pool.asset2ID)]));
+        const outstandingLiquidityTokenKey = base64_js_1.fromByteArray(util_1.joinByteArrays([OUTSTANDING_ENCODED, algosdk_1.default.encodeUint64(pool.liquidityTokenID)]));
         const outstandingAsset1Value = state[outstandingAsset1Key];
         const outstandingAsset2Value = state[outstandingAsset2Key];
         const outstandingLiquidityTokenValue = state[outstandingLiquidityTokenKey];
@@ -153,7 +153,7 @@ async function getPoolReserves(client, pool) {
 }
 exports.getPoolReserves = getPoolReserves;
 /* eslint-enable complexity */
-const EXCESS_ENCODED = Uint8Array.from([101]); // 'e'
+const EXCESS_ENCODED = util_1.encodeString("e");
 async function getAccountExcess({ client, pool, accountAddr }) {
     const info = (await client
         .accountInformation(accountAddr)
@@ -173,17 +173,17 @@ async function getAccountExcess({ client, pool, accountAddr }) {
             break;
         }
         const state = util_1.decodeState(keyValue);
-        const excessAsset1Key = base64_js_1.fromByteArray(util_1.joinUint8Arrays([
+        const excessAsset1Key = base64_js_1.fromByteArray(util_1.joinByteArrays([
             algosdk_1.default.decodeAddress(pool.addr).publicKey,
             EXCESS_ENCODED,
             algosdk_1.default.encodeUint64(pool.asset1ID)
         ]));
-        const excessAsset2Key = base64_js_1.fromByteArray(util_1.joinUint8Arrays([
+        const excessAsset2Key = base64_js_1.fromByteArray(util_1.joinByteArrays([
             algosdk_1.default.decodeAddress(pool.addr).publicKey,
             EXCESS_ENCODED,
             algosdk_1.default.encodeUint64(pool.asset2ID)
         ]));
-        const excessLiquidityTokenKey = base64_js_1.fromByteArray(util_1.joinUint8Arrays([
+        const excessLiquidityTokenKey = base64_js_1.fromByteArray(util_1.joinByteArrays([
             algosdk_1.default.decodeAddress(pool.addr).publicKey,
             EXCESS_ENCODED,
             algosdk_1.default.encodeUint64(pool.liquidityTokenID)

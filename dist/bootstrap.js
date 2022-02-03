@@ -10,7 +10,6 @@ const util_1 = require("./util");
 const TinymanError_1 = __importDefault(require("./error/TinymanError"));
 const assetConstants_1 = require("./asset/assetConstants");
 const constant_1 = require("./constant");
-const BOOTSTRAP_ENCODED = Uint8Array.from([98, 111, 111, 116, 115, 116, 114, 97, 112]); // 'bootstrap'
 var BootstapTxnGroupIndices;
 (function (BootstapTxnGroupIndices) {
     BootstapTxnGroupIndices[BootstapTxnGroupIndices["FUNDING_TXN"] = 0] = "FUNDING_TXN";
@@ -50,7 +49,7 @@ async function generateBootstrapTransactions({ client, validatorAppID, asset1ID,
         from: poolLogicSig.addr,
         appIndex: validatorAppID,
         appArgs: [
-            BOOTSTRAP_ENCODED,
+            util_1.encodeString("bootstrap"),
             algosdk_1.default.encodeUint64(asset1ID),
             algosdk_1.default.encodeUint64(asset2ID)
         ],

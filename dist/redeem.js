@@ -11,7 +11,6 @@ const pool_1 = require("./pool");
 const constant_1 = require("./constant");
 const TinymanError_1 = __importDefault(require("./error/TinymanError"));
 const assetUtils_1 = require("./asset/assetUtils");
-const REDEEM_ENCODED = Uint8Array.from([114, 101, 100, 101, 101, 109]); // 'redeem'
 /**
  * Execute a redeem operation to collect excess assets from previous operations.
  *
@@ -118,7 +117,7 @@ async function generateRedeemTxns({ client, pool, assetID, assetOut, initiatorAd
     const validatorAppCallTxn = algosdk_1.default.makeApplicationNoOpTxnFromObject({
         from: pool.addr,
         appIndex: pool.validatorAppID,
-        appArgs: [REDEEM_ENCODED],
+        appArgs: [util_1.encodeString("redeem")],
         accounts: [initiatorAddr],
         foreignAssets: 
         // eslint-disable-next-line eqeqeq

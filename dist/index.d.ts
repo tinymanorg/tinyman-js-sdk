@@ -99,3 +99,4 @@ export {
 } from "./account/accountUtils";
 export {AccountInformationData} from "./account/accountTypes";
 export {validatorAppSchema} from "./contract/contract";
+export {prepareCommitTransactions, getStakingAppID} from "./stake/stakeUtils";

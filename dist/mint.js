@@ -60,7 +60,6 @@ function getMintLiquidityQuote({ pool, reserves, asset1In, asset2In }) {
     };
 }
 exports.getMintLiquidityQuote = getMintLiquidityQuote;
-const MINT_ENCODED = Uint8Array.from([109, 105, 110, 116]); // 'mint'
 exports.MINT_PROCESS_TXN_COUNT = 5;
 async function generateMintTxns({ client, pool, asset1In, asset2In, liquidityOut, slippage, initiatorAddr }) {
     // apply slippage to liquidity out amount
@@ -69,7 +68,7 @@ async function generateMintTxns({ client, pool, asset1In, asset2In, liquidityOut
     const validatorAppCallTxn = algosdk_1.default.makeApplicationNoOpTxnFromObject({
         from: pool.addr,
         appIndex: pool.validatorAppID,
-        appArgs: [MINT_ENCODED],
+        appArgs: [util_1.encodeString("mint")],
         accounts: [initiatorAddr],
         foreignAssets: pool.asset2ID == assetConstants_1.ALGO_ASSET_ID
             ? [pool.asset1ID, pool.liquidityTokenID]
