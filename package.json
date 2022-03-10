@@ -1,6 +1,6 @@
 {
   "name": "tinyman",
-  "version": "0.32.4",
+  "version": "0.32.5",
   "description": "Tinyman JS SDK",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
