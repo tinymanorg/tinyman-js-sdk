@@ -29,7 +29,6 @@ async function prepareCommitTransactions({ client, stakingAppID, initiatorAddr, 
 }
 exports.prepareCommitTransactions = prepareCommitTransactions;
 function getStakingAppID(network) {
-    // TODO: fix the mainnet app id
-    return network === "testnet" ? 51948952 : 0;
+    return network === "testnet" ? 51948952 : 649588853;
 }
 exports.getStakingAppID = getStakingAppID;

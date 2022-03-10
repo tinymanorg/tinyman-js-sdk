@@ -18,5 +18,5 @@ declare function prepareCommitTransactions({
   };
   amount: number | bigint;
 }): Promise<SignerTransaction[]>;
-declare function getStakingAppID(network: SupportedNetwork): 0 | 51948952;
+declare function getStakingAppID(network: SupportedNetwork): 51948952 | 649588853;
 export {prepareCommitTransactions, getStakingAppID};
