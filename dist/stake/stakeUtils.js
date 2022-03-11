@@ -15,7 +15,7 @@ async function prepareCommitTransactions({ client, stakingAppID, initiatorAddr, 
                 suggestedParams,
                 foreignAssets: [liquidityAssetID],
                 accounts: [program.accountAddress],
-                appArgs: [util_1.encodeString("commit"), amountEncoded, programIdEncoded],
+                appArgs: [util_1.encodeString("commit"), amountEncoded],
                 note: util_1.joinByteArrays([
                     util_1.encodeString("tinymanStaking/v1:b"),
                     programIdEncoded,

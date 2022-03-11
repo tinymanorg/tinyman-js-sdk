@@ -34,7 +34,7 @@ async function prepareCommitTransactions({
         suggestedParams,
         foreignAssets: [liquidityAssetID],
         accounts: [program.accountAddress],
-        appArgs: [encodeString("commit"), amountEncoded, programIdEncoded],
+        appArgs: [encodeString("commit"), amountEncoded],
         note: joinByteArrays([
           encodeString("tinymanStaking/v1:b"),
           programIdEncoded,
