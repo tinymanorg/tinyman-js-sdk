@@ -220,7 +220,7 @@ export async function generateRedeemTxns({
     assetOutTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
       from: pool.addr,
       to: initiatorAddr,
-      amount: assetOut,
+      amount: BigInt(assetOut),
       suggestedParams
     });
   } else {
@@ -228,7 +228,7 @@ export async function generateRedeemTxns({
       from: pool.addr,
       to: initiatorAddr,
       assetIndex: assetID,
-      amount: assetOut,
+      amount: BigInt(assetOut),
       suggestedParams
     });
   }
