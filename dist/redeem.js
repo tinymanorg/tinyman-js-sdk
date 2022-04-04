@@ -127,7 +127,6 @@ async function generateRedeemTxns({ client, pool, assetID, assetOut, initiatorAd
         suggestedParams
     });
     let assetOutTxn;
-    console.log(assetOut);
     if (assetID === 0) {
         assetOutTxn = algosdk_1.default.makePaymentTxnWithSuggestedParamsFromObject({
             from: pool.addr,
