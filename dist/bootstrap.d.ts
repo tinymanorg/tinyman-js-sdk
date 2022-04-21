@@ -1,6 +1,6 @@
 import {Algodv2} from "algosdk";
 import {InitiatorSigner, SignerTransaction} from "./common-types";
-export declare function getBootstrapProcessTxnCount(asset2ID: number): 5 | 4;
+export declare function getBootstrapProcessTxnCount(asset2ID: number): 4 | 5;
 export declare function calculatePoolBootstrapFundingTxnAmount(
   asset2ID: number,
   fees: {
