@@ -36,27 +36,7 @@ const validatorAppId = getValidatorAppID("mainnet")
 
 ### Swapping
 
-1. First, we need to get the pool details for the asset pair:
-
-```typescript
-const poolInfo = await getPoolInfo(algodClient, {
-  validatorAppID,
-  asset1ID,
-  asset2ID
-});
-```
-
-This returns a PoolInfo object. A swap can only be done if the pair has a pool that is already created and has a `PoolStatus.READY` status.
-
-We will also need the reserve details of the pool to get a quote for the swap:
-
-```typescript
-const poolReserves = await getPoolReserves(algodClient, poolInfo);
-```
-
-<br/>
-
-2. If the pair has a READY pool, we can perform a swap.
+0. Let's say, we want to perform a swap between ALGO and USDC:
 
 ```typescript
 const assetIN = {
@@ -72,7 +52,27 @@ const assetOUT = {
 };
 ```
 
-Let's say, we want to perform a FIXED INPUT swap and turn 100 ALGO into USDC. You can get a quote for this swap like this:
+1. First, we need to get the pool details for the asset pair:
+
+```typescript
+const poolInfo = await getPoolInfo(algodClient, {
+  validatorAppID,
+  assetIN.id,
+  assetOUT.id
+});
+```
+
+This returns a PoolInfo object. A swap can only be done if the pair has a pool that is already created and has a `PoolStatus.READY` status.
+
+We will also need the reserve details of the pool to get a quote for the swap:
+
+```typescript
+const poolReserves = await getPoolReserves(algodClient, poolInfo);
+```
+
+<br/>
+
+2. If the pair has a READY pool, we can get a quote for the swap. The following code gets a quote for a FIXED INPUT swap:
 
 ```typescript
 const assetIN_amount = 100;
