@@ -19,7 +19,7 @@ export {
   sumUpTxnFees
 } from "./util/util";
 
-export {generateOptIntoAssetTxns, isNFT} from "./util/asset/assetUtils";
+export {generateOptIntoAssetTxns} from "./util/asset/assetUtils";
 
 export {
   AccountAsset,

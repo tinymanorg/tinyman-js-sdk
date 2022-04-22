@@ -1,5 +1,4 @@
 import {SignerTransaction} from "../commonTypes";
-import {TinymanAnalyticsApiAsset} from "./assetModels";
 export declare function generateOptIntoAssetTxns({
   client,
   assetID,
@@ -9,4 +8,3 @@ export declare function generateOptIntoAssetTxns({
   assetID: any;
   initiatorAddr: any;
 }): Promise<SignerTransaction[]>;
-export declare function isNFT(asset: TinymanAnalyticsApiAsset): boolean;
