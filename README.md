@@ -124,7 +124,7 @@ const swapTxns = await generateSwapTransactions({
 });
 ```
 
-4. Sign the txns with a wallet
+4. Sign the txns
 
 ```typescript
 const signedTxns = await signSwapTransactions({
@@ -134,7 +134,7 @@ const signedTxns = await signSwapTransactions({
 });
 ```
 
-`initiatorSigner` expects a callback of shape `(txGroups: SignerTransaction[][]) => Promise<Uint8Array[]>`. So, it takes the txns generated in the previous step and signs them with a wallet and then resolves with `Uint8Array[]`.
+`initiatorSigner` expects a callback of shape `(txGroups: SignerTransaction[][]) => Promise<Uint8Array[]>`. So, it takes the txns generated in the previous step and signs them and then resolves with `Uint8Array[]`.
 
 5. Perform the swap:
 
