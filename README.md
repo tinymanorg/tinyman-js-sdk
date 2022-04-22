@@ -159,3 +159,5 @@ const data = await issueSwap({
   initiatorAddr: accountAddress
 });
 ```
+
+The returned data from `issueSwap` has information about the confirmation round, transaction ID and the excess amounts accumulated within the account. Please check the `SwapExecution` interface for details on the returned data.
