@@ -34,8 +34,10 @@ const validatorAppId = getValidatorAppID("mainnet")
 
 <br>
 
-### Swapping
+<details>
+<summary><strong>Swapping</strong></summary>
 
+<br>
 0. Let's say, we want to perform a swap between ALGO and USDC:
 
 ```typescript
@@ -161,3 +163,5 @@ const data = await issueSwap({
 ```
 
 The returned data from `issueSwap` has information about the confirmation round, transaction ID and the excess amounts accumulated within the account. Please check the `SwapExecution` interface for details on the returned data.
+
+</details>
