@@ -1,5 +1,150 @@
-tinyman-js-sdk
-===========
+# tinyman-js-sdk
 
 JavaScript/TypeScript SDK for the Tinyman AMM Contracts.
 
+## Installation
+
+```shell
+npm i -S github:tinymanorg/tinyman-js-sdk
+```
+
+## Usage
+
+First, you need to instantiate the Algod client and get the Tinyman Validator App ID for the network:
+
+```typescript
+const algodClient = new algosdk.Algodv2(
+  /** Enter token here */,
+  /** Enter server here */,
+  /** Enter port here */
+)
+const validatorAppId = getValidatorAppID("mainnet")
+```
+
+<br>
+
+### Swapping
+
+1. First, we need to get the pool details for the asset pair:
+
+```typescript
+const poolInfo = await getPoolInfo(algodClient, {
+  validatorAppID,
+  asset1ID,
+  asset2ID
+});
+```
+
+This returns a PoolInfo object. A swap can only be done if the pair has a pool that is already created and has a `PoolStatus.READY` status.
+
+We will also need the reserve details of the pool to get a quote for the swap:
+
+```typescript
+const poolReserves = await getPoolReserves(algodClient, poolInfo);
+```
+
+<br/>
+
+2. If the pair has a READY pool, we can perform a swap.
+
+```typescript
+const assetIN = {
+  id: 0,
+  decimals: 6,
+  unit_name: "ALGO"
+};
+
+const assetOUT = {
+  id: 31566704,
+  decimals: 6,
+  unit_name: "USDC"
+};
+```
+
+Let's say, we want to perform a FIXED INPUT swap and turn 100 ALGO into USDC. You can get a quote for this swap like this:
+
+```typescript
+const assetIN_amount = 100;
+
+const swapQuote = getSwapQuote(
+  SwapType.FixedInput,
+  poolInfo,
+  poolReserves,
+  {
+    assetID: assetIN.id,
+    amount: convertToBaseUnits(assetIN.decimals, assetIN_amount)
+  },
+  {
+    assetIn: assetIN.decimals,
+    assetOut: assetOUT.decimals
+  }
+);
+```
+
+On the other hand, for a FIXED OUTPUT swap, we can get the quote like the following:
+
+```typescript
+const assetOUT_amount = 71.694124;
+
+const swapQuote = getSwapQuote(
+  SwapType.FixedOutput,
+  poolInfo,
+  poolReserves,
+  {
+    assetID: assetOUT.id,
+    amount: convertToBaseUnits(assetOUT.decimals, assetOUT_amount)
+  },
+  {
+    assetIn: assetIN.decimals,
+    assetOut: assetOUT.decimals
+  }
+);
+```
+
+3. Using the quote details, we can get the transaction group for the swap.
+
+```typescript
+const slippage = 0.1;
+const accountAddress = "...";
+
+const swapTxns = await generateSwapTransactions({
+  client: algodClient,
+  pool: poolInfo,
+  swapType: SwapType.FixedInput, // or, SwapType.FixedOutput
+  assetIn: {
+    assetID: swapQuote.assetInID,
+    amount: Number(swapQuote.assetInAmount)
+  },
+  assetOut: {
+    assetID: swapQuote.assetOutID,
+    amount: Number(swapQuote.assetOutAmount)
+  },
+  slippage,
+  initiatorAddr: accountAddress
+});
+```
+
+4. Sign the txns with a wallet
+
+```typescript
+const signedTxns = await signSwapTransactions({
+  pool: poolInfo,
+  txGroup: swapTxns,
+  initiatorSigner: signerCallback
+});
+```
+
+`initiatorSigner` expects a callback of shape `(txGroups: SignerTransaction[][]) => Promise<Uint8Array[]>`. So, it takes the txns generated in the previous step and signs them with a wallet and then resolves with `Uint8Array[]`.
+
+5. Perform the swap:
+
+```typescript
+const data = await issueSwap({
+  client: algodClient,
+  pool: poolInfo,
+  txGroup: swapTxns,
+  signedTxns,
+  swapType: SwapType.FixedInput, // or, SwapType.FixedOutput
+  initiatorAddr: accountAddress
+});
+```
