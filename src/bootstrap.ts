@@ -1,17 +1,19 @@
-import algosdk, {Algodv2, Transaction} from "algosdk";
+import algosdk, {Algodv2, LogicSigAccount, Transaction} from "algosdk";
 
 import {tinymanContract} from "./contract/contract";
-import {InitiatorSigner, SignerTransaction} from "./common-types";
-import {encodeString, waitForConfirmation} from "./util";
-import TinymanError from "./error/TinymanError";
-import {ALGO_ASSET_ID, LIQUIDITY_TOKEN_UNIT_NAME} from "./asset/assetConstants";
+import {InitiatorSigner, SignerTransaction} from "./util/commonTypes";
+import {encodeString, waitForConfirmation} from "./util/util";
+import TinymanError from "./util/error/TinymanError";
+import {ALGO_ASSET_ID, LIQUIDITY_TOKEN_UNIT_NAME} from "./util/asset/assetConstants";
 import {
   BASE_MINIMUM_BALANCE,
   MINIMUM_BALANCE_REQUIRED_PER_APP,
   MINIMUM_BALANCE_REQUIRED_PER_ASSET,
   MINIMUM_BALANCE_REQUIRED_PER_BYTE_SCHEMA,
   MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE
-} from "./constant";
+} from "./util/constant";
+import {PoolInfo} from "./util/pool/poolTypes";
+import {getPoolInfo} from "./util/pool/poolUtils";
 
 enum BootstapTxnGroupIndices {
   FUNDING_TXN = 0,
@@ -184,7 +186,7 @@ export async function signBootstrapTransactions({
     asset2ID,
     validatorAppID
   });
-  const lsig = algosdk.makeLogicSig(poolLogicSig.program);
+  const lsig = new LogicSigAccount(poolLogicSig.program);
 
   const txnIDs: string[] = [];
   const signedTxns = txGroup.map((txDetail, index) => {
@@ -201,7 +203,7 @@ export async function signBootstrapTransactions({
   return {signedTxns, txnIDs};
 }
 
-export async function doBootstrap({
+async function doBootstrap({
   client,
   signedTxns,
   txnIDs
@@ -233,4 +235,35 @@ export async function doBootstrap({
       "We encountered something unexpected while bootstraping the pool. Try again later."
     );
   }
+}
+
+/**
+ * Create an pool for an asset pair if it does not already exist. The initiator will provide
+ * funding to create the pool and pay for the creation transaction fees.
+ *
+ * @param client An Algodv2 client.
+ * @param pool Parameters of the pool to create.
+ * @param pool.validatorAppID The ID of the Validator App for the network.
+ * @param pool.asset1ID The ID of the first asset in the pool pair.
+ * @param pool.asset2ID The ID of the second asset in the pool pair.
+ * @param signedTxns Signed transactions
+ * @param txnIDs Transaction IDs
+ */
+export async function createPool(
+  client: Algodv2,
+  pool: {
+    validatorAppID: number;
+    asset1ID: number;
+    asset2ID: number;
+  },
+  signedTxns: Uint8Array[],
+  txnIDs: string[]
+): Promise<PoolInfo> {
+  await doBootstrap({
+    client,
+    signedTxns,
+    txnIDs
+  });
+
+  return getPoolInfo(client, pool);
 }

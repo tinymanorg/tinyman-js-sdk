@@ -1,14 +1,4 @@
-import WebStorage from "../web-storage/WebStorage";
 import {TinymanAnalyticsApiAsset} from "./assetModels";
-
-const cachedAssetsStoredValue = WebStorage.getFromWebStorage(
-  WebStorage.STORED_KEYS.TINYMAN_CACHED_ASSETS
-);
-
-export const CACHED_ASSETS: Record<
-  string,
-  {asset: TinymanAnalyticsApiAsset; isDeleted: boolean}
-> = (typeof cachedAssetsStoredValue === "object" ? cachedAssetsStoredValue : null) || {};
 
 export const ALGO_ASSET_ID = 0;
 

@@ -1,6 +1,6 @@
 import {Algodv2} from "algosdk";
-import {PoolInfo, PoolReserves} from "./pool";
-import {InitiatorSigner, SignerTransaction} from "./common-types";
+import {InitiatorSigner, SignerTransaction} from "./util/commonTypes";
+import {PoolInfo, PoolReserves} from "./util/pool/poolTypes";
 export declare enum SwapType {
   FixedInput = "fixed-input",
   FixedOutput = "fixed-output"

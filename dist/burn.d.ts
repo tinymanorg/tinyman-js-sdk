@@ -1,5 +1,5 @@
-import {PoolInfo, PoolReserves} from "./pool";
-import {InitiatorSigner, SignerTransaction} from "./common-types";
+import {PoolInfo, PoolReserves} from "./util/pool/poolTypes";
+import {InitiatorSigner, SignerTransaction} from "./util/commonTypes";
 /** An object containing information about a burn quote. */
 export interface BurnQuote {
   /** The round that this quote is based on. */

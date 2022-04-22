@@ -1,5 +1,4 @@
 import {AccountAsset} from "../asset/assetModels";
-
 export interface AccountInformation {
   address: string;
   amount: number;
@@ -14,19 +13,37 @@ export interface AccountInformation {
         uint: number;
       };
     }[];
-    schema: {"num-byte-slice": number; "num-uint": number};
+    schema: {
+      "num-byte-slice": number;
+      "num-uint": number;
+    };
   }[];
-  "apps-total-schema": {"num-byte-slice": number; "num-uint": number};
+  "apps-total-schema": {
+    "num-byte-slice": number;
+    "num-uint": number;
+  };
   assets: AccountAsset[];
   "created-apps": any[];
-  "created-assets": Omit<AccountAsset, "asset-id"> & {index: number}[];
+  "created-assets": Omit<AccountAsset, "asset-id"> &
+    {
+      index: number;
+    }[];
   "pending-rewards": number;
   "reward-base": number;
   rewards: number;
   round: number;
   status: "Offline";
 }
-
-export type AccountInformationData = AccountInformation & {
+export declare type AccountInformationData = AccountInformation & {
   minimum_required_balance: number;
 };
+export interface AccountExcessWithinPool {
+  excessAsset1: bigint;
+  excessAsset2: bigint;
+  excessLiquidityTokens: bigint;
+}
+export interface AccountExcess {
+  poolAddress: string;
+  assetID: number;
+  amount: number;
+}

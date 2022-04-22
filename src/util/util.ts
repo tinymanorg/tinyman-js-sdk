@@ -1,6 +1,6 @@
 import {Algodv2} from "algosdk";
 
-import {SignerTransaction} from "./common-types";
+import {SignerTransaction} from "./commonTypes";
 import {AccountInformation} from "./account/accountTypes";
 import TinymanError from "./error/TinymanError";
 
@@ -14,11 +14,9 @@ export function decodeState(
     let value;
 
     // intentionally using == to match BigInts
-    // eslint-disable-next-line eqeqeq
     if (pair.value.type == 1) {
       // value is byte array
       value = pair.value.bytes;
-      // eslint-disable-next-line eqeqeq
     } else if (pair.value.type == 2) {
       // value is uint64
       value = pair.value.uint;
@@ -100,10 +98,10 @@ export async function waitForConfirmation(
   client: Algodv2,
   txId: string
 ): Promise<Record<string, any>> {
-  await delay(1000);
-
   // eslint-disable-next-line no-constant-condition
   while (true) {
+    await delay(1000);
+
     let pendingTransactionInfo: Record<string, any> | null = null;
 
     try {
@@ -245,13 +243,6 @@ export function sumUpTxnFees(txns: SignerTransaction[]): number {
 
 export function getTxnGroupID(txns: SignerTransaction[]) {
   return bufferToBase64(txns[0].txn.group);
-}
-
-export function generateIndexerAssetInformationEndpointURL(
-  baseURL: string,
-  assetId: string | number
-) {
-  return `${baseURL}/assets/${assetId}?include-all=true`;
 }
 
 /**

@@ -1,4 +1,4 @@
-import algosdk, {Algodv2} from "algosdk";
+import algosdk, {Algodv2, LogicSigAccount} from "algosdk";
 
 import {
   applySlippageToAmount,
@@ -8,12 +8,13 @@ import {
   sumUpTxnFees,
   roundNumber,
   encodeString
-} from "./util";
-import {PoolInfo, getAccountExcess, PoolReserves} from "./pool";
-import {InitiatorSigner, SignerTransaction} from "./common-types";
-import TinymanError from "./error/TinymanError";
-import {DEFAULT_FEE_TXN_NOTE} from "./constant";
-import {ALGO_ASSET_ID} from "./asset/assetConstants";
+} from "./util/util";
+import {InitiatorSigner, SignerTransaction} from "./util/commonTypes";
+import TinymanError from "./util/error/TinymanError";
+import {DEFAULT_FEE_TXN_NOTE} from "./util/constant";
+import {ALGO_ASSET_ID} from "./util/asset/assetConstants";
+import {PoolInfo, PoolReserves} from "./util/pool/poolTypes";
+import {getAccountExcessWithinPool} from "./util/account/accountUtils";
 
 // FEE = %0.3 or 3/1000
 const FEE_NUMERATOR = 3n;
@@ -91,7 +92,7 @@ export async function signSwapTransactions({
   txGroup: SignerTransaction[];
   initiatorSigner: InitiatorSigner;
 }): Promise<Uint8Array[]> {
-  const lsig = algosdk.makeLogicSig(pool.program);
+  const lsig = new LogicSigAccount(pool.program);
 
   const [signedFeeTxn, signedAssetInTxn] = await initiatorSigner([txGroup]);
 
@@ -338,7 +339,7 @@ async function fixedInputSwap({
   };
   initiatorAddr: string;
 }): Promise<Omit<SwapExecution, "fees" | "groupID">> {
-  const prevExcessAssets = await getAccountExcess({
+  const prevExcessAssets = await getAccountExcessWithinPool({
     client,
     pool,
     accountAddr: initiatorAddr
@@ -346,7 +347,7 @@ async function fixedInputSwap({
 
   let [{confirmedRound, txnID}] = await sendAndWaitRawTransaction(client, [signedTxns]);
 
-  const excessAssets = await getAccountExcess({
+  const excessAssets = await getAccountExcessWithinPool({
     client,
     pool,
     accountAddr: initiatorAddr
@@ -545,7 +546,7 @@ async function fixedOutputSwap({
   };
   initiatorAddr: string;
 }): Promise<Omit<SwapExecution, "fees" | "groupID">> {
-  const prevExcessAssets = await getAccountExcess({
+  const prevExcessAssets = await getAccountExcessWithinPool({
     client,
     pool,
     accountAddr: initiatorAddr
@@ -553,7 +554,7 @@ async function fixedOutputSwap({
 
   let [{confirmedRound, txnID}] = await sendAndWaitRawTransaction(client, [signedTxns]);
 
-  const excessAssets = await getAccountExcess({
+  const excessAssets = await getAccountExcessWithinPool({
     client,
     pool,
     accountAddr: initiatorAddr

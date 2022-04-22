@@ -1,4 +1,4 @@
-import {SignerTransaction} from "../util/commonTypes";
+import {SignerTransaction} from "../commonTypes";
 import {TinymanAnalyticsApiAsset} from "./assetModels";
 export declare function generateOptIntoAssetTxns({
   client,

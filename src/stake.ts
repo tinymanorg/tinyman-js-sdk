@@ -1,7 +1,7 @@
 import {Algodv2, encodeUint64, makeApplicationNoOpTxnFromObject} from "algosdk";
 
-import {SignerTransaction, SupportedNetwork} from "../common-types";
-import {encodeString, joinByteArrays} from "../util";
+import {SignerTransaction, SupportedNetwork} from "./util/commonTypes";
+import {encodeString, joinByteArrays} from "./util/util";
 
 async function prepareCommitTransactions({
   client,

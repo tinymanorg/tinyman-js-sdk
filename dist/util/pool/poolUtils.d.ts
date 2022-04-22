@@ -1,30 +1,5 @@
 import {Algodv2} from "algosdk";
-export declare enum PoolStatus {
-  NOT_CREATED = "not created",
-  BOOTSTRAP = "bootstrap",
-  READY = "ready",
-  ERROR = "error"
-}
-export interface PoolInfo {
-  addr: string;
-  program: Uint8Array;
-  validatorAppID: number;
-  asset1ID: number;
-  asset2ID: number;
-  liquidityTokenID?: number;
-  status: PoolStatus;
-}
-export interface PoolReserves {
-  round: number;
-  asset1: bigint;
-  asset2: bigint;
-  issuedLiquidity: bigint;
-}
-export interface AccountExcess {
-  excessAsset1: bigint;
-  excessAsset2: bigint;
-  excessLiquidityTokens: bigint;
-}
+import {PoolInfo, PoolReserves} from "./poolTypes";
 /**
  * Look up information about an pool.
  *
@@ -46,15 +21,6 @@ export declare function getPoolReserves(
   client: any,
   pool: PoolInfo
 ): Promise<PoolReserves>;
-export declare function getAccountExcess({
-  client,
-  pool,
-  accountAddr
-}: {
-  client: any;
-  pool: PoolInfo;
-  accountAddr: string;
-}): Promise<AccountExcess>;
 /**
  * @param {bigint} totalLiquidity Total amount of issued liquidity within a pool
  * @param {bigint} ownedLiquidity Amount of liquidity tokens within an account

@@ -1,8 +1,6 @@
-import {Algodv2, Indexer} from "algosdk";
-import {PoolInfo} from "./pool";
-import {InitiatorSigner, SignerTransaction} from "./common-types";
-import {TinymanAnalyticsApiAsset} from "./asset/assetModels";
-import {GetAssetInformationByIdOptions} from "./asset/assetUtils";
+import {Algodv2} from "algosdk";
+import {InitiatorSigner, SignerTransaction} from "./util/commonTypes";
+import {PoolInfo} from "./util/pool/poolTypes";
 /**
  * Execute a redeem operation to collect excess assets from previous operations.
  *
@@ -76,54 +74,3 @@ export declare function generateRedeemTxns({
   assetOut: number | bigint;
   initiatorAddr: string;
 }): Promise<SignerTransaction[]>;
-export interface ExcessAmountData {
-  poolAddress: string;
-  assetID: number;
-  amount: number;
-}
-/**
- * Generates a list of excess amounts accumulated within an account.
- * @param params.client An Algodv2 client.
- * @param params.accountAddr The address of the account performing the redeem operation.
- * @param params.validatorAppID Validator APP ID
- * @returns List of excess amounts
- */
-export declare function getExcessAmounts({
-  client,
-  accountAddr,
-  validatorAppID
-}: {
-  client: any;
-  accountAddr: string;
-  validatorAppID: number;
-}): Promise<ExcessAmountData[]>;
-export interface ExcessAmountDataWithPoolAssetDetails {
-  pool: {
-    info: PoolInfo;
-    asset1: TinymanAnalyticsApiAsset;
-    asset2: TinymanAnalyticsApiAsset;
-    liquidityAsset: TinymanAnalyticsApiAsset;
-  };
-  asset: TinymanAnalyticsApiAsset;
-  amount: number;
-}
-/**
- * Generates a list of excess amounts accumulated within an account. Each item includes details of pool and its assets.
- * @param params.client An Algodv2 client.
- * @param params.accountAddr The address of the account performing the redeem operation.
- * @param params.validatorAppID Validator APP ID
- * @returns List of excess amounts
- */
-export declare function getExcessAmountsWithPoolAssetDetails({
-  client,
-  indexer,
-  accountAddr,
-  validatorAppID,
-  assetInformationHelperOptions
-}: {
-  client: Algodv2;
-  indexer: Indexer;
-  accountAddr: string;
-  validatorAppID: number;
-  assetInformationHelperOptions?: GetAssetInformationByIdOptions;
-}): Promise<ExcessAmountDataWithPoolAssetDetails[]>;

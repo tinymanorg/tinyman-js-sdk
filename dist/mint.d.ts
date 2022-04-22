@@ -1,5 +1,5 @@
-import {PoolInfo, PoolReserves} from "./pool";
-import {InitiatorSigner, SignerTransaction} from "./common-types";
+import {InitiatorSigner, SignerTransaction} from "./util/commonTypes";
+import {PoolInfo, PoolReserves} from "./util/pool/poolTypes";
 /** An object containing information about a mint quote. */
 export interface MintQuote {
   /** The round that this quote is based on. */

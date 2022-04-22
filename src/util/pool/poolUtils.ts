@@ -7,42 +7,10 @@ import {
   getMinBalanceForAccount,
   convertFromBaseUnits,
   encodeString
-} from "./util";
-import {doBootstrap} from "./bootstrap";
-import {AccountInformation} from "./account/accountTypes";
-import {tinymanContract} from "./contract/contract";
-
-export enum PoolStatus {
-  NOT_CREATED = "not created",
-  BOOTSTRAP = "bootstrap",
-  READY = "ready",
-  ERROR = "error"
-}
-
-export interface PoolInfo {
-  addr: string;
-  program: Uint8Array;
-  validatorAppID: number;
-  asset1ID: number;
-  asset2ID: number;
-  liquidityTokenID?: number;
-  status: PoolStatus;
-}
-
-export interface PoolReserves {
-  round: number;
-  asset1: bigint;
-  asset2: bigint;
-  issuedLiquidity: bigint;
-}
-
-export interface AccountExcess {
-  excessAsset1: bigint;
-  excessAsset2: bigint;
-  excessLiquidityTokens: bigint;
-}
-
-export const MINIMUM_LIQUIDITY = 1000;
+} from "../util";
+import {AccountInformation} from "../account/accountTypes";
+import {tinymanContract} from "../../contract/contract";
+import {PoolInfo, PoolReserves, PoolStatus} from "./poolTypes";
 
 /**
  * Look up information about an pool.
@@ -88,37 +56,6 @@ export async function getPoolInfo(
   return result;
 }
 
-/**
- * Create an pool for an asset pair if it does not already exist. The initiator will provide
- * funding to create the pool and pay for the creation transaction fees.
- *
- * @param client An Algodv2 client.
- * @param pool Parameters of the pool to create.
- * @param pool.validatorAppID The ID of the Validator App for the network.
- * @param pool.asset1ID The ID of the first asset in the pool pair.
- * @param pool.asset2ID The ID of the second asset in the pool pair.
- * @param signedTxns Signed transactions
- * @param txnIDs Transaction IDs
- */
-export async function createPool(
-  client: Algodv2,
-  pool: {
-    validatorAppID: number;
-    asset1ID: number;
-    asset2ID: number;
-  },
-  signedTxns: Uint8Array[],
-  txnIDs: string[]
-): Promise<PoolInfo> {
-  await doBootstrap({
-    client,
-    signedTxns,
-    txnIDs
-  });
-
-  return getPoolInfo(client, pool);
-}
-
 const OUTSTANDING_ENCODED = encodeString("o");
 const TOTAL_LIQUIDITY = 0xffffffffffffffffn;
 
@@ -138,7 +75,6 @@ export async function getPoolReserves(
   let outstandingLiquidityTokens = 0n;
 
   for (const app of appsLocalState) {
-    // eslint-disable-next-line eqeqeq
     if (app.id != pool.validatorAppID) {
       continue;
     }
@@ -229,98 +165,6 @@ export async function getPoolReserves(
 }
 /* eslint-enable complexity */
 
-const EXCESS_ENCODED = encodeString("e");
-
-export async function getAccountExcess({
-  client,
-  pool,
-  accountAddr
-}: {
-  client: any;
-  pool: PoolInfo;
-  accountAddr: string;
-}): Promise<AccountExcess> {
-  const info = (await client
-    .accountInformation(accountAddr)
-    .setIntDecoding("bigint")
-    .do()) as AccountInformation;
-
-  const appsLocalState = info["apps-local-state"] || [];
-
-  let excessAsset1 = 0n;
-  let excessAsset2 = 0n;
-  let excessLiquidityTokens = 0n;
-
-  for (const app of appsLocalState) {
-    // eslint-disable-next-line eqeqeq
-    if (app.id != pool.validatorAppID) {
-      continue;
-    }
-
-    const keyValue = app["key-value"];
-
-    if (!keyValue) {
-      break;
-    }
-
-    const state = decodeState(keyValue);
-
-    const excessAsset1Key = fromByteArray(
-      joinByteArrays([
-        algosdk.decodeAddress(pool.addr).publicKey,
-        EXCESS_ENCODED,
-        algosdk.encodeUint64(pool.asset1ID)
-      ])
-    );
-    const excessAsset2Key = fromByteArray(
-      joinByteArrays([
-        algosdk.decodeAddress(pool.addr).publicKey,
-        EXCESS_ENCODED,
-        algosdk.encodeUint64(pool.asset2ID)
-      ])
-    );
-    const excessLiquidityTokenKey = fromByteArray(
-      joinByteArrays([
-        algosdk.decodeAddress(pool.addr).publicKey,
-        EXCESS_ENCODED,
-        algosdk.encodeUint64(pool.liquidityTokenID!)
-      ])
-    );
-
-    const excessAsset1Value = state[excessAsset1Key];
-    const excessAsset2Value = state[excessAsset2Key];
-    const excessLiquidityTokenValue = state[excessLiquidityTokenKey];
-
-    if (typeof excessAsset1Value === "bigint") {
-      excessAsset1 = excessAsset1Value;
-    }
-
-    if (typeof excessAsset2Value === "bigint") {
-      excessAsset2 = excessAsset2Value;
-    }
-
-    if (typeof excessLiquidityTokenValue === "bigint") {
-      excessLiquidityTokens = excessLiquidityTokenValue;
-    }
-  }
-
-  const excessAssets = {
-    excessAsset1,
-    excessAsset2,
-    excessLiquidityTokens
-  };
-
-  if (
-    excessAssets.excessAsset1 < 0n ||
-    excessAssets.excessAsset2 < 0n ||
-    excessAssets.excessLiquidityTokens < 0n
-  ) {
-    throw new Error(`Invalid excess assets: ${excessAssets}`);
-  }
-
-  return excessAssets;
-}
-
 /**
  * @param {bigint} totalLiquidity Total amount of issued liquidity within a pool
  * @param {bigint} ownedLiquidity Amount of liquidity tokens within an account
@@ -336,32 +180,37 @@ export function getPoolShare(totalLiquidity: bigint, ownedLiquidity: bigint) {
   return share;
 }
 
-interface GetPoolAssetsReturnedValue {
+interface PoolAssets {
   asset1ID: number;
   asset2ID: number;
   liquidityTokenID: number;
 }
 
-const POOL_ASSETS_CACHE: Record<string, GetPoolAssetsReturnedValue> = {};
+const POOL_ASSETS_CACHE: Record<string, PoolAssets> = {};
 
-export async function getPoolAssets({
-  client,
-  address,
-  validatorAppID
-}: {
-  client: any;
-  address: string;
-  validatorAppID: number;
-}): Promise<GetPoolAssetsReturnedValue | null> {
-  if (POOL_ASSETS_CACHE[address]) {
-    return POOL_ASSETS_CACHE[address];
+/**
+ * Find out the ids of a pool's liquidity token and assets
+ */
+export async function getPoolAssets(
+  {
+    client,
+    address,
+    validatorAppID
+  }: {
+    client: Algodv2;
+    address: string;
+    validatorAppID: number;
+  },
+  cache: Record<string, PoolAssets> = POOL_ASSETS_CACHE
+): Promise<PoolAssets | null> {
+  if (cache[address]) {
+    return cache[address];
   }
 
   const info = (await client.accountInformation(address).do()) as AccountInformation;
 
-  // eslint-disable-next-line eqeqeq
   const appState = info["apps-local-state"].find((app) => app.id == validatorAppID);
-  let assets: GetPoolAssetsReturnedValue | null = null;
+  let assets: PoolAssets | null = null;
 
   if (appState) {
     const keyValue = appState["key-value"];
@@ -380,7 +229,7 @@ export async function getPoolAssets({
       liquidityTokenID
     };
 
-    POOL_ASSETS_CACHE[address] = assets;
+    cache[address] = assets;
   }
 
   return assets;

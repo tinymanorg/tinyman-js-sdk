@@ -1,5 +1,5 @@
 import {Algodv2} from "algosdk";
-import {PoolInfo} from "../util/pool/poolTypes";
+import {PoolInfo} from "../pool/poolTypes";
 import {
   AccountExcessWithinPool,
   AccountInformation,
