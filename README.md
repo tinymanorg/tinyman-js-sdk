@@ -65,7 +65,7 @@ const poolInfo = await getPoolInfo(algodClient, {
 });
 ```
 
-This returns a PoolInfo object. A swap can only be done if the pair has a pool that is already created and has a `PoolStatus.READY` status.
+This returns a PoolInfo object. A swap can only be done if the pair has a pool that is already created and has a `PoolStatus.READY` status. We can use `isPoolReady` utility to check this.
 
 We will also need the reserve details of the pool to get a quote for the swap:
 
@@ -73,7 +73,13 @@ We will also need the reserve details of the pool to get a quote for the swap:
 const poolReserves = await getPoolReserves(algodClient, poolInfo);
 ```
 
-  <br/>
+For a successful swap, there needs to be some liquidity within the pool. We can check this using `isPoolEmpty` utility:
+
+```typescript
+const isEmpty = isPoolEmpty(poolReserves);
+```
+
+<br/>
 
 2. If the pair has a READY pool, we can get a quote for the swap. The following code gets a quote for a FIXED INPUT swap:
 
