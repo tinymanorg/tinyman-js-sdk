@@ -49,7 +49,7 @@ export interface MintExecution {
   /** The quantity of the output liquidity token asset. */
   liquidityOut: bigint;
   excessAmount: {
-    /** Excess amount for the current swap */
+    /** Excess amount for the current mint */
     excessAmountForMinting: bigint;
     /** Total excess amount accumulated for the pool asset */
     totalExcessAmount: bigint;

@@ -124,7 +124,7 @@ const swapQuote = getSwapQuote(
 3. Using the quote details, we can get the transaction group for the swap.
 
 ```typescript
-const slippage = 0.1;
+const slippage = 0.01;
 const accountAddress = "...";
 
 const swapTxns = await generateSwapTransactions({
@@ -253,3 +253,125 @@ const poolInfo = await createPool(
 ```
 
 </details>
+
+<details>
+<summary><strong>Add liquidity to a pool</strong></summary>
+
+<br>
+
+0. Let's say, we want to add liquidity to a pool between ALGO and USDC:
+
+```typescript
+const asset1 = {
+  id: 31566704,
+  decimals: 6,
+  unit_name: "USDC"
+};
+
+const asset2 = {
+  id: 0,
+  decimals: 6,
+  unit_name: "ALGO"
+};
+```
+
+1. First, we need to get the pool info and make sure there is actually a pool between the assets:
+
+```typescript
+const poolInfo = await getPoolInfo(algodClient, {
+  validatorAppID,
+  asset1.id,
+  asset2.id
+});
+const isReady = isPoolReady(poolInfo);
+```
+
+We will also need the reserve details of the pool to get a quote for the mint as well:
+
+```typescript
+const poolReserves = await getPoolReserves(algodClient, poolInfo);
+```
+
+2. Find out the current reserve ratio and make sure the amounts to be deposited is in consistent with the ratio. Within the poolInfo and pool reserves data retrieved from `getPoolInfo` and `getPoolReserves` functions, asset1 is always the asset with greater asset ID. Therefore, we need to be careful about the pair order when determining the ratio from the poolReserves. In our example here, the `asset1` and `asset2` is in the correct order.
+
+```typescript
+let pairRatio = getPoolPairRatio(
+  {
+    asset1: asset1.decimals,
+    asset2: asset2.decimals
+  },
+  poolReserves
+);
+
+/* If assets were not in the correct order,
+let pairRatio = 1 / getPoolPairRatio(
+  {
+    asset1: asset1.decimals,
+    asset2: asset2.decimals
+  },
+  poolReserves
+);
+*/
+
+const asset1AmountToDeposit = 100;
+const asset2AmountToDeposit = asset1AmountToDeposit * (1 / pairRatio);
+
+/* If we wanted to set the asset2 amount and determine the asset1 amount from the ratio:
+const asset2AmountToDeposit = 100;
+const asset1AmountToDeposit = asset2AmountToDeposit * pairRatio;
+*/
+```
+
+3. After the amounts are set, we can get a quote for the mint:
+
+```typescript
+const mintQuote = await getMintLiquidityQuote({
+  pool: poolInfo,
+  reserves: poolReserves,
+  asset1In: asset1AmountToDeposit,
+  asset2In: asset2AmountToDeposit
+});
+```
+
+4. Create the transactions to add liquidity:
+
+```typescript
+const slippage = 0.01;
+const accountAddress = "...";
+
+const mintTxns = await generateMintTxns({
+  client: algodClient,
+  pool: poolInfo,
+  asset1In: mintQuote.asset1In,
+  asset2In: mintQuote.asset2In,
+  liquidityOut: mintQuote.liquidityOut,
+  slippage,
+  initiatorAddr: accountAddress
+});
+```
+
+5. Sign the generated transactions:
+
+```typescript
+const signedTxns = await signMintTxns({
+  pool: poolInfo,
+  txGroup: mintTxns,
+  initiatorSigner: signerCallback
+});
+```
+
+`initiatorSigner` expects a callback of shape `(txGroups: SignerTransaction[][]) => Promise<Uint8Array[]>`. So, it takes the txns generated in the previous step and signs them and then resolves with `Uint8Array[]`.
+
+6. Perform the mint operation:
+
+```typescript
+const data = await mintLiquidity({
+  client: algodClient,
+  pool: poolInfo,
+  txGroup: mintTxns,
+  signedTxns,
+  initiatorAddr: accountAddress
+});
+```
+
+The returned data from `mintLiquidity` has information about the confirmation round, transaction ID and the liquidity token excess amount accumulated within the account. Please check the `MintExecution` interface for details on the returned data.
