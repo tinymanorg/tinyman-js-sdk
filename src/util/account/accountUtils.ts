@@ -60,8 +60,6 @@ export function hasSufficientMinimumBalance(accountData: AccountInformationData)
 
 const EXCESS_ENCODED = encodeString("e");
 
-console.log(EXCESS_ENCODED[0]);
-
 /**
  * Finds the excess amounts accumulated for an account within a pool
  * @param params.client An Algodv2 client.
