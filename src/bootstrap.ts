@@ -74,9 +74,21 @@ export async function generateBootstrapTransactions({
 }): Promise<SignerTransaction[]> {
   const suggestedParams = await client.getTransactionParams().do();
 
+  // Make sure asset1 has greater ID
+  const assets =
+    asset1ID > asset2ID
+      ? {
+          asset1: {id: asset1ID, unitName: asset1UnitName},
+          asset2: {id: asset2ID, unitName: asset2UnitName}
+        }
+      : {
+          asset1: {id: asset2ID, unitName: asset2UnitName},
+          asset2: {id: asset1ID, unitName: asset1UnitName}
+        };
+
   const poolLogicSig = tinymanContract.getPoolLogicSig({
-    asset1ID,
-    asset2ID,
+    asset1ID: assets.asset1.id,
+    asset2ID: assets.asset2.id,
     validatorAppID
   });
 
@@ -85,10 +97,11 @@ export async function generateBootstrapTransactions({
     appIndex: validatorAppID,
     appArgs: [
       encodeString("bootstrap"),
-      algosdk.encodeUint64(asset1ID),
-      algosdk.encodeUint64(asset2ID)
+      algosdk.encodeUint64(assets.asset1.id),
+      algosdk.encodeUint64(assets.asset2.id)
     ],
-    foreignAssets: asset2ID == 0 ? [asset1ID] : [asset1ID, asset2ID],
+    foreignAssets:
+      assets.asset2.id == 0 ? [assets.asset1.id] : [assets.asset1.id, assets.asset2.id],
     suggestedParams
   });
 
@@ -99,7 +112,7 @@ export async function generateBootstrapTransactions({
       decimals: 6,
       defaultFrozen: false,
       unitName: LIQUIDITY_TOKEN_UNIT_NAME.DEFAULT,
-      assetName: `TinymanPool1.1 ${asset1UnitName}-${asset2UnitName}`,
+      assetName: `TinymanPool1.1 ${assets.asset1.unitName}-${assets.asset2.unitName}`,
       assetURL: "https://tinyman.org",
       suggestedParams
     }
@@ -108,18 +121,18 @@ export async function generateBootstrapTransactions({
   const asset1Optin = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
     from: poolLogicSig.addr,
     to: poolLogicSig.addr,
-    assetIndex: asset1ID,
+    assetIndex: assets.asset1.id,
     amount: 0,
     suggestedParams
   });
 
   const asset2Optin =
-    asset2ID === 0
+    assets.asset2.id === 0
       ? null
       : algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
           from: poolLogicSig.addr,
           to: poolLogicSig.addr,
-          assetIndex: asset2ID,
+          assetIndex: assets.asset2.id,
           amount: 0,
           suggestedParams
         });
@@ -127,7 +140,7 @@ export async function generateBootstrapTransactions({
   const fundingTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
     from: initiatorAddr,
     to: poolLogicSig.addr,
-    amount: calculatePoolBootstrapFundingTxnAmount(asset2ID, {
+    amount: calculatePoolBootstrapFundingTxnAmount(assets.asset2.id, {
       liquidityTokenCreateTxn: liquidityTokenCreateTxn.fee,
       asset1OptinTxn: asset1Optin.fee,
       asset2OptinTxn: asset2Optin ? asset2Optin.fee : 0,
