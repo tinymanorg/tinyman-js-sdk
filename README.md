@@ -532,3 +532,5 @@ const data = await redeemExcessAsset({
 ```
 
 `initiatorSigner` expects a callback of shape `(txGroups: SignerTransaction[][]) => Promise<Uint8Array[]>`. So, it takes the txns generated in the previous step and signs them and then resolves with `Uint8Array[]`.
+
+</details>
