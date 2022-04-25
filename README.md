@@ -375,3 +375,5 @@ const data = await mintLiquidity({
 ```
 
 The returned data from `mintLiquidity` has information about the confirmation round, transaction ID and the liquidity token excess amount accumulated within the account. Please check the `MintExecution` interface for details on the returned data.
+
+</details>
