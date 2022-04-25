@@ -35,7 +35,7 @@ const validatorAppId = getValidatorAppID("mainnet")
 <br>
 
 <details>
-<summary><strong>Swapping</strong></summary>
+<summary><strong>Swap</strong></summary>
 
 <br>
 
