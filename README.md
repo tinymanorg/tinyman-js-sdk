@@ -552,3 +552,11 @@ const data = await redeemExcessAsset({
 `initiatorSigner` expects a callback of shape `(txGroups: SignerTransaction[][]) => Promise<Uint8Array[]>`. So, it takes the txns generated in the previous step and signs them and then resolves with `Uint8Array[]`.
 
 </details>
+
+## License
+
+tinyman-js-sdk is licensed under a MIT license except for the exceptions listed below. See the LICENSE file for details.
+
+### Exceptions
+
+src/contract/asc.json is currently unlicensed. It may be used by this SDK but may not be used in any other way or be distributed separately without the express permission of Tinyman.
