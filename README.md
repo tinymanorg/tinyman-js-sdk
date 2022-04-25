@@ -29,7 +29,25 @@ const algodClient = new algosdk.Algodv2(
   /** Enter server here */,
   /** Enter port here */
 )
-const validatorAppId = getValidatorAppID("mainnet")
+const validatorAppID = getValidatorAppID("mainnet")
+```
+
+Before doing any operations, we need to make sure the account is opted into the Tinyman Validator App:
+
+```typescript
+const accountAddress = "...";
+const account = await getAccountInformation(algodClient, accountAddress);
+const hasOptedIn = isAccountOptedIntoApp(validatorAppID, account["apps-local-state"]);
+
+if (!hasOptedIn) {
+  const optInTxns = await generateOptIntoValidatorTxns({
+    client: algodClient,
+    validatorAppID,
+    initiatorAddr: accountAddress
+  });
+
+  await signAndWaitTransactions({initiatorSignerCallback: signerCallback}, [optInTxns]);
+}
 ```
 
 <br>
