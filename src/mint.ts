@@ -1,4 +1,4 @@
-import algosdk from "algosdk";
+import algosdk, {LogicSigAccount} from "algosdk";
 
 import {
   applySlippageToAmount,
@@ -6,18 +6,14 @@ import {
   getTxnGroupID,
   sendAndWaitRawTransaction,
   sumUpTxnFees
-} from "./util";
-import {
-  MINIMUM_LIQUIDITY,
-  PoolInfo,
-  getAccountExcess,
-  getPoolShare,
-  PoolReserves
-} from "./pool";
-import {InitiatorSigner, SignerTransaction} from "./common-types";
-import TinymanError from "./error/TinymanError";
-import {DEFAULT_FEE_TXN_NOTE} from "./constant";
-import {ALGO_ASSET_ID} from "./asset/assetConstants";
+} from "./util/util";
+import {InitiatorSigner, SignerTransaction} from "./util/commonTypes";
+import TinymanError from "./util/error/TinymanError";
+import {DEFAULT_FEE_TXN_NOTE, MINIMUM_LIQUIDITY_MINTING_AMOUNT} from "./util/constant";
+import {ALGO_ASSET_ID} from "./util/asset/assetConstants";
+import {PoolInfo, PoolReserves} from "./util/pool/poolTypes";
+import {getPoolShare} from "./util/pool/poolUtils";
+import {getAccountExcessWithinPool} from "./util/account/accountUtils";
 
 /** An object containing information about a mint quote. */
 export interface MintQuote {
@@ -53,7 +49,7 @@ export interface MintExecution {
   /** The quantity of the output liquidity token asset. */
   liquidityOut: bigint;
   excessAmount: {
-    /** Excess amount for the current swap */
+    /** Excess amount for the current mint */
     excessAmountForMinting: bigint;
     /** Total excess amount accumulated for the pool asset */
     totalExcessAmount: bigint;
@@ -96,9 +92,9 @@ export function getMintLiquidityQuote({
     // TODO: compute sqrt on bigints
     const geoMean = BigInt(Math.floor(Math.sqrt(Number(asset1In) * Number(asset2In))));
 
-    if (geoMean <= BigInt(MINIMUM_LIQUIDITY)) {
+    if (geoMean <= BigInt(MINIMUM_LIQUIDITY_MINTING_AMOUNT)) {
       throw new Error(
-        `Initial liquidity mint too small. Liquidity minting amount must be greater than ${MINIMUM_LIQUIDITY}, this quote is for ${geoMean}.`
+        `Initial liquidity mint too small. Liquidity minting amount must be greater than ${MINIMUM_LIQUIDITY_MINTING_AMOUNT}, this quote is for ${geoMean}.`
       );
     }
 
@@ -109,7 +105,7 @@ export function getMintLiquidityQuote({
       asset2ID: pool.asset2ID,
       asset2In: BigInt(asset2In),
       liquidityID: pool.liquidityTokenID!,
-      liquidityOut: geoMean - BigInt(MINIMUM_LIQUIDITY),
+      liquidityOut: geoMean - BigInt(MINIMUM_LIQUIDITY_MINTING_AMOUNT),
       share: 1
     };
   }
@@ -250,7 +246,7 @@ export async function signMintTxns({
   txGroup: SignerTransaction[];
   initiatorSigner: InitiatorSigner;
 }): Promise<Uint8Array[]> {
-  const lsig = algosdk.makeLogicSig(pool.program);
+  const lsig = new LogicSigAccount(pool.program);
   const [signedFeeTxn, signedAsset1InTxn, signedAsset2InTxn] = await initiatorSigner([
     txGroup
   ]);
@@ -305,7 +301,7 @@ export async function mintLiquidity({
       txGroup[MintTxnIndices.LIQUDITY_OUT_TXN].txn.amount
     );
 
-    const prevExcessAssets = await getAccountExcess({
+    const prevExcessAssets = await getAccountExcessWithinPool({
       client,
       pool,
       accountAddr: initiatorAddr
@@ -317,7 +313,7 @@ export async function mintLiquidity({
     const fees = sumUpTxnFees(txGroup);
     const groupID = getTxnGroupID(txGroup);
 
-    const excessAssets = await getAccountExcess({
+    const excessAssets = await getAccountExcessWithinPool({
       client,
       pool,
       accountAddr: initiatorAddr

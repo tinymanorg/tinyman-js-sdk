@@ -1,4 +1,4 @@
-import algosdk, {Algodv2} from "algosdk";
+import algosdk, {Algodv2, LogicSigAccount} from "algosdk";
 
 import {
   applySlippageToAmount,
@@ -8,12 +8,13 @@ import {
   sumUpTxnFees,
   roundNumber,
   encodeString
-} from "./util";
-import {PoolInfo, getAccountExcess, PoolReserves} from "./pool";
-import {InitiatorSigner, SignerTransaction} from "./common-types";
-import TinymanError from "./error/TinymanError";
-import {DEFAULT_FEE_TXN_NOTE} from "./constant";
-import {ALGO_ASSET_ID} from "./asset/assetConstants";
+} from "./util/util";
+import {InitiatorSigner, SignerTransaction} from "./util/commonTypes";
+import TinymanError from "./util/error/TinymanError";
+import {DEFAULT_FEE_TXN_NOTE} from "./util/constant";
+import {ALGO_ASSET_ID} from "./util/asset/assetConstants";
+import {PoolInfo, PoolReserves, PoolStatus} from "./util/pool/poolTypes";
+import {getAccountExcessWithinPool} from "./util/account/accountUtils";
 
 // FEE = %0.3 or 3/1000
 const FEE_NUMERATOR = 3n;
@@ -91,7 +92,7 @@ export async function signSwapTransactions({
   txGroup: SignerTransaction[];
   initiatorSigner: InitiatorSigner;
 }): Promise<Uint8Array[]> {
-  const lsig = algosdk.makeLogicSig(pool.program);
+  const lsig = new LogicSigAccount(pool.program);
 
   const [signedFeeTxn, signedAssetInTxn] = await initiatorSigner([txGroup]);
 
@@ -149,8 +150,8 @@ export async function generateSwapTransactions({
     accounts: [initiatorAddr],
     foreignAssets:
       pool.asset2ID == ALGO_ASSET_ID
-        ? [pool.asset1ID, <number>pool.liquidityTokenID]
-        : [pool.asset1ID, pool.asset2ID, <number>pool.liquidityTokenID],
+        ? [pool.asset1ID, pool.liquidityTokenID as number]
+        : [pool.asset1ID, pool.asset2ID, pool.liquidityTokenID as number],
     suggestedParams
   });
 
@@ -338,7 +339,7 @@ async function fixedInputSwap({
   };
   initiatorAddr: string;
 }): Promise<Omit<SwapExecution, "fees" | "groupID">> {
-  const prevExcessAssets = await getAccountExcess({
+  const prevExcessAssets = await getAccountExcessWithinPool({
     client,
     pool,
     accountAddr: initiatorAddr
@@ -346,7 +347,7 @@ async function fixedInputSwap({
 
   let [{confirmedRound, txnID}] = await sendAndWaitRawTransaction(client, [signedTxns]);
 
-  const excessAssets = await getAccountExcess({
+  const excessAssets = await getAccountExcessWithinPool({
     client,
     pool,
     accountAddr: initiatorAddr
@@ -488,6 +489,10 @@ export function getSwapQuote(
 ): SwapQuote {
   let quote;
 
+  if (pool.status !== PoolStatus.READY) {
+    throw new TinymanError({pool, asset}, "Trying to swap on a non-existent pool");
+  }
+
   if (type === "fixed-input") {
     quote = getFixedInputSwapQuote({
       pool,
@@ -545,7 +550,7 @@ async function fixedOutputSwap({
   };
   initiatorAddr: string;
 }): Promise<Omit<SwapExecution, "fees" | "groupID">> {
-  const prevExcessAssets = await getAccountExcess({
+  const prevExcessAssets = await getAccountExcessWithinPool({
     client,
     pool,
     accountAddr: initiatorAddr
@@ -553,7 +558,7 @@ async function fixedOutputSwap({
 
   let [{confirmedRound, txnID}] = await sendAndWaitRawTransaction(client, [signedTxns]);
 
-  const excessAssets = await getAccountExcess({
+  const excessAssets = await getAccountExcessWithinPool({
     client,
     pool,
     accountAddr: initiatorAddr
@@ -621,6 +626,13 @@ export async function issueSwap({
   signedTxns: Uint8Array[];
   initiatorAddr: string;
 }): Promise<SwapExecution> {
+  if (pool.status !== PoolStatus.READY) {
+    throw new TinymanError(
+      {pool, swapType, txGroup},
+      "Trying to swap on a non-existent pool"
+    );
+  }
+
   try {
     const assetIn = {
       assetID:

@@ -1,23 +1,15 @@
-import algosdk, {Algodv2, Indexer} from "algosdk";
-import {toByteArray} from "base64-js";
+import algosdk, {Algodv2, LogicSigAccount} from "algosdk";
 
 import {
-  decodeState,
   encodeString,
   getTxnGroupID,
   sendAndWaitRawTransaction,
   sumUpTxnFees
-} from "./util";
-import {getPoolAssets, getPoolInfo, PoolInfo} from "./pool";
-import {InitiatorSigner, SignerTransaction, SupportedNetwork} from "./common-types";
-import {AccountInformation} from "./account/accountTypes";
-import {DEFAULT_FEE_TXN_NOTE} from "./constant";
-import TinymanError from "./error/TinymanError";
-import {TinymanAnalyticsApiAsset} from "./asset/assetModels";
-import {
-  getAssetInformationById,
-  GetAssetInformationByIdOptions
-} from "./asset/assetUtils";
+} from "./util/util";
+import {InitiatorSigner, SignerTransaction} from "./util/commonTypes";
+import {DEFAULT_FEE_TXN_NOTE} from "./util/constant";
+import TinymanError from "./util/error/TinymanError";
+import {PoolInfo} from "./util/pool/poolTypes";
 
 /**
  * Execute a redeem operation to collect excess assets from previous operations.
@@ -81,7 +73,7 @@ async function signRedeemTxns({
   initiatorSigner: InitiatorSigner;
 }): Promise<Uint8Array[]> {
   const [signedFeeTxn] = await initiatorSigner([txGroup]);
-  const lsig = algosdk.makeLogicSig(pool.program);
+  const lsig = new LogicSigAccount(pool.program);
 
   const signedTxns = txGroup.map((txDetail, index) => {
     if (index === 0) {
@@ -129,7 +121,7 @@ export async function redeemAllExcessAsset({
         txns: txGroup,
         txnFees: sumUpTxnFees(txGroup),
         groupID: getTxnGroupID(txGroup),
-        lsig: algosdk.makeLogicSig(pool.program)
+        lsig: new LogicSigAccount(pool.program)
       };
     });
 
@@ -207,7 +199,6 @@ export async function generateRedeemTxns({
     appArgs: [encodeString("redeem")],
     accounts: [initiatorAddr],
     foreignAssets:
-      // eslint-disable-next-line eqeqeq
       pool.asset2ID == 0
         ? [pool.asset1ID, pool.liquidityTokenID as number]
         : [pool.asset1ID, pool.asset2ID, pool.liquidityTokenID as number],
@@ -257,148 +248,4 @@ export async function generateRedeemTxns({
       signers: [pool.addr]
     }
   ];
-}
-
-export interface ExcessAmountData {
-  poolAddress: string;
-  assetID: number;
-  amount: number;
-}
-
-/**
- * Generates a list of excess amounts accumulated within an account.
- * @param params.client An Algodv2 client.
- * @param params.accountAddr The address of the account performing the redeem operation.
- * @param params.validatorAppID Validator APP ID
- * @returns List of excess amounts
- */
-export async function getExcessAmounts({
-  client,
-  accountAddr,
-  validatorAppID
-}: {
-  client: any;
-  accountAddr: string;
-  validatorAppID: number;
-}) {
-  const info = (await client
-    .accountInformation(accountAddr)
-    .setIntDecoding("bigint")
-    .do()) as AccountInformation;
-
-  const appsLocalState = info["apps-local-state"] || [];
-  const appState = appsLocalState.find(
-    // `==` is used here to coerce bigints if necessary
-    // eslint-disable-next-line eqeqeq
-    (appLocalState) => appLocalState.id == validatorAppID
-  );
-  let excessData: ExcessAmountData[] = [];
-
-  if (appState && appState["key-value"]) {
-    const state = decodeState(appState["key-value"]);
-
-    for (let entry of Object.entries(state)) {
-      const [key, value] = entry;
-      const decodedKey = toByteArray(key);
-
-      if (decodedKey.length === 41 && decodedKey[32] === 101) {
-        excessData.push({
-          poolAddress: algosdk.encodeAddress(decodedKey.slice(0, 32)),
-          assetID: algosdk.decodeUint64(decodedKey.slice(33, 41), "safe"),
-          amount: parseInt(value as string)
-        });
-      }
-    }
-  }
-
-  return excessData;
-}
-
-export interface ExcessAmountDataWithPoolAssetDetails {
-  pool: {
-    info: PoolInfo;
-    asset1: TinymanAnalyticsApiAsset;
-    asset2: TinymanAnalyticsApiAsset;
-    liquidityAsset: TinymanAnalyticsApiAsset;
-  };
-  asset: TinymanAnalyticsApiAsset;
-  amount: number;
-}
-
-/**
- * Generates a list of excess amounts accumulated within an account. Each item includes details of pool and its assets.
- * @param params.client An Algodv2 client.
- * @param params.accountAddr The address of the account performing the redeem operation.
- * @param params.validatorAppID Validator APP ID
- * @returns List of excess amounts
- */
-export async function getExcessAmountsWithPoolAssetDetails({
-  client,
-  indexer,
-  accountAddr,
-  validatorAppID,
-  assetInformationHelperOptions
-}: {
-  client: Algodv2;
-  indexer: Indexer;
-  accountAddr: string;
-  validatorAppID: number;
-  assetInformationHelperOptions?: GetAssetInformationByIdOptions;
-}) {
-  const excessData = await getExcessAmounts({client, accountAddr, validatorAppID});
-  let excessDataWithDetail: ExcessAmountDataWithPoolAssetDetails[] = [];
-
-  for (let data of excessData) {
-    const {poolAddress, assetID, amount} = data;
-    const poolAssets = await getPoolAssets({
-      client,
-      address: poolAddress,
-      validatorAppID
-    });
-
-    if (poolAssets) {
-      const poolInfo = await getPoolInfo(client, {
-        validatorAppID,
-        asset1ID: poolAssets.asset1ID,
-        asset2ID: poolAssets.asset2ID
-      });
-      const assetDetails = await Promise.all([
-        getAssetInformationById(
-          indexer,
-          poolAssets.asset1ID,
-          assetInformationHelperOptions
-        ),
-        getAssetInformationById(
-          indexer,
-          poolAssets.asset2ID,
-          assetInformationHelperOptions
-        ),
-        getAssetInformationById(
-          indexer,
-          poolInfo.liquidityTokenID!,
-          assetInformationHelperOptions
-        )
-      ]);
-      let excessAsset = assetDetails[0].asset;
-
-      if (assetID === Number(assetDetails[1].asset.id)) {
-        excessAsset = assetDetails[1].asset;
-      } else if (assetID === Number(assetDetails[2]?.asset.id)) {
-        excessAsset = assetDetails[2].asset;
-      }
-
-      excessDataWithDetail.push({
-        amount,
-        asset: excessAsset,
-        pool: {
-          info: poolInfo,
-          asset1: assetDetails[0].asset,
-          asset2: assetDetails[1].asset,
-          liquidityAsset: assetDetails[2].asset
-        }
-      });
-    }
-  }
-
-  return excessDataWithDetail;
 }

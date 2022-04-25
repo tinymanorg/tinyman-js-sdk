@@ -1,5 +1,5 @@
-import {PoolInfo, PoolReserves} from "./pool";
-import {InitiatorSigner, SignerTransaction} from "./common-types";
+import {InitiatorSigner, SignerTransaction} from "./util/commonTypes";
+import {PoolInfo, PoolReserves} from "./util/pool/poolTypes";
 /** An object containing information about a mint quote. */
 export interface MintQuote {
   /** The round that this quote is based on. */
@@ -33,7 +33,7 @@ export interface MintExecution {
   /** The quantity of the output liquidity token asset. */
   liquidityOut: bigint;
   excessAmount: {
-    /** Excess amount for the current swap */
+    /** Excess amount for the current mint */
     excessAmountForMinting: bigint;
     /** Total excess amount accumulated for the pool asset */
     totalExcessAmount: bigint;

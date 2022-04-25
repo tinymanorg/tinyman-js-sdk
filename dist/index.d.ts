@@ -1,30 +1,66 @@
+export {InitiatorSigner, SignerTransaction} from "./util/commonTypes";
+export {
+  BASE_MINIMUM_BALANCE,
+  MINIMUM_BALANCE_REQUIRED_PER_ASSET,
+  MINIMUM_BALANCE_REQUIRED_PER_APP,
+  MINIMUM_BALANCE_REQUIRED_PER_BYTE_SCHEMA,
+  MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE,
+  MINIMUM_LIQUIDITY_MINTING_AMOUNT
+} from "./util/constant";
+export {
+  applySlippageToAmount,
+  ASSET_OPT_IN_PROCESS_TXN_COUNT,
+  convertFromBaseUnits,
+  convertToBaseUnits,
+  sendAndWaitRawTransaction,
+  getTxnGroupID,
+  sumUpTxnFees
+} from "./util/util";
+export {generateOptIntoAssetTxns} from "./util/asset/assetUtils";
+export {
+  AccountAsset,
+  TinymanAnalyticsApiAsset,
+  IndexerAssetInformation
+} from "./util/asset/assetModels";
+export {
+  ALGO_ASSET,
+  ALGO_ASSET_ID,
+  LIQUIDITY_TOKEN_UNIT_NAME
+} from "./util/asset/assetConstants";
+export {
+  getAccountInformation,
+  calculateAccountMinimumRequiredBalance,
+  hasSufficientMinimumBalance,
+  isAccountOptedIntoApp,
+  getAccountExcessWithinPool,
+  getAccountExcess
+} from "./util/account/accountUtils";
+export {AccountInformationData} from "./util/account/accountTypes";
+export {validatorAppSchema} from "./contract/contract";
 export {
   getValidatorAppID,
   generateOptIntoValidatorTxns,
   OPT_IN_VALIDATOR_APP_PROCESS_TXN_COUNT,
-  isOptedIntoValidator,
   generateOptOutOfValidatorTxns,
   OPT_OUT_VALIDATOR_APP_PROCESS_TXN_COUNT
 } from "./validator";
+export {PoolStatus, PoolInfo, PoolReserves} from "./util/pool/poolTypes";
 export {
-  PoolStatus,
-  PoolInfo,
-  PoolReserves,
-  MINIMUM_LIQUIDITY,
   getPoolInfo,
-  createPool,
   getPoolReserves,
   getPoolShare,
   getPoolPairRatio,
   isPoolEmpty,
   isPoolNotCreated,
-  isPoolReady
-} from "./pool";
+  isPoolReady,
+  getPoolAssets
+} from "./util/pool/poolUtils";
 export {
   generateBootstrapTransactions,
   signBootstrapTransactions,
   getBootstrapProcessTxnCount,
-  calculatePoolBootstrapFundingTxnAmount
+  calculatePoolBootstrapFundingTxnAmount,
+  createPool
 } from "./bootstrap";
 export {
   MintQuote,
@@ -56,47 +92,8 @@ export {
 } from "./swap";
 export {
   redeemExcessAsset,
-  getExcessAmounts,
-  ExcessAmountData,
-  getExcessAmountsWithPoolAssetDetails,
-  ExcessAmountDataWithPoolAssetDetails,
   redeemAllExcessAsset,
   generateRedeemTxns,
   REDEEM_PROCESS_TXN_COUNT
 } from "./redeem";
-export {
-  applySlippageToAmount,
-  ASSET_OPT_IN_PROCESS_TXN_COUNT,
-  convertFromBaseUnits,
-  convertToBaseUnits,
-  sendAndWaitRawTransaction,
-  getTxnGroupID,
-  sumUpTxnFees
-} from "./util";
-export {
-  generateOptIntoAssetTxns,
-  getAssetInformationById,
-  isNFT
-} from "./asset/assetUtils";
-export {AccountAsset, TinymanAnalyticsApiAsset} from "./asset/assetModels";
-export {
-  ALGO_ASSET,
-  ALGO_ASSET_ID,
-  LIQUIDITY_TOKEN_UNIT_NAME
-} from "./asset/assetConstants";
-export {InitiatorSigner, SignerTransaction} from "./common-types";
-export {
-  BASE_MINIMUM_BALANCE,
-  MINIMUM_BALANCE_REQUIRED_PER_ASSET,
-  MINIMUM_BALANCE_REQUIRED_PER_APP,
-  MINIMUM_BALANCE_REQUIRED_PER_BYTE_SCHEMA,
-  MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE
-} from "./constant";
-export {
-  getAccountInformation,
-  calculateAccountMinimumRequiredBalance,
-  hasSufficientMinimumBalance
-} from "./account/accountUtils";
-export {AccountInformationData} from "./account/accountTypes";
-export {validatorAppSchema} from "./contract/contract";
-export {prepareCommitTransactions, getStakingAppID} from "./stake/stakeUtils";
+export {prepareCommitTransactions, getStakingAppID} from "./stake";

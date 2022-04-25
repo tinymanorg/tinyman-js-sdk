@@ -1,6 +1,6 @@
 /// <reference types="node" />
 import {Algodv2} from "algosdk";
-import {SignerTransaction} from "./util/commonTypes";
+import {SignerTransaction} from "./commonTypes";
 import {AccountInformation} from "./account/accountTypes";
 export declare function decodeState(
   stateArray?: AccountInformation["apps-local-state"][0]["key-value"]

@@ -1,7 +1,6 @@
 import algosdk, {Algodv2} from "algosdk";
 
-import {SignerTransaction, SupportedNetwork} from "./common-types";
-import {AccountInformation} from "./account/accountTypes";
+import {SignerTransaction, SupportedNetwork} from "./util/commonTypes";
 
 export const OPT_IN_VALIDATOR_APP_PROCESS_TXN_COUNT = 1;
 
@@ -67,21 +66,4 @@ export async function generateOptOutOfValidatorTxns({
   });
 
   return [{txn: appClearStateTxn, signers: [initiatorAddr]}];
-}
-
-/**
- * Checks if an account is opted into the Validator app.
- *
- * @param params.validatorAppID The ID of the Validator App for the network.
- * @param params.accountAppsLocalState Array of app local states for an account.
- * @returns True if and only if the indicated account has opted into the Validator App.
- */
-export function isOptedIntoValidator({
-  validatorAppID,
-  accountAppsLocalState
-}: {
-  validatorAppID: number;
-  accountAppsLocalState: AccountInformation["apps-local-state"];
-}): boolean {
-  return accountAppsLocalState.some((appState) => appState.id === validatorAppID);
 }

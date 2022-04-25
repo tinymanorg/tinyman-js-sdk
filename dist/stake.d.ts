@@ -1,5 +1,5 @@
 import {Algodv2} from "algosdk";
-import {SignerTransaction, SupportedNetwork} from "../util/commonTypes";
+import {SignerTransaction, SupportedNetwork} from "./util/commonTypes";
 declare function prepareCommitTransactions({
   client,
   stakingAppID,

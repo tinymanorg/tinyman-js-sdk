@@ -1,4 +1,4 @@
-import algosdk from "algosdk";
+import algosdk, {Algodv2, LogicSigAccount} from "algosdk";
 
 import {
   applySlippageToAmount,
@@ -6,12 +6,13 @@ import {
   getTxnGroupID,
   sendAndWaitRawTransaction,
   sumUpTxnFees
-} from "./util";
-import {PoolInfo, getAccountExcess, PoolReserves} from "./pool";
-import {InitiatorSigner, SignerTransaction} from "./common-types";
-import TinymanError from "./error/TinymanError";
-import {DEFAULT_FEE_TXN_NOTE} from "./constant";
-import {ALGO_ASSET_ID} from "./asset/assetConstants";
+} from "./util/util";
+import {PoolInfo, PoolReserves} from "./util/pool/poolTypes";
+import {InitiatorSigner, SignerTransaction} from "./util/commonTypes";
+import TinymanError from "./util/error/TinymanError";
+import {DEFAULT_FEE_TXN_NOTE} from "./util/constant";
+import {ALGO_ASSET_ID} from "./util/asset/assetConstants";
+import {getAccountExcessWithinPool} from "./util/account/accountUtils";
 
 /** An object containing information about a burn quote. */
 export interface BurnQuote {
@@ -120,7 +121,7 @@ export async function generateBurnTxns({
   slippage,
   initiatorAddr
 }: {
-  client: any;
+  client: Algodv2;
   pool: PoolInfo;
   liquidityIn: number | bigint;
   asset1Out: number | bigint;
@@ -219,7 +220,7 @@ export async function signBurnTxns({
   initiatorSigner: InitiatorSigner;
 }): Promise<Uint8Array[]> {
   const [signedFeeTxn, signedLiquidityInTxn] = await initiatorSigner([txGroup]);
-  const lsig = algosdk.makeLogicSig(pool.program);
+  const lsig = new LogicSigAccount(pool.program);
 
   const signedTxns = txGroup.map((txDetail, index) => {
     if (index === BurnTxnIndices.FEE_TXN) {
@@ -270,7 +271,7 @@ export async function burnLiquidity({
     const asset2Out = txGroup[BurnTxnIndices.ASSET2_OUT_TXN].txn.amount;
     const liquidityIn = txGroup[BurnTxnIndices.LIQUDITY_IN_TXN].txn.amount;
 
-    const prevExcessAssets = await getAccountExcess({
+    const prevExcessAssets = await getAccountExcessWithinPool({
       client,
       pool,
       accountAddr: initiatorAddr
@@ -280,7 +281,7 @@ export async function burnLiquidity({
       signedTxns
     ]);
 
-    const excessAssets = await getAccountExcess({
+    const excessAssets = await getAccountExcessWithinPool({
       client,
       pool,
       accountAddr: initiatorAddr
