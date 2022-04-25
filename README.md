@@ -171,7 +171,7 @@ const data = await issueSwap({
 });
 ```
 
-The returned data from `issueSwap` has information about the confirmation round, transaction ID and the excess amounts accumulated within the account. Please check the `SwapExecution` interface for details on the returned data.
+Data returned from `issueSwap` has information about the confirmation round, transaction ID and the excess amounts accumulated within the account. Please check the `SwapExecution` interface for details on the returned data.
 
 </details>
 
@@ -259,7 +259,7 @@ const poolInfo = await createPool(
 
 <br>
 
-0. Let's say, we want to add liquidity to a pool between ALGO and USDC:
+0. Let's say, we want to add liquidity to the pool between ALGO and USDC:
 
 ```typescript
 const asset1 = {
@@ -374,6 +374,106 @@ const data = await mintLiquidity({
 });
 ```
 
-The returned data from `mintLiquidity` has information about the confirmation round, transaction ID and the liquidity token excess amount accumulated within the account. Please check the `MintExecution` interface for details on the returned data.
+Data returned from `mintLiquidity` has information about the confirmation round, transaction ID and the liquidity token excess amount accumulated within the account. Please check the `MintExecution` interface for details on the returned data.
+
+</details>
+
+<details>
+<summary><strong>Remove liquidity from a pool</strong></summary>
+
+<br>
+
+0. Let's say, we want to remove liquidity from the pool between ALGO and USDC:
+
+```typescript
+const asset1 = {
+  id: 31566704,
+  decimals: 6,
+  unit_name: "USDC"
+};
+
+const asset2 = {
+  id: 0,
+  decimals: 6,
+  unit_name: "ALGO"
+};
+```
+
+The rest of the steps below assumes assets are set in the right order, ie. asset1 has an ID that is greater than asset2's ID.
+
+1. First, we need to get the pool info and make sure there is actually a pool between the assets:
+
+```typescript
+const poolInfo = await getPoolInfo(algodClient, {
+  validatorAppID,
+  asset1.id,
+  asset2.id
+});
+const isReady = isPoolReady(poolInfo);
+```
+
+We will also need the reserve details of the pool to get a quote for the burn:
+
+```typescript
+const poolReserves = await getPoolReserves(algodClient, poolInfo);
+```
+
+2. Get a quote for the burn:
+
+```typescript
+const LIQUIDITY_TOKEN_DECIMALS = 6;
+
+// We want to burn 10 liquidity tokens which would be 10_000_000 in base units
+const liquidityIn = convertToBaseUnits(LIQUIDITY_TOKEN_DECIMALS, 10);
+
+const burnQuote = await getBurnLiquidityQuote({
+  pool: poolInfo,
+  reserves: poolReserves,
+  liquidityIn
+});
+```
+
+3. Generate the burn transactions:
+
+```typescript
+const slippage = 0.01;
+const accountAddress = "...";
+
+const burnTxns = await generateBurnTxns({
+  client: algodClient,
+  pool: poolInfo,
+  asset1Out: quote.asset1Out,
+  asset2Out: quote.asset2Out,
+  liquidityIn: quote.liquidityIn,
+  slippage,
+  initiatorAddr: accountAddress
+});
+```
+
+4. Sign the transactions:
+
+```typescript
+const signedTxns = await signBurnTxns({
+  pool: poolInfo,
+  txGroup: burnTxns,
+  initiatorSigner: signerCallback
+});
+```
+
+`initiatorSigner` expects a callback of shape `(txGroups: SignerTransaction[][]) => Promise<Uint8Array[]>`. So, it takes the txns generated in the previous step and signs them and then resolves with `Uint8Array[]`.
+
+5. Perform the burn operation:
+
+```typescript
+const data = await burnLiquidity({
+  client: algodClient,
+  pool: poolInfo,
+  txGroup: burnTxns,
+  signedTxns,
+  initiatorAddr: accountAddress
+});
+```
+
+Data returned from `burnLiquidity` has information about the confirmation round, transaction ID and the excess amounts accumulated within the account. Please check the `BurnExecution` interface for details on the returned data.
 
 </details>

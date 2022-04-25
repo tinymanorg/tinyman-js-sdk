@@ -1,4 +1,4 @@
-import algosdk, {LogicSigAccount} from "algosdk";
+import algosdk, {Algodv2, LogicSigAccount} from "algosdk";
 
 import {
   applySlippageToAmount,
@@ -121,7 +121,7 @@ export async function generateBurnTxns({
   slippage,
   initiatorAddr
 }: {
-  client: any;
+  client: Algodv2;
   pool: PoolInfo;
   liquidityIn: number | bigint;
   asset1Out: number | bigint;

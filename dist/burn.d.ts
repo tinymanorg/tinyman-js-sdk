@@ -1,3 +1,4 @@
+import {Algodv2} from "algosdk";
 import {PoolInfo, PoolReserves} from "./util/pool/poolTypes";
 import {InitiatorSigner, SignerTransaction} from "./util/commonTypes";
 /** An object containing information about a burn quote. */
@@ -76,7 +77,7 @@ export declare function generateBurnTxns({
   slippage,
   initiatorAddr
 }: {
-  client: any;
+  client: Algodv2;
   pool: PoolInfo;
   liquidityIn: number | bigint;
   asset1Out: number | bigint;
