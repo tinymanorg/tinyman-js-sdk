@@ -303,7 +303,7 @@ let pairRatio = getPoolPairRatio(
   poolReserves
 );
 
-/* If assets were not in the correct order,
+/* If assets were not in the correct order, eg. asset1 was ALGO and asset2 was USDC 
 let pairRatio = 1 / getPoolPairRatio(
   {
     asset1: asset1.decimals,
