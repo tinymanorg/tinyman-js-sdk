@@ -477,3 +477,58 @@ const data = await burnLiquidity({
 Data returned from `burnLiquidity` has information about the confirmation round, transaction ID and the excess amounts accumulated within the account. Please check the `BurnExecution` interface for details on the returned data.
 
 </details>
+
+<details>
+<summary><strong>Redeem an excess amount</strong></summary>
+
+<br>
+
+0. Let's say, we want to redeem USDC excess from the USDC/ALGO pool.
+
+```typescript
+const USDC = {
+  id: 31566704,
+  decimals: 6,
+  unit_name: "USDC"
+};
+
+const ALGO = {
+  id: 0,
+  decimals: 6,
+  unit_name: "ALGO"
+};
+
+const poolInfo = await getPoolInfo(algodClient, {
+  validatorAppID,
+  USDC.id,
+  ALGO.id
+});
+```
+
+1. Generate the redeem transactions:
+
+```typescript
+const accountAddress = "...";
+const amountToRedeem = 1000;
+
+const redeemTxns = await generateRedeemTxns({
+  client: algodClient,
+  pool: poolInfo,
+  assetID: USDC.id,
+  assetOut: amountToRedeem,
+  initiatorAddr: accountAddress
+});
+```
+
+2. Perform redeem operation:
+
+```typescript
+const data = await redeemExcessAsset({
+  client: algodClient,
+  pool: poolInfo,
+  txGroup,
+  initiatorSigner: signerCallback
+});
+```
+
+`initiatorSigner` expects a callback of shape `(txGroups: SignerTransaction[][]) => Promise<Uint8Array[]>`. So, it takes the txns generated in the previous step and signs them and then resolves with `Uint8Array[]`.
