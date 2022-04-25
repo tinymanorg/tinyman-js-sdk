@@ -194,9 +194,21 @@ export async function signBootstrapTransactions({
 }): Promise<{signedTxns: Uint8Array[]; txnIDs: string[]}> {
   const [signedFundingTxn] = await initiatorSigner([txGroup]);
 
+  // Make sure asset1 has greater ID
+  const assets =
+    asset1ID > asset2ID
+      ? {
+          asset1ID,
+          asset2ID
+        }
+      : {
+          asset1ID: asset2ID,
+          asset2ID: asset1ID
+        };
+
   const poolLogicSig = tinymanContract.getPoolLogicSig({
-    asset1ID,
-    asset2ID,
+    asset1ID: assets.asset1ID,
+    asset2ID: assets.asset2ID,
     validatorAppID
   });
   const lsig = new LogicSigAccount(poolLogicSig.program);
