@@ -38,6 +38,7 @@ const validatorAppId = getValidatorAppID("mainnet")
 <summary><strong>Swapping</strong></summary>
 
 <br>
+
 0. Let's say, we want to perform a swap between ALGO and USDC:
 
 ```typescript
@@ -72,7 +73,7 @@ We will also need the reserve details of the pool to get a quote for the swap:
 const poolReserves = await getPoolReserves(algodClient, poolInfo);
 ```
 
-<br/>
+  <br/>
 
 2. If the pair has a READY pool, we can get a quote for the swap. The following code gets a quote for a FIXED INPUT swap:
 
@@ -137,7 +138,9 @@ const swapTxns = await generateSwapTransactions({
 });
 ```
 
-4. Sign the txns
+This generates an array of `SignerTransaction` objects.
+
+4. Sign the generated txns
 
 ```typescript
 const signedTxns = await signSwapTransactions({
@@ -163,5 +166,84 @@ const data = await issueSwap({
 ```
 
 The returned data from `issueSwap` has information about the confirmation round, transaction ID and the excess amounts accumulated within the account. Please check the `SwapExecution` interface for details on the returned data.
+
+</details>
+
+<details>
+<summary><strong>Create a pool</strong></summary>
+
+<br>
+
+0. Let's say, we want to create a pool between ALGO and USDC:
+
+```typescript
+const asset1 = {
+  id: 31566704,
+  decimals: 6,
+  unit_name: "USDC"
+};
+
+const asset2 = {
+  id: 0,
+  decimals: 6,
+  unit_name: "ALGO"
+};
+```
+
+1. First, we need to get the pool info and make sure there is no pool available between the assets already:
+
+```typescript
+const poolInfo = await getPoolInfo(algodClient, {
+  validatorAppID,
+  asset1.id,
+  asset2.id
+});
+const isNotCreated = isPoolNotCreated(poolInfo);
+```
+
+2. Create the transactions for the pool creation:
+
+```typescript
+const accountAddress = "...";
+
+const bootstrapTxns = generateBootstrapTransactions({
+  client: algodClient,
+  validatorAppID,
+  asset1ID: asset1.id,
+  asset2ID: asset2.id,
+  asset1UnitName: asset1.unit_name,
+  asset2UnitName: asset2.unit_name,
+  initiatorAddr: accountAddress
+});
+```
+
+3. Sign the generated transactions:
+
+```typescript
+const {signedTxns, txnIDs} = await signBootstrapTransactions({
+  txGroup: bootstrapTxns,
+  validatorAppID,
+  asset1ID: asset1.id,
+  asset2ID: asset2.id,
+  initiatorSigner: signerCallback
+});
+```
+
+`initiatorSigner` expects a callback of shape `(txGroups: SignerTransaction[][]) => Promise<Uint8Array[]>`. So, it takes the txns generated in the previous step and signs them and then resolves with `Uint8Array[]`.
+
+4. Create the pool using the signedTxns:
+
+```typescript
+const poolInfo = await createPool(
+  algodClient,
+  {
+    asset1ID: asset1.id,
+    asset2ID: asset2.id,
+    validatorAppID
+  },
+  signedTxns,
+  txnIDs
+);
+```
 
 </details>
