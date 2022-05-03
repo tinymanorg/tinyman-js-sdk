@@ -21,7 +21,7 @@ export async function generateOptIntoAssetTxns({
     });
 
     return [{txn: optInTxn, signers: [initiatorAddr]}];
-  } catch (error) {
+  } catch (error: any) {
     throw new TinymanError(
       error,
       "We encountered something unexpected while opting into this asset. Try again later."

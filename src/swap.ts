@@ -667,7 +667,7 @@ export async function issueSwap({
     }
 
     return {...swapData, groupID: getTxnGroupID(txGroup), fees: sumUpTxnFees(txGroup)};
-  } catch (error) {
+  } catch (error: any) {
     const parsedError = new TinymanError(
       error,
       "We encountered something unexpected while swapping. Try again later."

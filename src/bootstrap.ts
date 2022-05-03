@@ -254,7 +254,7 @@ async function doBootstrap({
     return {
       liquidityTokenID
     };
-  } catch (error) {
+  } catch (error: any) {
     throw new TinymanError(
       error,
       "We encountered something unexpected while bootstraping the pool. Try again later."

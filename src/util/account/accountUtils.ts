@@ -30,7 +30,7 @@ export function getAccountInformation(client: Algodv2, address: string) {
         ...accountInfo,
         minimum_required_balance: calculateAccountMinimumRequiredBalance(accountInfo)
       });
-    } catch (error) {
+    } catch (error: any) {
       reject(new Error(error.message || "Failed to fetch account information"));
     }
   });

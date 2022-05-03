@@ -325,7 +325,7 @@ export async function burnLiquidity({
       txnID,
       groupID: getTxnGroupID(txGroup)
     };
-  } catch (error) {
+  } catch (error: any) {
     const parsedError = new TinymanError(
       error,
       "We encountered something unexpected while burning liquidity. Try again later."
