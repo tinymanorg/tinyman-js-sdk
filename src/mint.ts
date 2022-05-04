@@ -338,7 +338,7 @@ export async function mintLiquidity({
       txnID,
       groupID
     };
-  } catch (error) {
+  } catch (error: any) {
     const parsedError = new TinymanError(
       error,
       "We encountered something unexpected while minting liquidity. Try again later."

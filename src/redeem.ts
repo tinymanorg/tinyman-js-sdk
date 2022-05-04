@@ -55,7 +55,7 @@ export async function redeemExcessAsset({
       txnID,
       groupID: getTxnGroupID(txGroup)
     };
-  } catch (error) {
+  } catch (error: any) {
     throw new TinymanError(
       error,
       "We encountered something unexpected while redeeming. Try again later."
@@ -160,7 +160,7 @@ export async function redeemAllExcessAsset({
                 txnID,
                 confirmedRound
               });
-            } catch (error) {
+            } catch (error: any) {
               reject(error);
             }
           })
@@ -168,7 +168,7 @@ export async function redeemAllExcessAsset({
     );
 
     return redeemTxnsPromise;
-  } catch (error) {
+  } catch (error: any) {
     throw new TinymanError(
       error,
       "We encountered something unexpected while redeeming. Try again later."

@@ -9,7 +9,12 @@ module.exports = {
     jest: true,
     es6: true
   },
-  extends: ["@hipo/eslint-config-base", "@hipo/eslint-config-typescript", "prettier"],
+  extends: [
+    "@hipo/eslint-config-base",
+    "@hipo/eslint-config-typescript",
+    "prettier",
+    "plugin:import/typescript"
+  ],
   parserOptions: {
     project: path.resolve(__dirname, "./tsconfig.json"),
     tsconfigRootDir: __dirname,

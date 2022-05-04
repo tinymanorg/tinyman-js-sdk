@@ -108,7 +108,7 @@ export async function waitForConfirmation(
       pendingTransactionInfo = (await client
         .pendingTransactionInformation(txId)
         .do()) as Record<string, any> | null;
-    } catch (error) {
+    } catch (error: any) {
       // Ignore errors from PendingTransactionInformation, since it may return 404 if the algod
       // instance is behind a load balancer and the request goes to a different algod than the
       // one we submitted the transaction to
@@ -143,7 +143,7 @@ export function applySlippageToAmount(
     const offset = type === "negative" ? 1 - slippage : 1 + slippage;
 
     final = BigInt(Math.floor(Number(amount) * offset));
-  } catch (error) {
+  } catch (error: any) {
     throw new Error(error.message);
   }
 
@@ -229,7 +229,7 @@ export async function sendAndWaitRawTransaction(
     }
 
     return networkResponse;
-  } catch (error) {
+  } catch (error: any) {
     throw new TinymanError(
       error,
       "We encountered an error while processing this transaction. Try again later."
