@@ -431,14 +431,15 @@ function getFixedOutputSwapQuote({
   }
 
   const k = inputSupply * outputSupply;
-  // k = (inputSupply + assetInAmount) * (outputSupply - assetOutAmount)
-  const assetInAmount = k / (outputSupply - assetOutAmount) - inputSupply;
-  const swapFee = (assetInAmount * FEE_NUMERATOR) / FEE_DENOMINATOR;
-  const assetInAmountPlusFee = assetInAmount + swapFee;
+  // k = (inputSupply + assetInAmountMinusFee) * (outputSupply - assetOutAmount)
+  const assetInAmountMinusFee = k / (outputSupply - assetOutAmount) - inputSupply;
+  const assetInAmount =
+    (assetInAmountMinusFee * FEE_DENOMINATOR) / (FEE_DENOMINATOR - FEE_NUMERATOR);
+  const swapFee = assetInAmount - assetInAmountMinusFee;
 
   const rate =
     convertFromBaseUnits(decimals.assetOut, Number(assetOutAmount)) /
-    convertFromBaseUnits(decimals.assetIn, Number(assetInAmountPlusFee));
+    convertFromBaseUnits(decimals.assetIn, Number(assetInAmount));
 
   const swapPrice = 1 / rate;
 
@@ -454,7 +455,7 @@ function getFixedOutputSwapQuote({
   return {
     round: reserves.round,
     assetInID,
-    assetInAmount: assetInAmountPlusFee,
+    assetInAmount,
     assetOutID: assetOut.assetID,
     assetOutAmount,
     swapFee: Number(swapFee),
