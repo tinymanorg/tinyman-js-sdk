@@ -280,16 +280,11 @@ function getFixedInputSwapQuote({
     convertFromBaseUnits(decimals.assetOut, Number(assetOutAmount)) /
     convertFromBaseUnits(decimals.assetIn, Number(assetInAmount));
 
-  const swapPrice = 1 / rate;
-
   const poolPrice =
-    convertFromBaseUnits(decimals.assetIn, Number(inputSupply)) /
-    convertFromBaseUnits(decimals.assetOut, Number(outputSupply));
+    convertFromBaseUnits(decimals.assetOut, Number(outputSupply)) /
+    convertFromBaseUnits(decimals.assetIn, Number(inputSupply));
 
-  const priceImpact = roundNumber(
-    {decimalPlaces: 5},
-    Math.abs(swapPrice / poolPrice - 1)
-  );
+  const priceImpact = roundNumber({decimalPlaces: 5}, Math.abs(rate / poolPrice - 1));
 
   return {
     round: reserves.round,
@@ -441,16 +436,11 @@ function getFixedOutputSwapQuote({
     convertFromBaseUnits(decimals.assetOut, Number(assetOutAmount)) /
     convertFromBaseUnits(decimals.assetIn, Number(assetInAmount));
 
-  const swapPrice = 1 / rate;
-
   const poolPrice =
-    convertFromBaseUnits(decimals.assetIn, Number(inputSupply)) /
-    convertFromBaseUnits(decimals.assetOut, Number(outputSupply));
+    convertFromBaseUnits(decimals.assetOut, Number(outputSupply)) /
+    convertFromBaseUnits(decimals.assetIn, Number(inputSupply));
 
-  const priceImpact = roundNumber(
-    {decimalPlaces: 5},
-    Math.abs(swapPrice / poolPrice - 1)
-  );
+  const priceImpact = roundNumber({decimalPlaces: 5}, Math.abs(rate / poolPrice - 1));
 
   return {
     round: reserves.round,
