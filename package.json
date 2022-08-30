@@ -1,5 +1,5 @@
 {
-  "name": "tinyman",
+  "name": "@tinymanorg/tinyman-js-sdk",
   "version": "1.2.1",
   "description": "Tinyman JS SDK",
   "author": "Tinyman Core Team",
@@ -24,6 +24,12 @@
     "url": "https://github.com/tinymanorg/tinyman-js-sdk/issues"
   },
   "homepage": "https://github.com/tinymanorg/tinyman-js-sdk#readme",
+  "keywords": [
+    "tinyman",
+    "algorand",
+    "typescript",
+    "javascript"
+  ],
   "devDependencies": {
     "@hipo/eslint-config-base": "^4.2.1",
     "@hipo/eslint-config-typescript": "^1.2.0",

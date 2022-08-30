@@ -5,19 +5,8 @@ JavaScript/TypeScript SDK for the Tinyman AMM Contracts.
 ## Installation
 
 ```shell
-npm i -S github:tinymanorg/tinyman-js-sdk
+npm i -S @tinymanorg/tinyman-js-sdk
 ```
-
-As this is a private repo, the CI tool will require access to the repo as well when it needs to install the package as a dependency. Please add this step to your CI workflow before it attempts to install dependencies:
-
-```yml
-- name: Configure PAT
-  # Configure with [PAT](https://docs.github.com/en/github/authenticating-to-github/keeping-your-account-and-data-secure/creating-a-personal-access-token)
-  # so that we can install private repos
-  run: git config --global url."https://${{ secrets.GH_WORKFLOW_PAT }}@github.com/".insteadOf ssh://git@github.com/
-```
-
-GH_WORKFLOW_PAT is a token created by an Github account that has access to this repo. It should be added as a secret to the CI workflow.
 
 ## Usage
 
