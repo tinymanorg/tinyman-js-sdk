@@ -12,7 +12,6 @@ export default [
     plugins: [
       terser(),
       typescript({
-        rollupCommonJSResolveHack: true,
         exclude: "**/__tests__/**",
         clean: true
       }),
