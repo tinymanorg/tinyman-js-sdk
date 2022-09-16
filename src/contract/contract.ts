@@ -14,6 +14,11 @@ interface ValidatorAppSchema {
   numGlobalByteSlices: any;
 }
 
+export enum ContractVersion {
+  V1_1 = "v1_1",
+  V2 = "v2"
+}
+
 export class TinymanContract {
   private poolLogicSigContractTemplate: string;
   private templateVariables: PoolLogicSigVariables;

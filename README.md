@@ -18,7 +18,7 @@ const algodClient = new algosdk.Algodv2(
   /** Enter server here */,
   /** Enter port here */
 )
-const validatorAppID = getValidatorAppID("mainnet")
+const validatorAppID = getValidatorAppID("mainnet", "v2")
 ```
 
 Before doing any operations, we need to make sure the account is opted into the Tinyman Validator App:
