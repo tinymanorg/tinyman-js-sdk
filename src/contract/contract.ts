@@ -1,11 +1,19 @@
-import * as ascJson from "./asc.json";
+import * as ascJson_v1_1 from "./asc/v1_1.json";
 
 import {toByteArray} from "base64-js";
 import {LogicSigAccount} from "algosdk";
 
-type ValidatorApp = typeof ascJson.contracts.validator_app;
-type PoolLogicSig = typeof ascJson.contracts.pool_logicsig;
-type PoolLogicSigVariables = PoolLogicSig["logic"]["variables"];
+import {SupportedNetwork} from "../util/commonTypes";
+import {
+  GenerateLogicSigAccountForPoolParams,
+  generateLogicSigAccountForV1_1Pool,
+  generateLogicSigAccountForV2Pool
+} from "./utils";
+import {getValidatorAppID} from "../validator";
+
+type ValidatorApp = typeof ascJson_v1_1.contracts.validator_app;
+type PoolLogicSig = typeof ascJson_v1_1.contracts.pool_logicsig;
+export type PoolLogicSigVariables = PoolLogicSig["logic"]["variables"];
 
 interface ValidatorAppSchema {
   numLocalInts: any;
@@ -43,91 +51,37 @@ export class TinymanContract {
     };
   }
 
-  getPoolLogicSig({
-    validatorAppID,
-    asset1ID,
-    asset2ID
-  }: {
-    validatorAppID: number;
+  generateLogicSigAccountForPool(params: {
+    network: SupportedNetwork;
+    contractVersion: ContractVersion;
     asset1ID: number;
     asset2ID: number;
-  }): {addr: string; program: Uint8Array} {
-    if (asset1ID === asset2ID) {
-      throw new Error("Assets are the same");
-    }
-
-    if (asset2ID > asset1ID) {
-      const tmp = asset1ID;
-
-      asset1ID = asset2ID;
-      asset2ID = tmp;
-    }
-
-    let programArray = Array.from(toByteArray(this.poolLogicSigContractTemplate));
-
-    const variables = {
-      asset_id_1: asset1ID,
-      asset_id_2: asset2ID,
-      validator_app_id: validatorAppID
+  }): LogicSigAccount {
+    const {contractVersion, network, asset1ID, asset2ID} = params;
+    const validatorAppID = getValidatorAppID(network, contractVersion);
+    const generateLogicSicForPoolParams: GenerateLogicSigAccountForPoolParams = {
+      validatorAppID,
+      asset1ID,
+      asset2ID,
+      poolLogicSigContractTemplate: this.poolLogicSigContractTemplate,
+      templateVariables: this.templateVariables
     };
 
-    let offset = 0;
-
-    this.templateVariables.sort((a, b) => a.index - b.index);
-    for (let i = 0; i < this.templateVariables.length; i++) {
-      const v = this.templateVariables[i];
-      let name = v.name.split("TMPL_")[1].toLowerCase();
-      let value = variables[name];
-      let start = v.index - offset;
-      let end = start + v.length;
-      // All of the template variables are ints
-      let value_encoded = encodeVarInt(value);
-      let diff = v.length - value_encoded.length;
-
-      offset += diff;
-
-      programArray = programArray
-        .slice(0, start)
-        .concat(value_encoded)
-        .concat(programArray.slice(end));
-    }
-
-    const program = new Uint8Array(programArray);
-
-    const lsig = new LogicSigAccount(program);
-
-    return {
-      addr: lsig.address(),
-      program
-    };
+    return contractVersion === ContractVersion.V1_1
+      ? generateLogicSigAccountForV1_1Pool(generateLogicSicForPoolParams)
+      : generateLogicSigAccountForV2Pool(generateLogicSicForPoolParams);
   }
 }
 
-export const tinymanContract = new TinymanContract(
-  ascJson.contracts.validator_app,
-  ascJson.contracts.pool_logicsig
+export const tinymanContract_v1_1 = new TinymanContract(
+  ascJson_v1_1.contracts.validator_app,
+  ascJson_v1_1.contracts.pool_logicsig
 );
 
-export const validatorAppSchema = tinymanContract.schema;
-
-function encodeVarInt(number) {
-  let buf: number[] = [];
-
-  // eslint-disable-next-line no-constant-condition
-  while (true) {
-    let towrite = number & 0x7f;
-
-    number >>= 7;
-
-    if (number) {
-      buf.push(towrite | 0x80);
-    } else {
-      buf.push(towrite);
-      break;
-    }
-  }
-  return buf;
-}
+export const tinymanContract_v2 = new TinymanContract(
+  ascJson_v1_1.contracts.validator_app,
+  ascJson_v1_1.contracts.pool_logicsig
+);
 
 /* eslint
       no-param-reassign: "off",

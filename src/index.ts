@@ -44,7 +44,7 @@ export {
 
 export {AccountInformationData} from "./util/account/accountTypes";
 
-export {validatorAppSchema, ContractVersion} from "./contract/contract";
+export {ContractVersion} from "./contract/contract";
 
 export {
   getValidatorAppID,

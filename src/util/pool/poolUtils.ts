@@ -1,4 +1,4 @@
-import algosdk, {Algodv2} from "algosdk";
+import algosdk, {Algodv2, IntDecoding} from "algosdk";
 import {fromByteArray} from "base64-js";
 
 import {
@@ -9,8 +9,14 @@ import {
   encodeString
 } from "../util";
 import {AccountInformation} from "../account/accountTypes";
-import {tinymanContract} from "../../contract/contract";
+import {
+  ContractVersion,
+  tinymanContract_v1_1,
+  tinymanContract_v2
+} from "../../contract/contract";
 import {PoolInfo, PoolReserves, PoolStatus} from "./poolTypes";
+import {SupportedNetwork} from "../commonTypes";
+import {getValidatorAppID} from "../../validator";
 
 /**
  * Look up information about an pool.
@@ -21,29 +27,34 @@ import {PoolInfo, PoolReserves, PoolStatus} from "./poolTypes";
  * @param pool.asset1ID The ID of the first asset in the pool pair.
  * @param pool.asset2ID The ID of the second asset in the pool pair.
  */
-export async function getPoolInfo(
-  client: any,
-  pool: {
-    validatorAppID: number;
-    asset1ID: number;
-    asset2ID: number;
-  }
-): Promise<PoolInfo> {
-  const poolLogicSig = tinymanContract.getPoolLogicSig(pool);
+export async function getPoolInfo(params: {
+  client: Algodv2;
+  network: SupportedNetwork;
+  contractVersion: ContractVersion;
+  asset1ID: number;
+  asset2ID: number;
+}): Promise<PoolInfo> {
+  const {client, network, contractVersion, asset1ID, asset2ID} = params;
+  const contract =
+    contractVersion === ContractVersion.V1_1 ? tinymanContract_v1_1 : tinymanContract_v2;
+  const poolLogicSig = contract.generateLogicSigAccountForPool(params);
+  const validatorAppID = getValidatorAppID(network, contractVersion);
+  const address = poolLogicSig.address();
 
   let result: PoolInfo = {
-    addr: poolLogicSig.addr,
-    program: poolLogicSig.program,
-    validatorAppID: pool.validatorAppID,
-    asset1ID: Math.max(pool.asset1ID, pool.asset2ID),
-    asset2ID: Math.min(pool.asset1ID, pool.asset2ID),
-    status: PoolStatus.NOT_CREATED
+    account: poolLogicSig,
+    validatorAppID,
+    asset1ID: Math.max(asset1ID, asset2ID),
+    asset2ID: Math.min(asset1ID, asset2ID),
+    status: PoolStatus.NOT_CREATED,
+    contractVersion
   };
 
   const readyPoolAssets = await getPoolAssets({
     client,
-    address: poolLogicSig.addr,
-    validatorAppID: pool.validatorAppID
+    address,
+    network,
+    contractVersion
   });
 
   if (readyPoolAssets) {
@@ -61,12 +72,12 @@ const TOTAL_LIQUIDITY = 0xffffffffffffffffn;
 
 /* eslint-disable complexity */
 export async function getPoolReserves(
-  client: any,
+  client: Algodv2,
   pool: PoolInfo
 ): Promise<PoolReserves> {
   const info = (await client
-    .accountInformation(pool.addr)
-    .setIntDecoding("bigint")
+    .accountInformation(pool.account.address())
+    .setIntDecoding(IntDecoding.BIGINT)
     .do()) as AccountInformation;
   const appsLocalState = info["apps-local-state"] || [];
 
@@ -195,11 +206,13 @@ export async function getPoolAssets(
   {
     client,
     address,
-    validatorAppID
+    network,
+    contractVersion
   }: {
     client: Algodv2;
     address: string;
-    validatorAppID: number;
+    network: SupportedNetwork;
+    contractVersion: ContractVersion;
   },
   cache: Record<string, PoolAssets> = POOL_ASSETS_CACHE
 ): Promise<PoolAssets | null> {
@@ -209,7 +222,9 @@ export async function getPoolAssets(
 
   const info = (await client.accountInformation(address).do()) as AccountInformation;
 
-  const appState = info["apps-local-state"].find((app) => app.id == validatorAppID);
+  const appState = info["apps-local-state"].find(
+    (app) => app.id == getValidatorAppID(network, contractVersion)
+  );
   let assets: PoolAssets | null = null;
 
   if (appState) {
@@ -288,4 +303,17 @@ export function isPoolNotCreated(pool: undefined | null | PoolInfo) {
  */
 export function isPoolReady(pool: undefined | null | PoolInfo) {
   return pool?.status === PoolStatus.READY;
+}
+
+export function getPoolsForPair(params: {
+  client: Algodv2;
+  network: SupportedNetwork;
+  asset1ID: number;
+  asset2ID: number;
+}): Promise<PoolInfo[]> {
+  return Promise.all(
+    Object.values(ContractVersion).map((contractVersion) => {
+      return getPoolInfo({...params, contractVersion});
+    })
+  );
 }
