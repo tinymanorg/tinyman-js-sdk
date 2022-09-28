@@ -1,4 +1,5 @@
 import * as ascJson_v1_1 from "./asc/v1_1.json";
+import * as ascJson_v2 from "./asc/v2.json";
 
 import {toByteArray} from "base64-js";
 import {LogicSigAccount} from "algosdk";
@@ -11,9 +12,15 @@ import {
 } from "./utils";
 import {getValidatorAppID} from "../validator";
 
-type ValidatorApp = typeof ascJson_v1_1.contracts.validator_app;
-type PoolLogicSig = typeof ascJson_v1_1.contracts.pool_logicsig;
-export type PoolLogicSigVariables = PoolLogicSig["logic"]["variables"];
+type V1_1ValidatorApp = typeof ascJson_v1_1.contracts.validator_app;
+type V1_1PoolLogicSig = typeof ascJson_v1_1.contracts.pool_logicsig;
+export type V1_1PoolLogicSigVariables = V1_1PoolLogicSig["logic"]["variables"];
+
+// type V2ValidatorApp = typeof ascJson_v2.contracts.validator_app;
+type V2PoolLogicSig = typeof ascJson_v2.contracts.pool_logicsig;
+
+type PoolLogicSig = V1_1PoolLogicSig | V2PoolLogicSig;
+type PoolLogicSigVariables = V1_1PoolLogicSigVariables;
 
 interface ValidatorAppSchema {
   numLocalInts: any;
@@ -29,16 +36,20 @@ export enum ContractVersion {
 
 export class TinymanContract {
   private poolLogicSigContractTemplate: string;
-  private templateVariables: PoolLogicSigVariables;
+  private templateVariables: PoolLogicSigVariables | undefined;
 
   validatorApprovalContract: Uint8Array;
   validatorClearStateContract: Uint8Array;
 
   schema: ValidatorAppSchema;
 
-  constructor(validatorApp: ValidatorApp, poolLogicSig: PoolLogicSig) {
+  constructor(validatorApp: V1_1ValidatorApp, poolLogicSig: PoolLogicSig) {
     this.poolLogicSigContractTemplate = poolLogicSig.logic.bytecode;
-    this.templateVariables = poolLogicSig.logic.variables;
+
+    //  TODO: test this "in" operator
+    if ("variables" in poolLogicSig.logic) {
+      this.templateVariables = poolLogicSig.logic.variables;
+    }
 
     this.validatorApprovalContract = toByteArray(validatorApp.approval_program.bytecode);
     this.validatorClearStateContract = toByteArray(validatorApp.clear_program.bytecode);
@@ -80,7 +91,7 @@ export const tinymanContract_v1_1 = new TinymanContract(
 
 export const tinymanContract_v2 = new TinymanContract(
   ascJson_v1_1.contracts.validator_app,
-  ascJson_v1_1.contracts.pool_logicsig
+  ascJson_v2.contracts.pool_logicsig
 );
 
 /* eslint

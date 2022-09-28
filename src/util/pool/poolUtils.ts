@@ -21,11 +21,12 @@ import {getValidatorAppID} from "../../validator";
 /**
  * Look up information about an pool.
  *
- * @param client An Algodv2 client.
- * @param pool Parameters of the pool to look up.
- * @param pool.validatorAppID The ID of the Validator App for the network.
- * @param pool.asset1ID The ID of the first asset in the pool pair.
- * @param pool.asset2ID The ID of the second asset in the pool pair.
+ * @param params - The parameters for the pool information request.
+ * @param {Algodv2} params.client An Algodv2 client.
+ * @param {SupportedNetwork} params.network Network to use.
+ * @param {ContractVersion} params.contractVersion Contract version to use.
+ * @param {number} params.asset1ID The ID of the first asset in the pool pair.
+ * @param {number} params.asset2ID The ID of the second asset in the pool pair.
  */
 export async function getPoolInfo(params: {
   client: Algodv2;
@@ -305,6 +306,16 @@ export function isPoolReady(pool: undefined | null | PoolInfo) {
   return pool?.status === PoolStatus.READY;
 }
 
+/**
+ *  Returns the pools by given pair and network for both contract versions
+ *
+ * @param params - Parameters for getting pools by pair and network for both contract versions
+ * @param {Algodv2} params.client - Algodv2 client
+ * @param {SupportedNetwork} params.network - Network to use
+ * @param {number} params.asset1ID The ID of the first asset in the pool pair.
+ * @param {number} params.asset2ID The ID of the second asset in the pool pair.
+ * @returns {PoolInfo[]} - Pools infos
+ */
 export function getPoolsForPair(params: {
   client: Algodv2;
   network: SupportedNetwork;
