@@ -1,26 +1,39 @@
 import algosdk, {Algodv2} from "algosdk";
 
+import {ContractVersion} from "./contract/contract";
 import {SignerTransaction, SupportedNetwork} from "./util/commonTypes";
 
 export const OPT_IN_VALIDATOR_APP_PROCESS_TXN_COUNT = 1;
 
-const VALIDATOR_APP_ID: Record<SupportedNetwork, number> = {
-  testnet: 62368684,
-  mainnet: 552635992
+const VALIDATOR_APP_ID: Record<ContractVersion, Record<SupportedNetwork, number>> = {
+  [ContractVersion.V1_1]: {
+    testnet: 62368684,
+    mainnet: 552635992
+  },
+  [ContractVersion.V2]: {
+    //  TODO: update the values when new validator app is deployed
+    testnet: 62368684,
+    mainnet: 552635992
+  }
 };
 
 /**
  * Get the Validator App ID for a network.
  *
- * @param network "mainnet" | "testnet".
- *
+ * @param {SupportedNetwork} network "mainnet" | "testnet".
+ * @param {ContractVersion} version contract version.
  * @returns the Validator App ID
  */
-export function getValidatorAppID(network: SupportedNetwork): number {
-  const id = VALIDATOR_APP_ID[network];
+export function getValidatorAppID(
+  network: SupportedNetwork,
+  contractVersion: ContractVersion
+): number {
+  const id = VALIDATOR_APP_ID[contractVersion][network];
 
   if (!id) {
-    throw new Error(`No Validator App exists for network ${network}`);
+    throw new Error(
+      `No Validator App exists for ${network} network with ${contractVersion} contract version`
+    );
   }
 
   return id;
