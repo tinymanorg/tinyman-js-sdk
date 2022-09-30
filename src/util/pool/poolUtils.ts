@@ -17,6 +17,7 @@ import {
 import {PoolInfo, PoolReserves, PoolStatus} from "./poolTypes";
 import {SupportedNetwork} from "../commonTypes";
 import {getValidatorAppID} from "../../validator";
+import {isV2ContractVersion} from "../../contract/utils";
 
 /**
  * Look up information about an pool.
@@ -232,16 +233,20 @@ export async function getPoolAssets(
     const keyValue = appState["key-value"];
     const state = decodeState(keyValue);
 
-    const asset1Key = "YTE="; // 'a1' in base64
-    const asset2Key = "YTI="; // 'a2' in base64
+    const asset1Key = isV2ContractVersion(contractVersion) ? "asset_1_id" : "a1";
+    const asset2Key = isV2ContractVersion(contractVersion) ? "asset_2_id" : "a2";
+
+    //  Encode asset keys as base64 strings
+    const encodedAsset1Key = btoa(asset1Key);
+    const encodedAsset2Key = btoa(asset2Key);
 
     // The Liquidity Token is the only asset the Pool has created
     const liquidityTokenAsset = info["created-assets"][0];
     const liquidityTokenID = liquidityTokenAsset.index;
 
     assets = {
-      asset1ID: state[asset1Key] as number,
-      asset2ID: state[asset2Key] as number,
+      asset1ID: state[encodedAsset1Key] as number,
+      asset2ID: state[encodedAsset2Key] as number,
       liquidityTokenID
     };
 
