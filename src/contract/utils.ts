@@ -1,9 +1,9 @@
 import {LogicSigAccount} from "algosdk";
 import {toByteArray} from "base64-js";
 
-import {PoolLogicSigVariables} from "./contract";
+import {ContractVersion, PoolLogicSigVariables} from "./contract";
 
-interface GenerateLogicSigAccountForPoolParams {
+interface GenerateLogicSigAccountForV1_1PoolParams {
   validatorAppID: number;
   asset1ID: number;
   asset2ID: number;
@@ -11,8 +11,13 @@ interface GenerateLogicSigAccountForPoolParams {
   templateVariables: PoolLogicSigVariables;
 }
 
+type GenerateLogicSigAccountForV2PoolParams = Omit<
+  GenerateLogicSigAccountForV1_1PoolParams,
+  "templateVariables"
+>;
+
 function generateLogicSigAccountForV1_1Pool(
-  params: GenerateLogicSigAccountForPoolParams
+  params: GenerateLogicSigAccountForV1_1PoolParams
 ): LogicSigAccount {
   const {validatorAppID, poolLogicSigContractTemplate, templateVariables} = params;
   let {asset1ID, asset2ID} = params;
@@ -62,9 +67,10 @@ function generateLogicSigAccountForV1_1Pool(
   return new LogicSigAccount(program);
 }
 
-//  TODO: Update function for V2
-function generateLogicSigAccountForV2Pool(params: GenerateLogicSigAccountForPoolParams) {
-  let {validatorAppID, poolLogicSigContractTemplate, templateVariables} = params;
+function generateLogicSigAccountForV2Pool(
+  params: GenerateLogicSigAccountForV2PoolParams
+): LogicSigAccount {
+  const {validatorAppID, poolLogicSigContractTemplate} = params;
   let {asset1ID, asset2ID} = params;
 
   if (asset1ID === asset2ID) {
@@ -80,38 +86,18 @@ function generateLogicSigAccountForV2Pool(params: GenerateLogicSigAccountForPool
 
   let programArray = Array.from(toByteArray(poolLogicSigContractTemplate));
 
-  const variables = {
-    asset_id_1: asset1ID,
-    asset_id_2: asset2ID,
-    validator_app_id: validatorAppID
-  };
+  const validatorAppIdByteArray = Array.from(toByteArray(validatorAppID.toString()));
+  const asset1IDByteArray = Array.from(toByteArray(asset1ID.toString()));
+  const asset2IDByteArray = Array.from(toByteArray(asset2ID.toString()));
 
-  let offset = 0;
-
-  templateVariables.sort((a, b) => a.index - b.index);
-  for (let i = 0; i < templateVariables.length; i++) {
-    const v = templateVariables[i];
-    let name = v.name.split("TMPL_")[1].toLowerCase();
-    let value = variables[name];
-    let start = v.index - offset;
-    let end = start + v.length;
-    // All of the template variables are ints
-    let value_encoded = encodeVarInt(value);
-    let diff = v.length - value_encoded.length;
-
-    offset += diff;
-
-    programArray = programArray
-      .slice(0, start)
-      .concat(value_encoded)
-      .concat(programArray.slice(end));
-  }
+  programArray
+    .slice(0, 3)
+    .concat([...validatorAppIdByteArray, ...asset1IDByteArray, ...asset2IDByteArray])
+    .concat(programArray.slice(27));
 
   const program = new Uint8Array(programArray);
 
-  const lsig = new LogicSigAccount(program);
-
-  return lsig;
+  return new LogicSigAccount(program);
 }
 
 function encodeVarInt(number) {
@@ -133,10 +119,18 @@ function encodeVarInt(number) {
   return buf;
 }
 
+function isV2ContractVersion(
+  contractVersion: ContractVersion
+): contractVersion is ContractVersion.V2 {
+  return contractVersion === ContractVersion.V2;
+}
+
 export {
   generateLogicSigAccountForV1_1Pool,
   generateLogicSigAccountForV2Pool,
-  GenerateLogicSigAccountForPoolParams
+  GenerateLogicSigAccountForV1_1PoolParams,
+  GenerateLogicSigAccountForV2PoolParams,
+  isV2ContractVersion
 };
 
 /* eslint

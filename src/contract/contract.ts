@@ -6,9 +6,9 @@ import {LogicSigAccount} from "algosdk";
 
 import {SupportedNetwork} from "../util/commonTypes";
 import {
-  GenerateLogicSigAccountForPoolParams,
   generateLogicSigAccountForV1_1Pool,
-  generateLogicSigAccountForV2Pool
+  generateLogicSigAccountForV2Pool,
+  isV2ContractVersion
 } from "./utils";
 import {getValidatorAppID} from "../validator";
 
@@ -20,7 +20,7 @@ export type V1_1PoolLogicSigVariables = V1_1PoolLogicSig["logic"]["variables"];
 type V2PoolLogicSig = typeof ascJson_v2.contracts.pool_logicsig;
 
 type PoolLogicSig = V1_1PoolLogicSig | V2PoolLogicSig;
-type PoolLogicSigVariables = V1_1PoolLogicSigVariables;
+export type PoolLogicSigVariables = V1_1PoolLogicSigVariables;
 
 interface ValidatorAppSchema {
   numLocalInts: any;
@@ -70,17 +70,20 @@ export class TinymanContract {
   }): LogicSigAccount {
     const {contractVersion, network, asset1ID, asset2ID} = params;
     const validatorAppID = getValidatorAppID(network, contractVersion);
-    const generateLogicSicForPoolParams: GenerateLogicSigAccountForPoolParams = {
+    const generateLogicSigAccountForPoolParams = {
       validatorAppID,
       asset1ID,
       asset2ID,
-      poolLogicSigContractTemplate: this.poolLogicSigContractTemplate,
-      templateVariables: this.templateVariables
+      poolLogicSigContractTemplate: this.poolLogicSigContractTemplate
     };
 
-    return contractVersion === ContractVersion.V1_1
-      ? generateLogicSigAccountForV1_1Pool(generateLogicSicForPoolParams)
-      : generateLogicSigAccountForV2Pool(generateLogicSicForPoolParams);
+    //  This type assertion will be removed when if we create a new class for each contract version
+    return isV2ContractVersion(contractVersion)
+      ? generateLogicSigAccountForV2Pool(generateLogicSigAccountForPoolParams)
+      : generateLogicSigAccountForV1_1Pool({
+          ...generateLogicSigAccountForPoolParams,
+          templateVariables: this.templateVariables!
+        });
   }
 }
 
