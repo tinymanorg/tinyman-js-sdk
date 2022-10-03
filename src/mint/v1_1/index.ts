@@ -1,72 +1,29 @@
-import algosdk, {LogicSigAccount} from "algosdk";
+import algosdk from "algosdk";
 
+import {ContractVersion} from "../../contract/contract";
+import {getAccountExcessWithinPool} from "../../util/account/accountUtils";
+import {ALGO_ASSET_ID} from "../../util/asset/assetConstants";
+import {
+  SignerTransaction,
+  InitiatorSigner,
+  SupportedNetwork
+} from "../../util/commonTypes";
+import {
+  MINIMUM_LIQUIDITY_MINTING_AMOUNT,
+  DEFAULT_FEE_TXN_NOTE
+} from "../../util/constant";
+import TinymanError from "../../util/error/TinymanError";
+import {PoolInfo, PoolReserves} from "../../util/pool/poolTypes";
+import {getPoolShare} from "../../util/pool/poolUtils";
 import {
   applySlippageToAmount,
   encodeString,
-  getTxnGroupID,
   sendAndWaitRawTransaction,
-  sumUpTxnFees
-} from "./util/util";
-import {InitiatorSigner, SignerTransaction} from "./util/commonTypes";
-import TinymanError from "./util/error/TinymanError";
-import {DEFAULT_FEE_TXN_NOTE, MINIMUM_LIQUIDITY_MINTING_AMOUNT} from "./util/constant";
-import {ALGO_ASSET_ID} from "./util/asset/assetConstants";
-import {PoolInfo, PoolReserves} from "./util/pool/poolTypes";
-import {getPoolShare} from "./util/pool/poolUtils";
-import {getAccountExcessWithinPool} from "./util/account/accountUtils";
-
-/** An object containing information about a mint quote. */
-export interface MintQuote {
-  /** The round that this quote is based on. */
-  round: number;
-  /** The ID of the first input asset in this quote. */
-  asset1ID: number;
-  /** The quantity of the first input asset in this quote. */
-  asset1In: bigint;
-  /** The ID of the second input asset in this quote. */
-  asset2ID: number;
-  /** The quantity of the second input asset in this quote. */
-  asset2In: bigint;
-  /** The ID of the liquidity token output in this quote. */
-  liquidityID: number;
-  /** The amount of the liquidity token output in this quote. */
-  liquidityOut: bigint;
-  /** The share of the total liquidity in this quote. */
-  share: number;
-}
-
-/** An object containing information about a successfully executed mint transaction. */
-export interface MintExecution {
-  /** The round that the mint occurred in. */
-  round: number;
-  /**
-   * The total amount of transaction fees that were spent (in microAlgos) to execute the mint and,
-   * if applicable, redeem transactions.
-   */
-  fees: number;
-  /** The ID of the output liquidity token asset. */
-  liquidityID: number;
-  /** The quantity of the output liquidity token asset. */
-  liquidityOut: bigint;
-  excessAmount: {
-    /** Excess amount for the current mint */
-    excessAmountForMinting: bigint;
-    /** Total excess amount accumulated for the pool asset */
-    totalExcessAmount: bigint;
-  };
-  /** The ID of the transaction. */
-  txnID: string;
-  /** The group ID for the transaction group. */
-  groupID: string;
-}
-
-enum MintTxnIndices {
-  FEE_TXN = 0,
-  VALIDATOR_APP_CALL_TXN,
-  ASSET1_IN_TXN,
-  ASSET2_IN_TXN,
-  LIQUDITY_OUT_TXN
-}
+  sumUpTxnFees,
+  getTxnGroupID
+} from "../../util/util";
+import {getValidatorAppID} from "../../validator";
+import {MintQuote, MintExecution, MintTxnIndices} from "../types";
 
 /**
  * Get a quote for how many liquidity tokens a deposit of asset1In and asset2In is worth at this
@@ -128,78 +85,83 @@ export function getMintLiquidityQuote({
 
 export const MINT_PROCESS_TXN_COUNT = 5;
 
-export async function generateMintTxns({
+export async function generateTxns({
   client,
-  pool,
-  asset1In,
-  asset2In,
-  liquidityOut,
+  network,
+  poolAddress,
+  asset_1,
+  asset_2,
+  liquidityToken,
   slippage,
   initiatorAddr
 }: {
   client: any;
-  pool: PoolInfo;
-  asset1In: number | bigint;
-  asset2In: number | bigint;
-  liquidityOut: number | bigint;
+  network: SupportedNetwork;
+  poolAddress: string;
+  asset_1: {id: number; amount: number | bigint};
+  asset_2: {id: number; amount: number | bigint};
+  liquidityToken: {id: number; amount: number | bigint};
   slippage: number;
   initiatorAddr: string;
 }): Promise<SignerTransaction[]> {
   // apply slippage to liquidity out amount
-  const liquidityOutAmount = applySlippageToAmount("negative", slippage, liquidityOut);
-
+  const liquidityOutAmount = applySlippageToAmount(
+    "negative",
+    slippage,
+    liquidityToken.id
+  );
   const suggestedParams = await client.getTransactionParams().do();
 
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
-    from: pool.addr,
-    appIndex: pool.validatorAppID,
+    from: poolAddress,
+    appIndex: getValidatorAppID(network, ContractVersion.V1_1),
     appArgs: [encodeString("mint")],
     accounts: [initiatorAddr],
     foreignAssets:
-      pool.asset2ID == ALGO_ASSET_ID
-        ? [pool.asset1ID, <number>pool.liquidityTokenID]
-        : [pool.asset1ID, pool.asset2ID, <number>pool.liquidityTokenID],
+      asset_2.id == ALGO_ASSET_ID
+        ? [asset_1.id, <number>liquidityToken.id]
+        : [asset_1.id, asset_2.id, <number>liquidityToken.id],
     suggestedParams
   });
 
   const asset1InTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
     from: initiatorAddr,
-    to: pool.addr,
-    assetIndex: pool.asset1ID,
-    amount: asset1In,
+    to: poolAddress,
+    assetIndex: asset_1.id,
+    amount: asset_1.amount,
     suggestedParams
   });
 
   let asset2InTxn;
 
-  if (pool.asset2ID === ALGO_ASSET_ID) {
+  if (asset_2.id === ALGO_ASSET_ID) {
     asset2InTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
       from: initiatorAddr,
-      to: pool.addr,
-      amount: asset2In,
+      to: poolAddress,
+      amount: asset_2.amount,
       suggestedParams
     });
   } else {
     asset2InTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
       from: initiatorAddr,
-      to: pool.addr,
-      assetIndex: pool.asset2ID,
-      amount: asset2In,
+      to: poolAddress,
+      assetIndex: asset_2.id,
+      amount: asset_2.amount,
       suggestedParams
     });
   }
 
   const liquidityOutTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-    from: pool.addr,
+    from: poolAddress,
     to: initiatorAddr,
-    assetIndex: <number>pool.liquidityTokenID,
+    assetIndex: <number>liquidityToken.id,
     amount: liquidityOutAmount,
     suggestedParams
   });
 
   const feeTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
     from: initiatorAddr,
-    to: pool.addr,
+    to: poolAddress,
     amount: validatorAppCallTxn.fee + liquidityOutTxn.fee,
     note: DEFAULT_FEE_TXN_NOTE, // just here to make this unique from asset1In if necessary
     suggestedParams
@@ -220,7 +182,7 @@ export async function generateMintTxns({
     },
     {
       txn: txGroup[1],
-      signers: [pool.addr]
+      signers: [poolAddress]
     },
     {
       txn: txGroup[2],
@@ -232,7 +194,7 @@ export async function generateMintTxns({
     },
     {
       txn: txGroup[4],
-      signers: [pool.addr]
+      signers: [poolAddress]
     }
   ];
 }
@@ -246,7 +208,7 @@ export async function signMintTxns({
   txGroup: SignerTransaction[];
   initiatorSigner: InitiatorSigner;
 }): Promise<Uint8Array[]> {
-  const lsig = new LogicSigAccount(pool.program);
+  const {lsig} = pool.account;
   const [signedFeeTxn, signedAsset1InTxn, signedAsset2InTxn] = await initiatorSigner([
     txGroup
   ]);
