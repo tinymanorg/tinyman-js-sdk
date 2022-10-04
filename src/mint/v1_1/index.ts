@@ -34,7 +34,7 @@ import {MintQuote, MintExecution, MintTxnIndices} from "../types";
  * @param params.asset1In The quantity of the first asset being deposited.
  * @param params.asset2In The quantity of the second asset being deposited.
  */
-export function getMintLiquidityQuote({
+export function getQuote({
   pool,
   reserves,
   asset1In,
@@ -82,8 +82,6 @@ export function getMintLiquidityQuote({
     share: getPoolShare(reserves.issuedLiquidity + liquidityOut, liquidityOut)
   };
 }
-
-export const MINT_PROCESS_TXN_COUNT = 5;
 
 export async function generateTxns({
   client,
@@ -199,7 +197,7 @@ export async function generateTxns({
   ];
 }
 
-export async function signMintTxns({
+export async function signTxns({
   pool,
   txGroup,
   initiatorSigner
@@ -245,7 +243,7 @@ export async function signMintTxns({
  * @param params.initiatorSigner A function that will sign transactions from the initiator's
  *   account.
  */
-export async function mintLiquidity({
+export async function execute({
   client,
   pool,
   txGroup,

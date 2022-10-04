@@ -1,9 +1,3 @@
-import * as flexible from "./flexible";
-import * as standart from "./standart";
-import * as withSingleAsset from "./with-single-asset";
-
-export default {
-  flexible,
-  standart,
-  withSingleAsset
-};
+export * as flexible from "./flexible";
+export * as standart from "./standart";
+export * as withSingleAsset from "./with-single-asset";
