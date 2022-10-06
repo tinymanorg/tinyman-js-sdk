@@ -2,7 +2,7 @@ import * as ascJson_v1_1 from "./asc/v1_1.json";
 import * as ascJson_v2 from "./asc/v2.json";
 
 import {toByteArray} from "base64-js";
-import algosdk, {LogicSigAccount} from "algosdk";
+import {LogicSigAccount} from "algosdk";
 
 import {SupportedNetwork} from "../util/commonTypes";
 import {
