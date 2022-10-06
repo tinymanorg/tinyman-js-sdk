@@ -3,6 +3,7 @@ import {Algodv2} from "algosdk";
 import {SignerTransaction} from "./commonTypes";
 import {AccountInformation} from "./account/accountTypes";
 import TinymanError from "./error/TinymanError";
+import {ALGO_ASSET_ID} from "./asset/assetConstants";
 
 export function decodeState(
   stateArray: AccountInformation["apps-local-state"][0]["key-value"] = []
@@ -250,4 +251,8 @@ export function getTxnGroupID(txns: SignerTransaction[]) {
  */
 export function encodeString(text: string) {
   return new TextEncoder().encode(text);
+}
+
+export function isAlgo(id: number | bigint) {
+  return id === ALGO_ASSET_ID;
 }

@@ -2,7 +2,7 @@ import * as ascJson_v1_1 from "./asc/v1_1.json";
 import * as ascJson_v2 from "./asc/v2.json";
 
 import {toByteArray} from "base64-js";
-import {LogicSigAccount} from "algosdk";
+import algosdk, {LogicSigAccount} from "algosdk";
 
 import {SupportedNetwork} from "../util/commonTypes";
 import {
@@ -62,6 +62,8 @@ export abstract class BaseTinymanContract<
     asset1ID: number;
     asset2ID: number;
   }): LogicSigAccount;
+
+  abstract getApplicationAddress(network: SupportedNetwork): string;
 }
 
 export class TinymanContractV1_1 extends BaseTinymanContract<
@@ -96,6 +98,12 @@ export class TinymanContractV1_1 extends BaseTinymanContract<
 
     return generateLogicSigAccountForV1_1Pool(generateLogicSigAccountForPoolParams);
   }
+
+  getApplicationAddress(network: SupportedNetwork): string {
+    return algosdk.getApplicationAddress(
+      getValidatorAppID(network, ContractVersion.V1_1)
+    );
+  }
 }
 
 export class TinymanContractV2 extends BaseTinymanContract<
@@ -126,6 +134,10 @@ export class TinymanContractV2 extends BaseTinymanContract<
     };
 
     return generateLogicSigAccountForV2Pool(generateLogicSigAccountForPoolParams);
+  }
+
+  getApplicationAddress(network: SupportedNetwork): string {
+    return algosdk.getApplicationAddress(getValidatorAppID(network, ContractVersion.V2));
   }
 }
 
