@@ -73,13 +73,7 @@ export {
   getPoolsForPair
 } from "./util/pool/poolUtils";
 
-export {
-  generateBootstrapTransactions,
-  signBootstrapTransactions,
-  getBootstrapProcessTxnCount,
-  calculatePoolBootstrapFundingTxnAmount,
-  createPool
-} from "./bootstrap";
+export {Bootstrap} from "./bootstrap";
 
 export {
   BurnQuote,
