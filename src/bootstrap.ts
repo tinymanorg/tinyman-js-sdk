@@ -1,6 +1,6 @@
-import algosdk, {Algodv2, LogicSigAccount, Transaction} from "algosdk";
+import algosdk, {Algodv2, Transaction} from "algosdk";
 
-import {ContractVersion, tinymanContract_v1_1} from "./contract/contract";
+import {CONTRACT_VERSION, tinymanContract_v1_1} from "./contract/contract";
 import {InitiatorSigner, SignerTransaction} from "./util/commonTypes";
 import {encodeString, waitForConfirmation} from "./util/util";
 import TinymanError from "./util/error/TinymanError";
@@ -301,6 +301,6 @@ export async function createPool(
     asset1ID: pool.asset1ID,
     asset2ID: pool.asset2ID,
     //  TODO: Fix this
-    contractVersion: ContractVersion.V1_1
+    contractVersion: CONTRACT_VERSION.V1_1
   });
 }

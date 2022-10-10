@@ -11,6 +11,7 @@ import {
 import {AccountInformation} from "../account/accountTypes";
 import {
   ContractVersion,
+  CONTRACT_VERSION,
   tinymanContract_v1_1,
   tinymanContract_v2
 } from "../../contract/contract";
@@ -38,7 +39,7 @@ export async function getPoolInfo(params: {
 }): Promise<PoolInfo> {
   const {client, network, contractVersion, asset1ID, asset2ID} = params;
   const contract =
-    contractVersion === ContractVersion.V1_1 ? tinymanContract_v1_1 : tinymanContract_v2;
+    contractVersion === CONTRACT_VERSION.V1_1 ? tinymanContract_v1_1 : tinymanContract_v2;
   const poolLogicSig = contract.generateLogicSigAccountForPool(params);
   const validatorAppID = getValidatorAppID(network, contractVersion);
   const address = poolLogicSig.address();
@@ -331,7 +332,7 @@ export function getPoolsForPair(params: {
   asset2ID: number;
 }): Promise<PoolInfo[]> {
   return Promise.all(
-    Object.values(ContractVersion).map((contractVersion) => {
+    Object.values(CONTRACT_VERSION).map((contractVersion) => {
       return getPoolInfo({...params, contractVersion});
     })
   );

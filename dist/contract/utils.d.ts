@@ -17,9 +17,7 @@ declare function generateLogicSigAccountForV1_1Pool(
 declare function generateLogicSigAccountForV2Pool(
   params: GenerateLogicSigAccountForV2PoolParams
 ): LogicSigAccount;
-declare function isV2ContractVersion(
-  contractVersion: ContractVersion
-): contractVersion is ContractVersion.V2;
+declare function isV2ContractVersion(contractVersion: ContractVersion): boolean;
 export {
   generateLogicSigAccountForV1_1Pool,
   generateLogicSigAccountForV2Pool,

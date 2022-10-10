@@ -13,10 +13,8 @@ interface ValidatorAppSchema {
   numGlobalInts: any;
   numGlobalByteSlices: any;
 }
-export declare enum ContractVersion {
-  V1_1 = "v1_1",
-  V2 = "v2"
-}
+export declare type ContractVersion = "v1_1" | "v2";
+export declare const CONTRACT_VERSION: Record<string, ContractVersion>;
 export declare abstract class BaseTinymanContract<
   ValidatorApp extends V1_1ValidatorApp,
   PoolLogicSig extends V1_1PoolLogicSig | V2PoolLogicSig

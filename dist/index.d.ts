@@ -38,6 +38,7 @@ export {
 export {AccountInformationData} from "./util/account/accountTypes";
 export {
   ContractVersion,
+  CONTRACT_VERSION,
   TinymanContractV1_1,
   tinymanContract_v2
 } from "./contract/contract";
