@@ -227,6 +227,9 @@ export async function getPoolAssets(
   const appState = info["apps-local-state"].find(
     (app) => app.id == getValidatorAppID(network, contractVersion)
   );
+
+  // appState["pool-token-asset-id"]
+
   let assets: PoolAssets | null = null;
 
   if (appState) {

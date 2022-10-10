@@ -92,8 +92,6 @@ export async function signSwapTransactions({
   txGroup: SignerTransaction[];
   initiatorSigner: InitiatorSigner;
 }): Promise<Uint8Array[]> {
-  const lsig = new LogicSigAccount(pool.program);
-
   const [signedFeeTxn, signedAssetInTxn] = await initiatorSigner([txGroup]);
 
   const signedTxns = txGroup.map((txDetail, index) => {
@@ -103,7 +101,7 @@ export async function signSwapTransactions({
     if (index === SwapTxnGroupIndices.ASSET_IN_TXN_INDEX) {
       return signedAssetInTxn;
     }
-    const {blob} = algosdk.signLogicSigTransactionObject(txDetail.txn, lsig);
+    const {blob} = algosdk.signLogicSigTransactionObject(txDetail.txn, pool.account.lsig);
 
     return blob;
   });
@@ -120,10 +118,12 @@ export async function generateSwapTransactions({
   assetIn,
   assetOut,
   slippage,
-  initiatorAddr
+  initiatorAddr,
+  poolAddress
 }: {
   client: any;
   pool: PoolInfo;
+  poolAddress: string;
   swapType: SwapType;
   assetIn: {
     assetID: number;
@@ -144,7 +144,7 @@ export async function generateSwapTransactions({
   ];
 
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
-    from: pool.addr,
+    from: poolAddress,
     appIndex: pool.validatorAppID!,
     appArgs: validatorAppCallArgs,
     accounts: [initiatorAddr],
@@ -164,14 +164,14 @@ export async function generateSwapTransactions({
   if (assetIn.assetID === ALGO_ASSET_ID) {
     assetInTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
       from: initiatorAddr,
-      to: pool.addr,
+      to: poolAddress,
       amount: assetInAmount,
       suggestedParams
     });
   } else {
     assetInTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
       from: initiatorAddr,
-      to: pool.addr,
+      to: poolAddress,
       assetIndex: assetIn.assetID,
       amount: assetInAmount,
       suggestedParams
@@ -186,14 +186,14 @@ export async function generateSwapTransactions({
 
   if (assetOut.assetID === ALGO_ASSET_ID) {
     assetOutTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-      from: pool.addr,
+      from: poolAddress,
       to: initiatorAddr,
       amount: assetOutAmount,
       suggestedParams
     });
   } else {
     assetOutTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-      from: pool.addr,
+      from: poolAddress,
       to: initiatorAddr,
       assetIndex: assetOut.assetID,
       amount: assetOutAmount,
@@ -203,7 +203,7 @@ export async function generateSwapTransactions({
 
   const feeTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
     from: initiatorAddr,
-    to: pool.addr,
+    to: poolAddress,
     amount: validatorAppCallTxn.fee + assetOutTxn.fee,
     note: DEFAULT_FEE_TXN_NOTE,
     suggestedParams
@@ -218,9 +218,9 @@ export async function generateSwapTransactions({
 
   return [
     {txn: txGroup[0], signers: [initiatorAddr]},
-    {txn: txGroup[1], signers: [pool.addr]},
+    {txn: txGroup[1], signers: [poolAddress]},
     {txn: txGroup[2], signers: [initiatorAddr]},
-    {txn: txGroup[3], signers: [pool.addr]}
+    {txn: txGroup[3], signers: [poolAddress]}
   ];
 }
 

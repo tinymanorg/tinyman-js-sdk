@@ -109,7 +109,6 @@ export async function generateTxns({
     liquidityToken.id
   );
   const suggestedParams = await client.getTransactionParams().do();
-
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
     from: poolAddress,
     appIndex: getValidatorAppID(network, ContractVersion.V1_1),

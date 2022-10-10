@@ -1,4 +1,4 @@
-import algosdk, {Algodv2, LogicSigAccount} from "algosdk";
+import algosdk, {Algodv2} from "algosdk";
 
 import {
   applySlippageToAmount,
@@ -119,7 +119,8 @@ export async function generateBurnTxns({
   asset1Out,
   asset2Out,
   slippage,
-  initiatorAddr
+  initiatorAddr,
+  poolAddress
 }: {
   client: Algodv2;
   pool: PoolInfo;
@@ -128,11 +129,12 @@ export async function generateBurnTxns({
   asset2Out: number | bigint;
   slippage: number;
   initiatorAddr: string;
+  poolAddress: string;
 }): Promise<SignerTransaction[]> {
   const suggestedParams = await client.getTransactionParams().do();
 
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
-    from: pool.addr,
+    from: poolAddress,
     appIndex: pool.validatorAppID,
     appArgs: [encodeString("burn")],
     accounts: [initiatorAddr],
@@ -146,7 +148,7 @@ export async function generateBurnTxns({
   const asset1OutAmount = applySlippageToAmount("negative", slippage, asset1Out);
 
   const asset1OutTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-    from: pool.addr,
+    from: poolAddress,
     to: initiatorAddr,
     assetIndex: pool.asset1ID,
     amount: asset1OutAmount,
@@ -158,14 +160,14 @@ export async function generateBurnTxns({
 
   if (pool.asset2ID === ALGO_ASSET_ID) {
     asset2OutTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-      from: pool.addr,
+      from: poolAddress,
       to: initiatorAddr,
       amount: asset2OutAmount,
       suggestedParams
     });
   } else {
     asset2OutTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-      from: pool.addr,
+      from: poolAddress,
       to: initiatorAddr,
       assetIndex: pool.asset2ID,
       amount: asset2OutAmount,
@@ -175,7 +177,7 @@ export async function generateBurnTxns({
 
   const liquidityInTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
     from: initiatorAddr,
-    to: pool.addr,
+    to: poolAddress,
     assetIndex: pool.liquidityTokenID as number,
     amount: liquidityIn,
     suggestedParams
@@ -185,7 +187,7 @@ export async function generateBurnTxns({
 
   const feeTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
     from: initiatorAddr,
-    to: pool.addr,
+    to: poolAddress,
     amount: txnFees,
     note: DEFAULT_FEE_TXN_NOTE,
     suggestedParams
@@ -203,9 +205,9 @@ export async function generateBurnTxns({
 
   return [
     {txn: txGroup[BurnTxnIndices.FEE_TXN], signers: [initiatorAddr]},
-    {txn: txGroup[BurnTxnIndices.VALIDATOR_APP_CALL_TXN], signers: [pool.addr]},
-    {txn: txGroup[BurnTxnIndices.ASSET1_OUT_TXN], signers: [pool.addr]},
-    {txn: txGroup[BurnTxnIndices.ASSET2_OUT_TXN], signers: [pool.addr]},
+    {txn: txGroup[BurnTxnIndices.VALIDATOR_APP_CALL_TXN], signers: [poolAddress]},
+    {txn: txGroup[BurnTxnIndices.ASSET1_OUT_TXN], signers: [poolAddress]},
+    {txn: txGroup[BurnTxnIndices.ASSET2_OUT_TXN], signers: [poolAddress]},
     {txn: txGroup[BurnTxnIndices.LIQUDITY_IN_TXN], signers: [initiatorAddr]}
   ];
 }
@@ -220,7 +222,7 @@ export async function signBurnTxns({
   initiatorSigner: InitiatorSigner;
 }): Promise<Uint8Array[]> {
   const [signedFeeTxn, signedLiquidityInTxn] = await initiatorSigner([txGroup]);
-  const lsig = new LogicSigAccount(pool.program);
+  const {lsig} = pool.account;
 
   const signedTxns = txGroup.map((txDetail, index) => {
     if (index === BurnTxnIndices.FEE_TXN) {
