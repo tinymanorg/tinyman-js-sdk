@@ -69,7 +69,8 @@ export {
   isPoolEmpty,
   isPoolNotCreated,
   isPoolReady,
-  getPoolAssets
+  getPoolAssets,
+  getPoolsForPair
 } from "./util/pool/poolUtils";
 
 export {
