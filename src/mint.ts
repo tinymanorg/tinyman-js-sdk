@@ -149,9 +149,10 @@ export async function generateMintTxns({
   const liquidityOutAmount = applySlippageToAmount("negative", slippage, liquidityOut);
 
   const suggestedParams = await client.getTransactionParams().do();
+  const poolAddress = pool.account.address();
 
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
-    from: pool.addr,
+    from: poolAddress,
     appIndex: pool.validatorAppID,
     appArgs: [encodeString("mint")],
     accounts: [initiatorAddr],
@@ -164,7 +165,7 @@ export async function generateMintTxns({
 
   const asset1InTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
     from: initiatorAddr,
-    to: pool.addr,
+    to: poolAddress,
     assetIndex: pool.asset1ID,
     amount: asset1In,
     suggestedParams
@@ -175,14 +176,14 @@ export async function generateMintTxns({
   if (pool.asset2ID === ALGO_ASSET_ID) {
     asset2InTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
       from: initiatorAddr,
-      to: pool.addr,
+      to: poolAddress,
       amount: asset2In,
       suggestedParams
     });
   } else {
     asset2InTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
       from: initiatorAddr,
-      to: pool.addr,
+      to: poolAddress,
       assetIndex: pool.asset2ID,
       amount: asset2In,
       suggestedParams
@@ -190,7 +191,7 @@ export async function generateMintTxns({
   }
 
   const liquidityOutTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-    from: pool.addr,
+    from: poolAddress,
     to: initiatorAddr,
     assetIndex: <number>pool.liquidityTokenID,
     amount: liquidityOutAmount,
@@ -199,7 +200,7 @@ export async function generateMintTxns({
 
   const feeTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
     from: initiatorAddr,
-    to: pool.addr,
+    to: poolAddress,
     amount: validatorAppCallTxn.fee + liquidityOutTxn.fee,
     note: DEFAULT_FEE_TXN_NOTE, // just here to make this unique from asset1In if necessary
     suggestedParams
@@ -220,7 +221,7 @@ export async function generateMintTxns({
     },
     {
       txn: txGroup[1],
-      signers: [pool.addr]
+      signers: [poolAddress]
     },
     {
       txn: txGroup[2],
@@ -232,7 +233,7 @@ export async function generateMintTxns({
     },
     {
       txn: txGroup[4],
-      signers: [pool.addr]
+      signers: [poolAddress]
     }
   ];
 }
@@ -246,7 +247,7 @@ export async function signMintTxns({
   txGroup: SignerTransaction[];
   initiatorSigner: InitiatorSigner;
 }): Promise<Uint8Array[]> {
-  const lsig = new LogicSigAccount(pool.program);
+  const {lsig} = pool.account;
   const [signedFeeTxn, signedAsset1InTxn, signedAsset2InTxn] = await initiatorSigner([
     txGroup
   ]);

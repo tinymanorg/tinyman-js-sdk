@@ -1,6 +1,6 @@
 import algosdk, {Algodv2, LogicSigAccount, Transaction} from "algosdk";
 
-import {tinymanContract} from "./contract/contract";
+import {ContractVersion, tinymanContract_v1_1} from "./contract/contract";
 import {InitiatorSigner, SignerTransaction} from "./util/commonTypes";
 import {encodeString, waitForConfirmation} from "./util/util";
 import TinymanError from "./util/error/TinymanError";
@@ -43,8 +43,10 @@ export function calculatePoolBootstrapFundingTxnAmount(
     MINIMUM_BALANCE_REQUIRED_PER_ASSET + // fee + min balance to opt into asset 1
     (asset2ID === 0 ? 0 : MINIMUM_BALANCE_REQUIRED_PER_ASSET) + // min balance to opt into asset 2
     MINIMUM_BALANCE_REQUIRED_PER_APP + // min balance to opt into validator app
-    MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE * tinymanContract.schema.numLocalInts +
-    MINIMUM_BALANCE_REQUIRED_PER_BYTE_SCHEMA * tinymanContract.schema.numLocalByteSlices;
+    MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE *
+      tinymanContract_v1_1.schema.numLocalInts +
+    MINIMUM_BALANCE_REQUIRED_PER_BYTE_SCHEMA *
+      tinymanContract_v1_1.schema.numLocalByteSlices;
 
   return (
     poolAccountMinBalance +
@@ -86,14 +88,15 @@ export async function generateBootstrapTransactions({
           asset2: {id: asset1ID, unitName: asset1UnitName}
         };
 
-  const poolLogicSig = tinymanContract.getPoolLogicSig({
+  const poolLogicSig = tinymanContract_v1_1.generateLogicSigAccountForPool({
     asset1ID: assets.asset1.id,
     asset2ID: assets.asset2.id,
-    validatorAppID
+    //  TODO: Fix this
+    network: "testnet"
   });
-
+  const poolAddress = poolLogicSig.address();
   const validatorAppCallTxn = algosdk.makeApplicationOptInTxnFromObject({
-    from: poolLogicSig.addr,
+    from: poolAddress,
     appIndex: validatorAppID,
     appArgs: [
       encodeString("bootstrap"),
@@ -107,7 +110,7 @@ export async function generateBootstrapTransactions({
 
   const liquidityTokenCreateTxn = algosdk.makeAssetCreateTxnWithSuggestedParamsFromObject(
     {
-      from: poolLogicSig.addr,
+      from: poolAddress,
       total: 0xffffffffffffffffn,
       decimals: 6,
       defaultFrozen: false,
@@ -119,8 +122,8 @@ export async function generateBootstrapTransactions({
   );
 
   const asset1Optin = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-    from: poolLogicSig.addr,
-    to: poolLogicSig.addr,
+    from: poolAddress,
+    to: poolAddress,
     assetIndex: assets.asset1.id,
     amount: 0,
     suggestedParams
@@ -130,8 +133,8 @@ export async function generateBootstrapTransactions({
     assets.asset2.id === 0
       ? null
       : algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-          from: poolLogicSig.addr,
-          to: poolLogicSig.addr,
+          from: poolAddress,
+          to: poolAddress,
           assetIndex: assets.asset2.id,
           amount: 0,
           suggestedParams
@@ -139,7 +142,7 @@ export async function generateBootstrapTransactions({
 
   const fundingTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
     from: initiatorAddr,
-    to: poolLogicSig.addr,
+    to: poolAddress,
     amount: calculatePoolBootstrapFundingTxnAmount(assets.asset2.id, {
       liquidityTokenCreateTxn: liquidityTokenCreateTxn.fee,
       asset1OptinTxn: asset1Optin.fee,
@@ -164,15 +167,15 @@ export async function generateBootstrapTransactions({
 
   let finalSignerTxns: SignerTransaction[] = [
     {txn: txGroup[0], signers: [initiatorAddr]},
-    {txn: txGroup[1], signers: [poolLogicSig.addr]},
-    {txn: txGroup[2], signers: [poolLogicSig.addr]},
-    {txn: txGroup[3], signers: [poolLogicSig.addr]}
+    {txn: txGroup[1], signers: [poolAddress]},
+    {txn: txGroup[2], signers: [poolAddress]},
+    {txn: txGroup[3], signers: [poolAddress]}
   ];
 
   if (txGroup[4]) {
     finalSignerTxns.push({
       txn: txGroup[4],
-      signers: [poolLogicSig.addr]
+      signers: [poolAddress]
     });
   }
 
@@ -206,12 +209,13 @@ export async function signBootstrapTransactions({
           asset2ID: asset1ID
         };
 
-  const poolLogicSig = tinymanContract.getPoolLogicSig({
+  const poolLogicSig = tinymanContract_v1_1.generateLogicSigAccountForPool({
     asset1ID: assets.asset1ID,
     asset2ID: assets.asset2ID,
-    validatorAppID
+    // TODO: Fix this
+    network: "testnet"
   });
-  const lsig = new LogicSigAccount(poolLogicSig.program);
+  const lsig = poolLogicSig;
 
   const txnIDs: string[] = [];
   const signedTxns = txGroup.map((txDetail, index) => {
@@ -290,5 +294,13 @@ export async function createPool(
     txnIDs
   });
 
-  return getPoolInfo(client, pool);
+  return getPoolInfo({
+    client,
+    //  TODO: Fix this
+    network: "testnet",
+    asset1ID: pool.asset1ID,
+    asset2ID: pool.asset2ID,
+    //  TODO: Fix this
+    contractVersion: ContractVersion.V1_1
+  });
 }
