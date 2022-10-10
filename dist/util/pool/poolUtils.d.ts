@@ -1,24 +1,26 @@
 import {Algodv2} from "algosdk";
+import {ContractVersion} from "../../contract/contract";
 import {PoolInfo, PoolReserves} from "./poolTypes";
+import {SupportedNetwork} from "../commonTypes";
 /**
  * Look up information about an pool.
  *
- * @param client An Algodv2 client.
- * @param pool Parameters of the pool to look up.
- * @param pool.validatorAppID The ID of the Validator App for the network.
- * @param pool.asset1ID The ID of the first asset in the pool pair.
- * @param pool.asset2ID The ID of the second asset in the pool pair.
+ * @param params - The parameters for the pool information request.
+ * @param {Algodv2} params.client An Algodv2 client.
+ * @param {SupportedNetwork} params.network Network to use.
+ * @param {ContractVersion} params.contractVersion Contract version to use.
+ * @param {number} params.asset1ID The ID of the first asset in the pool pair.
+ * @param {number} params.asset2ID The ID of the second asset in the pool pair.
  */
-export declare function getPoolInfo(
-  client: any,
-  pool: {
-    validatorAppID: number;
-    asset1ID: number;
-    asset2ID: number;
-  }
-): Promise<PoolInfo>;
+export declare function getPoolInfo(params: {
+  client: Algodv2;
+  network: SupportedNetwork;
+  contractVersion: ContractVersion;
+  asset1ID: number;
+  asset2ID: number;
+}): Promise<PoolInfo>;
 export declare function getPoolReserves(
-  client: any,
+  client: Algodv2,
   pool: PoolInfo
 ): Promise<PoolReserves>;
 /**
@@ -42,11 +44,13 @@ export declare function getPoolAssets(
   {
     client,
     address,
-    validatorAppID
+    network,
+    contractVersion
   }: {
     client: Algodv2;
     address: string;
-    validatorAppID: number;
+    network: SupportedNetwork;
+    contractVersion: ContractVersion;
   },
   cache?: Record<string, PoolAssets>
 ): Promise<PoolAssets | null>;
@@ -79,4 +83,20 @@ export declare function isPoolNotCreated(pool: undefined | null | PoolInfo): boo
  * @returns true if pool's status is READY, otherwise returns false
  */
 export declare function isPoolReady(pool: undefined | null | PoolInfo): boolean;
+/**
+ *  Returns the pools by given pair and network for both contract versions
+ *
+ * @param params - Parameters for getting pools by pair and network for both contract versions
+ * @param {Algodv2} params.client - Algodv2 client
+ * @param {SupportedNetwork} params.network - Network to use
+ * @param {number} params.asset1ID The ID of the first asset in the pool pair.
+ * @param {number} params.asset2ID The ID of the second asset in the pool pair.
+ * @returns {PoolInfo[]} - Pools infos
+ */
+export declare function getPoolsForPair(params: {
+  client: Algodv2;
+  network: SupportedNetwork;
+  asset1ID: number;
+  asset2ID: number;
+}): Promise<PoolInfo[]>;
 export {};

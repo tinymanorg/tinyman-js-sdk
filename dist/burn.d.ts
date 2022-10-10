@@ -75,7 +75,8 @@ export declare function generateBurnTxns({
   asset1Out,
   asset2Out,
   slippage,
-  initiatorAddr
+  initiatorAddr,
+  poolAddress
 }: {
   client: Algodv2;
   pool: PoolInfo;
@@ -84,6 +85,7 @@ export declare function generateBurnTxns({
   asset2Out: number | bigint;
   slippage: number;
   initiatorAddr: string;
+  poolAddress: string;
 }): Promise<SignerTransaction[]>;
 export declare function signBurnTxns({
   pool,

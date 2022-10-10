@@ -30,10 +30,12 @@ interface ValidatorAppSchema {
   numGlobalByteSlices: any;
 }
 
-export enum ContractVersion {
-  V1_1 = "v1_1",
-  V2 = "v2"
-}
+export type ContractVersion = "v1_1" | "v2";
+
+export const CONTRACT_VERSION: Record<string, ContractVersion> = {
+  V1_1: "v1_1",
+  V2: "v2"
+};
 
 export abstract class BaseTinymanContract<
   ValidatorApp extends V1_1ValidatorApp,
@@ -84,7 +86,7 @@ export class TinymanContractV1_1 extends BaseTinymanContract<
     asset2ID: number;
   }): LogicSigAccount {
     const {network, asset1ID, asset2ID} = params;
-    const validatorAppID = getValidatorAppID(network, ContractVersion.V1_1);
+    const validatorAppID = getValidatorAppID(network, CONTRACT_VERSION.V1_1);
     const generateLogicSigAccountForPoolParams: GenerateLogicSigAccountForV1_1PoolParams =
       {
         validatorAppID,
@@ -117,7 +119,7 @@ export class TinymanContractV2 extends BaseTinymanContract<
     asset2ID: number;
   }): LogicSigAccount {
     const {network, asset1ID, asset2ID} = params;
-    const validatorAppID = getValidatorAppID(network, ContractVersion.V1_1);
+    const validatorAppID = getValidatorAppID(network, CONTRACT_VERSION.V2);
     const generateLogicSigAccountForPoolParams: GenerateLogicSigAccountForV2PoolParams = {
       validatorAppID,
       asset1ID,

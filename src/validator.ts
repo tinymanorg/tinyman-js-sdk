@@ -6,11 +6,11 @@ import {SignerTransaction, SupportedNetwork} from "./util/commonTypes";
 export const OPT_IN_VALIDATOR_APP_PROCESS_TXN_COUNT = 1;
 
 const VALIDATOR_APP_ID: Record<ContractVersion, Record<SupportedNetwork, number>> = {
-  [ContractVersion.V1_1]: {
+  v1_1: {
     testnet: 62368684,
     mainnet: 552635992
   },
-  [ContractVersion.V2]: {
+  v2: {
     //  TODO: update the values when new validator app is deployed
     testnet: 113134165,
     mainnet: 552635992

@@ -1,7 +1,7 @@
 import {LogicSigAccount} from "algosdk";
 import {toByteArray} from "base64-js";
 
-import {ContractVersion, PoolLogicSigVariables} from "./contract";
+import {ContractVersion, CONTRACT_VERSION, PoolLogicSigVariables} from "./contract";
 
 interface GenerateLogicSigAccountForV1_1PoolParams {
   validatorAppID: number;
@@ -119,10 +119,8 @@ function encodeVarInt(number) {
   return buf;
 }
 
-function isV2ContractVersion(
-  contractVersion: ContractVersion
-): contractVersion is ContractVersion.V2 {
-  return contractVersion === ContractVersion.V2;
+function isV2ContractVersion(contractVersion: ContractVersion) {
+  return contractVersion === CONTRACT_VERSION.V2;
 }
 
 export {
