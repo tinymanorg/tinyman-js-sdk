@@ -71,10 +71,12 @@ export declare function generateSwapTransactions({
   assetIn,
   assetOut,
   slippage,
-  initiatorAddr
+  initiatorAddr,
+  poolAddress
 }: {
   client: any;
   pool: PoolInfo;
+  poolAddress: string;
   swapType: SwapType;
   assetIn: {
     assetID: number;

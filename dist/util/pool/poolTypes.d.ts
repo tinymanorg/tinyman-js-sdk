@@ -1,3 +1,5 @@
+import {LogicSigAccount} from "algosdk";
+import {ContractVersion} from "../../contract/contract";
 export declare enum PoolStatus {
   NOT_CREATED = "not created",
   BOOTSTRAP = "bootstrap",
@@ -5,8 +7,8 @@ export declare enum PoolStatus {
   ERROR = "error"
 }
 export interface PoolInfo {
-  addr: string;
-  program: Uint8Array;
+  account: LogicSigAccount;
+  contractVersion: ContractVersion;
   validatorAppID: number;
   asset1ID: number;
   asset2ID: number;

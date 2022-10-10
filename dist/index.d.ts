@@ -1,4 +1,4 @@
-export {InitiatorSigner, SignerTransaction} from "./util/commonTypes";
+export {InitiatorSigner, SignerTransaction, SupportedNetwork} from "./util/commonTypes";
 export {
   BASE_MINIMUM_BALANCE,
   MINIMUM_BALANCE_REQUIRED_PER_ASSET,
@@ -36,7 +36,11 @@ export {
   getAccountExcess
 } from "./util/account/accountUtils";
 export {AccountInformationData} from "./util/account/accountTypes";
-export {validatorAppSchema} from "./contract/contract";
+export {
+  ContractVersion,
+  TinymanContractV1_1,
+  tinymanContract_v2
+} from "./contract/contract";
 export {
   getValidatorAppID,
   generateOptIntoValidatorTxns,
@@ -62,15 +66,6 @@ export {
   calculatePoolBootstrapFundingTxnAmount,
   createPool
 } from "./bootstrap";
-export {
-  MintQuote,
-  MintExecution,
-  getMintLiquidityQuote,
-  mintLiquidity,
-  generateMintTxns,
-  signMintTxns,
-  MINT_PROCESS_TXN_COUNT
-} from "./mint";
 export {
   BurnQuote,
   BurnExecution,
