@@ -1,4 +1,4 @@
-import algosdk, {Algodv2, LogicSigAccount, Transaction} from "algosdk";
+import algosdk, {Algodv2, Transaction} from "algosdk";
 
 import {CONTRACT_VERSION, tinymanContract_v1_1} from "../../contract/contract";
 import {
@@ -6,20 +6,15 @@ import {
   SignerTransaction,
   SupportedNetwork
 } from "../../util/commonTypes";
-import {encodeString, waitForConfirmation} from "../../util/util";
+import {encodeString, isAlgo, waitForConfirmation} from "../../util/util";
 import TinymanError from "../../util/error/TinymanError";
-import {ALGO_ASSET_ID, LIQUIDITY_TOKEN_UNIT_NAME} from "../../util/asset/assetConstants";
-import {
-  BASE_MINIMUM_BALANCE,
-  MINIMUM_BALANCE_REQUIRED_PER_APP,
-  MINIMUM_BALANCE_REQUIRED_PER_ASSET,
-  MINIMUM_BALANCE_REQUIRED_PER_BYTE_SCHEMA,
-  MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE
-} from "../../util/constant";
+import {LIQUIDITY_TOKEN_UNIT_NAME} from "../../util/asset/assetConstants";
 import {PoolInfo} from "../../util/pool/poolTypes";
 import {getPoolInfo} from "../../util/pool/poolUtils";
+import {calculateBootstrapFundingTxnAmount} from "../utils";
+import {getValidatorAppID} from "../../validator";
 
-enum BootstapTxnGroupIndices {
+enum BootstrapTxnGroupIndices {
   FUNDING_TXN = 0,
   VALIDATOR_APP_CALL,
   LIQUIDITY_TOKEN_CREATE,
@@ -29,49 +24,12 @@ enum BootstapTxnGroupIndices {
 
 export function getBootstrapProcessTxnCount(asset2ID: number) {
   // IF asset2 is ALGO, there won't be `asset2Optin` txn within the bootstrap txn group
-  return ALGO_ASSET_ID === asset2ID ? 4 : 5;
+  return isAlgo(asset2ID) ? 4 : 5;
 }
 
-export function calculatePoolBootstrapFundingTxnAmount(
-  asset2ID: number,
-  fees: {
-    liquidityTokenCreateTxn: number;
-    asset1OptinTxn: number;
-    asset2OptinTxn: number;
-    validatorAppCallTxn: number;
-  }
-) {
-  return (
-    getPoolAccountMinBalance(asset2ID) +
-    fees.liquidityTokenCreateTxn +
-    fees.asset1OptinTxn +
-    fees.asset2OptinTxn +
-    fees.validatorAppCallTxn
-  );
-}
-
-/**
- * TODO: make this fn generic for both v1 and v2 and move to utils
- */
-export function getPoolAccountMinBalance(asset2ID: number) {
-  return (
-    BASE_MINIMUM_BALANCE +
-    MINIMUM_BALANCE_REQUIRED_PER_ASSET + // min balance to create asset
-    // TODO: why MINIMUM_BALANCE_REQUIRED_PER_ASSET repeated?
-    MINIMUM_BALANCE_REQUIRED_PER_ASSET + // fee + min balance to opt into asset 1
-    (asset2ID === 0 ? 0 : MINIMUM_BALANCE_REQUIRED_PER_ASSET) + // min balance to opt into asset 2
-    MINIMUM_BALANCE_REQUIRED_PER_APP + // min balance to opt into validator app
-    MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE *
-      tinymanContract_v1_1.schema.numLocalInts +
-    MINIMUM_BALANCE_REQUIRED_PER_BYTE_SCHEMA *
-      tinymanContract_v1_1.schema.numLocalByteSlices
-  );
-}
-
-export async function generateBootstrapTransactions({
+export async function generateTxns({
   client,
   network,
-  validatorAppID,
   asset1ID,
   asset2ID,
   asset1UnitName,
@@ -80,8 +38,6 @@ export async function generateBootstrapTransactions({
 }: {
   client: Algodv2;
   network: SupportedNetwork;
-  poolAddress: string;
-  validatorAppID: number;
   asset1ID: number;
   asset2ID: number;
   asset1UnitName: string;
@@ -89,7 +45,7 @@ export async function generateBootstrapTransactions({
   initiatorAddr: string;
 }): Promise<SignerTransaction[]> {
   const suggestedParams = await client.getTransactionParams().do();
-
+  const validatorAppID = getValidatorAppID(network, CONTRACT_VERSION.v1_1);
   // Make sure asset1 has greater ID
   const assets =
     asset1ID > asset2ID
@@ -157,11 +113,10 @@ export async function generateBootstrapTransactions({
   const fundingTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
     from: initiatorAddr,
     to: poolLogicSigAddress,
-    amount: calculatePoolBootstrapFundingTxnAmount(assets.asset2.id, {
-      liquidityTokenCreateTxn: liquidityTokenCreateTxn.fee,
-      asset1OptinTxn: asset1Optin.fee,
-      asset2OptinTxn: asset2Optin ? asset2Optin.fee : 0,
-      validatorAppCallTxn: validatorAppCallTxn.fee
+    amount: calculateBootstrapFundingTxnAmount({
+      contractVersion: CONTRACT_VERSION.V1_1,
+      isAlgoPool: isAlgo(assets.asset2.id),
+      txnFee: suggestedParams.fee
     }),
     suggestedParams
   });
@@ -196,7 +151,7 @@ export async function generateBootstrapTransactions({
   return finalSignerTxns;
 }
 
-export async function signBootstrapTransactions({
+export async function signTxns({
   txGroup,
   network,
   initiatorSigner,
@@ -213,15 +168,7 @@ export async function signBootstrapTransactions({
 
   // Make sure asset1 has greater ID
   const assets =
-    asset1ID > asset2ID
-      ? {
-          asset1ID,
-          asset2ID
-        }
-      : {
-          asset1ID: asset2ID,
-          asset2ID: asset1ID
-        };
+    asset1ID > asset2ID ? {asset1ID, asset2ID} : {asset1ID: asset2ID, asset2ID: asset1ID};
 
   const poolLogicSig = tinymanContract_v1_1.generateLogicSigAccountForPool({
     network,
@@ -231,7 +178,7 @@ export async function signBootstrapTransactions({
 
   const txnIDs: string[] = [];
   const signedTxns = txGroup.map((txDetail, index) => {
-    if (index === BootstapTxnGroupIndices.FUNDING_TXN) {
+    if (index === BootstrapTxnGroupIndices.FUNDING_TXN) {
       txnIDs.push(txDetail.txn.txID().toString());
       return signedFundingTxn;
     }
@@ -261,7 +208,7 @@ async function doBootstrap({
 
     const assetCreationResult = await waitForConfirmation(
       client,
-      txnIDs[BootstapTxnGroupIndices.LIQUIDITY_TOKEN_CREATE]
+      txnIDs[BootstrapTxnGroupIndices.LIQUIDITY_TOKEN_CREATE]
     );
 
     const liquidityTokenID = assetCreationResult["asset-index"];
@@ -293,16 +240,22 @@ async function doBootstrap({
  * @param signedTxns Signed transactions
  * @param txnIDs Transaction IDs
  */
-export async function createPool(
-  client: Algodv2,
-  network: SupportedNetwork,
+async function execute({
+  client,
+  network,
+  pool,
+  signedTxns,
+  txnIDs
+}: {
+  client: Algodv2;
+  network: SupportedNetwork;
   pool: {
     asset1ID: number;
     asset2ID: number;
-  },
-  signedTxns: Uint8Array[],
-  txnIDs: string[]
-): Promise<PoolInfo> {
+  };
+  signedTxns: Uint8Array[];
+  txnIDs: string[];
+}): Promise<PoolInfo> {
   await doBootstrap({
     client,
     signedTxns,
@@ -319,7 +272,7 @@ export async function createPool(
 }
 
 export const BootstrapV1_1 = {
-  generateTxns: generateBootstrapTransactions,
-  signTxns: signBootstrapTransactions,
-  execute: createPool
+  generateTxns,
+  signTxns,
+  execute
 };
