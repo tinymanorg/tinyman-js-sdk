@@ -94,14 +94,13 @@ async function generateTxns({
     asset2ID: assets.asset2.id
   });
   const poolLogicSigAddress = poolLogicSig.address();
-
   const appID = getValidatorAppID(network, CONTRACT_VERSION.V2);
-  const isAlgoPool = isAlgo(assets.asset2.id);
+
   const appCallTxn = algosdk.makeApplicationOptInTxnFromObject({
     from: poolLogicSigAddress,
     appIndex: appID,
     appArgs: [encodeString("bootstrap")],
-    foreignAssets: isAlgoPool ? [assets.asset1.id] : [assets.asset1.id, assets.asset2.id],
+    foreignAssets: [assets.asset1.id, assets.asset2.id],
     rekeyTo: appAddress,
     suggestedParams: {
       ...suggestedParams,
@@ -109,15 +108,6 @@ async function generateTxns({
     }
   });
 
-  /**
-   * Pay Txn:
-   *  Sender: any_address
-   *  Receiver: pool_address
-   *  Amount:
-   *    + Pool minimum balance (Formula I)
-   *    + Transaction fee of the app call
-   *    + 100000 (min transaction fee for asset creation)
-   */
   const fundingTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
     from: initiatorAddr,
     to: poolLogicSigAddress,
