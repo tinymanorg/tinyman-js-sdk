@@ -10,7 +10,7 @@ import {
 } from "../util";
 import {AccountInformation} from "../account/accountTypes";
 import {
-  ContractVersion,
+  ContractVersionValue,
   CONTRACT_VERSION,
   tinymanContract_v1_1,
   tinymanContract_v2
@@ -33,7 +33,7 @@ import {isV2ContractVersion} from "../../contract/utils";
 export async function getPoolInfo(params: {
   client: Algodv2;
   network: SupportedNetwork;
-  contractVersion: ContractVersion;
+  contractVersion: ContractVersionValue;
   asset1ID: number;
   asset2ID: number;
 }): Promise<PoolInfo> {
@@ -215,7 +215,7 @@ export async function getPoolAssets(
     client: Algodv2;
     address: string;
     network: SupportedNetwork;
-    contractVersion: ContractVersion;
+    contractVersion: ContractVersionValue;
   },
   cache: Record<string, PoolAssets> = POOL_ASSETS_CACHE
 ): Promise<PoolAssets | null> {
