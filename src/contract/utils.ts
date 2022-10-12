@@ -86,9 +86,9 @@ function generateLogicSigAccountForV2Pool(
 
   let programArray = Array.from(toByteArray(poolLogicSigContractTemplate));
 
-  const validatorAppIdByteArray = Array.from(toByteArray(validatorAppID.toString()));
-  const asset1IDByteArray = Array.from(toByteArray(asset1ID.toString()));
-  const asset2IDByteArray = Array.from(toByteArray(asset2ID.toString()));
+  const validatorAppIdByteArray = Array.from(encodeVarInt(validatorAppID));
+  const asset1IDByteArray = Array.from(encodeVarInt(asset1ID));
+  const asset2IDByteArray = Array.from(encodeVarInt(asset2ID));
 
   programArray
     .slice(0, 3)
