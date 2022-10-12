@@ -25,12 +25,6 @@ const V2_BOOTSTRAP_INNER_TXN_COUNT = {
   ASA_ASA: 6
 } as const;
 
-function getBootstrapInnerTxnCountForV2(asset2ID: string | number) {
-  return isAlgo(asset2ID)
-    ? V2_BOOTSTRAP_INNER_TXN_COUNT.ASA_ALGO
-    : V2_BOOTSTRAP_INNER_TXN_COUNT.ASA_ASA;
-}
-
 async function getBootstrapFundingTxnAmountForV2(
   client: Algodv2,
   asset2ID: string | number
@@ -42,7 +36,7 @@ async function getBootstrapFundingTxnAmountForV2(
   );
 }
 
-export async function getBootstrapAppCallTxnFeeForV2(
+async function getBootstrapAppCallTxnFeeForV2(
   client: Algodv2,
   asset2ID: string | number
 ) {
@@ -52,6 +46,12 @@ export async function getBootstrapAppCallTxnFeeForV2(
   const {fee: txnFee} = await client.getTransactionParams().do();
 
   return totalTxnCount * txnFee;
+}
+
+function getBootstrapInnerTxnCountForV2(asset2ID: string | number) {
+  return isAlgo(asset2ID)
+    ? V2_BOOTSTRAP_INNER_TXN_COUNT.ASA_ALGO
+    : V2_BOOTSTRAP_INNER_TXN_COUNT.ASA_ASA;
 }
 
 async function generateTxns({
@@ -132,7 +132,7 @@ async function generateTxns({
   return txns;
 }
 
-export async function signTxns({
+async function signTxns({
   txGroup,
   network,
   initiatorSigner,

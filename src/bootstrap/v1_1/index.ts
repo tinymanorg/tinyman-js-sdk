@@ -27,14 +27,14 @@ const V1_BOOTSTRAP_TXN_COUNT = {
   ASA_ASA: 5
 } as const;
 
-export function getBootstrapProcessTxnCount(asset2ID: number | string) {
+function getBootstrapProcessTxnCount(asset2ID: number | string) {
   // IF asset2 is ALGO, there won't be `asset2Optin` txn within the bootstrap txn group
   return isAlgo(asset2ID)
     ? V1_BOOTSTRAP_TXN_COUNT.ASA_ALGO
     : V1_BOOTSTRAP_TXN_COUNT.ASA_ASA;
 }
 
-export async function getBootstrapFundingTxnAmountForV1(
+async function getBootstrapFundingTxnAmountForV1(
   client: Algodv2,
   asset2ID: string | number
 ) {
@@ -53,7 +53,7 @@ export async function getBootstrapFundingTxnAmountForV1(
   );
 }
 
-export async function generateTxns({
+async function generateTxns({
   client,
   network,
   asset1ID,
@@ -171,7 +171,7 @@ export async function generateTxns({
   return finalSignerTxns;
 }
 
-export async function signTxns({
+async function signTxns({
   txGroup,
   network,
   initiatorSigner,
@@ -260,7 +260,7 @@ async function doBootstrap({
  * @param signedTxns Signed transactions
  * @param txnIDs Transaction IDs
  */
-async function execute({
+function execute({
   client,
   network,
   pool,
