@@ -1,10 +1,6 @@
 import algosdk, {Algodv2, getApplicationAddress} from "algosdk";
 
-import {
-  ContractVersion,
-  CONTRACT_VERSION,
-  tinymanContract_v2
-} from "../../contract/contract";
+import {CONTRACT_VERSION, tinymanContract_v2} from "../../contract/contract";
 import {TinymanAnalyticsApiAsset} from "../../util/asset/assetModels";
 import {
   SupportedNetwork,
@@ -26,14 +22,12 @@ enum BootstrapTxnGroupIndices {
 async function generateTxns({
   client,
   network,
-  contractVersion,
   asset_1,
   asset_2,
   initiatorAddr
 }: {
   client: Algodv2;
   network: SupportedNetwork;
-  contractVersion: ContractVersion;
   asset_1: Pick<TinymanAnalyticsApiAsset, "id" | "unit_name">;
   asset_2: Pick<TinymanAnalyticsApiAsset, "id" | "unit_name">;
   initiatorAddr: string;
@@ -62,14 +56,11 @@ async function generateTxns({
   const poolLogicSig = tinymanContract_v2.generateLogicSigAccountForPool({
     network,
     asset1ID: assets.asset1.id,
-    asset2ID: assets.asset2.id,
-
-    // TODO: This shouldn't be a parameter of `generateLogicSigAccountForPool`
-    contractVersion: CONTRACT_VERSION.V2
+    asset2ID: assets.asset2.id
   });
   const poolLogicSigAddress = poolLogicSig.address();
 
-  const appID = getValidatorAppID(network, contractVersion);
+  const appID = getValidatorAppID(network, CONTRACT_VERSION.V2);
   const isAlgoPool = isAlgo(assets.asset2.id);
   const appCallTxn = algosdk.makeApplicationOptInTxnFromObject({
     from: poolLogicSigAddress,
@@ -92,7 +83,7 @@ async function generateTxns({
     to: poolLogicSigAddress,
     amount: calculateBootstrapFundingTxnAmount({
       isAlgoPool,
-      contractVersion,
+      contractVersion: CONTRACT_VERSION.V2,
       txnFee: suggestedParams.fee
     }),
     suggestedParams
@@ -137,8 +128,7 @@ export async function signTxns({
   const poolLogicSig = tinymanContract_v2.generateLogicSigAccountForPool({
     network,
     asset1ID: assets.asset1ID,
-    asset2ID: assets.asset2ID,
-    contractVersion: "v2"
+    asset2ID: assets.asset2ID
   });
 
   const txnIDs: string[] = [];
@@ -234,7 +224,7 @@ async function execute({
   return getPoolInfo({
     client,
     network,
-    contractVersion: CONTRACT_VERSION.v2,
+    contractVersion: CONTRACT_VERSION.V2,
     asset1ID: pool.asset1ID,
     asset2ID: pool.asset2ID
   });

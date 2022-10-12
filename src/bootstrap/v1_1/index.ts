@@ -45,7 +45,7 @@ export async function generateTxns({
   initiatorAddr: string;
 }): Promise<SignerTransaction[]> {
   const suggestedParams = await client.getTransactionParams().do();
-  const validatorAppID = getValidatorAppID(network, CONTRACT_VERSION.v1_1);
+  const validatorAppID = getValidatorAppID(network, CONTRACT_VERSION.V1_1);
   // Make sure asset1 has greater ID
   const assets =
     asset1ID > asset2ID
@@ -265,7 +265,7 @@ async function execute({
   return getPoolInfo({
     client,
     network,
-    contractVersion: CONTRACT_VERSION.v1_1,
+    contractVersion: CONTRACT_VERSION.V1_1,
     asset1ID: pool.asset1ID,
     asset2ID: pool.asset2ID
   });

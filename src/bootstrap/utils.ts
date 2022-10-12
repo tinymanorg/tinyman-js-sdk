@@ -1,14 +1,12 @@
 import {Algodv2} from "algosdk";
 
 import {
-  ContractVersion,
+  ContractVersionValue,
   CONTRACT_VERSION,
   tinymanContract_v1_1,
   tinymanContract_v2
 } from "../contract/contract";
 import {TinymanAnalyticsApiAsset} from "../util/asset/assetModels";
-// TODO: add unused import rule
-import {orderByAssetId} from "../util/asset/assetUtils";
 import {SupportedNetwork, SignerTransaction, InitiatorSigner} from "../util/commonTypes";
 import {
   BASE_MINIMUM_BALANCE,
@@ -31,12 +29,12 @@ export function generateTxns({
 }: {
   client: Algodv2;
   network: SupportedNetwork;
-  contractVersion: ContractVersion;
+  contractVersion: ContractVersionValue;
   asset_1: Pick<TinymanAnalyticsApiAsset, "id" | "unit_name">;
   asset_2: Pick<TinymanAnalyticsApiAsset, "id" | "unit_name">;
   initiatorAddr: string;
 }): Promise<SignerTransaction[]> {
-  if (contractVersion === CONTRACT_VERSION.v1_1) {
+  if (contractVersion === CONTRACT_VERSION.V1_1) {
     return BootstrapV1_1.generateTxns({
       client,
       network,
@@ -51,7 +49,6 @@ export function generateTxns({
   return BootstrapV2.generateTxns({
     client,
     network,
-    contractVersion,
     asset_1,
     asset_2,
     initiatorAddr
@@ -59,14 +56,14 @@ export function generateTxns({
 }
 
 export function signTxns(params: {
-  contractVersion: ContractVersion;
+  contractVersion: ContractVersionValue;
   txGroup: SignerTransaction[];
   network: SupportedNetwork;
   initiatorSigner: InitiatorSigner;
   asset1ID: number;
   asset2ID: number;
 }): Promise<{signedTxns: Uint8Array[]; txnIDs: string[]}> {
-  if (params.contractVersion === CONTRACT_VERSION.v1_1) {
+  if (params.contractVersion === CONTRACT_VERSION.V1_1) {
     return BootstrapV1_1.signTxns(params);
   }
 
@@ -75,13 +72,13 @@ export function signTxns(params: {
 
 export function execute(params: {
   client: Algodv2;
-  contractVersion: ContractVersion;
+  contractVersion: ContractVersionValue;
   network: SupportedNetwork;
   pool: {asset1ID: number; asset2ID: number};
   signedTxns: Uint8Array[];
   txnIDs: string[];
 }): Promise<PoolInfo> {
-  if (params.contractVersion === CONTRACT_VERSION.v1_1) {
+  if (params.contractVersion === CONTRACT_VERSION.V1_1) {
     return BootstrapV1_1.execute(params);
   }
 
@@ -96,7 +93,7 @@ export function calculateBootstrapFundingTxnAmount({
   isAlgoPool,
   txnFee
 }: {
-  contractVersion: ContractVersion;
+  contractVersion: ContractVersionValue;
   isAlgoPool: boolean;
   /*
    * txnFee is the current fee the Algorand network gets from a single txn.
@@ -132,13 +129,13 @@ export function calculateBootstrapFundingTxnAmount({
  */
 export function getPoolAccountMinBalance(
   // Local state uint count and Local state byte slice count changes between different contract versions
-  contractVersion: ContractVersion,
+  contractVersion: ContractVersionValue,
   isAlgoPool: boolean
 ) {
   const {
     schema: {numLocalInts, numLocalByteSlices}
   } =
-    contractVersion === CONTRACT_VERSION.v1_1 ? tinymanContract_v1_1 : tinymanContract_v2;
+    contractVersion === CONTRACT_VERSION.V1_1 ? tinymanContract_v1_1 : tinymanContract_v2;
 
   return (
     BASE_MINIMUM_BALANCE +
