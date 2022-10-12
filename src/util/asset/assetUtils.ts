@@ -27,10 +27,3 @@ export async function generateOptIntoAssetTxns({
     );
   }
 }
-
-/**
- * @returns the ordered version of the given list in ascending order with respect to asset id
- */
-export function orderByAssetId<Data extends {id: string}>(list: Data[]) {
-  return [...list].sort((item1, item2) => Number(item2.id) - Number(item1.id));
-}
