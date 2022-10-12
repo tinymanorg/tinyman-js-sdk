@@ -1,7 +1,7 @@
 import {LogicSigAccount} from "algosdk";
 import {toByteArray} from "base64-js";
 
-import {ContractVersion, CONTRACT_VERSION, PoolLogicSigVariables} from "./contract";
+import {ContractVersionValue, CONTRACT_VERSION, PoolLogicSigVariables} from "./contract";
 
 interface GenerateLogicSigAccountForV1_1PoolParams {
   validatorAppID: number;
@@ -86,9 +86,9 @@ function generateLogicSigAccountForV2Pool(
 
   let programArray = Array.from(toByteArray(poolLogicSigContractTemplate));
 
-  const validatorAppIdByteArray = Array.from(toByteArray(validatorAppID.toString()));
-  const asset1IDByteArray = Array.from(toByteArray(asset1ID.toString()));
-  const asset2IDByteArray = Array.from(toByteArray(asset2ID.toString()));
+  const validatorAppIdByteArray = Array.from(encodeVarInt(validatorAppID));
+  const asset1IDByteArray = Array.from(encodeVarInt(asset1ID));
+  const asset2IDByteArray = Array.from(encodeVarInt(asset2ID));
 
   programArray
     .slice(0, 3)
@@ -119,7 +119,7 @@ function encodeVarInt(number) {
   return buf;
 }
 
-function isV2ContractVersion(contractVersion: ContractVersion) {
+function isV2ContractVersion(contractVersion: ContractVersionValue) {
   return contractVersion === CONTRACT_VERSION.V2;
 }
 

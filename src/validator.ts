@@ -1,11 +1,11 @@
 import algosdk, {Algodv2} from "algosdk";
 
-import {ContractVersion} from "./contract/contract";
+import {ContractVersionValue} from "./contract/contract";
 import {SignerTransaction, SupportedNetwork} from "./util/commonTypes";
 
 export const OPT_IN_VALIDATOR_APP_PROCESS_TXN_COUNT = 1;
 
-const VALIDATOR_APP_ID: Record<ContractVersion, Record<SupportedNetwork, number>> = {
+const VALIDATOR_APP_ID: Record<ContractVersionValue, Record<SupportedNetwork, number>> = {
   v1_1: {
     testnet: 62368684,
     mainnet: 552635992
@@ -26,7 +26,7 @@ const VALIDATOR_APP_ID: Record<ContractVersion, Record<SupportedNetwork, number>
  */
 export function getValidatorAppID(
   network: SupportedNetwork,
-  contractVersion: ContractVersion
+  contractVersion: ContractVersionValue
 ): number {
   const id = VALIDATOR_APP_ID[contractVersion][network];
 
