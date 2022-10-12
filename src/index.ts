@@ -81,15 +81,7 @@ export {
   createPool
 } from "./bootstrap";
 
-export {
-  BurnQuote,
-  BurnExecution,
-  getBurnLiquidityQuote,
-  burnLiquidity,
-  generateBurnTxns,
-  signBurnTxns,
-  BURN_PROCESS_TXN_COUNT
-} from "./burn";
+export {Burn} from "./burn/";
 
 export {
   SwapQuote,

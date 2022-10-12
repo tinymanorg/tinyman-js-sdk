@@ -1,18 +1,23 @@
 import algosdk, {Algodv2} from "algosdk";
 
+import {tinymanContract_v1_1} from "../../contract/contract";
+import {getAccountExcessWithinPool} from "../../util/account/accountUtils";
+import {ALGO_ASSET_ID} from "../../util/asset/assetConstants";
 import {
-  applySlippageToAmount,
+  SignerTransaction,
+  InitiatorSigner,
+  SupportedNetwork
+} from "../../util/commonTypes";
+import {DEFAULT_FEE_TXN_NOTE} from "../../util/constant";
+import TinymanError from "../../util/error/TinymanError";
+import {PoolInfo, PoolReserves} from "../../util/pool/poolTypes";
+import {
   encodeString,
-  getTxnGroupID,
+  applySlippageToAmount,
   sendAndWaitRawTransaction,
-  sumUpTxnFees
-} from "./util/util";
-import {PoolInfo, PoolReserves} from "./util/pool/poolTypes";
-import {InitiatorSigner, SignerTransaction} from "./util/commonTypes";
-import TinymanError from "./util/error/TinymanError";
-import {DEFAULT_FEE_TXN_NOTE} from "./util/constant";
-import {ALGO_ASSET_ID} from "./util/asset/assetConstants";
-import {getAccountExcessWithinPool} from "./util/account/accountUtils";
+  sumUpTxnFees,
+  getTxnGroupID
+} from "../../util/util";
 
 /** An object containing information about a burn quote. */
 export interface BurnQuote {
@@ -112,7 +117,7 @@ export function getBurnLiquidityQuote({
 
 export const BURN_PROCESS_TXN_COUNT = 5;
 
-export async function generateBurnTxns({
+async function generateTxns({
   client,
   pool,
   liquidityIn,
@@ -212,17 +217,23 @@ export async function generateBurnTxns({
   ];
 }
 
-export async function signBurnTxns({
+async function signTxns({
   pool,
+  network,
   txGroup,
   initiatorSigner
 }: {
   pool: PoolInfo;
+  network: SupportedNetwork;
   txGroup: SignerTransaction[];
   initiatorSigner: InitiatorSigner;
 }): Promise<Uint8Array[]> {
   const [signedFeeTxn, signedLiquidityInTxn] = await initiatorSigner([txGroup]);
-  const {lsig} = pool.account;
+  const poolLogicSig = tinymanContract_v1_1.generateLogicSigAccountForPool({
+    network,
+    asset1ID: pool.asset1ID,
+    asset2ID: pool.asset2ID
+  });
 
   const signedTxns = txGroup.map((txDetail, index) => {
     if (index === BurnTxnIndices.FEE_TXN) {
@@ -231,7 +242,7 @@ export async function signBurnTxns({
     if (index === BurnTxnIndices.LIQUDITY_IN_TXN) {
       return signedLiquidityInTxn;
     }
-    const {blob} = algosdk.signLogicSigTransactionObject(txDetail.txn, lsig);
+    const {blob} = algosdk.signLogicSigTransactionObject(txDetail.txn, poolLogicSig);
 
     return blob;
   });
@@ -255,7 +266,7 @@ export async function signBurnTxns({
  * @param params.initiatorSigner A function that will sign transactions from the initiator's
  *   account.
  */
-export async function burnLiquidity({
+async function execute({
   client,
   pool,
   txGroup,
@@ -342,3 +353,9 @@ export async function burnLiquidity({
     throw parsedError;
   }
 }
+
+export const BurnV1_1 = {
+  generateTxns,
+  signTxns,
+  execute
+};
