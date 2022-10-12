@@ -91,10 +91,10 @@ export async function generateTxns({
     asset1ID: assets.asset1.id,
     asset2ID: assets.asset2.id
   });
-  const poolLogicSigAddress = poolLogicSig.address();
+  const poolAddress = poolLogicSig.address();
 
   const validatorAppCallTxn = algosdk.makeApplicationOptInTxnFromObject({
-    from: poolLogicSigAddress,
+    from: poolAddress,
     appIndex: validatorAppID,
     appArgs: [
       encodeString("bootstrap"),
@@ -107,7 +107,7 @@ export async function generateTxns({
 
   const liquidityTokenCreateTxn = algosdk.makeAssetCreateTxnWithSuggestedParamsFromObject(
     {
-      from: poolLogicSigAddress,
+      from: poolAddress,
       total: 0xffffffffffffffffn,
       decimals: 6,
       defaultFrozen: false,
@@ -119,8 +119,8 @@ export async function generateTxns({
   );
 
   const asset1Optin = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-    from: poolLogicSigAddress,
-    to: poolLogicSigAddress,
+    from: poolAddress,
+    to: poolAddress,
     assetIndex: assets.asset1.id,
     amount: 0,
     suggestedParams
@@ -128,7 +128,7 @@ export async function generateTxns({
 
   const fundingTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
     from: initiatorAddr,
-    to: poolLogicSigAddress,
+    to: poolAddress,
     amount: await getBootstrapFundingTxnAmountForV1(client, assets.asset2.id),
     suggestedParams
   });
@@ -143,8 +143,8 @@ export async function generateTxns({
   if (!isAlgoPool) {
     txns.push(
       algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-        from: poolLogicSigAddress,
-        to: poolLogicSigAddress,
+        from: poolAddress,
+        to: poolAddress,
         assetIndex: assets.asset2.id,
         amount: 0,
         suggestedParams
@@ -156,15 +156,15 @@ export async function generateTxns({
 
   let finalSignerTxns: SignerTransaction[] = [
     {txn: txGroup[0], signers: [initiatorAddr]},
-    {txn: txGroup[1], signers: [poolLogicSigAddress]},
-    {txn: txGroup[2], signers: [poolLogicSigAddress]},
-    {txn: txGroup[3], signers: [poolLogicSigAddress]}
+    {txn: txGroup[1], signers: [poolAddress]},
+    {txn: txGroup[2], signers: [poolAddress]},
+    {txn: txGroup[3], signers: [poolAddress]}
   ];
 
   if (txGroup[4]) {
     finalSignerTxns.push({
       txn: txGroup[4],
-      signers: [poolLogicSigAddress]
+      signers: [poolAddress]
     });
   }
 
