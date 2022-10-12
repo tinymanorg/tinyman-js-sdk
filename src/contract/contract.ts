@@ -60,7 +60,6 @@ export abstract class BaseTinymanContract<
 
   abstract generateLogicSigAccountForPool(params: {
     network: SupportedNetwork;
-    contractVersion: ContractVersion;
     asset1ID: number;
     asset2ID: number;
   }): LogicSigAccount;
@@ -114,7 +113,6 @@ export class TinymanContractV2 extends BaseTinymanContract<
 
   generateLogicSigAccountForPool(params: {
     network: SupportedNetwork;
-    contractVersion: ContractVersion;
     asset1ID: number;
     asset2ID: number;
   }): LogicSigAccount {
