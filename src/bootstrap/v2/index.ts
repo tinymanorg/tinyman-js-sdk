@@ -7,16 +7,51 @@ import {
   SignerTransaction,
   InitiatorSigner
 } from "../../util/commonTypes";
+import {MINIMUM_BALANCE_REQUIRED_PER_ASSET} from "../../util/constant";
 import TinymanError from "../../util/error/TinymanError";
 import {PoolInfo} from "../../util/pool/poolTypes";
 import {getPoolInfo} from "../../util/pool/poolUtils";
 import {encodeString, isAlgo, waitForConfirmation} from "../../util/util";
 import {getValidatorAppID} from "../../validator";
-import {calculateBootstrapFundingTxnAmount} from "../utils";
+import {getPoolAccountMinBalance} from "../utils";
 
 enum BootstrapTxnGroupIndices {
   FUNDING_TXN = 0,
   VALIDATOR_APP_CALL
+}
+
+const V2_BOOTSTRAP_INNER_TXN_COUNT = {
+  ASA_ALGO: 5,
+  ASA_ASA: 6
+} as const;
+
+function getBootstrapInnerTxnCountForV2(asset2ID: string | number) {
+  return isAlgo(asset2ID)
+    ? V2_BOOTSTRAP_INNER_TXN_COUNT.ASA_ALGO
+    : V2_BOOTSTRAP_INNER_TXN_COUNT.ASA_ASA;
+}
+
+async function getBootstrapFundingTxnAmountForV2(
+  client: Algodv2,
+  asset2ID: string | number
+) {
+  return (
+    getPoolAccountMinBalance(CONTRACT_VERSION.V2, isAlgo(asset2ID)) +
+    (await getBootstrapAppCallTxnFeeForV2(client, asset2ID)) +
+    MINIMUM_BALANCE_REQUIRED_PER_ASSET // Min fee for asset creation
+  );
+}
+
+export async function getBootstrapAppCallTxnFeeForV2(
+  client: Algodv2,
+  asset2ID: string | number
+) {
+  const innerTxnCount = getBootstrapInnerTxnCountForV2(asset2ID);
+  // Add 1 to the txn count to account for the group transaction itself.
+  const totalTxnCount = innerTxnCount + 1;
+  const {fee: txnFee} = await client.getTransactionParams().do();
+
+  return totalTxnCount * txnFee;
 }
 
 async function generateTxns({
@@ -70,22 +105,23 @@ async function generateTxns({
     rekeyTo: appAddress,
     suggestedParams: {
       ...suggestedParams,
-
-      // There will be 5 or 6 additional Inner Transactions
-      // So the fee is AppCallTxn's fee + (5 or 6) Inner Transactions' fees
-      // TODO: do we need a fn: calculateAppCallTxnFee ?
-      fee: suggestedParams.fee * (isAlgo(assets.asset2.id) ? 6 : 7)
+      fee: await getBootstrapAppCallTxnFeeForV2(client, assets.asset2.id)
     }
   });
 
+  /**
+   * Pay Txn:
+   *  Sender: any_address
+   *  Receiver: pool_address
+   *  Amount:
+   *    + Pool minimum balance (Formula I)
+   *    + Transaction fee of the app call
+   *    + 100000 (min transaction fee for asset creation)
+   */
   const fundingTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
     from: initiatorAddr,
     to: poolLogicSigAddress,
-    amount: calculateBootstrapFundingTxnAmount({
-      isAlgoPool,
-      contractVersion: CONTRACT_VERSION.V2,
-      txnFee: suggestedParams.fee
-    }),
+    amount: await getBootstrapFundingTxnAmountForV2(client, assets.asset2.id),
     suggestedParams
   });
 

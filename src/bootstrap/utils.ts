@@ -86,45 +86,6 @@ export function execute(params: {
 }
 
 /**
- *  @returns The amount of funding txn for creating a pool
- */
-export function calculateBootstrapFundingTxnAmount({
-  contractVersion,
-  isAlgoPool,
-  txnFee
-}: {
-  contractVersion: ContractVersionValue;
-  isAlgoPool: boolean;
-  /*
-   * txnFee is the current fee the Algorand network gets from a single txn.
-   */
-  txnFee: number;
-}): number {
-  /**
-   * TODO: Convert to switch?
-   * TODO: Fix the logic
-   * https://hipo.slack.com/archives/C040R0QEVM3/p1665491908620689
-   * v1 version: https://github.com/Hipo/tinyman-js-sdk/blob/0bfce768500980bc2c9440580df75dea606a9a45/src/bootstrap.ts#L31
-   * v2 py version: https://github.com/Hipo/private-tinyman-py-sdk/blob/c90c3171d59b7ce86c3d3ce49616b4af1663b5e9/tinyman/v2/pools.py#L328
-   *
-   */
-
-  const poolAccountMinBalance = getPoolAccountMinBalance(contractVersion, isAlgoPool);
-
-  if (contractVersion === CONTRACT_VERSION.V1_1) {
-    // For v1_1, the amount is: getPoolAccountMinBalance() + (isAlgoPool ? 4 : 3) * txnFee;
-    return poolAccountMinBalance + (isAlgoPool ? 4 : 3) * txnFee;
-  }
-
-  // For v2, the amount is: getPoolAccountMinBalance() + txnFee +  MINIMUM_BALANCE_REQUIRED_PER_ASSET;
-  return (
-    poolAccountMinBalance +
-    (isAlgoPool ? 6 : 5) * txnFee +
-    MINIMUM_BALANCE_REQUIRED_PER_ASSET
-  );
-}
-
-/**
  * @returns Minimum balance for a pool account
  */
 export function getPoolAccountMinBalance(
@@ -137,16 +98,25 @@ export function getPoolAccountMinBalance(
   } =
     contractVersion === CONTRACT_VERSION.V1_1 ? tinymanContract_v1_1 : tinymanContract_v2;
 
-  return (
+  let fee =
     BASE_MINIMUM_BALANCE +
     MINIMUM_BALANCE_REQUIRED_PER_ASSET + // min balance to create asset
     MINIMUM_BALANCE_REQUIRED_PER_ASSET + // fee + min balance to opt into asset 1
-    (isAlgoPool ? 0 : MINIMUM_BALANCE_REQUIRED_PER_ASSET) + // min balance to opt into asset 2
     MINIMUM_BALANCE_REQUIRED_PER_APP + // min balance to opt into validator app
     MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE * numLocalInts +
-    MINIMUM_BALANCE_REQUIRED_PER_BYTE_SCHEMA * numLocalByteSlices
-  );
+    MINIMUM_BALANCE_REQUIRED_PER_BYTE_SCHEMA * numLocalByteSlices;
+
+  if (!isAlgoPool) {
+    fee += MINIMUM_BALANCE_REQUIRED_PER_ASSET; // min balance to opt into asset 2
+  }
+
+  return fee;
 }
+
+/**
+ * TODO: Do we need `calculateBootstrapFundingTxnAmount` instead of
+ * separate functions for v1 and v2?
+ */
 
 /**
  * TODO: `function getMinBalanceRequiredToCreatePool({`

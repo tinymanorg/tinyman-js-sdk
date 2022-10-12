@@ -11,7 +11,7 @@ import TinymanError from "../../util/error/TinymanError";
 import {LIQUIDITY_TOKEN_UNIT_NAME} from "../../util/asset/assetConstants";
 import {PoolInfo} from "../../util/pool/poolTypes";
 import {getPoolInfo} from "../../util/pool/poolUtils";
-import {calculateBootstrapFundingTxnAmount} from "../utils";
+import {getPoolAccountMinBalance} from "../utils";
 import {getValidatorAppID} from "../../validator";
 
 enum BootstrapTxnGroupIndices {
@@ -22,9 +22,35 @@ enum BootstrapTxnGroupIndices {
   ASSET2_OPT_IN
 }
 
-export function getBootstrapProcessTxnCount(asset2ID: number) {
+const V1_BOOTSTRAP_TXN_COUNT = {
+  ASA_ALGO: 4,
+  ASA_ASA: 5
+} as const;
+
+export function getBootstrapProcessTxnCount(asset2ID: number | string) {
   // IF asset2 is ALGO, there won't be `asset2Optin` txn within the bootstrap txn group
-  return isAlgo(asset2ID) ? 4 : 5;
+  return isAlgo(asset2ID)
+    ? V1_BOOTSTRAP_TXN_COUNT.ASA_ALGO
+    : V1_BOOTSTRAP_TXN_COUNT.ASA_ASA;
+}
+
+export async function getBootstrapFundingTxnAmountForV1(
+  client: Algodv2,
+  asset2ID: string | number
+) {
+  const {fee: txnFee} = await client.getTransactionParams().do();
+
+  /**
+   * TODO:
+   * Compare return values with docs:
+   * Total costs for Pool Creation:
+   *  ASA-ASA Pool: 0.961 Algo
+   *  ASA-Algo Pool: 0.86 Algo
+   */
+  return (
+    getPoolAccountMinBalance(CONTRACT_VERSION.V1_1, isAlgo(asset2ID)) +
+    getBootstrapProcessTxnCount(asset2ID) * txnFee
+  );
 }
 
 export async function generateTxns({
@@ -58,6 +84,8 @@ export async function generateTxns({
           asset2: {id: asset1ID, unitName: asset1UnitName}
         };
 
+  const isAlgoPool = isAlgo(assets.asset2.id);
+
   const poolLogicSig = tinymanContract_v1_1.generateLogicSigAccountForPool({
     network,
     asset1ID: assets.asset1.id,
@@ -73,8 +101,7 @@ export async function generateTxns({
       algosdk.encodeUint64(assets.asset1.id),
       algosdk.encodeUint64(assets.asset2.id)
     ],
-    foreignAssets:
-      assets.asset2.id == 0 ? [assets.asset1.id] : [assets.asset1.id, assets.asset2.id],
+    foreignAssets: isAlgoPool ? [assets.asset1.id] : [assets.asset1.id, assets.asset2.id],
     suggestedParams
   });
 
@@ -99,25 +126,10 @@ export async function generateTxns({
     suggestedParams
   });
 
-  const asset2Optin =
-    assets.asset2.id === 0
-      ? null
-      : algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-          from: poolLogicSigAddress,
-          to: poolLogicSigAddress,
-          assetIndex: assets.asset2.id,
-          amount: 0,
-          suggestedParams
-        });
-
   const fundingTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
     from: initiatorAddr,
     to: poolLogicSigAddress,
-    amount: calculateBootstrapFundingTxnAmount({
-      contractVersion: CONTRACT_VERSION.V1_1,
-      isAlgoPool: isAlgo(assets.asset2.id),
-      txnFee: suggestedParams.fee
-    }),
+    amount: await getBootstrapFundingTxnAmountForV1(client, assets.asset2.id),
     suggestedParams
   });
 
@@ -128,8 +140,16 @@ export async function generateTxns({
     asset1Optin
   ];
 
-  if (asset2Optin) {
-    txns.push(asset2Optin);
+  if (!isAlgoPool) {
+    txns.push(
+      algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
+        from: poolLogicSigAddress,
+        to: poolLogicSigAddress,
+        assetIndex: assets.asset2.id,
+        amount: 0,
+        suggestedParams
+      })
+    );
   }
 
   const txGroup = algosdk.assignGroupID(txns);

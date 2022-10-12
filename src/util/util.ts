@@ -256,6 +256,6 @@ export function encodeString(text: string) {
 /**
  * @returns `true` if the given id is the asset id of ALGO
  */
-export function isAlgo(id: number | bigint) {
-  return id === ALGO_ASSET_ID;
+export function isAlgo(id: number | string | bigint) {
+  return Number(id) === ALGO_ASSET_ID;
 }
