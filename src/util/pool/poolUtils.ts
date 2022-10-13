@@ -18,7 +18,7 @@ import {
 import {PoolInfo, PoolReserves, PoolStatus} from "./poolTypes";
 import {SupportedNetwork} from "../commonTypes";
 import {getValidatorAppID} from "../../validator";
-import {isV2ContractVersion} from "../../contract/utils";
+import {getIsV2ContractVersion} from "../../contract/utils";
 
 /**
  * Look up information about an pool.
@@ -42,7 +42,7 @@ export async function getPoolInfo(params: {
     contractVersion === CONTRACT_VERSION.V1_1 ? tinymanContract_v1_1 : tinymanContract_v2;
   const poolLogicSig = contract.generateLogicSigAccountForPool(params);
   const validatorAppID = getValidatorAppID(network, contractVersion);
-  const address = poolLogicSig.address();
+  const poolAddress = poolLogicSig.address();
 
   let result: PoolInfo = {
     account: poolLogicSig,
@@ -55,7 +55,7 @@ export async function getPoolInfo(params: {
 
   const readyPoolAssets = await getPoolAssets({
     client,
-    address,
+    address: poolAddress,
     network,
     contractVersion
   });
@@ -237,8 +237,8 @@ export async function getPoolAssets(
     const keyValue = appState["key-value"];
     const state = decodeState(keyValue);
 
-    const asset1Key = isV2ContractVersion(contractVersion) ? "asset_1_id" : "a1";
-    const asset2Key = isV2ContractVersion(contractVersion) ? "asset_2_id" : "a2";
+    const asset1Key = getIsV2ContractVersion(contractVersion) ? "asset_1_id" : "a1";
+    const asset2Key = getIsV2ContractVersion(contractVersion) ? "asset_2_id" : "a2";
 
     //  Encode asset keys as base64 strings
     const encodedAsset1Key = btoa(asset1Key);
