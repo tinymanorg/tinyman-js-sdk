@@ -1,7 +1,7 @@
 import algosdk from "algosdk";
 
 import {MINT_APP_ARGUMENT} from "../ constants";
-import {ContractVersion} from "../../contract/contract";
+import {CONTRACT_VERSION} from "../../contract/contract";
 import {getAccountExcessWithinPool} from "../../util/account/accountUtils";
 import {ALGO_ASSET_ID} from "../../util/asset/assetConstants";
 import {
@@ -111,7 +111,7 @@ export async function generateTxns({
   const suggestedParams = await client.getTransactionParams().do();
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
     from: poolAddress,
-    appIndex: getValidatorAppID(network, ContractVersion.V1_1),
+    appIndex: getValidatorAppID(network, CONTRACT_VERSION.V1_1),
     appArgs: [MINT_APP_ARGUMENT],
     accounts: [initiatorAddr],
     foreignAssets:

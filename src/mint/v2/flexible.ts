@@ -2,8 +2,7 @@ import algosdk from "algosdk";
 import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
 
 import {MINT_APP_ARGUMENT, MINT_FLEXIBLE_MODE_APP_ARGUMENT} from "../ constants";
-import {ContractVersion} from "../../contract/contract";
-import {getAccountExcessWithinPool} from "../../util/account/accountUtils";
+import {CONTRACT_VERSION} from "../../contract/contract";
 import {
   InitiatorSigner,
   SignerTransaction,
@@ -65,7 +64,7 @@ export async function generateTxns({
       });
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
     from: poolAddress,
-    appIndex: getValidatorAppID(network, ContractVersion.V2),
+    appIndex: getValidatorAppID(network, CONTRACT_VERSION.V2),
     appArgs: [MINT_APP_ARGUMENT, MINT_FLEXIBLE_MODE_APP_ARGUMENT],
     accounts: [poolAddress],
     foreignAssets: isAlgoPool
