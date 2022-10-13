@@ -91,16 +91,7 @@ export {
   BURN_PROCESS_TXN_COUNT
 } from "./burn";
 
-export {
-  SwapQuote,
-  SwapExecution,
-  SwapType,
-  getSwapQuote,
-  issueSwap,
-  generateSwapTransactions,
-  signSwapTransactions,
-  SWAP_PROCESS_TXN_COUNT
-} from "./swap";
+export {Swap} from "./swap";
 
 export {
   redeemExcessAsset,
