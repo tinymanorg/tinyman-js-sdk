@@ -229,7 +229,6 @@ export function isAccountOptedIntoApp({
   return accountAppsLocalState.some((appState) => appState.id === appID);
 }
 
-//  TODO: Check if this is the correct way to do it
 export function minRequiredBalanceToOptIn(
   type: "asset-opt-in" | "app-opt-in",
   currentMinumumBalanceForAccount: number,
