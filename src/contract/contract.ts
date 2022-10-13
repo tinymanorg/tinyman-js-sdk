@@ -12,6 +12,7 @@ import {
   GenerateLogicSigAccountForV2PoolParams
 } from "./utils";
 import {getValidatorAppID} from "../validator";
+import {ValueOf} from "../util/typeUtils";
 
 type V1_1ValidatorApp = typeof ascJson_v1_1.contracts.validator_app;
 type V1_1PoolLogicSig = typeof ascJson_v1_1.contracts.pool_logicsig;
@@ -30,12 +31,11 @@ interface ValidatorAppSchema {
   numGlobalByteSlices: any;
 }
 
-export type ContractVersion = "v1_1" | "v2";
-
-export const CONTRACT_VERSION: Record<string, ContractVersion> = {
+export const CONTRACT_VERSION = {
   V1_1: "v1_1",
   V2: "v2"
-};
+} as const;
+export type ContractVersionValue = ValueOf<typeof CONTRACT_VERSION>;
 
 export abstract class BaseTinymanContract<
   ValidatorApp extends V1_1ValidatorApp,
@@ -60,7 +60,6 @@ export abstract class BaseTinymanContract<
 
   abstract generateLogicSigAccountForPool(params: {
     network: SupportedNetwork;
-    contractVersion: ContractVersion;
     asset1ID: number;
     asset2ID: number;
   }): LogicSigAccount;
@@ -114,7 +113,6 @@ export class TinymanContractV2 extends BaseTinymanContract<
 
   generateLogicSigAccountForPool(params: {
     network: SupportedNetwork;
-    contractVersion: ContractVersion;
     asset1ID: number;
     asset2ID: number;
   }): LogicSigAccount {

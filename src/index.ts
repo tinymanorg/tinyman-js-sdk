@@ -45,7 +45,7 @@ export {
 export {AccountInformationData} from "./util/account/accountTypes";
 
 export {
-  ContractVersion,
+  ContractVersionValue,
   CONTRACT_VERSION,
   TinymanContractV1_1,
   tinymanContract_v2
