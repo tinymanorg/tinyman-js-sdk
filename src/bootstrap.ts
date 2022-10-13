@@ -185,13 +185,11 @@ export async function generateBootstrapTransactions({
 export async function signBootstrapTransactions({
   txGroup,
   initiatorSigner,
-  validatorAppID,
   asset1ID,
   asset2ID
 }: {
   txGroup: SignerTransaction[];
   initiatorSigner: InitiatorSigner;
-  validatorAppID: number;
   asset1ID: number;
   asset2ID: number;
 }): Promise<{signedTxns: Uint8Array[]; txnIDs: string[]}> {
