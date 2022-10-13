@@ -1,7 +1,6 @@
 import algosdk from "algosdk";
 
 import {SignerTransaction} from "../commonTypes";
-import {TinymanAnalyticsApiAsset} from "./assetModels";
 import TinymanError from "../error/TinymanError";
 
 export async function generateOptIntoAssetTxns({
