@@ -21,7 +21,7 @@ export {
 
 export {generateOptIntoAssetTxns} from "./util/asset/assetUtils";
 
-export {
+export type {
   AccountAsset,
   TinymanAnalyticsApiAsset,
   IndexerAssetInformation
@@ -42,7 +42,7 @@ export {
   getAccountExcess
 } from "./util/account/accountUtils";
 
-export {AccountInformationData} from "./util/account/accountTypes";
+export type {AccountInformationData} from "./util/account/accountTypes";
 
 export {
   ContractVersionValue,
@@ -59,7 +59,7 @@ export {
   OPT_OUT_VALIDATOR_APP_PROCESS_TXN_COUNT
 } from "./validator";
 
-export {PoolStatus, PoolInfo, PoolReserves} from "./util/pool/poolTypes";
+export type {PoolStatus, PoolInfo, PoolReserves} from "./util/pool/poolTypes";
 
 export {
   getPoolInfo,
@@ -81,6 +81,8 @@ export {
   createPool
 } from "./bootstrap";
 
+export type {MintQuote, MintExecution} from "./mint";
+
 export {
   BurnQuote,
   BurnExecution,
@@ -91,9 +93,10 @@ export {
   BURN_PROCESS_TXN_COUNT
 } from "./burn";
 
+export type {SwapQuote, SwapExecution} from "./swap";
+
+// eslint-disable-next-line no-duplicate-imports
 export {
-  SwapQuote,
-  SwapExecution,
   SwapType,
   getSwapQuote,
   issueSwap,
