@@ -18,7 +18,12 @@ import {
   AccountInformationData,
   AccountExcess
 } from "./accountTypes";
-import {tinymanContract_v1_1} from "../../contract/contract";
+import {
+  ContractVersionValue,
+  tinymanContract_v1_1,
+  tinymanContract_v2
+} from "../../contract/contract";
+import {getIsV2ContractVersion} from "../../contract/utils";
 
 export function getAccountInformation(client: Algodv2, address: string) {
   return new Promise<AccountInformationData>(async (resolve, reject) => {
@@ -88,7 +93,7 @@ export async function getAccountExcessWithinPool({
   let excessAsset2 = 0n;
   let excessLiquidityTokens = 0n;
 
-  const address = pool.account.address();
+  const poolAddress = pool.account.address();
 
   for (const app of appsLocalState) {
     if (app.id != pool.validatorAppID) {
@@ -105,21 +110,21 @@ export async function getAccountExcessWithinPool({
 
     const excessAsset1Key = fromByteArray(
       joinByteArrays([
-        algosdk.decodeAddress(address).publicKey,
+        algosdk.decodeAddress(poolAddress).publicKey,
         EXCESS_ENCODED,
         algosdk.encodeUint64(pool.asset1ID)
       ])
     );
     const excessAsset2Key = fromByteArray(
       joinByteArrays([
-        algosdk.decodeAddress(address).publicKey,
+        algosdk.decodeAddress(poolAddress).publicKey,
         EXCESS_ENCODED,
         algosdk.encodeUint64(pool.asset2ID)
       ])
     );
     const excessLiquidityTokenKey = fromByteArray(
       joinByteArrays([
-        algosdk.decodeAddress(address).publicKey,
+        algosdk.decodeAddress(poolAddress).publicKey,
         EXCESS_ENCODED,
         algosdk.encodeUint64(pool.liquidityTokenID!)
       ])
@@ -228,16 +233,18 @@ export function isAccountOptedIntoApp({
 export function minRequiredBalanceToOptIn(
   type: "asset-opt-in" | "app-opt-in",
   currentMinumumBalanceForAccount: number,
+  contractVersion: ContractVersionValue,
   suggestedTransactionFee?: number
 ) {
+  const contract = getIsV2ContractVersion(contractVersion)
+    ? tinymanContract_v2
+    : tinymanContract_v1_1;
   const minBalanceRequirementPerOptIn =
     type === "asset-opt-in"
       ? MINIMUM_BALANCE_REQUIRED_PER_ASSET
       : MINIMUM_BALANCE_REQUIRED_PER_APP +
-        tinymanContract_v1_1.schema.numLocalByteSlices *
-          MINIMUM_BALANCE_REQUIRED_PER_BYTE_SCHEMA +
-        tinymanContract_v1_1.schema.numLocalInts *
-          MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE;
+        contract.schema.numLocalByteSlices * MINIMUM_BALANCE_REQUIRED_PER_BYTE_SCHEMA +
+        contract.schema.numLocalInts * MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE;
 
   return (
     minBalanceRequirementPerOptIn +

@@ -119,7 +119,7 @@ function encodeVarInt(number) {
   return buf;
 }
 
-function isV2ContractVersion(contractVersion: ContractVersionValue) {
+function getIsV2ContractVersion(contractVersion: ContractVersionValue) {
   return contractVersion === CONTRACT_VERSION.V2;
 }
 
@@ -128,7 +128,7 @@ export {
   generateLogicSigAccountForV2Pool,
   GenerateLogicSigAccountForV1_1PoolParams,
   GenerateLogicSigAccountForV2PoolParams,
-  isV2ContractVersion
+  getIsV2ContractVersion
 };
 
 /* eslint
