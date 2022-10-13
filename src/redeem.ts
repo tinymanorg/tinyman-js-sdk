@@ -1,4 +1,4 @@
-import algosdk, {Algodv2, LogicSigAccount} from "algosdk";
+import algosdk, {Algodv2} from "algosdk";
 
 import {
   encodeString,

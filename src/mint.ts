@@ -1,4 +1,4 @@
-import algosdk, {LogicSigAccount} from "algosdk";
+import algosdk from "algosdk";
 
 import {
   applySlippageToAmount,

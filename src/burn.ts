@@ -119,8 +119,7 @@ export async function generateBurnTxns({
   asset1Out,
   asset2Out,
   slippage,
-  initiatorAddr,
-  poolAddress
+  initiatorAddr
 }: {
   client: Algodv2;
   pool: PoolInfo;
@@ -129,9 +128,9 @@ export async function generateBurnTxns({
   asset2Out: number | bigint;
   slippage: number;
   initiatorAddr: string;
-  poolAddress: string;
 }): Promise<SignerTransaction[]> {
   const suggestedParams = await client.getTransactionParams().do();
+  const poolAddress = pool.account.address();
 
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
     from: poolAddress,
