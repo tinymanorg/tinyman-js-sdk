@@ -260,7 +260,7 @@ async function doBootstrap({
  * @param signedTxns Signed transactions
  * @param txnIDs Transaction IDs
  */
-function execute({
+async function execute({
   client,
   network,
   pool,
