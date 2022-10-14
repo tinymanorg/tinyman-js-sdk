@@ -1,5 +1,5 @@
 import { LogicSigAccount } from "algosdk";
-import { ContractVersionValue } from "../../contract/contract";
+import { ContractVersionValue } from "../../contract/types";
 export declare enum PoolStatus {
     NOT_CREATED = "not created",
     BOOTSTRAP = "bootstrap",

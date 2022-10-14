@@ -1,5 +1,5 @@
 import { Algodv2 } from "algosdk";
-import { ContractVersionValue } from "../../contract/contract";
+import { ContractVersionValue } from "../../contract/types";
 import { PoolInfo, PoolReserves } from "./poolTypes";
 import { SupportedNetwork } from "../commonTypes";
 /**

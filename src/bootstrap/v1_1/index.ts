@@ -1,6 +1,6 @@
 import algosdk, {Algodv2, Transaction} from "algosdk";
 
-import {CONTRACT_VERSION, tinymanContract_v1_1} from "../../contract/contract";
+import {tinymanContract_v1_1} from "../../contract/contract";
 import {
   InitiatorSigner,
   SignerTransaction,
@@ -13,6 +13,7 @@ import {PoolInfo} from "../../util/pool/poolTypes";
 import {getPoolInfo} from "../../util/pool/poolUtils";
 import {getPoolAccountMinBalance} from "../utils";
 import {getValidatorAppID} from "../../validator";
+import {CONTRACT_VERSION} from "../../contract/constants";
 
 enum BootstrapTxnGroupIndices {
   FUNDING_TXN = 0,

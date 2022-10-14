@@ -1,5 +1,5 @@
 import { Algodv2 } from "algosdk";
-import { ContractVersionValue } from "./contract/contract";
+import { ContractVersionValue } from "./contract/types";
 import { SignerTransaction, SupportedNetwork } from "./util/commonTypes";
 export declare const OPT_IN_VALIDATOR_APP_PROCESS_TXN_COUNT = 1;
 /**
