@@ -87,7 +87,7 @@ export {
 } from "./bootstrap";
 
 export type {MintQuote, MintExecution} from "./mint/types";
-export type {Mint} from "./mint";
+export {Mint} from "./mint";
 
 export type {BurnQuote, BurnExecution} from "./burn";
 // eslint-disable-next-line no-duplicate-imports
