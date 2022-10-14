@@ -1,14 +1,16 @@
 import algosdk, {Algodv2, Transaction} from "algosdk";
 
-import {encodeString} from "../../util/util";
+import {encodeString, isAlgo} from "../../util/util";
 import {InitiatorSigner, SignerTransaction} from "../../util/commonTypes";
 import TinymanError from "../../util/error/TinymanError";
 import {PoolInfo, PoolReserves, PoolStatus} from "../../util/pool/poolTypes";
 import {SwapQuote, SwapType} from "../types";
 
 enum V2SwapTxnGroupIndices {
-  ASSET_TRANSFER_TXN = 0,
-  PAYMENT_TXN,
+  /**
+   * If the input asset is Algo, it'll be a payment txn, otherwise it'll be an asset transfer txn.
+   */
+  INPUT_TXN = 0,
   APP_CALL_TXN
 }
 
@@ -31,15 +33,13 @@ async function signTxns({
   txGroup: SignerTransaction[];
   initiatorSigner: InitiatorSigner;
 }): Promise<Uint8Array[]> {
-  const [signedAssetTransferTxn, signedPaymentTxn] = await initiatorSigner([txGroup]);
+  const [signedInputTxn] = await initiatorSigner([txGroup]);
 
   const signedTxns = txGroup.map((txDetail, index) => {
-    if (index === V2SwapTxnGroupIndices.ASSET_TRANSFER_TXN) {
-      return signedAssetTransferTxn;
+    if (index === V2SwapTxnGroupIndices.INPUT_TXN) {
+      return signedInputTxn;
     }
-    if (index === V2SwapTxnGroupIndices.PAYMENT_TXN) {
-      return signedPaymentTxn;
-    }
+
     const {blob} = algosdk.signLogicSigTransactionObject(txDetail.txn, pool.account.lsig);
 
     return blob;
@@ -65,21 +65,25 @@ async function generateTxns({
 }): Promise<SignerTransaction[]> {
   const suggestedParams = await client.getTransactionParams().do();
   const poolAddress = pool.account.address();
+  const isAssetInAlgo = isAlgo(assetIn.assetID);
 
-  const assetTransferTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-    from: initiatorAddr,
-    to: poolAddress,
-    amount: assetIn.amount,
-    assetIndex: assetIn.assetID,
-    suggestedParams
-  });
-
-  const paymentTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-    from: initiatorAddr,
-    to: poolAddress,
-    amount: assetIn.amount,
-    suggestedParams
-  });
+  /**
+   * If the input asset is Algo, a payment txn, otherwise an asset transfer txn is required
+   */
+  const inputTxn = isAssetInAlgo
+    ? algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+        from: initiatorAddr,
+        to: poolAddress,
+        amount: assetIn.amount,
+        suggestedParams
+      })
+    : algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
+        from: initiatorAddr,
+        to: poolAddress,
+        amount: assetIn.amount,
+        assetIndex: assetIn.assetID,
+        suggestedParams
+      });
 
   const appCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
     from: initiatorAddr,
@@ -100,15 +104,13 @@ async function generateTxns({
 
   let txns: Transaction[] = [];
 
-  txns[V2SwapTxnGroupIndices.ASSET_TRANSFER_TXN] = assetTransferTxn;
-  txns[V2SwapTxnGroupIndices.PAYMENT_TXN] = paymentTxn;
+  txns[V2SwapTxnGroupIndices.INPUT_TXN] = inputTxn;
   txns[V2SwapTxnGroupIndices.APP_CALL_TXN] = appCallTxn;
 
   const txGroup: algosdk.Transaction[] = algosdk.assignGroupID(txns);
 
   return [
-    {txn: txGroup[V2SwapTxnGroupIndices.ASSET_TRANSFER_TXN], signers: [initiatorAddr]},
-    {txn: txGroup[V2SwapTxnGroupIndices.PAYMENT_TXN], signers: [initiatorAddr]},
+    {txn: txGroup[V2SwapTxnGroupIndices.INPUT_TXN], signers: [initiatorAddr]},
     {txn: txGroup[V2SwapTxnGroupIndices.APP_CALL_TXN], signers: [poolAddress]}
   ];
 }
