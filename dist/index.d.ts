@@ -11,7 +11,7 @@ export { CONTRACT_VERSION, TinymanContractV1_1, tinymanContract_v2 } from "./con
 export { getValidatorAppID, generateOptIntoValidatorTxns, OPT_IN_VALIDATOR_APP_PROCESS_TXN_COUNT, generateOptOutOfValidatorTxns, OPT_OUT_VALIDATOR_APP_PROCESS_TXN_COUNT } from "./validator";
 export type { PoolStatus, PoolInfo, PoolReserves } from "./util/pool/poolTypes";
 export { getPoolInfo, getPoolReserves, getPoolShare, getPoolPairRatio, isPoolEmpty, isPoolNotCreated, isPoolReady, getPoolAssets, getPoolsForPair } from "./util/pool/poolUtils";
-export { generateBootstrapTransactions, signBootstrapTransactions, getBootstrapProcessTxnCount, calculatePoolBootstrapFundingTxnAmount, createPool } from "./bootstrap";
+export { Bootstrap } from "./bootstrap";
 export type { MintQuote, MintExecution } from "./mint";
 export type { BurnQuote, BurnExecution } from "./burn";
 export { getBurnLiquidityQuote, burnLiquidity, generateBurnTxns, signBurnTxns, BURN_PROCESS_TXN_COUNT } from "./burn";
