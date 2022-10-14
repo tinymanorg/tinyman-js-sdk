@@ -24,28 +24,31 @@ const V2_SWAP_APP_CALL_SWAP_TYPE_ARGS_ENCODED = {
   [SwapType.FixedOutput]: encodeString("fixed-output")
 } as const;
 
-async function signTxns({
-  pool,
-  txGroup,
-  initiatorSigner
-}: {
-  pool: PoolInfo;
-  txGroup: SignerTransaction[];
-  initiatorSigner: InitiatorSigner;
-}): Promise<Uint8Array[]> {
-  const [signedInputTxn] = await initiatorSigner([txGroup]);
+/**
+ * Executes a swap with the desired quantities.
+ */
+function execute(_args: any, swapType: SwapType) {
+  throw new Error("Not implemented");
 
-  const signedTxns = txGroup.map((txDetail, index) => {
-    if (index === V2SwapTxnGroupIndices.INPUT_TXN) {
-      return signedInputTxn;
-    }
+  if (swapType === SwapType.FixedInput) {
+    return executeFixedInputSwap(_args);
+  }
 
-    const {blob} = algosdk.signLogicSigTransactionObject(txDetail.txn, pool.account.lsig);
+  return executeFixedOutputSwap(_args);
+}
 
-    return blob;
-  });
+/**
+ * Executes a fixed input swap with the desired quantities.
+ */
+function executeFixedInputSwap(_args: any) {
+  throw new Error("Not implemented");
+}
 
-  return signedTxns;
+/**
+ * Executes a fixed output swap with the desired quantities.
+ */
+function executeFixedOutputSwap(_args: any) {
+  throw new Error("Not implemented");
 }
 
 async function generateTxns({
@@ -56,7 +59,7 @@ async function generateTxns({
   assetOut,
   initiatorAddr
 }: {
-  client: any;
+  client: Algodv2;
   pool: PoolInfo;
   swapType: SwapType;
   assetIn: {assetID: number; amount: number | bigint};
@@ -115,6 +118,30 @@ async function generateTxns({
   ];
 }
 
+async function signTxns({
+  pool,
+  txGroup,
+  initiatorSigner
+}: {
+  pool: PoolInfo;
+  txGroup: SignerTransaction[];
+  initiatorSigner: InitiatorSigner;
+}): Promise<Uint8Array[]> {
+  const [signedInputTxn] = await initiatorSigner([txGroup]);
+
+  const signedTxns = txGroup.map((txDetail, index) => {
+    if (index === V2SwapTxnGroupIndices.INPUT_TXN) {
+      return signedInputTxn;
+    }
+
+    const {blob} = algosdk.signLogicSigTransactionObject(txDetail.txn, pool.account.lsig);
+
+    return blob;
+  });
+
+  return signedTxns;
+}
+
 async function getSwapAppCallFeeAmount(client: Algodv2, swapType: SwapType) {
   const {fee: txnFee} = await client.getTransactionParams().do();
   // +1 to account for the outer txn fee
@@ -167,33 +194,6 @@ function getFixedInputSwapQuote(_args: any): any {
  */
 function getFixedOutputSwapQuote(_args: any): any {
   throw new Error("Not implemented");
-}
-
-/**
- * Executes a fixed input swap with the desired quantities.
- */
-function executeFixedInputSwap(_args: any) {
-  throw new Error("Not implemented");
-}
-
-/**
- * Executes a fixed output swap with the desired quantities.
- */
-function executeFixedOutputSwap(_args: any) {
-  throw new Error("Not implemented");
-}
-
-/**
- * Executes a swap with the desired quantities.
- */
-function execute(_args: any, swapType: SwapType) {
-  throw new Error("Not implemented");
-
-  if (swapType === SwapType.FixedInput) {
-    return executeFixedInputSwap(_args);
-  }
-
-  return executeFixedOutputSwap(_args);
 }
 
 export const SwapV2 = {
