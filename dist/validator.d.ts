@@ -1,6 +1,6 @@
-import {Algodv2} from "algosdk";
-import {ContractVersion} from "./contract/contract";
-import {SignerTransaction, SupportedNetwork} from "./util/commonTypes";
+import { Algodv2 } from "algosdk";
+import { ContractVersionValue } from "./contract/contract";
+import { SignerTransaction, SupportedNetwork } from "./util/commonTypes";
 export declare const OPT_IN_VALIDATOR_APP_PROCESS_TXN_COUNT = 1;
 /**
  * Get the Validator App ID for a network.
@@ -9,26 +9,17 @@ export declare const OPT_IN_VALIDATOR_APP_PROCESS_TXN_COUNT = 1;
  * @param {ContractVersion} version contract version.
  * @returns the Validator App ID
  */
-export declare function getValidatorAppID(
-  network: SupportedNetwork,
-  contractVersion: ContractVersion
-): number;
-export declare function generateOptIntoValidatorTxns({
-  client,
-  validatorAppID,
-  initiatorAddr
-}: {
-  client: Algodv2;
-  validatorAppID: number;
-  initiatorAddr: string;
+export declare function getValidatorAppID(network: SupportedNetwork, contractVersion: ContractVersionValue): number;
+export declare function generateOptIntoValidatorTxns({ client, network, contractVersion, initiatorAddr }: {
+    client: Algodv2;
+    network: SupportedNetwork;
+    contractVersion: ContractVersionValue;
+    initiatorAddr: string;
 }): Promise<SignerTransaction[]>;
 export declare const OPT_OUT_VALIDATOR_APP_PROCESS_TXN_COUNT = 1;
-export declare function generateOptOutOfValidatorTxns({
-  client,
-  validatorAppID,
-  initiatorAddr
-}: {
-  client: Algodv2;
-  validatorAppID: number;
-  initiatorAddr: string;
+export declare function generateOptOutOfValidatorTxns({ client, network, contractVersion, initiatorAddr }: {
+    client: Algodv2;
+    network: SupportedNetwork;
+    contractVersion: ContractVersionValue;
+    initiatorAddr: string;
 }): Promise<SignerTransaction[]>;

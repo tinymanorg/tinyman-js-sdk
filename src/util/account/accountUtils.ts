@@ -18,12 +18,8 @@ import {
   AccountInformationData,
   AccountExcess
 } from "./accountTypes";
-import {
-  ContractVersionValue,
-  tinymanContract_v1_1,
-  tinymanContract_v2
-} from "../../contract/contract";
-import {getIsV2ContractVersion} from "../../contract/utils";
+import {ContractVersionValue} from "../../contract/contract";
+import {getContract} from "../../contract/utils";
 
 export function getAccountInformation(client: Algodv2, address: string) {
   return new Promise<AccountInformationData>(async (resolve, reject) => {
@@ -235,9 +231,7 @@ export function minRequiredBalanceToOptIn(
   contractVersion: ContractVersionValue,
   suggestedTransactionFee?: number
 ) {
-  const contract = getIsV2ContractVersion(contractVersion)
-    ? tinymanContract_v2
-    : tinymanContract_v1_1;
+  const contract = getContract(contractVersion);
   const minBalanceRequirementPerOptIn =
     type === "asset-opt-in"
       ? MINIMUM_BALANCE_REQUIRED_PER_ASSET

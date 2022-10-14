@@ -14,14 +14,10 @@ import {
 import {getValidatorAppID} from "../validator";
 import {ValueOf} from "../util/typeUtils";
 
-type V1_1ValidatorApp = typeof ascJson_v1_1.contracts.validator_app;
-type V1_1PoolLogicSig = typeof ascJson_v1_1.contracts.pool_logicsig;
+export type V1_1ValidatorApp = typeof ascJson_v1_1.contracts.validator_app;
+export type V1_1PoolLogicSig = typeof ascJson_v1_1.contracts.pool_logicsig;
 export type V1_1PoolLogicSigVariables = V1_1PoolLogicSig["logic"]["variables"];
-
-// type V2ValidatorApp = typeof ascJson_v2.contracts.validator_app;
-type V2PoolLogicSig = typeof ascJson_v2.contracts.pool_logicsig;
-
-// type PoolLogicSig = V1_1PoolLogicSig | V2PoolLogicSig;
+export type V2PoolLogicSig = typeof ascJson_v2.contracts.pool_logicsig;
 export type PoolLogicSigVariables = V1_1PoolLogicSigVariables;
 
 interface ValidatorAppSchema {
@@ -135,6 +131,7 @@ export const tinymanContract_v1_1 = new TinymanContractV1_1(
 );
 
 export const tinymanContract_v2 = new TinymanContractV2(
+  // TODO: Use v2 validator app when it's ready
   ascJson_v1_1.contracts.validator_app,
   ascJson_v2.contracts.pool_logicsig
 );

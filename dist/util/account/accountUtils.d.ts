@@ -1,6 +1,7 @@
 import { Algodv2 } from "algosdk";
 import { PoolInfo } from "../pool/poolTypes";
 import { AccountExcessWithinPool, AccountInformation, AccountInformationData, AccountExcess } from "./accountTypes";
+import { ContractVersionValue } from "../../contract/contract";
 export declare function getAccountInformation(client: Algodv2, address: string): Promise<AccountInformationData>;
 export declare function calculateAccountMinimumRequiredBalance(account: AccountInformation): number;
 export declare function hasSufficientMinimumBalance(accountData: AccountInformationData): boolean;
@@ -39,8 +40,4 @@ export declare function isAccountOptedIntoApp({ appID, accountAppsLocalState }: 
     appID: number;
     accountAppsLocalState: AccountInformation["apps-local-state"];
 }): boolean;
-export declare function minRequiredBalanceToOptIn(
-  type: "asset-opt-in" | "app-opt-in",
-  currentMinumumBalanceForAccount: number,
-  suggestedTransactionFee?: number
-): number;
+export declare function minRequiredBalanceToOptIn(type: "asset-opt-in" | "app-opt-in", currentMinumumBalanceForAccount: number, contractVersion: ContractVersionValue, suggestedTransactionFee?: number): number;
