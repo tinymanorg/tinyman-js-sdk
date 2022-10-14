@@ -1,11 +1,8 @@
 import {Algodv2} from "algosdk";
 
-import {
-  ContractVersionValue,
-  CONTRACT_VERSION,
-  tinymanContract_v1_1,
-  tinymanContract_v2
-} from "../contract/contract";
+import {tinymanContract_v1_1, tinymanContract_v2} from "../contract/contract";
+import {ContractVersionValue} from "../contract/types";
+import {CONTRACT_VERSION} from "../contract/constants";
 import {TinymanAnalyticsApiAsset} from "../util/asset/assetModels";
 import {SupportedNetwork, SignerTransaction, InitiatorSigner} from "../util/commonTypes";
 import {

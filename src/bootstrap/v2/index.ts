@@ -1,6 +1,7 @@
 import algosdk, {Algodv2, getApplicationAddress} from "algosdk";
 
-import {CONTRACT_VERSION, tinymanContract_v2} from "../../contract/contract";
+import {tinymanContract_v2} from "../../contract/contract";
+import {CONTRACT_VERSION} from "../../contract/constants";
 import {TinymanAnalyticsApiAsset} from "../../util/asset/assetModels";
 import {
   SupportedNetwork,

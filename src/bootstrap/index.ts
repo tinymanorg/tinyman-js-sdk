@@ -1,6 +1,6 @@
 import {BootstrapV1_1} from "./v1_1";
 import {BootstrapV2} from "./v2";
-import {CONTRACT_VERSION} from "../contract/contract";
+import {CONTRACT_VERSION} from "../contract/constants";
 import {execute, generateTxns, signTxns} from "./utils";
 
 export const Bootstrap = {
