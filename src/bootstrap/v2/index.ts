@@ -14,7 +14,7 @@ import {PoolInfo} from "../../util/pool/poolTypes";
 import {getPoolInfo} from "../../util/pool/poolUtils";
 import {encodeString, isAlgo, waitForConfirmation} from "../../util/util";
 import {getValidatorAppID} from "../../validator";
-import {getPoolAccountMinBalance} from "../utils";
+import {getPoolAccountMinBalance} from "../common/utils";
 
 enum BootstrapTxnGroupIndices {
   FUNDING_TXN = 0,

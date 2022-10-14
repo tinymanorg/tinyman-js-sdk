@@ -34,10 +34,6 @@ export declare function execute(params: {
     txnIDs: string[];
 }): Promise<PoolInfo>;
 /**
- * @returns Minimum balance for a pool account
- */
-export declare function getPoolAccountMinBalance(contractVersion: ContractVersionValue, isAlgoPool: boolean): number;
-/**
  * TODO: Do we need `calculateBootstrapFundingTxnAmount` instead of
  * separate functions for v1 and v2?
  */

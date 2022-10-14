@@ -11,7 +11,7 @@ import TinymanError from "../../util/error/TinymanError";
 import {LIQUIDITY_TOKEN_UNIT_NAME} from "../../util/asset/assetConstants";
 import {PoolInfo} from "../../util/pool/poolTypes";
 import {getPoolInfo} from "../../util/pool/poolUtils";
-import {getPoolAccountMinBalance} from "../utils";
+import {getPoolAccountMinBalance} from "../common/utils";
 import {getValidatorAppID} from "../../validator";
 import {CONTRACT_VERSION} from "../../contract/constants";
 
