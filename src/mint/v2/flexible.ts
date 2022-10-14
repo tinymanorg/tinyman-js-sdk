@@ -1,7 +1,7 @@
 import algosdk from "algosdk";
 import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
 
-import {MINT_APP_ARGUMENT, MINT_FLEXIBLE_MODE_APP_ARGUMENT} from "../ constants";
+import {MINT_APP_V2_ARGUMENT, MINT_FLEXIBLE_MODE_APP_ARGUMENT} from "../ constants";
 import {CONTRACT_VERSION} from "../../contract/contract";
 import {
   InitiatorSigner,
@@ -65,11 +65,9 @@ export async function generateTxns({
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
     from: poolAddress,
     appIndex: getValidatorAppID(network, CONTRACT_VERSION.V2),
-    appArgs: [MINT_APP_ARGUMENT, MINT_FLEXIBLE_MODE_APP_ARGUMENT],
+    appArgs: [MINT_APP_V2_ARGUMENT, MINT_FLEXIBLE_MODE_APP_ARGUMENT],
     accounts: [poolAddress],
-    foreignAssets: isAlgoPool
-      ? [pool.asset1ID, liquidityToken.id]
-      : [pool.asset1ID, pool.asset2ID, liquidityToken.id],
+    foreignAssets: [liquidityToken.id],
     suggestedParams: {
       ...suggestedParams,
       // In addition to the AppCall txn, there will be two additional Inner Transactions.

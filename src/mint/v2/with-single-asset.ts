@@ -1,7 +1,7 @@
 import algosdk from "algosdk";
 import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
 
-import {MINT_APP_ARGUMENT, MINT_SINGLE_MODE_APP_ARGUMENT} from "../ constants";
+import {MINT_APP_V2_ARGUMENT, MINT_SINGLE_MODE_APP_ARGUMENT} from "../ constants";
 import {CONTRACT_VERSION} from "../../contract/contract";
 import {SupportedNetwork} from "../../util/commonTypes";
 import {PoolInfo} from "../../util/pool/poolTypes";
@@ -42,7 +42,7 @@ export async function generateTxns({
       "If you want to add asset 1 and asset 2 at the same time, please use flexible add liquidity."
     );
   }
-  const isAlgoPool = isAlgo(asset_2.id);
+  const isAlgoPool = isAlgo(assetIn.id);
   const suggestedParams = await client.getTransactionParams().do();
   const assetInTxn = isAlgoPool
     ? algosdk.makePaymentTxnWithSuggestedParamsFromObject({
@@ -61,9 +61,9 @@ export async function generateTxns({
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
     from: poolAddress,
     appIndex: getValidatorAppID(network, CONTRACT_VERSION.V2),
-    appArgs: [MINT_APP_ARGUMENT, MINT_SINGLE_MODE_APP_ARGUMENT],
+    appArgs: [MINT_APP_V2_ARGUMENT, MINT_SINGLE_MODE_APP_ARGUMENT],
     accounts: [poolAddress],
-    foreignAssets: isAlgoPool ? [liquidityToken.id] : [assetIn.id, liquidityToken.id],
+    foreignAssets: [liquidityToken.id],
     suggestedParams: {
       ...suggestedParams,
       // In addition to the AppCall txn, there will be two additional Inner Transactions.
