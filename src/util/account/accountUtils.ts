@@ -18,7 +18,7 @@ import {
   AccountInformationData,
   AccountExcess
 } from "./accountTypes";
-import {ContractVersionValue} from "../../contract/contract";
+import {ContractVersionValue} from "../../contract/types";
 import {getContract} from "../../contract/utils";
 
 export function getAccountInformation(client: Algodv2, address: string) {

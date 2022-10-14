@@ -48,13 +48,9 @@ export {
 
 export type {AccountInformationData} from "./util/account/accountTypes";
 
-export type {ContractVersionValue} from "./contract/contract";
-// eslint-disable-next-line no-duplicate-imports
-export {
-  CONTRACT_VERSION,
-  TinymanContractV1_1,
-  tinymanContract_v2
-} from "./contract/contract";
+export type {ContractVersionValue} from "./contract/types";
+export {CONTRACT_VERSION} from "./contract/constants";
+export {tinymanContract_v1_1, tinymanContract_v2} from "./contract/contract";
 
 export {
   getValidatorAppID,
