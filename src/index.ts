@@ -1,4 +1,8 @@
-export {InitiatorSigner, SignerTransaction, SupportedNetwork} from "./util/commonTypes";
+export type {
+  InitiatorSigner,
+  SignerTransaction,
+  SupportedNetwork
+} from "./util/commonTypes";
 
 export {
   BASE_MINIMUM_BALANCE,
@@ -44,8 +48,9 @@ export {
 
 export type {AccountInformationData} from "./util/account/accountTypes";
 
+export type {ContractVersionValue} from "./contract/contract";
+// eslint-disable-next-line no-duplicate-imports
 export {
-  ContractVersionValue,
   CONTRACT_VERSION,
   TinymanContractV1_1,
   tinymanContract_v2
@@ -83,9 +88,9 @@ export {
 
 export type {MintQuote, MintExecution} from "./mint";
 
+export type {BurnQuote, BurnExecution} from "./burn";
+// eslint-disable-next-line no-duplicate-imports
 export {
-  BurnQuote,
-  BurnExecution,
   getBurnLiquidityQuote,
   burnLiquidity,
   generateBurnTxns,
