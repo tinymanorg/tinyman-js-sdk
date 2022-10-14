@@ -49,3 +49,4 @@ export declare function getTxnGroupID(txns: SignerTransaction[]): string;
  * Converts a text into bytes
  */
 export declare function encodeString(text: string): Uint8Array;
+export declare function isAlgo(id: number | bigint): boolean;

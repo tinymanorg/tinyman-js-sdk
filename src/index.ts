@@ -86,7 +86,7 @@ export {
   createPool
 } from "./bootstrap";
 
-export type {MintQuote, MintExecution} from "./mint";
+export type {MintQuote, MintExecution} from "./mint/types";
 
 export type {BurnQuote, BurnExecution} from "./burn";
 // eslint-disable-next-line no-duplicate-imports
