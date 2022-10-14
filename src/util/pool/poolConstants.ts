@@ -1,4 +1,4 @@
-import {CONTRACT_VERSION} from "../../contract/contract";
+import {CONTRACT_VERSION} from "../../contract/constants";
 
 export const ENCODED_ASSET_KEYS = {
   [CONTRACT_VERSION.V1_1]: {

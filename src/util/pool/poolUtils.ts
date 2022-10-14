@@ -9,12 +9,13 @@ import {
   encodeString
 } from "../util";
 import {AccountInformation} from "../account/accountTypes";
-import {ContractVersionValue, CONTRACT_VERSION} from "../../contract/contract";
+import {ContractVersionValue} from "../../contract/types";
+import {CONTRACT_VERSION} from "../../contract/constants";
 import {PoolInfo, PoolReserves, PoolStatus} from "./poolTypes";
 import {SupportedNetwork} from "../commonTypes";
 import {getValidatorAppID} from "../../validator";
 import {ENCODED_ASSET_KEYS} from "./poolConstants";
-import {getContract} from "../../contract/utils";
+import {getContract} from "../../contract/contract";
 
 /**
  * Look up information about an pool.

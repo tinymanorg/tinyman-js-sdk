@@ -6,8 +6,9 @@ export type { AccountAsset, TinymanAnalyticsApiAsset, IndexerAssetInformation } 
 export { ALGO_ASSET, ALGO_ASSET_ID, LIQUIDITY_TOKEN_UNIT_NAME } from "./util/asset/assetConstants";
 export { getAccountInformation, calculateAccountMinimumRequiredBalance, hasSufficientMinimumBalance, isAccountOptedIntoApp, getAccountExcessWithinPool, getAccountExcess } from "./util/account/accountUtils";
 export type { AccountInformationData } from "./util/account/accountTypes";
-export type { ContractVersionValue } from "./contract/contract";
-export { CONTRACT_VERSION, TinymanContractV1_1, tinymanContract_v2 } from "./contract/contract";
+export type { ContractVersionValue } from "./contract/types";
+export { CONTRACT_VERSION } from "./contract/constants";
+export { TinymanContractV1_1, tinymanContract_v2 } from "./contract/contract";
 export { getValidatorAppID, generateOptIntoValidatorTxns, OPT_IN_VALIDATOR_APP_PROCESS_TXN_COUNT, generateOptOutOfValidatorTxns, OPT_OUT_VALIDATOR_APP_PROCESS_TXN_COUNT } from "./validator";
 export type { PoolStatus, PoolInfo, PoolReserves } from "./util/pool/poolTypes";
 export { getPoolInfo, getPoolReserves, getPoolShare, getPoolPairRatio, isPoolEmpty, isPoolNotCreated, isPoolReady, getPoolAssets, getPoolsForPair } from "./util/pool/poolUtils";

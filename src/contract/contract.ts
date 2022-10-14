@@ -12,13 +12,14 @@ import {
   GenerateLogicSigAccountForV2PoolParams
 } from "./utils";
 import {getValidatorAppID} from "../validator";
-import {ValueOf} from "../util/typeUtils";
-
-export type V1_1ValidatorApp = typeof ascJson_v1_1.contracts.validator_app;
-export type V1_1PoolLogicSig = typeof ascJson_v1_1.contracts.pool_logicsig;
-export type V1_1PoolLogicSigVariables = V1_1PoolLogicSig["logic"]["variables"];
-export type V2PoolLogicSig = typeof ascJson_v2.contracts.pool_logicsig;
-export type PoolLogicSigVariables = V1_1PoolLogicSigVariables;
+import {
+  V1_1ValidatorApp,
+  V1_1PoolLogicSig,
+  V2PoolLogicSig,
+  PoolLogicSigVariables,
+  ContractVersionValue
+} from "./types";
+import {CONTRACT_VERSION} from "./constants";
 
 interface ValidatorAppSchema {
   numLocalInts: any;
@@ -26,12 +27,6 @@ interface ValidatorAppSchema {
   numGlobalInts: any;
   numGlobalByteSlices: any;
 }
-
-export const CONTRACT_VERSION = {
-  V1_1: "v1_1",
-  V2: "v2"
-} as const;
-export type ContractVersionValue = ValueOf<typeof CONTRACT_VERSION>;
 
 export abstract class BaseTinymanContract<
   ValidatorApp extends V1_1ValidatorApp,
@@ -135,6 +130,16 @@ export const tinymanContract_v2 = new TinymanContractV2(
   ascJson_v1_1.contracts.validator_app,
   ascJson_v2.contracts.pool_logicsig
 );
+
+function getIsV2ContractVersion(contractVersion: ContractVersionValue) {
+  return contractVersion === CONTRACT_VERSION.V2;
+}
+
+export function getContract(contractVersion: ContractVersionValue) {
+  return getIsV2ContractVersion(contractVersion)
+    ? tinymanContract_v2
+    : tinymanContract_v1_1;
+}
 
 /* eslint
       no-param-reassign: "off",
