@@ -13,6 +13,7 @@ export type { PoolStatus, PoolInfo, PoolReserves } from "./util/pool/poolTypes";
 export { getPoolInfo, getPoolReserves, getPoolShare, getPoolPairRatio, isPoolEmpty, isPoolNotCreated, isPoolReady, getPoolAssets, getPoolsForPair } from "./util/pool/poolUtils";
 export { generateBootstrapTransactions, signBootstrapTransactions, getBootstrapProcessTxnCount, calculatePoolBootstrapFundingTxnAmount, createPool } from "./bootstrap";
 export type { MintQuote, MintExecution } from "./mint/types";
+export type { Mint } from "./mint";
 export type { BurnQuote, BurnExecution } from "./burn";
 export { getBurnLiquidityQuote, burnLiquidity, generateBurnTxns, signBurnTxns, BURN_PROCESS_TXN_COUNT } from "./burn";
 export type { SwapQuote, SwapExecution } from "./swap";
