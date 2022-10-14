@@ -65,14 +65,7 @@ export declare function isPoolNotCreated(pool: undefined | null | PoolInfo): boo
  */
 export declare function isPoolReady(pool: undefined | null | PoolInfo): boolean;
 /**
- *  Returns the pools by given pair and network for both contract versions
- *
- * @param params - Parameters for getting pools by pair and network for both contract versions
- * @param {Algodv2} params.client - Algodv2 client
- * @param {SupportedNetwork} params.network - Network to use
- * @param {number} params.asset1ID The ID of the first asset in the pool pair.
- * @param {number} params.asset2ID The ID of the second asset in the pool pair.
- * @returns {PoolInfo[]} - Pools infos
+ * @returns {PoolInfo[]} - Pool info for the given asset pair for all contract versions
  */
 export declare function getPoolsForPair(params: {
     client: Algodv2;
