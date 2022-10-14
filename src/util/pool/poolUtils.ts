@@ -15,7 +15,7 @@ import {PoolInfo, PoolReserves, PoolStatus} from "./poolTypes";
 import {SupportedNetwork} from "../commonTypes";
 import {getValidatorAppID} from "../../validator";
 import {ENCODED_ASSET_KEYS} from "./poolConstants";
-import {getContract} from "../../contract/contract";
+import {getContract} from "../../contract/utils";
 
 /**
  * Look up information about an pool.

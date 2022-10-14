@@ -10,14 +10,13 @@ import {
   GenerateLogicSigAccountForV1_1PoolParams,
   generateLogicSigAccountForV2Pool,
   GenerateLogicSigAccountForV2PoolParams
-} from "./utils";
+} from "./contractLogicSigUtils";
 import {getValidatorAppID} from "../validator";
 import {
   V1_1ValidatorApp,
   V1_1PoolLogicSig,
   V2PoolLogicSig,
-  PoolLogicSigVariables,
-  ContractVersionValue
+  PoolLogicSigVariables
 } from "./types";
 import {CONTRACT_VERSION} from "./constants";
 
@@ -130,19 +129,3 @@ export const tinymanContract_v2 = new TinymanContractV2(
   ascJson_v1_1.contracts.validator_app,
   ascJson_v2.contracts.pool_logicsig
 );
-
-function getIsV2ContractVersion(contractVersion: ContractVersionValue) {
-  return contractVersion === CONTRACT_VERSION.V2;
-}
-
-export function getContract(contractVersion: ContractVersionValue) {
-  return getIsV2ContractVersion(contractVersion)
-    ? tinymanContract_v2
-    : tinymanContract_v1_1;
-}
-
-/* eslint
-      no-param-reassign: "off",
-      no-bitwise: "off",
-      prefer-destructuring: "off"
-*/

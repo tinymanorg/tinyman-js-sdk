@@ -1,6 +1,6 @@
 import { LogicSigAccount } from "algosdk";
 import { SupportedNetwork } from "../util/commonTypes";
-import { V1_1ValidatorApp, V1_1PoolLogicSig, V2PoolLogicSig, ContractVersionValue } from "./types";
+import { V1_1ValidatorApp, V1_1PoolLogicSig, V2PoolLogicSig } from "./types";
 interface ValidatorAppSchema {
     numLocalInts: any;
     numLocalByteSlices: any;
@@ -39,5 +39,4 @@ export declare class TinymanContractV2 extends BaseTinymanContract<V1_1Validator
 }
 export declare const tinymanContract_v1_1: TinymanContractV1_1;
 export declare const tinymanContract_v2: TinymanContractV2;
-export declare function getContract(contractVersion: ContractVersionValue): TinymanContractV1_1 | TinymanContractV2;
 export {};
