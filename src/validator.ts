@@ -41,18 +41,20 @@ export function getValidatorAppID(
 
 export async function generateOptIntoValidatorTxns({
   client,
-  validatorAppID,
+  network,
+  contractVersion,
   initiatorAddr
 }: {
   client: Algodv2;
-  validatorAppID: number;
+  network: SupportedNetwork;
+  contractVersion: ContractVersionValue;
   initiatorAddr: string;
 }): Promise<SignerTransaction[]> {
   const suggestedParams = await client.getTransactionParams().do();
 
   const appOptInTxn = algosdk.makeApplicationOptInTxnFromObject({
     from: initiatorAddr,
-    appIndex: validatorAppID,
+    appIndex: getValidatorAppID(network, contractVersion),
     suggestedParams
   });
 
@@ -63,18 +65,20 @@ export const OPT_OUT_VALIDATOR_APP_PROCESS_TXN_COUNT = 1;
 
 export async function generateOptOutOfValidatorTxns({
   client,
-  validatorAppID,
+  network,
+  contractVersion,
   initiatorAddr
 }: {
   client: Algodv2;
-  validatorAppID: number;
+  network: SupportedNetwork;
+  contractVersion: ContractVersionValue;
   initiatorAddr: string;
 }): Promise<SignerTransaction[]> {
   const suggestedParams = await client.getTransactionParams().do();
 
   const appClearStateTxn = algosdk.makeApplicationClearStateTxnFromObject({
     from: initiatorAddr,
-    appIndex: validatorAppID,
+    appIndex: getValidatorAppID(network, contractVersion),
     suggestedParams
   });
 

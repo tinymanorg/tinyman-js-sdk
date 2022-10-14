@@ -1,4 +1,8 @@
-export {InitiatorSigner, SignerTransaction, SupportedNetwork} from "./util/commonTypes";
+export type {
+  InitiatorSigner,
+  SignerTransaction,
+  SupportedNetwork
+} from "./util/commonTypes";
 
 export {
   BASE_MINIMUM_BALANCE,
@@ -21,7 +25,7 @@ export {
 
 export {generateOptIntoAssetTxns} from "./util/asset/assetUtils";
 
-export {
+export type {
   AccountAsset,
   TinymanAnalyticsApiAsset,
   IndexerAssetInformation
@@ -42,10 +46,11 @@ export {
   getAccountExcess
 } from "./util/account/accountUtils";
 
-export {AccountInformationData} from "./util/account/accountTypes";
+export type {AccountInformationData} from "./util/account/accountTypes";
 
+export type {ContractVersionValue} from "./contract/contract";
+// eslint-disable-next-line no-duplicate-imports
 export {
-  ContractVersionValue,
   CONTRACT_VERSION,
   TinymanContractV1_1,
   tinymanContract_v2
@@ -59,7 +64,7 @@ export {
   OPT_OUT_VALIDATOR_APP_PROCESS_TXN_COUNT
 } from "./validator";
 
-export {PoolStatus, PoolInfo, PoolReserves} from "./util/pool/poolTypes";
+export type {PoolStatus, PoolInfo, PoolReserves} from "./util/pool/poolTypes";
 
 export {
   getPoolInfo,
@@ -81,9 +86,11 @@ export {
   createPool
 } from "./bootstrap";
 
+export type {MintQuote, MintExecution} from "./mint";
+
+export type {BurnQuote, BurnExecution} from "./burn";
+// eslint-disable-next-line no-duplicate-imports
 export {
-  BurnQuote,
-  BurnExecution,
   getBurnLiquidityQuote,
   burnLiquidity,
   generateBurnTxns,
@@ -91,9 +98,10 @@ export {
   BURN_PROCESS_TXN_COUNT
 } from "./burn";
 
+export type {SwapQuote, SwapExecution} from "./swap";
+
+// eslint-disable-next-line no-duplicate-imports
 export {
-  SwapQuote,
-  SwapExecution,
   SwapType,
   getSwapQuote,
   issueSwap,
