@@ -16,7 +16,8 @@ import {
   V1_1ValidatorApp,
   V1_1PoolLogicSig,
   V2PoolLogicSig,
-  PoolLogicSigVariables
+  PoolLogicSigVariables,
+  V2ValidatorApp
 } from "./types";
 import {CONTRACT_VERSION} from "./constants";
 
@@ -28,7 +29,7 @@ interface ValidatorAppSchema {
 }
 
 export abstract class BaseTinymanContract<
-  ValidatorApp extends V1_1ValidatorApp,
+  ValidatorApp extends V1_1ValidatorApp | V2ValidatorApp,
   PoolLogicSig extends V1_1PoolLogicSig | V2PoolLogicSig
 > {
   validatorApprovalContract: Uint8Array;
@@ -125,7 +126,6 @@ export const tinymanContract_v1_1 = new TinymanContractV1_1(
 );
 
 export const tinymanContract_v2 = new TinymanContractV2(
-  // TODO: Use v2 validator app when it's ready
-  ascJson_v1_1.contracts.validator_app,
+  ascJson_v2.contracts.validator_app,
   ascJson_v2.contracts.pool_logicsig
 );
