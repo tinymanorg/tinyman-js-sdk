@@ -1,4 +1,4 @@
-import algosdk, {Algodv2, Transaction} from "algosdk";
+import algosdk, {Algodv2, ALGORAND_MIN_TX_FEE, Transaction} from "algosdk";
 
 import {tinymanContract_v1_1} from "../../contract/contract";
 import {
@@ -23,36 +23,14 @@ enum BootstrapTxnGroupIndices {
   ASSET2_OPT_IN
 }
 
+/**
+ * Txn counts according to the pool type (ASA-ASA or ASA-Algo)
+ * If it's ASA-Algo, there won't be `asset2Optin` txn within the bootstrap txn group
+ */
 const V1_BOOTSTRAP_TXN_COUNT = {
   ASA_ALGO: 4,
   ASA_ASA: 5
 } as const;
-
-function getBootstrapProcessTxnCount(asset2ID: number | string) {
-  // IF asset2 is ALGO, there won't be `asset2Optin` txn within the bootstrap txn group
-  return isAlgo(asset2ID)
-    ? V1_BOOTSTRAP_TXN_COUNT.ASA_ALGO
-    : V1_BOOTSTRAP_TXN_COUNT.ASA_ASA;
-}
-
-async function getBootstrapFundingTxnAmountForV1(
-  client: Algodv2,
-  asset2ID: string | number
-) {
-  const {fee: txnFee} = await client.getTransactionParams().do();
-
-  /**
-   * TODO:
-   * Compare return values with docs:
-   * Total costs for Pool Creation:
-   *  ASA-ASA Pool: 0.961 Algo
-   *  ASA-Algo Pool: 0.86 Algo
-   */
-  return (
-    getPoolAccountMinBalance(CONTRACT_VERSION.V1_1, isAlgo(asset2ID)) +
-    getBootstrapProcessTxnCount(asset2ID) * txnFee
-  );
-}
 
 async function generateTxns({
   client,
@@ -130,7 +108,7 @@ async function generateTxns({
   const fundingTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
     from: initiatorAddr,
     to: poolAddress,
-    amount: await getBootstrapFundingTxnAmountForV1(client, assets.asset2.id),
+    amount: getBootstrapFundingTxnAmountForV1(isAlgoPool),
     suggestedParams
   });
 
@@ -170,6 +148,24 @@ async function generateTxns({
   }
 
   return finalSignerTxns;
+}
+
+function getBootstrapFundingTxnAmountForV1(isAlgoPool: boolean) {
+  /**
+   * TODO:
+   * Compare return values with docs:
+   * Total costs for Pool Creation:
+   *  ASA-ASA Pool: 0.961 Algo
+   *  ASA-Algo Pool: 0.86 Algo
+   */
+  return (
+    getPoolAccountMinBalance(CONTRACT_VERSION.V1_1, isAlgoPool) +
+    getBootstrapProcessTxnCount(isAlgoPool) * ALGORAND_MIN_TX_FEE
+  );
+}
+
+function getBootstrapProcessTxnCount(isAlgoPool: boolean) {
+  return isAlgoPool ? V1_BOOTSTRAP_TXN_COUNT.ASA_ALGO : V1_BOOTSTRAP_TXN_COUNT.ASA_ASA;
 }
 
 async function signTxns({

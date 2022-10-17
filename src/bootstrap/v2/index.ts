@@ -1,4 +1,4 @@
-import algosdk, {Algodv2, getApplicationAddress} from "algosdk";
+import algosdk, {Algodv2, ALGORAND_MIN_TX_FEE, getApplicationAddress} from "algosdk";
 
 import {tinymanContract_v2} from "../../contract/contract";
 import {CONTRACT_VERSION} from "../../contract/constants";
@@ -21,39 +21,13 @@ enum BootstrapTxnGroupIndices {
   VALIDATOR_APP_CALL
 }
 
+/**
+ * Inner txn counts according to the pool type (ASA-ALGO or ASA-ASA)
+ */
 const V2_BOOTSTRAP_INNER_TXN_COUNT = {
   ASA_ALGO: 5,
   ASA_ASA: 6
 } as const;
-
-async function getBootstrapFundingTxnAmountForV2(
-  client: Algodv2,
-  asset2ID: string | number
-) {
-  return (
-    getPoolAccountMinBalance(CONTRACT_VERSION.V2, isAlgo(asset2ID)) +
-    (await getBootstrapAppCallTxnFeeForV2(client, asset2ID)) +
-    MINIMUM_BALANCE_REQUIRED_PER_ASSET // Min fee for asset creation
-  );
-}
-
-async function getBootstrapAppCallTxnFeeForV2(
-  client: Algodv2,
-  asset2ID: string | number
-) {
-  const innerTxnCount = getBootstrapInnerTxnCountForV2(asset2ID);
-  // Add 1 to the txn count to account for the group transaction itself.
-  const totalTxnCount = innerTxnCount + 1;
-  const {fee: txnFee} = await client.getTransactionParams().do();
-
-  return totalTxnCount * txnFee;
-}
-
-function getBootstrapInnerTxnCountForV2(asset2ID: string | number) {
-  return isAlgo(asset2ID)
-    ? V2_BOOTSTRAP_INNER_TXN_COUNT.ASA_ALGO
-    : V2_BOOTSTRAP_INNER_TXN_COUNT.ASA_ASA;
-}
 
 async function generateTxns({
   client,
@@ -96,7 +70,7 @@ async function generateTxns({
   });
   const poolLogicSigAddress = poolLogicSig.address();
   const appID = getValidatorAppID(network, CONTRACT_VERSION.V2);
-
+  const isAlgoPool = isAlgo(assets.asset2.id);
   const appCallTxn = algosdk.makeApplicationOptInTxnFromObject({
     from: poolLogicSigAddress,
     appIndex: appID,
@@ -105,20 +79,17 @@ async function generateTxns({
     rekeyTo: appAddress,
     suggestedParams: {
       ...suggestedParams,
-      fee: await getBootstrapAppCallTxnFeeForV2(client, assets.asset2.id)
+      fee: getBootstrapAppCallTxnFeeForV2(isAlgoPool)
     }
   });
 
   const fundingTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
     from: initiatorAddr,
     to: poolLogicSigAddress,
-    amount: await getBootstrapFundingTxnAmountForV2(client, assets.asset2.id),
+    amount: getBootstrapFundingTxnAmountForV2(isAlgoPool),
     suggestedParams
   });
 
-  /**
-   * TODO: Does this make sense? Is there a downside?
-   */
   let txns: SignerTransaction[] = [];
 
   txns[BootstrapTxnGroupIndices.FUNDING_TXN] = {
@@ -131,6 +102,27 @@ async function generateTxns({
   };
 
   return txns;
+}
+
+function getBootstrapFundingTxnAmountForV2(isAlgoPool: boolean) {
+  return (
+    getPoolAccountMinBalance(CONTRACT_VERSION.V2, isAlgoPool) +
+    getBootstrapAppCallTxnFeeForV2(isAlgoPool) +
+    MINIMUM_BALANCE_REQUIRED_PER_ASSET // Min fee for asset creation
+  );
+}
+
+function getBootstrapAppCallTxnFeeForV2(isAlgoPool: boolean) {
+  // Add 1 to the txn count to account for the group transaction itself.
+  const totalTxnCount = getBootstrapInnerTxnCountForV2(isAlgoPool) + 1;
+
+  return totalTxnCount * ALGORAND_MIN_TX_FEE;
+}
+
+function getBootstrapInnerTxnCountForV2(isAlgoPool: boolean) {
+  return isAlgoPool
+    ? V2_BOOTSTRAP_INNER_TXN_COUNT.ASA_ALGO
+    : V2_BOOTSTRAP_INNER_TXN_COUNT.ASA_ASA;
 }
 
 async function signTxns({
