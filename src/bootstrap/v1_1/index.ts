@@ -15,6 +15,7 @@ import {getPoolAccountMinBalance} from "../common/utils";
 import {getValidatorAppID} from "../../validator";
 import {CONTRACT_VERSION} from "../../contract/constants";
 import {TinymanAnalyticsApiAsset} from "../../util/asset/assetModels";
+import {prepareAssetPairData} from "../../util/asset/assetUtils";
 
 enum BootstrapTxnGroupIndices {
   FUNDING_TXN = 0,
@@ -47,22 +48,9 @@ async function generateTxns({
   initiatorAddr: string;
 }): Promise<SignerTransaction[]> {
   const suggestedParams = await client.getTransactionParams().do();
-  const {unit_name: asset1UnitName} = asset_1;
-  const asset1ID = Number(asset_1.id);
-  const {unit_name: asset2UnitName} = asset_2;
-  const asset2ID = Number(asset_2.id);
 
   // Make sure asset1 has greater ID
-  const assets =
-    asset1ID > asset2ID
-      ? {
-          asset1: {id: asset1ID, unitName: asset1UnitName},
-          asset2: {id: asset2ID, unitName: asset2UnitName}
-        }
-      : {
-          asset1: {id: asset2ID, unitName: asset2UnitName},
-          asset2: {id: asset1ID, unitName: asset1UnitName}
-        };
+  const assets = prepareAssetPairData(asset_1, asset_2);
 
   const isAlgoPool = isAlgo(assets.asset2.id);
 

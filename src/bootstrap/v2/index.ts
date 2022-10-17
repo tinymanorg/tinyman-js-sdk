@@ -15,6 +15,7 @@ import {getPoolInfo} from "../../util/pool/poolUtils";
 import {encodeString, isAlgo, waitForConfirmation} from "../../util/util";
 import {getValidatorAppID} from "../../validator";
 import {getPoolAccountMinBalance} from "../common/utils";
+import {prepareAssetPairData} from "../../util/asset/assetUtils";
 
 enum BootstrapTxnGroupIndices {
   FUNDING_TXN = 0,
@@ -43,25 +44,11 @@ async function generateTxns({
   initiatorAddr: string;
 }): Promise<SignerTransaction[]> {
   const suggestedParams = await client.getTransactionParams().do();
-  const {unit_name: asset1UnitName} = asset_1;
-  const asset1ID = Number(asset_1.id);
-  const {unit_name: asset2UnitName} = asset_2;
-  const asset2ID = Number(asset_2.id);
-
   const validatorAppID = getValidatorAppID(network, CONTRACT_VERSION.V2);
   const appAddress = getApplicationAddress(validatorAppID);
 
   // Make sure asset1 has greater ID
-  const assets =
-    asset1ID > asset2ID
-      ? {
-          asset1: {id: asset1ID, unitName: asset1UnitName},
-          asset2: {id: asset2ID, unitName: asset2UnitName}
-        }
-      : {
-          asset1: {id: asset2ID, unitName: asset2UnitName},
-          asset2: {id: asset1ID, unitName: asset1UnitName}
-        };
+  const assets = prepareAssetPairData(asset_1, asset_2);
 
   const poolLogicSig = tinymanContract_v2.generateLogicSigAccountForPool({
     network,
@@ -113,8 +100,11 @@ function getBootstrapFundingTxnAmountForV2(isAlgoPool: boolean) {
 }
 
 function getBootstrapAppCallTxnFeeForV2(isAlgoPool: boolean) {
+  const innerTxnCount = isAlgoPool
+    ? V2_BOOTSTRAP_INNER_TXN_COUNT.ASA_ALGO
+    : V2_BOOTSTRAP_INNER_TXN_COUNT.ASA_ASA;
   // Add 1 to the txn count to account for the group transaction itself.
-  const totalTxnCount = getBootstrapInnerTxnCountForV2(isAlgoPool) + 1;
+  const totalTxnCount = innerTxnCount + 1;
 
   /**
    * TODO: Is it ok to use `ALGORAND_MIN_TX_FEE` here?
@@ -122,12 +112,6 @@ function getBootstrapAppCallTxnFeeForV2(isAlgoPool: boolean) {
    * - There is `algod.suggestedTransactionFee`, but we only have client in sdk
    **/
   return totalTxnCount * ALGORAND_MIN_TX_FEE;
-}
-
-function getBootstrapInnerTxnCountForV2(isAlgoPool: boolean) {
-  return isAlgoPool
-    ? V2_BOOTSTRAP_INNER_TXN_COUNT.ASA_ALGO
-    : V2_BOOTSTRAP_INNER_TXN_COUNT.ASA_ASA;
 }
 
 async function signTxns({
