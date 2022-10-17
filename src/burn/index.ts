@@ -1,4 +1,4 @@
-import {CONTRACT_VERSION} from "../contract/contract";
+import {CONTRACT_VERSION} from "../contract/constants";
 import {BurnV1_1} from "./v1_1";
 import {BurnV2} from "./v2";
 
