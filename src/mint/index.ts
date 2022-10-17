@@ -1,4 +1,4 @@
-import {CONTRACT_VERSION} from "../contract/contract";
+import {CONTRACT_VERSION} from "../contract/constants";
 import * as MintV1_1 from "./v1_1";
 import * as MintV2 from "./v2";
 
