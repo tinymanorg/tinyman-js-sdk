@@ -1,4 +1,4 @@
-import algosdk, {Algodv2, IntDecoding} from "algosdk";
+import algosdk, {IntDecoding} from "algosdk";
 import {fromByteArray} from "base64-js";
 
 import {
@@ -28,7 +28,7 @@ import {getContract} from "../../contract/utils";
  * @param {number} params.asset2ID The ID of the second asset in the pool pair.
  */
 export async function getPoolInfo(params: {
-  client: Algodv2;
+  client: any;
   network: SupportedNetwork;
   contractVersion: ContractVersionValue;
   asset1ID: number;
@@ -71,7 +71,7 @@ const TOTAL_LIQUIDITY = 0xffffffffffffffffn;
 
 /* eslint-disable complexity */
 export async function getPoolReserves(
-  client: Algodv2,
+  client: any,
   pool: PoolInfo
 ): Promise<PoolReserves> {
   const info = (await client
@@ -208,7 +208,7 @@ export async function getPoolAssets(
     network,
     contractVersion
   }: {
-    client: Algodv2;
+    client: any;
     address: string;
     network: SupportedNetwork;
     contractVersion: ContractVersionValue;
@@ -306,7 +306,7 @@ export function isPoolReady(pool: undefined | null | PoolInfo) {
  * @returns {PoolInfo[]} - Pool info for the given asset pair for all contract versions
  */
 export function getPoolsForPair(params: {
-  client: Algodv2;
+  client: any;
   network: SupportedNetwork;
   asset1ID: number;
   asset2ID: number;
