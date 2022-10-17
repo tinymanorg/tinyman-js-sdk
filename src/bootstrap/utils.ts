@@ -54,9 +54,21 @@ export function execute(params: {
 }
 
 /**
- * TODO: Do we need `calculateBootstrapFundingTxnAmount` instead of
- * separate functions for v1 and v2?
+ *  Calculates the amount of funding txn for creating a pool
  */
+export function calculateBootstrapFundingTxnAmount({
+  contractVersion,
+  isAlgoPool
+}: {
+  contractVersion: ContractVersionValue;
+  isAlgoPool: boolean;
+}): number {
+  if (contractVersion === CONTRACT_VERSION.V1_1) {
+    return BootstrapV1_1.getBootstrapFundingTxnAmountForV1(isAlgoPool);
+  }
+
+  return BootstrapV2.getBootstrapFundingTxnAmountForV2(isAlgoPool);
+}
 
 /**
  * TODO: `function getMinBalanceRequiredToCreatePool({`

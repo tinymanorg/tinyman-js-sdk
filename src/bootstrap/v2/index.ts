@@ -241,5 +241,6 @@ async function execute({
 export const BootstrapV2 = {
   generateTxns,
   signTxns,
-  execute
+  execute,
+  getBootstrapFundingTxnAmountForV2
 };
