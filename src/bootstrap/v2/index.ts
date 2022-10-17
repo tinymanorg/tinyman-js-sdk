@@ -116,6 +116,11 @@ function getBootstrapAppCallTxnFeeForV2(isAlgoPool: boolean) {
   // Add 1 to the txn count to account for the group transaction itself.
   const totalTxnCount = getBootstrapInnerTxnCountForV2(isAlgoPool) + 1;
 
+  /**
+   * TODO: Is it ok to use `ALGORAND_MIN_TX_FEE` here?
+   * - `suggestedParams.fee` returns 0, so we can't use it
+   * - There is `algod.suggestedTransactionFee`, but we only have client in sdk
+   **/
   return totalTxnCount * ALGORAND_MIN_TX_FEE;
 }
 

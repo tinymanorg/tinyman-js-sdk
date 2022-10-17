@@ -8,14 +8,7 @@ import {PoolInfo} from "../util/pool/poolTypes";
 import {BootstrapV1_1} from "./v1_1";
 import {BootstrapV2} from "./v2";
 
-export function generateTxns({
-  client,
-  network,
-  contractVersion,
-  asset_1,
-  asset_2,
-  initiatorAddr
-}: {
+export function generateTxns(params: {
   client: Algodv2;
   network: SupportedNetwork;
   contractVersion: ContractVersionValue;
@@ -23,25 +16,11 @@ export function generateTxns({
   asset_2: Pick<TinymanAnalyticsApiAsset, "id" | "unit_name">;
   initiatorAddr: string;
 }): Promise<SignerTransaction[]> {
-  if (contractVersion === CONTRACT_VERSION.V1_1) {
-    return BootstrapV1_1.generateTxns({
-      client,
-      network,
-      asset1ID: Number(asset_1.id),
-      asset2ID: Number(asset_2.id),
-      asset1UnitName: asset_1.unit_name,
-      asset2UnitName: asset_2.unit_name,
-      initiatorAddr
-    });
+  if (params.contractVersion === CONTRACT_VERSION.V1_1) {
+    return BootstrapV1_1.generateTxns(params);
   }
 
-  return BootstrapV2.generateTxns({
-    client,
-    network,
-    asset_1,
-    asset_2,
-    initiatorAddr
-  });
+  return BootstrapV2.generateTxns(params);
 }
 
 export function signTxns(params: {

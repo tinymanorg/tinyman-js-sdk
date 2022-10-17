@@ -14,6 +14,7 @@ import {getPoolInfo} from "../../util/pool/poolUtils";
 import {getPoolAccountMinBalance} from "../common/utils";
 import {getValidatorAppID} from "../../validator";
 import {CONTRACT_VERSION} from "../../contract/constants";
+import {TinymanAnalyticsApiAsset} from "../../util/asset/assetModels";
 
 enum BootstrapTxnGroupIndices {
   FUNDING_TXN = 0,
@@ -35,22 +36,22 @@ const V1_BOOTSTRAP_TXN_COUNT = {
 async function generateTxns({
   client,
   network,
-  asset1ID,
-  asset2ID,
-  asset1UnitName,
-  asset2UnitName,
+  asset_1,
+  asset_2,
   initiatorAddr
 }: {
   client: Algodv2;
   network: SupportedNetwork;
-  asset1ID: number;
-  asset2ID: number;
-  asset1UnitName: string;
-  asset2UnitName: string;
+  asset_1: Pick<TinymanAnalyticsApiAsset, "id" | "unit_name">;
+  asset_2: Pick<TinymanAnalyticsApiAsset, "id" | "unit_name">;
   initiatorAddr: string;
 }): Promise<SignerTransaction[]> {
   const suggestedParams = await client.getTransactionParams().do();
-  const validatorAppID = getValidatorAppID(network, CONTRACT_VERSION.V1_1);
+  const {unit_name: asset1UnitName} = asset_1;
+  const asset1ID = Number(asset_1.id);
+  const {unit_name: asset2UnitName} = asset_2;
+  const asset2ID = Number(asset_2.id);
+
   // Make sure asset1 has greater ID
   const assets =
     asset1ID > asset2ID
@@ -65,6 +66,7 @@ async function generateTxns({
 
   const isAlgoPool = isAlgo(assets.asset2.id);
 
+  const validatorAppID = getValidatorAppID(network, CONTRACT_VERSION.V1_1);
   const poolLogicSig = tinymanContract_v1_1.generateLogicSigAccountForPool({
     network,
     asset1ID: assets.asset1.id,
