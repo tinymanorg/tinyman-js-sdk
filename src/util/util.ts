@@ -245,6 +245,29 @@ export function getTxnGroupID(txns: SignerTransaction[]) {
   return bufferToBase64(txns[0].txn.group);
 }
 
+export function encodeInteger(number) {
+  let buf: number[] = [];
+
+  /* eslint-disable no-bitwise */
+  /* eslint-disable no-constant-condition */
+  /* eslint-disable no-param-reassign */
+  while (true) {
+    let towrite = number & 0x7f;
+
+    number >>= 7;
+
+    if (number) {
+      buf.push(towrite | 0x80);
+    } else {
+      buf.push(towrite);
+      break;
+    }
+  }
+  /* eslint-enable */
+
+  return buf;
+}
+
 /**
  * Converts a text into bytes
  */
