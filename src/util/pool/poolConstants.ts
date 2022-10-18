@@ -1,6 +1,6 @@
 import {CONTRACT_VERSION} from "../../contract/constants";
 
-export const ENCODED_ASSET_KEYS = {
+export const ENCODED_APP_STATE_KEYS = {
   [CONTRACT_VERSION.V1_1]: {
     asset1: btoa("asset_1_id"),
     asset2: btoa("asset_2_id")

@@ -1,6 +1,5 @@
 import algosdk, {Algodv2, Transaction} from "algosdk";
 
-import {tinymanContract_v1_1} from "./contract/contract";
 import {InitiatorSigner, SignerTransaction} from "./util/commonTypes";
 import {encodeString, waitForConfirmation} from "./util/util";
 import TinymanError from "./util/error/TinymanError";
@@ -15,6 +14,7 @@ import {
 import {PoolInfo} from "./util/pool/poolTypes";
 import {getPoolInfo} from "./util/pool/poolUtils";
 import {CONTRACT_VERSION} from "./contract/constants";
+import {tinymanContract_v1_1} from "./contract/v1_1/contract";
 
 enum BootstapTxnGroupIndices {
   FUNDING_TXN = 0,
@@ -208,13 +208,12 @@ export async function signBootstrapTransactions({
           asset2ID: asset1ID
         };
 
-  const poolLogicSig = tinymanContract_v1_1.generateLogicSigAccountForPool({
+  const lsig = tinymanContract_v1_1.generateLogicSigAccountForPool({
     asset1ID: assets.asset1ID,
     asset2ID: assets.asset2ID,
     // TODO: Fix this
     network: "testnet"
   });
-  const lsig = poolLogicSig;
 
   const txnIDs: string[] = [];
   const signedTxns = txGroup.map((txDetail, index) => {

@@ -205,7 +205,7 @@ export async function signTxns({
   txGroup: SignerTransaction[];
   initiatorSigner: InitiatorSigner;
 }): Promise<Uint8Array[]> {
-  const {lsig} = pool.account;
+  const lsig = pool.account;
   const [signedFeeTxn, signedAsset1InTxn, signedAsset2InTxn] = await initiatorSigner([
     txGroup
   ]);
