@@ -61,6 +61,10 @@ export class TinymanContractV1_1 extends BaseTinymanContract<
       let value = variables[name];
       let start = v.index - offset;
       let end = start + v.length;
+      /**
+       * TODO: Try using `algosdk.encodeUint64` instead of this function.
+       * If it works, remove `encodeInteger`
+       */
       // All of the template variables are ints
       let value_encoded = encodeInteger(value);
       let diff = v.length - value_encoded.length;
