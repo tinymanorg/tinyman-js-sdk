@@ -1,6 +1,6 @@
 import algosdk from "algosdk";
 
-import {MINT_V1_APP_ARGUMENT} from "../ constants";
+import {MINT_APP_CALL_ARGUMENTS} from "../constants";
 import {CONTRACT_VERSION} from "../../contract/constants";
 import {getAccountExcessWithinPool} from "../../util/account/accountUtils";
 import {ALGO_ASSET_ID} from "../../util/asset/assetConstants";
@@ -106,13 +106,13 @@ export async function generateTxns({
   const liquidityOutAmount = applySlippageToAmount(
     "negative",
     slippage,
-    liquidityToken.id
+    liquidityToken.amount
   );
   const suggestedParams = await client.getTransactionParams().do();
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
     from: poolAddress,
     appIndex: getValidatorAppID(network, CONTRACT_VERSION.V1_1),
-    appArgs: [MINT_V1_APP_ARGUMENT],
+    appArgs: MINT_APP_CALL_ARGUMENTS.v1_1,
     accounts: [initiatorAddr],
     foreignAssets:
       asset_2.id == ALGO_ASSET_ID

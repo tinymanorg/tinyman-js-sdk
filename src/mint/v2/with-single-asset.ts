@@ -1,12 +1,12 @@
 import algosdk from "algosdk";
 import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
 
-import {MINT_V2_APP_ARGUMENT, MINT_SINGLE_MODE_APP_ARGUMENT} from "../ constants";
+import {MINT_APP_CALL_ARGUMENTS} from "../constants";
 import {CONTRACT_VERSION} from "../../contract/constants";
 import {SupportedNetwork} from "../../util/commonTypes";
 import {PoolInfo} from "../../util/pool/poolTypes";
-import {isAlgo} from "../../util/util";
 import {getValidatorAppID} from "../../validator";
+import {isAlgo} from "../../util/asset/assetUtils";
 
 export async function generateTxns({
   client,
@@ -61,7 +61,7 @@ export async function generateTxns({
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
     from: poolAddress,
     appIndex: getValidatorAppID(network, CONTRACT_VERSION.V2),
-    appArgs: [MINT_V2_APP_ARGUMENT, MINT_SINGLE_MODE_APP_ARGUMENT],
+    appArgs: MINT_APP_CALL_ARGUMENTS.v2.SINGLE_ASSET_MODE,
     accounts: [poolAddress],
     foreignAssets: [liquidityToken.id],
     suggestedParams: {

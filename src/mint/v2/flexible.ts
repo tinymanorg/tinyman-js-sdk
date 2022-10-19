@@ -1,7 +1,7 @@
 import algosdk from "algosdk";
 import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
 
-import {MINT_V2_APP_ARGUMENT, MINT_FLEXIBLE_MODE_APP_ARGUMENT} from "../ constants";
+import {MINT_APP_CALL_ARGUMENTS} from "../constants";
 import {CONTRACT_VERSION} from "../../contract/constants";
 import {
   InitiatorSigner,
@@ -10,14 +10,10 @@ import {
 } from "../../util/commonTypes";
 import TinymanError from "../../util/error/TinymanError";
 import {PoolInfo} from "../../util/pool/poolTypes";
-import {
-  getTxnGroupID,
-  isAlgo,
-  sendAndWaitRawTransaction,
-  sumUpTxnFees
-} from "../../util/util";
+import {getTxnGroupID, sendAndWaitRawTransaction, sumUpTxnFees} from "../../util/util";
 import {getValidatorAppID} from "../../validator";
 import {MintExecution, MintTxnIndices} from "../types";
+import {isAlgo} from "../../util/asset/assetUtils";
 
 export async function generateTxns({
   client,
@@ -65,7 +61,7 @@ export async function generateTxns({
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
     from: poolAddress,
     appIndex: getValidatorAppID(network, CONTRACT_VERSION.V2),
-    appArgs: [MINT_V2_APP_ARGUMENT, MINT_FLEXIBLE_MODE_APP_ARGUMENT],
+    appArgs: MINT_APP_CALL_ARGUMENTS.v2.FLEXIBLE_MODE,
     accounts: [poolAddress],
     foreignAssets: [liquidityToken.id],
     suggestedParams: {

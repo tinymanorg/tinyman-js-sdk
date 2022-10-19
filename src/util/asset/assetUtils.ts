@@ -2,6 +2,7 @@ import algosdk from "algosdk";
 
 import {SignerTransaction} from "../commonTypes";
 import TinymanError from "../error/TinymanError";
+import {ALGO_ASSET_ID} from "./assetConstants";
 
 export async function generateOptIntoAssetTxns({
   client,
@@ -26,4 +27,8 @@ export async function generateOptIntoAssetTxns({
       "We encountered something unexpected while opting into this asset. Try again later."
     );
   }
+}
+
+export function isAlgo(id: number | bigint) {
+  return id === ALGO_ASSET_ID;
 }
