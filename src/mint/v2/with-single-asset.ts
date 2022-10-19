@@ -1,7 +1,7 @@
-import algosdk from "algosdk";
+import algosdk, {ALGORAND_MIN_TX_FEE} from "algosdk";
 import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
 
-import {MINT_APP_CALL_ARGUMENTS} from "../constants";
+import {MINT_APP_CALL_ARGUMENTS, V2_MINT_INNER_TXN_COUNT} from "../constants";
 import {CONTRACT_VERSION} from "../../contract/constants";
 import {SupportedNetwork} from "../../util/commonTypes";
 import {PoolInfo} from "../../util/pool/poolTypes";
@@ -66,8 +66,8 @@ export async function generateTxns({
     foreignAssets: [liquidityToken.id],
     suggestedParams: {
       ...suggestedParams,
-      // In addition to the AppCall txn, there will be two additional Inner Transactions.
-      fee: 3 * suggestedParams.fee
+      // Add +1 to account for the fee of the outer txn
+      fee: (V2_MINT_INNER_TXN_COUNT.SINGLE_ASSET_MODE + 1) * ALGORAND_MIN_TX_FEE
     }
   });
 
