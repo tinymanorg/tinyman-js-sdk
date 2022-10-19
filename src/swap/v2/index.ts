@@ -1,55 +1,20 @@
-import algosdk, {Algodv2, Transaction} from "algosdk";
+/**
+ * questions
+ * - what is `total_fee_share`
+ */
+import algosdk, {Algodv2, ALGORAND_MIN_TX_FEE, Transaction} from "algosdk";
 
-import {encodeString, isAlgo, roundNumber} from "../../util/util";
+import {isAlgo, roundNumber} from "../../util/util";
 import {InitiatorSigner, SignerTransaction} from "../../util/commonTypes";
 import TinymanError from "../../util/error/TinymanError";
 import {PoolInfo, PoolReserves, PoolStatus} from "../../util/pool/poolTypes";
 import {SwapQuote, SwapType} from "../types";
-
-enum V2SwapTxnGroupIndices {
-  /**
-   * If the input asset is Algo, it'll be a payment txn, otherwise it'll be an asset transfer txn.
-   */
-  INPUT_TXN = 0,
-  APP_CALL_TXN
-}
-
-const V2_SWAP_APP_CALL_INNER_TXN_COUNT = {
-  [SwapType.FixedInput]: 1,
-  [SwapType.FixedOutput]: 2
-} as const;
-const V2_SWAP_APP_CALL_ARG_ENCODED = encodeString("swap");
-const V2_SWAP_APP_CALL_SWAP_TYPE_ARGS_ENCODED = {
-  [SwapType.FixedInput]: encodeString("fixed-input"),
-  [SwapType.FixedOutput]: encodeString("fixed-output")
-} as const;
-
-/**
- * Executes a swap with the desired quantities.
- */
-function execute(_args: any, swapType: SwapType) {
-  throw new Error("Not implemented");
-
-  if (swapType === SwapType.FixedInput) {
-    return executeFixedInputSwap(_args);
-  }
-
-  return executeFixedOutputSwap(_args);
-}
-
-/**
- * Executes a fixed input swap with the desired quantities.
- */
-function executeFixedInputSwap(_args: any) {
-  throw new Error("Not implemented");
-}
-
-/**
- * Executes a fixed output swap with the desired quantities.
- */
-function executeFixedOutputSwap(_args: any) {
-  throw new Error("Not implemented");
-}
+import {
+  V2_SWAP_APP_CALL_ARG_ENCODED,
+  V2_SWAP_APP_CALL_SWAP_TYPE_ARGS_ENCODED,
+  V2SwapTxnGroupIndices,
+  V2_SWAP_APP_CALL_INNER_TXN_COUNT
+} from "./constants";
 
 async function generateTxns({
   client,
@@ -94,14 +59,13 @@ async function generateTxns({
     appArgs: [
       V2_SWAP_APP_CALL_ARG_ENCODED,
       V2_SWAP_APP_CALL_SWAP_TYPE_ARGS_ENCODED[swapType],
-      // TODO: How to encode this?
-      encodeString(String(assetOut.amount))
+      algosdk.encodeUint64(assetOut.amount)
     ],
     accounts: [poolAddress],
     foreignAssets: [pool.asset1ID, pool.asset2ID],
     suggestedParams: {
       ...suggestedParams,
-      fee: await getSwapAppCallFeeAmount(client, swapType)
+      fee: getSwapAppCallFeeAmount(swapType)
     }
   });
 
@@ -113,8 +77,14 @@ async function generateTxns({
   const txGroup: algosdk.Transaction[] = algosdk.assignGroupID(txns);
 
   return [
-    {txn: txGroup[V2SwapTxnGroupIndices.INPUT_TXN], signers: [initiatorAddr]},
-    {txn: txGroup[V2SwapTxnGroupIndices.APP_CALL_TXN], signers: [poolAddress]}
+    {
+      txn: txGroup[V2SwapTxnGroupIndices.INPUT_TXN],
+      signers: [initiatorAddr]
+    },
+    {
+      txn: txGroup[V2SwapTxnGroupIndices.APP_CALL_TXN],
+      signers: [poolAddress]
+    }
   ];
 }
 
@@ -142,12 +112,38 @@ async function signTxns({
   return signedTxns;
 }
 
-async function getSwapAppCallFeeAmount(client: Algodv2, swapType: SwapType) {
-  const {fee: txnFee} = await client.getTransactionParams().do();
-  // +1 to account for the outer txn fee
+function getSwapAppCallFeeAmount(swapType: SwapType) {
+  // Add +1 to account for the outer txn fee
   const totalTxnCount = V2_SWAP_APP_CALL_INNER_TXN_COUNT[swapType] + 1;
 
-  return txnFee * totalTxnCount;
+  return totalTxnCount * ALGORAND_MIN_TX_FEE;
+}
+
+/**
+ * Executes a swap with the desired quantities.
+ */
+function execute(_args: any, swapType: SwapType) {
+  throw new Error("Not implemented");
+
+  if (swapType === SwapType.FixedInput) {
+    return executeFixedInputSwap(_args);
+  }
+
+  return executeFixedOutputSwap(_args);
+}
+
+/**
+ * Executes a fixed input swap with the desired quantities.
+ */
+function executeFixedInputSwap(_args: any) {
+  throw new Error("Not implemented");
+}
+
+/**
+ * Executes a fixed output swap with the desired quantities.
+ */
+function executeFixedOutputSwap(_args: any) {
+  throw new Error("Not implemented");
 }
 
 /**
@@ -176,7 +172,7 @@ function getQuote(
   if (type === SwapType.FixedInput) {
     quote = getFixedInputSwapQuote({pool, reserves, assetIn: asset, decimals});
   } else {
-    quote = getFixedOutputSwapQuote({pool, reserves, assetOut: asset, decimals});
+    quote = getFixedOutputSwapQuote({pool, reserves, assetOut: asset});
   }
 
   return quote;
@@ -202,6 +198,10 @@ function getFixedInputSwapQuote({
    * - [ ] Test; compare quotes with py sdk
    */
   console.log({decimals});
+
+  if (pool.status !== PoolStatus.READY) {
+    throw new TinymanError({pool, assetIn}, "Trying to swap on a non-existent pool");
+  }
 
   const assetInAmount = BigInt(assetIn.amount);
 
@@ -240,6 +240,63 @@ function getFixedInputSwapQuote({
   } as SwapQuote;
 }
 
+/**
+ * @returns A quote for a fixed output swap. Does NOT execute any transactions.
+ */
+function getFixedOutputSwapQuote({
+  pool,
+  reserves,
+  assetOut
+}: // decimals
+{
+  pool: PoolInfo;
+  reserves: PoolReserves;
+  assetOut: {assetID: number; amount: number | bigint};
+  // decimals: {assetIn: number; assetOut: number};
+}): SwapQuote {
+  // fetch_fixed_output_swap_quote
+  // console.log(params);
+  // throw new Error("Not implemented");
+
+  const assetOutAmount = BigInt(assetOut.amount);
+
+  let assetInID: number;
+  let inputSupply: bigint;
+  let outputSupply: bigint;
+
+  // check this again
+  if (assetOut.assetID === pool.asset1ID) {
+    assetInID = pool.asset2ID;
+    inputSupply = reserves.asset2;
+    outputSupply = reserves.asset1;
+  } else {
+    assetInID = pool.asset1ID;
+    inputSupply = reserves.asset1;
+    outputSupply = reserves.asset2;
+  }
+
+  const {swap_input_amount, total_fee_amount, price_impact} = calculateFixedOutputSwap({
+    input_supply: inputSupply,
+    output_supply: outputSupply,
+    swap_output_amount: assetOutAmount,
+    // TODO: I think this should be in PoolInfo object (if we could fetch pool info correctly)
+    total_fee_share: 1 as any
+  });
+
+  return {
+    round: reserves.round,
+    assetInID,
+    assetInAmount: swap_input_amount,
+    assetOutID: assetOut.assetID,
+    assetOutAmount,
+    swapFee: Number(total_fee_amount),
+    // TODO: do we need slippage?
+    // slippage,
+    rate: Number(assetOutAmount / swap_input_amount),
+    priceImpact: price_impact
+  } as SwapQuote;
+}
+
 function calculateFixedInputSwap({
   input_supply,
   output_supply,
@@ -251,10 +308,12 @@ function calculateFixedInputSwap({
   swap_input_amount: bigint;
   total_fee_share: number;
 }) {
-  const total_fee_amount = calculate_fixed_input_fee_amount({
-    input_amount: swap_input_amount,
-    total_fee_share
-  });
+  const total_fee_amount = BigInt(
+    calculate_fixed_input_fee_amount({
+      input_amount: swap_input_amount,
+      total_fee_share
+    })
+  );
   const swap_amount = swap_input_amount - total_fee_amount;
   const swap_output_amount = calculate_output_amount_of_fixed_input_swap(
     input_supply,
@@ -272,6 +331,38 @@ function calculateFixedInputSwap({
   return {swap_output_amount, total_fee_amount, price_impact};
 }
 
+function calculateFixedOutputSwap({
+  input_supply,
+  output_supply,
+  swap_output_amount,
+  total_fee_share
+}: {
+  input_supply: bigint;
+  output_supply: bigint;
+  swap_output_amount: bigint;
+  total_fee_share: number;
+}) {
+  const swap_amount = calculate_swap_amount_of_fixed_output_swap(
+    input_supply,
+    output_supply,
+    swap_output_amount
+  );
+  const total_fee_amount = calculate_fixed_output_fee_amount({
+    swap_amount,
+    total_fee_share
+  });
+  const swap_input_amount = swap_amount + total_fee_amount;
+
+  const price_impact = calculate_price_impact(
+    input_supply,
+    output_supply,
+    swap_input_amount,
+    swap_output_amount
+  );
+
+  return {swap_input_amount, total_fee_amount, price_impact};
+}
+
 function calculate_fixed_input_fee_amount({
   input_amount,
   total_fee_share
@@ -279,7 +370,20 @@ function calculate_fixed_input_fee_amount({
   input_amount: bigint;
   total_fee_share: number | bigint;
 }) {
-  const total_fee_amount = input_amount * BigInt(total_fee_share); // 10_000
+  return Math.floor(Number(input_amount * BigInt(total_fee_share)) / 10_000);
+}
+
+function calculate_fixed_output_fee_amount({
+  swap_amount,
+  total_fee_share
+}: {
+  swap_amount: bigint;
+  total_fee_share: number | bigint;
+}) {
+  const input_amount = Math.floor(
+    Number((swap_amount * BigInt(10_000)) / (BigInt(10_000) - BigInt(total_fee_share)))
+  );
+  const total_fee_amount = BigInt(input_amount) - swap_amount;
 
   return total_fee_amount;
 }
@@ -297,6 +401,19 @@ function calculate_output_amount_of_fixed_input_swap(
   return output_amount;
 }
 
+function calculate_swap_amount_of_fixed_output_swap(
+  input_supply: bigint,
+  output_supply: bigint,
+  output_amount: bigint
+): bigint {
+  const k = input_supply * output_supply;
+  let swap_amount = BigInt(k / (output_supply - output_amount)) - input_supply;
+
+  swap_amount += BigInt(1);
+
+  return swap_amount;
+}
+
 function calculate_price_impact(
   input_supply: bigint,
   output_supply: bigint,
@@ -311,19 +428,6 @@ function calculate_price_impact(
   );
 
   return price_impact;
-}
-
-/**
- * @returns A quote for a fixed output swap. Does NOT execute any transactions.
- */
-function getFixedOutputSwapQuote(params: {
-  pool: PoolInfo;
-  reserves: PoolReserves;
-  assetOut: {assetID: number; amount: number | bigint};
-  decimals: {assetIn: number; assetOut: number};
-}): SwapQuote {
-  console.log(params);
-  throw new Error("Not implemented");
 }
 
 export const SwapV2 = {
