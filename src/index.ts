@@ -50,7 +50,8 @@ export type {AccountInformationData} from "./util/account/accountTypes";
 
 export type {ContractVersionValue} from "./contract/types";
 export {CONTRACT_VERSION} from "./contract/constants";
-export {tinymanContract_v1_1, tinymanContract_v2} from "./contract/contract";
+export {tinymanContract_v2} from "./contract/v2/contract";
+export {tinymanContract_v1_1} from "./contract/v1_1/contract";
 
 export {
   getValidatorAppID,

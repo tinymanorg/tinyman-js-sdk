@@ -1,13 +1,8 @@
 import algosdk, {Algodv2} from "algosdk";
 
-import {tinymanContract_v1_1} from "../../contract/contract";
 import {getAccountExcessWithinPool} from "../../util/account/accountUtils";
 import {ALGO_ASSET_ID} from "../../util/asset/assetConstants";
-import {
-  SignerTransaction,
-  InitiatorSigner,
-  SupportedNetwork
-} from "../../util/commonTypes";
+import {SignerTransaction, InitiatorSigner} from "../../util/commonTypes";
 import {DEFAULT_FEE_TXN_NOTE} from "../../util/constant";
 import TinymanError from "../../util/error/TinymanError";
 import {PoolInfo, PoolReserves} from "../../util/pool/poolTypes";
@@ -218,21 +213,15 @@ async function generateTxns({
 
 async function signTxns({
   pool,
-  network,
   txGroup,
   initiatorSigner
 }: {
   pool: PoolInfo;
-  network: SupportedNetwork;
   txGroup: SignerTransaction[];
   initiatorSigner: InitiatorSigner;
 }): Promise<Uint8Array[]> {
   const [signedFeeTxn, signedLiquidityInTxn] = await initiatorSigner([txGroup]);
-  const poolLogicSig = tinymanContract_v1_1.generateLogicSigAccountForPool({
-    network,
-    asset1ID: pool.asset1ID,
-    asset2ID: pool.asset2ID
-  });
+  const lsig = pool.account;
 
   const signedTxns = txGroup.map((txDetail, index) => {
     if (index === BurnTxnIndices.FEE_TXN) {
@@ -241,7 +230,7 @@ async function signTxns({
     if (index === BurnTxnIndices.LIQUDITY_IN_TXN) {
       return signedLiquidityInTxn;
     }
-    const {blob} = algosdk.signLogicSigTransactionObject(txDetail.txn, poolLogicSig);
+    const {blob} = algosdk.signLogicSigTransactionObject(txDetail.txn, lsig);
 
     return blob;
   });

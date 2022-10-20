@@ -1,4 +1,4 @@
-import algosdk, {IntDecoding} from "algosdk";
+import algosdk, {Algodv2, IntDecoding} from "algosdk";
 import {fromByteArray} from "base64-js";
 
 import {
@@ -14,8 +14,8 @@ import {CONTRACT_VERSION} from "../../contract/constants";
 import {PoolInfo, PoolReserves, PoolStatus} from "./poolTypes";
 import {SupportedNetwork} from "../commonTypes";
 import {getValidatorAppID} from "../../validator";
-import {ENCODED_ASSET_KEYS} from "./poolConstants";
-import {getContract} from "../../contract/utils";
+import {ENCODED_APP_STATE_KEYS} from "./poolConstants";
+import {getContract} from "../../contract";
 
 /**
  * Look up information about an pool.
@@ -28,7 +28,7 @@ import {getContract} from "../../contract/utils";
  * @param {number} params.asset2ID The ID of the second asset in the pool pair.
  */
 export async function getPoolInfo(params: {
-  client: any;
+  client: Algodv2;
   network: SupportedNetwork;
   contractVersion: ContractVersionValue;
   asset1ID: number;
@@ -71,7 +71,7 @@ const TOTAL_LIQUIDITY = 0xffffffffffffffffn;
 
 /* eslint-disable complexity */
 export async function getPoolReserves(
-  client: any,
+  client: Algodv2,
   pool: PoolInfo
 ): Promise<PoolReserves> {
   const info = (await client
@@ -208,7 +208,7 @@ export async function getPoolAssets(
     network,
     contractVersion
   }: {
-    client: any;
+    client: Algodv2;
     address: string;
     network: SupportedNetwork;
     contractVersion: ContractVersionValue;
@@ -231,13 +231,24 @@ export async function getPoolAssets(
     const keyValue = appState["key-value"];
     const state = decodeState(keyValue);
 
-    // The Liquidity Token is the only asset the Pool has created
-    const liquidityTokenAsset = info["created-assets"][0];
-    const liquidityTokenID = liquidityTokenAsset.index;
+    let liquidityTokenID: number;
+
+    if (contractVersion === CONTRACT_VERSION.V1_1) {
+      // The Liquidity Token is the only asset the Pool has created
+      const liquidityTokenAsset = info["created-assets"][0];
+
+      liquidityTokenID = liquidityTokenAsset.index;
+    } else {
+      //  Local state contains liqudity token id on V2 contracts
+
+      liquidityTokenID = state[
+        ENCODED_APP_STATE_KEYS[contractVersion].liquidityTokenID
+      ] as number;
+    }
 
     assets = {
-      asset1ID: state[ENCODED_ASSET_KEYS[contractVersion].asset1] as number,
-      asset2ID: state[ENCODED_ASSET_KEYS[contractVersion].asset2] as number,
+      asset1ID: state[ENCODED_APP_STATE_KEYS[contractVersion].asset1] as number,
+      asset2ID: state[ENCODED_APP_STATE_KEYS[contractVersion].asset2] as number,
       liquidityTokenID
     };
 
@@ -306,7 +317,7 @@ export function isPoolReady(pool: undefined | null | PoolInfo) {
  * @returns {PoolInfo[]} - Pool info for the given asset pair for all contract versions
  */
 export function getPoolsForPair(params: {
-  client: any;
+  client: Algodv2;
   network: SupportedNetwork;
   asset1ID: number;
   asset2ID: number;
