@@ -64,10 +64,10 @@ export function calculateBootstrapFundingTxnAmount({
   isAlgoPool: boolean;
 }): number {
   if (contractVersion === CONTRACT_VERSION.V1_1) {
-    return BootstrapV1_1.getBootstrapFundingTxnAmountForV1(isAlgoPool);
+    return BootstrapV1_1.getBootstrapFundingTxnAmount(isAlgoPool);
   }
 
-  return BootstrapV2.getBootstrapFundingTxnAmountForV2(isAlgoPool);
+  return BootstrapV2.getBootstrapFundingTxnAmount(isAlgoPool);
 }
 
 /**

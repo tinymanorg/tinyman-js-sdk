@@ -14,25 +14,9 @@ import {getPoolAccountMinBalance} from "../common/utils";
 import {getValidatorAppID} from "../../validator";
 import {CONTRACT_VERSION} from "../../contract/constants";
 import {TinymanAnalyticsApiAsset} from "../../util/asset/assetModels";
-import {prepareAssetPairData} from "../../util/asset/assetUtils";
+import {prepareAssetPairData, sortAssetIds} from "../../util/asset/assetUtils";
+import {V1_1BootstrapTxnGroupIndices, V1_BOOTSTRAP_TXN_COUNT} from "./constants";
 import {tinymanContract_v1_1} from "../../contract/v1_1/contract";
-
-enum BootstrapTxnGroupIndices {
-  FUNDING_TXN = 0,
-  VALIDATOR_APP_CALL,
-  LIQUIDITY_TOKEN_CREATE,
-  ASSET1_OPT_IN,
-  ASSET2_OPT_IN
-}
-
-/**
- * Txn counts according to the pool type (ASA-ASA or ASA-Algo)
- * If it's ASA-Algo, there won't be `asset2Optin` txn within the bootstrap txn group
- */
-const V1_BOOTSTRAP_TXN_COUNT = {
-  ASA_ALGO: 4,
-  ASA_ASA: 5
-} as const;
 
 async function generateTxns({
   client,
@@ -48,17 +32,17 @@ async function generateTxns({
   initiatorAddr: string;
 }): Promise<SignerTransaction[]> {
   const suggestedParams = await client.getTransactionParams().do();
-
   // Make sure asset1 has greater ID
-  const assets = prepareAssetPairData(asset_1, asset_2);
-
-  const isAlgoPool = isAlgo(assets.asset2.id);
-
+  const {
+    asset1: {id: asset1ID, unitName: asset1UnitName},
+    asset2: {id: asset2ID, unitName: asset2UnitName}
+  } = prepareAssetPairData(asset_1, asset_2);
+  const isAlgoPool = isAlgo(asset2ID);
   const validatorAppID = getValidatorAppID(network, CONTRACT_VERSION.V1_1);
   const poolLogicSig = tinymanContract_v1_1.generateLogicSigAccountForPool({
     network,
-    asset1ID: assets.asset1.id,
-    asset2ID: assets.asset2.id
+    asset1ID,
+    asset2ID
   });
   const poolAddress = poolLogicSig.address();
 
@@ -67,10 +51,10 @@ async function generateTxns({
     appIndex: validatorAppID,
     appArgs: [
       encodeString("bootstrap"),
-      algosdk.encodeUint64(assets.asset1.id),
-      algosdk.encodeUint64(assets.asset2.id)
+      algosdk.encodeUint64(asset1ID),
+      algosdk.encodeUint64(asset2ID)
     ],
-    foreignAssets: isAlgoPool ? [assets.asset1.id] : [assets.asset1.id, assets.asset2.id],
+    foreignAssets: isAlgoPool ? [asset1ID] : [asset2ID],
     suggestedParams
   });
 
@@ -81,7 +65,7 @@ async function generateTxns({
       decimals: 6,
       defaultFrozen: false,
       unitName: LIQUIDITY_TOKEN_UNIT_NAME.DEFAULT,
-      assetName: `TinymanPool1.1 ${assets.asset1.unitName}-${assets.asset2.unitName}`,
+      assetName: `TinymanPool1.1 ${asset1UnitName}-${asset2UnitName}`,
       assetURL: "https://tinyman.org",
       suggestedParams
     }
@@ -90,7 +74,7 @@ async function generateTxns({
   const asset1Optin = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
     from: poolAddress,
     to: poolAddress,
-    assetIndex: assets.asset1.id,
+    assetIndex: asset1ID,
     amount: 0,
     suggestedParams
   });
@@ -98,41 +82,52 @@ async function generateTxns({
   const fundingTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
     from: initiatorAddr,
     to: poolAddress,
-    amount: getBootstrapFundingTxnAmountForV1(isAlgoPool),
+    amount: getBootstrapFundingTxnAmount(isAlgoPool),
     suggestedParams
   });
 
-  let txns: Transaction[] = [
-    fundingTxn,
-    validatorAppCallTxn,
-    liquidityTokenCreateTxn,
-    asset1Optin
-  ];
+  let txns: Transaction[] = [];
+
+  txns[V1_1BootstrapTxnGroupIndices.FUNDING_TXN] = fundingTxn;
+  txns[V1_1BootstrapTxnGroupIndices.VALIDATOR_APP_CALL] = validatorAppCallTxn;
+  txns[V1_1BootstrapTxnGroupIndices.LIQUIDITY_TOKEN_CREATE] = liquidityTokenCreateTxn;
+  txns[V1_1BootstrapTxnGroupIndices.ASSET1_OPT_IN] = asset1Optin;
 
   if (!isAlgoPool) {
-    txns.push(
+    txns[V1_1BootstrapTxnGroupIndices.ASSET2_OPT_IN] =
       algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
         from: poolAddress,
         to: poolAddress,
-        assetIndex: assets.asset2.id,
+        assetIndex: asset2ID,
         amount: 0,
         suggestedParams
-      })
-    );
+      });
   }
 
   const txGroup = algosdk.assignGroupID(txns);
 
   let finalSignerTxns: SignerTransaction[] = [
-    {txn: txGroup[0], signers: [initiatorAddr]},
-    {txn: txGroup[1], signers: [poolAddress]},
-    {txn: txGroup[2], signers: [poolAddress]},
-    {txn: txGroup[3], signers: [poolAddress]}
+    {
+      txn: txGroup[V1_1BootstrapTxnGroupIndices.FUNDING_TXN],
+      signers: [initiatorAddr]
+    },
+    {
+      txn: txGroup[V1_1BootstrapTxnGroupIndices.VALIDATOR_APP_CALL],
+      signers: [poolAddress]
+    },
+    {
+      txn: txGroup[V1_1BootstrapTxnGroupIndices.LIQUIDITY_TOKEN_CREATE],
+      signers: [poolAddress]
+    },
+    {
+      txn: txGroup[V1_1BootstrapTxnGroupIndices.ASSET1_OPT_IN],
+      signers: [poolAddress]
+    }
   ];
 
-  if (txGroup[4]) {
+  if (txGroup[V1_1BootstrapTxnGroupIndices.ASSET2_OPT_IN]) {
     finalSignerTxns.push({
-      txn: txGroup[4],
+      txn: txGroup[V1_1BootstrapTxnGroupIndices.ASSET2_OPT_IN],
       signers: [poolAddress]
     });
   }
@@ -140,14 +135,7 @@ async function generateTxns({
   return finalSignerTxns;
 }
 
-function getBootstrapFundingTxnAmountForV1(isAlgoPool: boolean) {
-  /**
-   * TODO:
-   * Compare return values with docs:
-   * Total costs for Pool Creation:
-   *  ASA-ASA Pool: 0.961 Algo
-   *  ASA-Algo Pool: 0.86 Algo
-   */
+function getBootstrapFundingTxnAmount(isAlgoPool: boolean) {
   return (
     getPoolAccountMinBalance(CONTRACT_VERSION.V1_1, isAlgoPool) +
     getBootstrapProcessTxnCount(isAlgoPool) * ALGORAND_MIN_TX_FEE
@@ -174,18 +162,17 @@ async function signTxns({
   const [signedFundingTxn] = await initiatorSigner([txGroup]);
 
   // Make sure asset1 has greater ID
-  const assets =
-    asset1ID > asset2ID ? {asset1ID, asset2ID} : {asset1ID: asset2ID, asset2ID: asset1ID};
+  const [sortedAsset1ID, sortedAsset2ID] = sortAssetIds(asset1ID, asset2ID);
 
   const poolLogicSig = tinymanContract_v1_1.generateLogicSigAccountForPool({
     network,
-    asset1ID: assets.asset1ID,
-    asset2ID: assets.asset2ID
+    asset1ID: sortedAsset1ID,
+    asset2ID: sortedAsset2ID
   });
 
   const txnIDs: string[] = [];
   const signedTxns = txGroup.map((txDetail, index) => {
-    if (index === BootstrapTxnGroupIndices.FUNDING_TXN) {
+    if (index === V1_1BootstrapTxnGroupIndices.FUNDING_TXN) {
       txnIDs.push(txDetail.txn.txID().toString());
       return signedFundingTxn;
     }
@@ -215,7 +202,7 @@ async function doBootstrap({
 
     const assetCreationResult = await waitForConfirmation(
       client,
-      txnIDs[BootstrapTxnGroupIndices.LIQUIDITY_TOKEN_CREATE]
+      txnIDs[V1_1BootstrapTxnGroupIndices.LIQUIDITY_TOKEN_CREATE]
     );
 
     const liquidityTokenID = assetCreationResult["asset-index"];
@@ -238,43 +225,28 @@ async function doBootstrap({
 /**
  * Create an pool for an asset pair if it does not already exist. The initiator will provide
  * funding to create the pool and pay for the creation transaction fees.
- *
- * @param client An Algodv2 client.
- * @param pool Parameters of the pool to create.
- * @param pool.validatorAppID The ID of the Validator App for the network.
- * @param pool.asset1ID The ID of the first asset in the pool pair.
- * @param pool.asset2ID The ID of the second asset in the pool pair.
- * @param signedTxns Signed transactions
- * @param txnIDs Transaction IDs
  */
 async function execute({
   client,
   network,
-  pool,
+  pool: {asset1ID, asset2ID},
   signedTxns,
   txnIDs
 }: {
   client: Algodv2;
   network: SupportedNetwork;
-  pool: {
-    asset1ID: number;
-    asset2ID: number;
-  };
+  pool: {asset1ID: number; asset2ID: number};
   signedTxns: Uint8Array[];
   txnIDs: string[];
 }): Promise<PoolInfo> {
-  await doBootstrap({
-    client,
-    signedTxns,
-    txnIDs
-  });
+  await doBootstrap({client, signedTxns, txnIDs});
 
   return getPoolInfo({
     client,
     network,
     contractVersion: CONTRACT_VERSION.V1_1,
-    asset1ID: pool.asset1ID,
-    asset2ID: pool.asset2ID
+    asset1ID,
+    asset2ID
   });
 }
 
@@ -282,5 +254,5 @@ export const BootstrapV1_1 = {
   generateTxns,
   signTxns,
   execute,
-  getBootstrapFundingTxnAmountForV1
+  getBootstrapFundingTxnAmount
 };

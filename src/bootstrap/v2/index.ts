@@ -1,6 +1,5 @@
 import algosdk, {Algodv2, ALGORAND_MIN_TX_FEE, getApplicationAddress} from "algosdk";
 
-import {tinymanContract_v2} from "../../contract/contract";
 import {CONTRACT_VERSION} from "../../contract/constants";
 import {TinymanAnalyticsApiAsset} from "../../util/asset/assetModels";
 import {
@@ -15,7 +14,8 @@ import {getPoolInfo} from "../../util/pool/poolUtils";
 import {encodeString, isAlgo, waitForConfirmation} from "../../util/util";
 import {getValidatorAppID} from "../../validator";
 import {getPoolAccountMinBalance} from "../common/utils";
-import {prepareAssetPairData} from "../../util/asset/assetUtils";
+import {prepareAssetPairData, sortAssetIds} from "../../util/asset/assetUtils";
+import {tinymanContract_v2} from "../../contract/v2/contract";
 
 enum BootstrapTxnGroupIndices {
   FUNDING_TXN = 0,
@@ -48,32 +48,34 @@ async function generateTxns({
   const appAddress = getApplicationAddress(validatorAppID);
 
   // Make sure asset1 has greater ID
-  const assets = prepareAssetPairData(asset_1, asset_2);
+  const {
+    asset1: {id: asset1ID},
+    asset2: {id: asset2ID}
+  } = prepareAssetPairData(asset_1, asset_2);
 
   const poolLogicSig = tinymanContract_v2.generateLogicSigAccountForPool({
     network,
-    asset1ID: assets.asset1.id,
-    asset2ID: assets.asset2.id
+    asset1ID,
+    asset2ID
   });
   const poolLogicSigAddress = poolLogicSig.address();
-  const appID = getValidatorAppID(network, CONTRACT_VERSION.V2);
-  const isAlgoPool = isAlgo(assets.asset2.id);
+  const isAlgoPool = isAlgo(asset2ID);
   const appCallTxn = algosdk.makeApplicationOptInTxnFromObject({
     from: poolLogicSigAddress,
-    appIndex: appID,
+    appIndex: validatorAppID,
     appArgs: [encodeString("bootstrap")],
-    foreignAssets: [assets.asset1.id, assets.asset2.id],
+    foreignAssets: [asset1ID, asset2ID],
     rekeyTo: appAddress,
     suggestedParams: {
       ...suggestedParams,
-      fee: getBootstrapAppCallTxnFeeForV2(isAlgoPool)
+      fee: getBootstrapAppCallTxnFee(isAlgoPool)
     }
   });
 
   const fundingTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
     from: initiatorAddr,
     to: poolLogicSigAddress,
-    amount: getBootstrapFundingTxnAmountForV2(isAlgoPool),
+    amount: getBootstrapFundingTxnAmount(isAlgoPool),
     suggestedParams
   });
 
@@ -91,26 +93,21 @@ async function generateTxns({
   return txns;
 }
 
-function getBootstrapFundingTxnAmountForV2(isAlgoPool: boolean) {
+function getBootstrapFundingTxnAmount(isAlgoPool: boolean) {
   return (
     getPoolAccountMinBalance(CONTRACT_VERSION.V2, isAlgoPool) +
-    getBootstrapAppCallTxnFeeForV2(isAlgoPool) +
+    getBootstrapAppCallTxnFee(isAlgoPool) +
     MINIMUM_BALANCE_REQUIRED_PER_ASSET // Min fee for asset creation
   );
 }
 
-function getBootstrapAppCallTxnFeeForV2(isAlgoPool: boolean) {
+function getBootstrapAppCallTxnFee(isAlgoPool: boolean) {
   const innerTxnCount = isAlgoPool
     ? V2_BOOTSTRAP_INNER_TXN_COUNT.ASA_ALGO
     : V2_BOOTSTRAP_INNER_TXN_COUNT.ASA_ASA;
   // Add 1 to the txn count to account for the group transaction itself.
   const totalTxnCount = innerTxnCount + 1;
 
-  /**
-   * TODO: Is it ok to use `ALGORAND_MIN_TX_FEE` here?
-   * - `suggestedParams.fee` returns 0, so we can't use it
-   * - There is `algod.suggestedTransactionFee`, but we only have client in sdk
-   **/
   return totalTxnCount * ALGORAND_MIN_TX_FEE;
 }
 
@@ -130,13 +127,12 @@ async function signTxns({
   const [signedFundingTxn] = await initiatorSigner([txGroup]);
 
   // Make sure asset1 has greater ID
-  const assets =
-    asset1ID > asset2ID ? {asset1ID, asset2ID} : {asset1ID: asset2ID, asset2ID: asset1ID};
+  const [sortedAsset1ID, sortedAsset2ID] = sortAssetIds(asset1ID, asset2ID);
 
   const poolLogicSig = tinymanContract_v2.generateLogicSigAccountForPool({
     network,
-    asset1ID: assets.asset1ID,
-    asset2ID: assets.asset2ID
+    asset1ID: sortedAsset1ID,
+    asset2ID: sortedAsset2ID
   });
 
   const txnIDs: string[] = [];
@@ -171,7 +167,6 @@ async function doBootstrap({
   try {
     await client.sendRawTransaction(signedTxns).do();
 
-    // TODO: Should we start using the method from `algosdk`?
     const assetCreationResult = await waitForConfirmation(
       client,
       txnIDs[BootstrapTxnGroupIndices.VALIDATOR_APP_CALL]
@@ -198,43 +193,28 @@ async function doBootstrap({
 /**
  * Create an pool for an asset pair if it does not already exist. The initiator will provide
  * funding to create the pool and pay for the creation transaction fees.
- *
- * @param client An Algodv2 client.
- * @param pool Parameters of the pool to create.
- * @param pool.validatorAppID The ID of the Validator App for the network.
- * @param pool.asset1ID The ID of the first asset in the pool pair.
- * @param pool.asset2ID The ID of the second asset in the pool pair.
- * @param signedTxns Signed transactions
- * @param txnIDs Transaction IDs
  */
 async function execute({
   client,
   network,
-  pool,
+  pool: {asset1ID, asset2ID},
   signedTxns,
   txnIDs
 }: {
   client: Algodv2;
   network: SupportedNetwork;
-  pool: {
-    asset1ID: number;
-    asset2ID: number;
-  };
+  pool: {asset1ID: number; asset2ID: number};
   signedTxns: Uint8Array[];
   txnIDs: string[];
 }): Promise<PoolInfo> {
-  await doBootstrap({
-    client,
-    signedTxns,
-    txnIDs
-  });
+  await doBootstrap({client, signedTxns, txnIDs});
 
   return getPoolInfo({
     client,
     network,
     contractVersion: CONTRACT_VERSION.V2,
-    asset1ID: pool.asset1ID,
-    asset2ID: pool.asset2ID
+    asset1ID,
+    asset2ID
   });
 }
 
@@ -242,5 +222,5 @@ export const BootstrapV2 = {
   generateTxns,
   signTxns,
   execute,
-  getBootstrapFundingTxnAmountForV2
+  getBootstrapFundingTxnAmount
 };
