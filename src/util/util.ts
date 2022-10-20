@@ -3,6 +3,7 @@ import {Algodv2} from "algosdk";
 import {SignerTransaction} from "./commonTypes";
 import {AccountInformation} from "./account/accountTypes";
 import TinymanError from "./error/TinymanError";
+import {ALGO_ASSET_ID} from "./asset/assetConstants";
 
 export function decodeState(
   stateArray: AccountInformation["apps-local-state"][0]["key-value"] = []
@@ -273,4 +274,11 @@ export function encodeInteger(number) {
  */
 export function encodeString(text: string) {
   return new TextEncoder().encode(text);
+}
+
+/**
+ * @returns `true` if the given id is the asset id of ALGO
+ */
+export function isAlgo(id: number | string | bigint) {
+  return Number(id) === ALGO_ASSET_ID;
 }

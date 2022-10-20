@@ -90,17 +90,7 @@ export type {MintQuote, MintExecution} from "./mint";
 // eslint-disable-next-line no-duplicate-imports
 export {Burn} from "./burn";
 
-export type {SwapQuote, SwapExecution} from "./swap";
-
-// eslint-disable-next-line no-duplicate-imports
-export {
-  SwapType,
-  getSwapQuote,
-  issueSwap,
-  generateSwapTransactions,
-  signSwapTransactions,
-  SWAP_PROCESS_TXN_COUNT
-} from "./swap";
+export {Swap} from "./swap";
 
 export {
   redeemExcessAsset,
