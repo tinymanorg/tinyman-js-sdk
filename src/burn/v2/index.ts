@@ -1,6 +1,6 @@
 import algosdk, {Algodv2, ALGORAND_MIN_TX_FEE, Transaction} from "algosdk";
 
-import {tinymanContract_v2} from "../../contract/contract";
+import {tinymanContract_v2} from "../../contract/v2/contract";
 import {
   SignerTransaction,
   InitiatorSigner,
