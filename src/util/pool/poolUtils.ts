@@ -14,8 +14,8 @@ import {CONTRACT_VERSION} from "../../contract/constants";
 import {PoolInfo, PoolReserves, PoolStatus} from "./poolTypes";
 import {SupportedNetwork} from "../commonTypes";
 import {getValidatorAppID} from "../../validator";
-import {ENCODED_ASSET_KEYS} from "./poolConstants";
-import {getContract} from "../../contract/utils";
+import {ENCODED_APP_STATE_KEYS} from "./poolConstants";
+import {getContract} from "../../contract";
 
 /**
  * Look up information about an pool.
@@ -236,8 +236,8 @@ export async function getPoolAssets(
     const liquidityTokenID = liquidityTokenAsset.index;
 
     assets = {
-      asset1ID: state[ENCODED_ASSET_KEYS[contractVersion].asset1] as number,
-      asset2ID: state[ENCODED_ASSET_KEYS[contractVersion].asset2] as number,
+      asset1ID: state[ENCODED_APP_STATE_KEYS[contractVersion].asset1] as number,
+      asset2ID: state[ENCODED_APP_STATE_KEYS[contractVersion].asset2] as number,
       liquidityTokenID
     };
 

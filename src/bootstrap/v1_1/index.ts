@@ -1,6 +1,5 @@
 import algosdk, {Algodv2, ALGORAND_MIN_TX_FEE, Transaction} from "algosdk";
 
-import {tinymanContract_v1_1} from "../../contract/contract";
 import {
   InitiatorSigner,
   SignerTransaction,
@@ -16,6 +15,7 @@ import {getValidatorAppID} from "../../validator";
 import {CONTRACT_VERSION} from "../../contract/constants";
 import {TinymanAnalyticsApiAsset} from "../../util/asset/assetModels";
 import {prepareAssetPairData} from "../../util/asset/assetUtils";
+import {tinymanContract_v1_1} from "../../contract/v1_1/contract";
 
 enum BootstrapTxnGroupIndices {
   FUNDING_TXN = 0,
