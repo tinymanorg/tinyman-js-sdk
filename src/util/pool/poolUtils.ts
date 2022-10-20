@@ -14,8 +14,8 @@ import {CONTRACT_VERSION} from "../../contract/constants";
 import {PoolInfo, PoolReserves, PoolStatus} from "./poolTypes";
 import {SupportedNetwork} from "../commonTypes";
 import {getValidatorAppID} from "../../validator";
-import {ENCODED_ASSET_KEYS} from "./poolConstants";
-import {getContract} from "../../contract/utils";
+import {ENCODED_APP_STATE_KEYS} from "./poolConstants";
+import {getContract} from "../../contract";
 
 /**
  * Look up information about an pool.
@@ -231,13 +231,24 @@ export async function getPoolAssets(
     const keyValue = appState["key-value"];
     const state = decodeState(keyValue);
 
-    // The Liquidity Token is the only asset the Pool has created
-    const liquidityTokenAsset = info["created-assets"][0];
-    const liquidityTokenID = liquidityTokenAsset.index;
+    let liquidityTokenID: number;
+
+    if (contractVersion === CONTRACT_VERSION.V1_1) {
+      // The Liquidity Token is the only asset the Pool has created
+      const liquidityTokenAsset = info["created-assets"][0];
+
+      liquidityTokenID = liquidityTokenAsset.index;
+    } else {
+      //  Local state contains liqudity token id on V2 contracts
+
+      liquidityTokenID = state[
+        ENCODED_APP_STATE_KEYS[contractVersion].liquidityTokenID
+      ] as number;
+    }
 
     assets = {
-      asset1ID: state[ENCODED_ASSET_KEYS[contractVersion].asset1] as number,
-      asset2ID: state[ENCODED_ASSET_KEYS[contractVersion].asset2] as number,
+      asset1ID: state[ENCODED_APP_STATE_KEYS[contractVersion].asset1] as number,
+      asset2ID: state[ENCODED_APP_STATE_KEYS[contractVersion].asset2] as number,
       liquidityTokenID
     };
 

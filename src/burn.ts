@@ -221,7 +221,7 @@ export async function signBurnTxns({
   initiatorSigner: InitiatorSigner;
 }): Promise<Uint8Array[]> {
   const [signedFeeTxn, signedLiquidityInTxn] = await initiatorSigner([txGroup]);
-  const {lsig} = pool.account;
+  const lsig = pool.account;
 
   const signedTxns = txGroup.map((txDetail, index) => {
     if (index === BurnTxnIndices.FEE_TXN) {
