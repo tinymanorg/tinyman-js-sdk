@@ -9,6 +9,7 @@ import {getValidatorAppID} from "../../validator";
 import {BaseTinymanContract} from "../base/contract";
 import {CONTRACT_VERSION} from "../constants";
 import {PoolLogicSigVariables, V1_1PoolLogicSig, V1_1ValidatorApp} from "./types";
+import {sortAssetIds} from "../../util/asset/assetUtils";
 
 export class TinymanContractV1_1 extends BaseTinymanContract<
   V1_1ValidatorApp,
@@ -29,20 +30,13 @@ export class TinymanContractV1_1 extends BaseTinymanContract<
     asset1ID: number;
     asset2ID: number;
   }): LogicSigAccount {
-    const {network} = params;
-    const validatorAppID = getValidatorAppID(network, CONTRACT_VERSION.V1_1);
-    let {asset1ID, asset2ID} = params;
-
-    if (asset1ID === asset2ID) {
+    if (params.asset1ID === params.asset2ID) {
       throw new Error("Assets are the same");
     }
 
-    if (asset2ID > asset1ID) {
-      const tmp = asset1ID;
-
-      asset1ID = asset2ID;
-      asset2ID = tmp;
-    }
+    const {network} = params;
+    const validatorAppID = getValidatorAppID(network, CONTRACT_VERSION.V1_1);
+    const [asset1ID, asset2ID] = sortAssetIds(params.asset1ID, params.asset2ID);
 
     let programArray = Array.from(toByteArray(this.poolLogicSigContractTemplate));
 
@@ -61,6 +55,10 @@ export class TinymanContractV1_1 extends BaseTinymanContract<
       let value = variables[name];
       let start = v.index - offset;
       let end = start + v.length;
+      /**
+       * TODO: Try using `algosdk.encodeUint64` instead of this function.
+       * If it works, remove `encodeInteger`
+       */
       // All of the template variables are ints
       let value_encoded = encodeInteger(value);
       let diff = v.length - value_encoded.length;

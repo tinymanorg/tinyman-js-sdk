@@ -1,14 +1,13 @@
 import * as ascJson_v2 from "./asc.json";
 
-import {LogicSigAccount} from "algosdk";
-import {toByteArray} from "base64-js";
+import {encodeUint64, LogicSigAccount} from "algosdk";
 
 import {SupportedNetwork} from "../../util/commonTypes";
-import {encodeInteger} from "../../util/util";
 import {getValidatorAppID} from "../../validator";
 import {BaseTinymanContract} from "../base/contract";
 import {CONTRACT_VERSION} from "../constants";
 import {V2PoolLogicSig, V2ValidatorApp} from "./types";
+import {sortAssetIds} from "../../util/asset/assetUtils";
 
 export class TinymanContractV2 extends BaseTinymanContract<
   V2ValidatorApp,
@@ -27,35 +26,33 @@ export class TinymanContractV2 extends BaseTinymanContract<
     asset1ID: number;
     asset2ID: number;
   }): LogicSigAccount {
-    const {network} = params;
-    let {asset1ID, asset2ID} = params;
-    const validatorAppID = getValidatorAppID(network, CONTRACT_VERSION.V2);
-
-    if (asset1ID === asset2ID) {
+    if (params.asset1ID === params.asset2ID) {
       throw new Error("Assets are the same");
     }
 
-    if (asset2ID > asset1ID) {
-      const tmp = asset1ID;
+    const {network} = params;
+    const validatorAppID = getValidatorAppID(network, CONTRACT_VERSION.V2);
+    const [asset1ID, asset2ID] = sortAssetIds(params.asset1ID, params.asset2ID);
 
-      asset1ID = asset2ID;
-      asset2ID = tmp;
-    }
+    // Encode required values, and convert them to byte arrays
+    const encodedByteArrays = {
+      bytes: Array.from(Buffer.from(this.poolLogicSigContractTemplate, "base64")),
+      validatorAppId: Array.from(encodeUint64(validatorAppID)),
+      asset1ID: Array.from(encodeUint64(asset1ID)),
+      asset2ID: Array.from(encodeUint64(asset2ID))
+    };
 
-    let programArray = Array.from(toByteArray(this.poolLogicSigContractTemplate));
+    // Concat byte arrays (we're required to insert validatorAppID and assetIDs in the middle of the byte array)
+    const finalProgramArray = [
+      ...encodedByteArrays.bytes.slice(0, 3),
+      ...encodedByteArrays.validatorAppId.slice(0, 8),
+      ...encodedByteArrays.asset1ID.slice(0, 8),
+      ...encodedByteArrays.asset2ID.slice(0, 8),
+      ...encodedByteArrays.bytes.slice(27)
+    ];
 
-    const validatorAppIdByteArray = Array.from(encodeInteger(validatorAppID));
-    const asset1IDByteArray = Array.from(encodeInteger(asset1ID));
-    const asset2IDByteArray = Array.from(encodeInteger(asset2ID));
-
-    programArray
-      .slice(0, 3)
-      .concat([...validatorAppIdByteArray, ...asset1IDByteArray, ...asset2IDByteArray])
-      .concat(programArray.slice(27));
-
-    const program = new Uint8Array(programArray);
-
-    return new LogicSigAccount(program);
+    // Finally, create the logic signature account using the final byte array
+    return new LogicSigAccount(new Uint8Array(finalProgramArray));
   }
 }
 

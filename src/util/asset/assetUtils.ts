@@ -29,6 +29,15 @@ export async function generateOptIntoAssetTxns({
   }
 }
 
+/**
+ * @returns Array of given asset ids, bigger first
+ */
+export function sortAssetIds(asset1ID: number, asset2ID: number): number[] {
+  const assets = [asset1ID, asset2ID];
+
+  return [Math.max(...assets), Math.min(...assets)];
+}
+
 export function isAlgo(id: number | bigint) {
   return id === ALGO_ASSET_ID;
 }

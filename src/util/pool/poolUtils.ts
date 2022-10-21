@@ -231,9 +231,20 @@ export async function getPoolAssets(
     const keyValue = appState["key-value"];
     const state = decodeState(keyValue);
 
-    // The Liquidity Token is the only asset the Pool has created
-    const liquidityTokenAsset = info["created-assets"][0];
-    const liquidityTokenID = liquidityTokenAsset.index;
+    let liquidityTokenID: number;
+
+    if (contractVersion === CONTRACT_VERSION.V1_1) {
+      // The Liquidity Token is the only asset the Pool has created
+      const liquidityTokenAsset = info["created-assets"][0];
+
+      liquidityTokenID = liquidityTokenAsset.index;
+    } else {
+      //  Local state contains liqudity token id on V2 contracts
+
+      liquidityTokenID = state[
+        ENCODED_APP_STATE_KEYS[contractVersion].liquidityTokenID
+      ] as number;
+    }
 
     assets = {
       asset1ID: state[ENCODED_APP_STATE_KEYS[contractVersion].asset1] as number,
