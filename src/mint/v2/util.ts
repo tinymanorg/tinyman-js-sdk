@@ -1,0 +1,106 @@
+import {PoolReserves} from "../../util/pool/poolTypes";
+
+export function calculateSubsequentAddLiquidity(
+  reserves: PoolReserves,
+  totalFeeShare: number | bigint,
+  asset1Amount: number | bigint,
+  asset2Amount: number | bigint
+) {
+  const oldK = reserves.asset1 * reserves.asset2;
+  const newAsset1Reserves = reserves.asset1 + BigInt(asset1Amount);
+  const newAsset2Reserves = reserves.asset2 + BigInt(asset2Amount);
+
+  const newK = newAsset1Reserves * newAsset2Reserves;
+
+  const newIssuedPoolTokens = BigInt(
+    Math.sqrt(Number(String((newK * reserves.issuedLiquidity ** 2n) / oldK)))
+  );
+
+  let poolTokenAssetAmount = newIssuedPoolTokens - reserves.issuedLiquidity;
+
+  const calculatedAsset1Amount =
+    (poolTokenAssetAmount * newAsset1Reserves) / newIssuedPoolTokens;
+  const calculatedAsset2Amount =
+    (poolTokenAssetAmount * newAsset2Reserves) / newIssuedPoolTokens;
+
+  const asset1SwapAmount = BigInt(asset1Amount) - calculatedAsset1Amount;
+  const asset2SwapAmount = BigInt(asset2Amount) - calculatedAsset2Amount;
+
+  let swapFromAsset1ToAsset2;
+  let swapInAmount;
+  let swapOutAmount;
+  let swapTotalFeeAmount;
+
+  if (asset1SwapAmount > asset2SwapAmount) {
+    const swapInAmountWithoutFee = asset1SwapAmount;
+
+    swapOutAmount = Math.min(Number(asset2SwapAmount), 0);
+    swapFromAsset1ToAsset2 = true;
+    swapTotalFeeAmount = calculateInternalSwapFeeAmount(
+      swapInAmountWithoutFee,
+      totalFeeShare
+    );
+    const feeAsPoolTokens =
+      (swapTotalFeeAmount * newIssuedPoolTokens) / (newAsset1Reserves * BigInt(2));
+
+    swapInAmount = swapInAmountWithoutFee + swapTotalFeeAmount;
+
+    poolTokenAssetAmount -= feeAsPoolTokens;
+  } else {
+    const swapInAmountWithoutFee = asset2SwapAmount;
+
+    swapOutAmount = Math.min(Number(asset1SwapAmount), 0);
+    swapFromAsset1ToAsset2 = false;
+    swapTotalFeeAmount = calculateInternalSwapFeeAmount(
+      swapInAmountWithoutFee,
+      totalFeeShare
+    );
+    const feeAsPoolTokens =
+      (swapTotalFeeAmount * newIssuedPoolTokens) / (newAsset2Reserves * BigInt(2));
+
+    swapInAmount = swapInAmountWithoutFee + swapTotalFeeAmount;
+
+    poolTokenAssetAmount -= feeAsPoolTokens;
+  }
+
+  const swapPriceImpact = calculatePriceImpact(
+    swapFromAsset1ToAsset2 ? reserves.asset1 : reserves.asset2,
+    swapFromAsset1ToAsset2 ? reserves.asset2 : reserves.asset1,
+    swapInAmount,
+    swapOutAmount
+  );
+
+  return {
+    poolTokenAssetAmount,
+    swapFromAsset1ToAsset2,
+    swapInAmount,
+    swapOutAmount,
+    swapTotalFeeAmount,
+    swapPriceImpact
+  };
+}
+
+function calculateInternalSwapFeeAmount(
+  swapAmount: number | bigint,
+  totalFeeShare: number | bigint
+) {
+  return (
+    //  ?????
+    BigInt(swapAmount) * BigInt(totalFeeShare) * (BigInt(10_000) - BigInt(totalFeeShare))
+  );
+}
+
+function calculatePriceImpact(
+  inputSupply: number | bigint,
+  outputSupply: number | bigint,
+  swapInputAmount: number | bigint,
+  swapOutputAmount: number | bigint
+) {
+  const swapPrice = BigInt(swapOutputAmount) / BigInt(swapInputAmount);
+  const poolPrice = BigInt(outputSupply) / BigInt(inputSupply);
+  const priceImpact = BigInt(
+    Math.abs(Math.round(Number(swapPrice / poolPrice - BigInt(1))))
+  );
+
+  return priceImpact;
+}
