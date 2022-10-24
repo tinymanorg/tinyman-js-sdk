@@ -26,10 +26,7 @@ Before doing any operations, we need to make sure the account is opted into the 
 ```typescript
 const accountAddress = "...";
 const account = await getAccountInformation(algodClient, accountAddress);
-const hasOptedIn = isAccountOptedIntoApp({
-  appID: validatorAppID,
-  accountAppsLocalState: account["apps-local-state"]
-});
+const hasOptedIn = isAccountOptedIntoApp(validatorAppID, account["apps-local-state"]);
 
 if (!hasOptedIn) {
   const optInTxns = await generateOptIntoValidatorTxns({
@@ -39,8 +36,6 @@ if (!hasOptedIn) {
   });
 
   await signAndWaitTransactions({initiatorSignerCallback: signerCallback}, [optInTxns]);
-  // There is no exported function named signAndWaitTransactions.
-  // Where do we get signerCallBack from ?
 }
 ```
 
@@ -176,9 +171,9 @@ const signedTxns = await signSwapTransactions({
 const data = await issueSwap({
   client: algodClient,
   pool: poolInfo,
-  swapType: SwapType.FixedInput, // or, SwapType.FixedOutput
   txGroup: swapTxns,
   signedTxns,
+  swapType: SwapType.FixedInput, // or, SwapType.FixedOutput
   initiatorAddr: accountAddress
 });
 ```
@@ -240,10 +235,10 @@ const bootstrapTxns = generateBootstrapTransactions({
 ```typescript
 const {signedTxns, txnIDs} = await signBootstrapTransactions({
   txGroup: bootstrapTxns,
-  initiatorSigner: signerCallback
   validatorAppID,
   asset1ID: asset1.id,
   asset2ID: asset2.id,
+  initiatorSigner: signerCallback
 });
 ```
 
@@ -255,9 +250,9 @@ const {signedTxns, txnIDs} = await signBootstrapTransactions({
 const poolInfo = await createPool(
   algodClient,
   {
-    validatorAppID
     asset1ID: asset1.id,
     asset2ID: asset2.id,
+    validatorAppID
   },
   signedTxns,
   txnIDs
