@@ -11,10 +11,10 @@ import {MINIMUM_BALANCE_REQUIRED_PER_ASSET} from "../../util/constant";
 import TinymanError from "../../util/error/TinymanError";
 import {PoolInfo} from "../../util/pool/poolTypes";
 import {getPoolInfo} from "../../util/pool/poolUtils";
-import {encodeString, isAlgo, waitForConfirmation} from "../../util/util";
+import {encodeString, waitForConfirmation} from "../../util/util";
 import {getValidatorAppID} from "../../validator";
 import {getPoolAccountMinBalance} from "../common/utils";
-import {prepareAssetPairData, sortAssetIds} from "../../util/asset/assetUtils";
+import {isAlgo, prepareAssetPairData, sortAssetIds} from "../../util/asset/assetUtils";
 import {tinymanContract_v2} from "../../contract/v2/contract";
 
 enum BootstrapTxnGroupIndices {

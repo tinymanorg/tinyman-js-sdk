@@ -5,7 +5,7 @@ import {
   SignerTransaction,
   SupportedNetwork
 } from "../../util/commonTypes";
-import {encodeString, isAlgo, waitForConfirmation} from "../../util/util";
+import {encodeString, waitForConfirmation} from "../../util/util";
 import TinymanError from "../../util/error/TinymanError";
 import {LIQUIDITY_TOKEN_UNIT_NAME} from "../../util/asset/assetConstants";
 import {PoolInfo} from "../../util/pool/poolTypes";
@@ -14,7 +14,7 @@ import {getPoolAccountMinBalance} from "../common/utils";
 import {getValidatorAppID} from "../../validator";
 import {CONTRACT_VERSION} from "../../contract/constants";
 import {TinymanAnalyticsApiAsset} from "../../util/asset/assetModels";
-import {prepareAssetPairData, sortAssetIds} from "../../util/asset/assetUtils";
+import {isAlgo, prepareAssetPairData, sortAssetIds} from "../../util/asset/assetUtils";
 import {V1_1BootstrapTxnGroupIndices, V1_BOOTSTRAP_TXN_COUNT} from "./constants";
 import {tinymanContract_v1_1} from "../../contract/v1_1/contract";
 

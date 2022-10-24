@@ -2,6 +2,7 @@ import algosdk from "algosdk";
 
 import {SignerTransaction} from "../commonTypes";
 import TinymanError from "../error/TinymanError";
+import {ALGO_ASSET_ID} from "./assetConstants";
 import {TinymanAnalyticsApiAsset} from "./assetModels";
 
 export async function generateOptIntoAssetTxns({
@@ -68,4 +69,11 @@ export function sortAssetIds(asset1ID: number, asset2ID: number): number[] {
   const assets = [asset1ID, asset2ID];
 
   return [Math.max(...assets), Math.min(...assets)];
+}
+
+/**
+ * @returns `true` if the given id is the asset id of ALGO
+ */
+export function isAlgo(id: number | string | bigint) {
+  return Number(id) === ALGO_ASSET_ID;
 }

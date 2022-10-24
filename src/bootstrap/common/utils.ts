@@ -1,6 +1,7 @@
 import {CONTRACT_VERSION} from "../../contract/constants";
-import {tinymanContract_v1_1, tinymanContract_v2} from "../../contract/contract";
 import {ContractVersionValue} from "../../contract/types";
+import {tinymanContract_v1_1} from "../../contract/v1_1/contract";
+import {tinymanContract_v2} from "../../contract/v2/contract";
 import {
   BASE_MINIMUM_BALANCE,
   MINIMUM_BALANCE_REQUIRED_PER_ASSET,
