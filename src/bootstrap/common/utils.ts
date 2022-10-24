@@ -14,7 +14,6 @@ import {
  * @returns Minimum balance for a pool account
  */
 export function getPoolAccountMinBalance(
-  // Local state uint count and Local state byte slice count changes between different contract versions
   contractVersion: ContractVersionValue,
   isAlgoPool: boolean
 ) {
@@ -22,14 +21,6 @@ export function getPoolAccountMinBalance(
     schema: {numLocalInts, numLocalByteSlices}
   } =
     contractVersion === CONTRACT_VERSION.V1_1 ? tinymanContract_v1_1 : tinymanContract_v2;
-
-  /**
-   * TODO: Remove this once `validator_app` is added to json
-   */
-  if (contractVersion === CONTRACT_VERSION.V2) {
-    numLocalInts = 12;
-    numLocalByteSlices = 2;
-  }
 
   let fee =
     BASE_MINIMUM_BALANCE +
