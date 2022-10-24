@@ -3,7 +3,6 @@ import algosdk from "algosdk";
 import {SignerTransaction} from "../commonTypes";
 import TinymanError from "../error/TinymanError";
 import {ALGO_ASSET_ID} from "./assetConstants";
-import {TinymanAnalyticsApiAsset} from "./assetModels";
 
 export async function generateOptIntoAssetTxns({
   client,
