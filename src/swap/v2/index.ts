@@ -435,5 +435,6 @@ export const SwapV2 = {
   generateTxns,
   signTxns,
   execute,
-  executeFixedOutputSwap
+  executeFixedOutputSwap,
+  calculateFixedInputSwap
 };
