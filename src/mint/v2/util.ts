@@ -9,32 +9,32 @@ export function calculateSubsequentAddLiquidity(
   const oldK = reserves.asset1 * reserves.asset2;
   const newAsset1Reserves = reserves.asset1 + BigInt(asset1Amount);
   const newAsset2Reserves = reserves.asset2 + BigInt(asset2Amount);
-
   const newK = newAsset1Reserves * newAsset2Reserves;
-
   const newIssuedPoolTokens = BigInt(
-    Math.sqrt(Number(String((newK * reserves.issuedLiquidity ** 2n) / oldK)))
+    parseInt(
+      String(
+        Math.sqrt(
+          Number((newK * reserves.issuedLiquidity * reserves.issuedLiquidity) / oldK)
+        )
+      )
+    )
   );
-
   let poolTokenAssetAmount = newIssuedPoolTokens - reserves.issuedLiquidity;
-
   const calculatedAsset1Amount =
     (poolTokenAssetAmount * newAsset1Reserves) / newIssuedPoolTokens;
   const calculatedAsset2Amount =
     (poolTokenAssetAmount * newAsset2Reserves) / newIssuedPoolTokens;
-
   const asset1SwapAmount = BigInt(asset1Amount) - calculatedAsset1Amount;
   const asset2SwapAmount = BigInt(asset2Amount) - calculatedAsset2Amount;
-
   let swapFromAsset1ToAsset2;
-  let swapInAmount;
-  let swapOutAmount;
-  let swapTotalFeeAmount;
+  let swapInAmount: bigint;
+  let swapOutAmount: bigint;
+  let swapTotalFeeAmount: bigint;
 
   if (asset1SwapAmount > asset2SwapAmount) {
     const swapInAmountWithoutFee = asset1SwapAmount;
 
-    swapOutAmount = Math.min(Number(asset2SwapAmount), 0);
+    swapOutAmount = BigInt(Math.min(Number(asset2SwapAmount), 0));
     swapFromAsset1ToAsset2 = true;
     swapTotalFeeAmount = calculateInternalSwapFeeAmount(
       swapInAmountWithoutFee,
@@ -49,7 +49,7 @@ export function calculateSubsequentAddLiquidity(
   } else {
     const swapInAmountWithoutFee = asset2SwapAmount;
 
-    swapOutAmount = Math.min(Number(asset1SwapAmount), 0);
+    swapOutAmount = BigInt(Math.min(Number(asset1SwapAmount), 0));
     swapFromAsset1ToAsset2 = false;
     swapTotalFeeAmount = calculateInternalSwapFeeAmount(
       swapInAmountWithoutFee,

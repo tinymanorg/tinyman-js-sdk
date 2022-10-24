@@ -1,6 +1,5 @@
-import algosdk, {ALGORAND_MIN_TX_FEE} from "algosdk";
+import algosdk, {ALGORAND_MIN_TX_FEE, encodeUint64} from "algosdk";
 import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
-import {toByteArray} from "base64-js";
 
 import {MINT_APP_CALL_ARGUMENTS, V2_MINT_INNER_TXN_COUNT} from "../constants";
 import {CONTRACT_VERSION} from "../../contract/constants";
@@ -75,43 +74,6 @@ export function getQuote({
     slippage,
     swapQuote
   };
-
-  // if (reserves.issuedLiquidity === 0n) {
-  //   // TODO: compute sqrt on bigints
-  //   const geoMean = BigInt(Math.floor(Math.sqrt(Number(asset1In) * Number(asset2In))));
-
-  //   if (geoMean <= BigInt(MINIMUM_LIQUIDITY_MINTING_AMOUNT)) {
-  //     throw new Error(
-  //       `Initial liquidity mint too small. Liquidity minting amount must be greater than ${MINIMUM_LIQUIDITY_MINTING_AMOUNT}, this quote is for ${geoMean}.`
-  //     );
-  //   }
-
-  //   return {
-  //     round: reserves.round,
-  //     asset1ID: pool.asset1ID,
-  //     asset1In: BigInt(asset1In),
-  //     asset2ID: pool.asset2ID,
-  //     asset2In: BigInt(asset2In),
-  //     liquidityID: pool.liquidityTokenID!,
-  //     liquidityOut: geoMean - BigInt(MINIMUM_LIQUIDITY_MINTING_AMOUNT),
-  //     share: 1
-  //   };
-  // }
-
-  // const asset1Ratio = (BigInt(asset1In) * reserves.issuedLiquidity) / reserves.asset1;
-  // const asset2Ratio = (BigInt(asset2In) * reserves.issuedLiquidity) / reserves.asset2;
-  // const liquidityOut = asset1Ratio < asset2Ratio ? asset1Ratio : asset2Ratio;
-
-  // return {
-  //   round: reserves.round,
-  //   asset1ID: pool.asset1ID,
-  //   asset1In: BigInt(asset1In),
-  //   asset2ID: pool.asset2ID,
-  //   asset2In: BigInt(asset2In),
-  //   liquidityID: pool.liquidityTokenID!,
-  //   liquidityOut,
-  //   share: getPoolShare(reserves.issuedLiquidity + liquidityOut, liquidityOut)
-  // };
 }
 
 export async function generateTxns({
@@ -161,7 +123,7 @@ export async function generateTxns({
     appIndex: getValidatorAppID(network, CONTRACT_VERSION.V2),
     appArgs: [
       ...MINT_APP_CALL_ARGUMENTS.v2.FLEXIBLE_MODE,
-      toByteArray(String(liquidityToken.amount))
+      encodeUint64(liquidityToken.amount)
     ],
     accounts: [poolAddress],
     foreignAssets: [liquidityToken.id],
