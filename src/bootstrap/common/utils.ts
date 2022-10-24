@@ -1,7 +1,5 @@
-import {CONTRACT_VERSION} from "../../contract/constants";
+import {getContract} from "../../contract";
 import {ContractVersionValue} from "../../contract/types";
-import {tinymanContract_v1_1} from "../../contract/v1_1/contract";
-import {tinymanContract_v2} from "../../contract/v2/contract";
 import {
   BASE_MINIMUM_BALANCE,
   MINIMUM_BALANCE_REQUIRED_PER_ASSET,
@@ -19,8 +17,7 @@ export function getPoolAccountMinBalance(
 ) {
   let {
     schema: {numLocalInts, numLocalByteSlices}
-  } =
-    contractVersion === CONTRACT_VERSION.V1_1 ? tinymanContract_v1_1 : tinymanContract_v2;
+  } = getContract(contractVersion);
 
   let fee =
     BASE_MINIMUM_BALANCE +
