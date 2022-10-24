@@ -33,33 +33,26 @@ export async function generateOptIntoAssetTxns({
 /**
  * @param asset_1 - Asset 1 of the pool
  * @param asset_2 - Asset 2 of the pool
- * @returns Ordered (asset with bigger id becomes asset1) asset data of the pool in frontend friendly format
+ * @returns Array of assets, ordered by descending asset id
  */
-export function prepareAssetPairData(
-  asset_1: Pick<TinymanAnalyticsApiAsset, "id" | "unit_name">,
-  asset_2: Pick<TinymanAnalyticsApiAsset, "id" | "unit_name">
-): {
-  asset1: {id: number; unitName: string};
-  asset2: {id: number; unitName: string};
-} {
-  const {unit_name: asset1UnitName} = asset_1;
+
+export function prepareAssetPairData<Asset extends {id: string | number}>(
+  asset_1: Asset,
+  asset_2: Asset
+): [Omit<Asset, "id"> & {id: number}, Omit<Asset, "id"> & {id: number}] {
   const asset1ID = Number(asset_1.id);
-  const {unit_name: asset2UnitName} = asset_2;
   const asset2ID = Number(asset_2.id);
 
-  // Make sure asset1 has greater ID
-  const assets =
-    asset1ID > asset2ID
-      ? {
-          asset1: {id: asset1ID, unitName: asset1UnitName},
-          asset2: {id: asset2ID, unitName: asset2UnitName}
-        }
-      : {
-          asset1: {id: asset2ID, unitName: asset2UnitName},
-          asset2: {id: asset1ID, unitName: asset1UnitName}
-        };
-
-  return assets;
+  // Make sure first asset has greater ID
+  return asset1ID > asset2ID
+    ? [
+        {...asset_1, id: asset1ID},
+        {...asset_2, id: asset2ID}
+      ]
+    : [
+        {...asset_2, id: asset2ID},
+        {...asset_1, id: asset1ID}
+      ];
 }
 
 /**

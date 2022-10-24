@@ -33,10 +33,7 @@ async function generateTxns({
 }): Promise<SignerTransaction[]> {
   const suggestedParams = await client.getTransactionParams().do();
   // Make sure asset1 has greater ID
-  const {
-    asset1: {id: asset1ID, unitName: asset1UnitName},
-    asset2: {id: asset2ID, unitName: asset2UnitName}
-  } = prepareAssetPairData(asset_1, asset_2);
+  const [{id: asset1ID}, {id: asset2ID}] = prepareAssetPairData(asset_1, asset_2);
   const isAlgoPool = isAlgo(asset2ID);
   const validatorAppID = getValidatorAppID(network, CONTRACT_VERSION.V1_1);
   const poolLogicSig = tinymanContract_v1_1.generateLogicSigAccountForPool({
