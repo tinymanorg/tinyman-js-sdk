@@ -21,6 +21,7 @@ import {getValidatorAppID} from "../../validator";
 import {getPoolAccountMinBalance} from "../common/utils";
 import {isAlgo, prepareAssetPairData, sortAssetIds} from "../../util/asset/assetUtils";
 import {tinymanContract_v2} from "../../contract/v2/contract";
+import {AccountInformation} from "../../util/account/accountTypes";
 
 enum BootstrapTxnGroupIndices {
   FUNDING_TXN = 0,
@@ -192,20 +193,30 @@ async function doBootstrap({
   try {
     await client.sendRawTransaction(signedTxns).do();
 
-    const assetCreationResult = await waitForConfirmation(
+    /**
+     * TODO: We will do this extraction part in a better way once PoolInfo shape is updated
+     **/
+    const assetCreationResult = (await waitForConfirmation(
       client,
       txnIDs[BootstrapTxnGroupIndices.VALIDATOR_APP_CALL]
-    );
+    )) as {
+      "confirmed-round": number;
+      "local-state-delta": {
+        delta: AccountInformation["apps-local-state"][0]["key-value"];
+      }[];
+      txn: Transaction;
+    };
+    const POOL_TOKEN_ASSET_ID_KEY = btoa("pool_token_asset_id");
+    const localState = assetCreationResult["local-state-delta"][0].delta;
+    const poolTokenAssetId = localState?.find((kv) => kv.key === POOL_TOKEN_ASSET_ID_KEY)
+      ?.value.uint;
 
-    // TODO: Do result type and used key is correct?
-    const liquidityTokenID = assetCreationResult["asset-index"];
-
-    if (typeof liquidityTokenID !== "number") {
-      throw new Error(`Generated ID is not valid: got ${liquidityTokenID}`);
+    if (typeof poolTokenAssetId !== "number") {
+      throw new Error(`Generated ID is not valid: got ${poolTokenAssetId}`);
     }
 
     return {
-      liquidityTokenID
+      liquidityTokenID: poolTokenAssetId
     };
   } catch (error: any) {
     throw new TinymanError(
