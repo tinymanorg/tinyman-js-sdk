@@ -15,6 +15,7 @@ import {
   V2SwapTxnGroupIndices,
   V2_SWAP_APP_CALL_INNER_TXN_COUNT
 } from "./constants";
+import {V2_TOTAL_FEE_SHARE} from "../../contract/constants";
 
 async function generateTxns({
   client,
@@ -223,8 +224,7 @@ function getFixedInputSwapQuote({
     input_supply: inputSupply,
     output_supply: outputSupply,
     swap_input_amount: assetInAmount,
-    // TODO: What is total fee share?
-    total_fee_share: 1 as any
+    total_fee_share: V2_TOTAL_FEE_SHARE
   });
 
   return {
@@ -279,8 +279,8 @@ function getFixedOutputSwapQuote({
     input_supply: inputSupply,
     output_supply: outputSupply,
     swap_output_amount: assetOutAmount,
-    // TODO: I think this should be in PoolInfo object (if we could fetch pool info correctly)
-    total_fee_share: 1 as any
+    // todo: extract fee share from pool
+    total_fee_share: V2_TOTAL_FEE_SHARE
   });
 
   return {

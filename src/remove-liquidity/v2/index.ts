@@ -1,5 +1,6 @@
 import algosdk, {Algodv2, ALGORAND_MIN_TX_FEE, Transaction} from "algosdk";
 
+import {V2_TOTAL_FEE_SHARE} from "../../contract/constants";
 import {tinymanContract_v2} from "../../contract/v2/contract";
 import {SwapV2} from "../../swap/v2";
 import {
@@ -72,7 +73,7 @@ export function getSingleAssetRemoveLiquidityQuote({
   const poolTokenAssetIn_bigInt = BigInt(poolTokenAssetIn);
   const {asset_1_output_amount, asset_2_output_amount} =
     calculateRemoveLiquidityOutputAmounts(poolTokenAssetIn_bigInt, reserves);
-  const total_fee_share = 1 as any; // TODO: this should be in PoolInfo
+  const total_fee_share = V2_TOTAL_FEE_SHARE;
 
   let quote: V2SingleAssetRemoveLiquidityQuote;
 
@@ -377,7 +378,7 @@ async function execute({
   txGroup,
   signedTxns
 }: {
-  client: any;
+  client: Algodv2;
   pool: PoolInfo;
   txGroup: SignerTransaction[];
   signedTxns: Uint8Array[];
