@@ -40,6 +40,11 @@ export async function getPoolInfo(params: {
   const validatorAppID = getValidatorAppID(network, contractVersion);
   const poolAddress = poolLogicSig.address();
 
+  const info = (await client.accountInformation(poolAddress).do()) as AccountInformation;
+  const appState = info["apps-local-state"].find(
+    (app) => app.id == getValidatorAppID(network, contractVersion)
+  );
+
   let result: PoolInfo = {
     account: poolLogicSig,
     validatorAppID,
@@ -48,6 +53,13 @@ export async function getPoolInfo(params: {
     status: PoolStatus.NOT_CREATED,
     contractVersion
   };
+
+  if (appState) {
+    const keyValue = appState["key-value"];
+    const state = decodeState(keyValue);
+
+    result.totalFeeShare = BigInt(state[ENCODED_APP_STATE_KEYS.v2.totalFeeShare]);
+  }
 
   const readyPoolAssets = await getPoolAssets({
     client,

@@ -53,7 +53,7 @@ export function getQuote({
     swapOutAmount,
     swapPriceImpact,
     swapTotalFeeAmount
-  } = calculateSubsequentAddLiquidity(reserves, 0.5, asset1In, asset2In);
+  } = calculateSubsequentAddLiquidity(reserves, pool.totalFeeShare!, asset1In, asset2In);
 
   const swapQuote = {
     amountIn: swapInAmount,

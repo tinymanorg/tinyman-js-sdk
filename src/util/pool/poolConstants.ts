@@ -8,6 +8,7 @@ export const ENCODED_APP_STATE_KEYS = {
   [CONTRACT_VERSION.V2]: {
     asset1: btoa("asset_1_id"),
     asset2: btoa("asset_2_id"),
-    liquidityTokenID: btoa("pool_token_asset_id")
+    liquidityTokenID: btoa("pool_token_asset_id"),
+    totalFeeShare: btoa("total_fee_share")
   }
 };
