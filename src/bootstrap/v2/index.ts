@@ -1,4 +1,9 @@
-import algosdk, {Algodv2, ALGORAND_MIN_TX_FEE, getApplicationAddress} from "algosdk";
+import algosdk, {
+  Algodv2,
+  ALGORAND_MIN_TX_FEE,
+  getApplicationAddress,
+  Transaction
+} from "algosdk";
 
 import {CONTRACT_VERSION} from "../../contract/constants";
 import {TinymanAnalyticsApiAsset} from "../../util/asset/assetModels";
@@ -9,7 +14,7 @@ import {
 } from "../../util/commonTypes";
 import {MINIMUM_BALANCE_REQUIRED_PER_ASSET} from "../../util/constant";
 import TinymanError from "../../util/error/TinymanError";
-import {PoolInfo} from "../../util/pool/poolTypes";
+import {PoolInfo, PoolStatus} from "../../util/pool/poolTypes";
 import {getPoolInfo} from "../../util/pool/poolUtils";
 import {encodeString, waitForConfirmation} from "../../util/util";
 import {getValidatorAppID} from "../../validator";
@@ -50,6 +55,18 @@ async function generateTxns({
   // Make sure asset1 has greater ID
   const [{id: asset1ID}, {id: asset2ID}] = prepareAssetPairData(asset_1, asset_2);
 
+  const poolInfo = await getPoolInfo({
+    client,
+    network,
+    contractVersion: CONTRACT_VERSION.V2,
+    asset1ID,
+    asset2ID
+  });
+
+  if (poolInfo.status === PoolStatus.READY) {
+    throw new Error(`Pool for ${asset_1.unit_name}-${asset_2.unit_name} already exists`);
+  }
+
   const poolLogicSig = tinymanContract_v2.generateLogicSigAccountForPool({
     network,
     asset1ID,
@@ -63,11 +80,10 @@ async function generateTxns({
     appArgs: [encodeString("bootstrap")],
     foreignAssets: [asset1ID, asset2ID],
     rekeyTo: appAddress,
-    suggestedParams: {
-      ...suggestedParams,
-      fee: getBootstrapAppCallTxnFee(isAlgoPool)
-    }
+    suggestedParams
   });
+
+  appCallTxn.fee = getBootstrapAppCallTxnFee(isAlgoPool);
 
   const fundingTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
     from: initiatorAddr,
@@ -76,18 +92,30 @@ async function generateTxns({
     suggestedParams
   });
 
-  let txns: SignerTransaction[] = [];
+  let txns: Transaction[] = [];
 
-  txns[BootstrapTxnGroupIndices.FUNDING_TXN] = {
-    txn: fundingTxn,
+  txns[BootstrapTxnGroupIndices.FUNDING_TXN] = fundingTxn;
+  txns[BootstrapTxnGroupIndices.VALIDATOR_APP_CALL] = appCallTxn;
+
+  /**
+   * TODO: Ideally we need to return txns without grouping them
+   * in order to support txn composition, but that caused
+   * a weird bug: https://hipo.slack.com/archives/C03AE5QEHN1/p1666726549862249
+   */
+  const txGroup = algosdk.assignGroupID(txns);
+
+  let signerTxns: SignerTransaction[] = [];
+
+  signerTxns[BootstrapTxnGroupIndices.FUNDING_TXN] = {
+    txn: txGroup[BootstrapTxnGroupIndices.FUNDING_TXN],
     signers: [initiatorAddr]
   };
-  txns[BootstrapTxnGroupIndices.VALIDATOR_APP_CALL] = {
-    txn: appCallTxn,
+  signerTxns[BootstrapTxnGroupIndices.VALIDATOR_APP_CALL] = {
+    txn: txGroup[BootstrapTxnGroupIndices.VALIDATOR_APP_CALL],
     signers: [poolLogicSigAddress]
   };
 
-  return txns;
+  return signerTxns;
 }
 
 function getBootstrapFundingTxnAmount(isAlgoPool: boolean) {
