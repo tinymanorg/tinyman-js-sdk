@@ -16,16 +16,10 @@ import {SupportedNetwork} from "../commonTypes";
 import {getValidatorAppID} from "../../validator";
 import {ENCODED_APP_STATE_KEYS} from "./poolConstants";
 import {getContract} from "../../contract";
+import {sortAssetIds} from "../asset/assetUtils";
 
 /**
- * Look up information about an pool.
- *
- * @param params - The parameters for the pool information request.
- * @param {Algodv2} params.client An Algodv2 client.
- * @param {SupportedNetwork} params.network Network to use.
- * @param {ContractVersion} params.contractVersion Contract version to use.
- * @param {number} params.asset1ID The ID of the first asset in the pool pair.
- * @param {number} params.asset2ID The ID of the second asset in the pool pair.
+ * @returns Information object for the pool with given arguments
  */
 export async function getPoolInfo(params: {
   client: Algodv2;
@@ -39,12 +33,13 @@ export async function getPoolInfo(params: {
   const poolLogicSig = contract.generateLogicSigAccountForPool(params);
   const validatorAppID = getValidatorAppID(network, contractVersion);
   const poolAddress = poolLogicSig.address();
+  const sortedAssetIDs = sortAssetIds(asset1ID, asset2ID);
 
   let result: PoolInfo = {
     account: poolLogicSig,
     validatorAppID,
-    asset1ID: Math.max(asset1ID, asset2ID),
-    asset2ID: Math.min(asset1ID, asset2ID),
+    asset1ID: sortedAssetIDs[0],
+    asset2ID: sortedAssetIDs[1],
     status: PoolStatus.NOT_CREATED,
     contractVersion
   };
