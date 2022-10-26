@@ -228,12 +228,12 @@ async function generateTxns({
     ],
     accounts: [poolAddress],
     foreignAssets: [pool.asset1ID, pool.asset2ID],
-    suggestedParams: {
-      ...suggestedParams,
-      // Add + 1 for outer txn cost
-      fee: (V2_REMOVE_LIQUIDITY_APP_CALL_INNER_TXN_COUNT + 1) * ALGORAND_MIN_TX_FEE
-    }
+    suggestedParams
   });
+
+  // Add + 1 for outer txn cost
+  validatorAppCallTxn.fee =
+    (V2_REMOVE_LIQUIDITY_APP_CALL_INNER_TXN_COUNT + 1) * ALGORAND_MIN_TX_FEE;
 
   const txns: Transaction[] = [];
 
@@ -314,12 +314,12 @@ async function generateSingleAssetOutTxns({
     ],
     accounts: [poolAddress],
     foreignAssets: [pool.asset1ID, pool.asset2ID],
-    suggestedParams: {
-      ...suggestedParams,
-      // Add + 1 for outer txn cost
-      fee: (V2_REMOVE_LIQUIDITY_APP_CALL_INNER_TXN_COUNT + 1) * suggestedParams.fee
-    }
+    suggestedParams
   });
+
+  // Add + 1 for outer txn cost
+  validatorAppCallTxn.fee =
+    (V2_REMOVE_LIQUIDITY_APP_CALL_INNER_TXN_COUNT + 1) * suggestedParams.fee;
 
   const txns: Transaction[] = [];
 
@@ -402,10 +402,42 @@ async function execute({
   };
 }
 
+function getRemoveLiquidityQuoteAmountsWithSlippage(
+  quote: V2RemoveLiquidityQuote
+): Pick<V2RemoveLiquidityQuote, "asset1Out" | "asset2Out"> {
+  return {
+    asset1Out: {
+      assetId: quote.asset1Out.assetId,
+      amount: getAmountWithSlippage(quote.asset1Out.amount, quote.slippage)
+    },
+    asset2Out: {
+      assetId: quote.asset2Out.assetId,
+      amount: getAmountWithSlippage(quote.asset2Out.amount, quote.slippage)
+    }
+  };
+}
+
+function getSingleAssetRemoveLiquidityQuoteAmountWithSlippage(
+  quote: V2SingleAssetRemoveLiquidityQuote
+): V2SingleAssetRemoveLiquidityQuote["assetOut"] {
+  return {
+    assetId: quote.assetOut.assetId,
+    amount: getAmountWithSlippage(quote.assetOut.amount, quote.slippage)
+  };
+}
+
+function getAmountWithSlippage(amount: bigint, slippage: number | bigint): bigint {
+  return amount - amount * BigInt(slippage);
+}
+
 export const RemoveLiquidityV2 = {
   getQuote,
   generateTxns,
   generateSingleAssetOutTxns,
   signTxns,
-  execute
+  execute,
+  getSingleAssetRemoveLiquidityQuote,
+  getSingleAssetRemoveLiquidityQuoteAmountWithSlippage,
+  getRemoveLiquidityQuoteAmountsWithSlippage,
+  getAmountWithSlippage
 };
