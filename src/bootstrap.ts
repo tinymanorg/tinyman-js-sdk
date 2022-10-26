@@ -12,8 +12,7 @@ import {
   MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE
 } from "./util/constant";
 import {PoolInfo} from "./util/pool/poolTypes";
-import {getPoolInfo} from "./util/pool/poolUtils";
-import {CONTRACT_VERSION} from "./contract/constants";
+import {poolUtils} from "./util/pool";
 import {tinymanContract_v1_1} from "./contract/v1_1/contract";
 
 enum BootstapTxnGroupIndices {
@@ -292,13 +291,12 @@ export async function createPool(
     txnIDs
   });
 
-  return getPoolInfo({
+  //  TODO: Fix this
+  return poolUtils.v1_1.getPoolInfo({
     client,
     //  TODO: Fix this
     network: "testnet",
     asset1ID: pool.asset1ID,
-    asset2ID: pool.asset2ID,
-    //  TODO: Fix this
-    contractVersion: CONTRACT_VERSION.V1_1
+    asset2ID: pool.asset2ID
   });
 }
