@@ -1,6 +1,5 @@
 import algosdk, {Algodv2, ALGORAND_MIN_TX_FEE, Transaction} from "algosdk";
 
-import {V2_TOTAL_FEE_SHARE} from "../../contract/constants";
 import {tinymanContract_v2} from "../../contract/v2/contract";
 import {SwapV2} from "../../swap/v2";
 import {
@@ -8,7 +7,7 @@ import {
   InitiatorSigner,
   SupportedNetwork
 } from "../../util/commonTypes";
-import {PoolInfo, PoolReserves} from "../../util/pool/poolTypes";
+import {PoolReserves, V2PoolInfo} from "../../util/pool/poolTypes";
 import {getTxnGroupID, sendAndWaitRawTransaction} from "../../util/util";
 import {
   V2RemoveLiquidityTxnIndices,
@@ -30,7 +29,7 @@ export function getQuote({
   poolTokenAssetIn,
   slippage = 0.05
 }: {
-  pool: PoolInfo;
+  pool: V2PoolInfo;
   reserves: PoolReserves;
   poolTokenAssetIn: number | bigint;
   slippage?: number;
@@ -64,7 +63,7 @@ export function getSingleAssetRemoveLiquidityQuote({
   assetOutID,
   slippage = 0.05
 }: {
-  pool: PoolInfo;
+  pool: V2PoolInfo;
   reserves: PoolReserves;
   poolTokenAssetInAmount: number | bigint;
   assetOutID: number;
@@ -73,7 +72,8 @@ export function getSingleAssetRemoveLiquidityQuote({
   const poolTokenAssetIn_bigInt = BigInt(poolTokenAssetIn);
   const {asset_1_output_amount, asset_2_output_amount} =
     calculateRemoveLiquidityOutputAmounts(poolTokenAssetIn_bigInt, reserves);
-  const total_fee_share = V2_TOTAL_FEE_SHARE;
+  // TODO: remove `!` once pool info shape is updated
+  const total_fee_share = pool.totalFeeShare!;
 
   let quote: V2SingleAssetRemoveLiquidityQuote;
 
@@ -194,7 +194,7 @@ async function generateTxns({
   minAsset2Amount
 }: {
   client: Algodv2;
-  pool: PoolInfo;
+  pool: V2PoolInfo;
   poolTokenAssetAmount: number | bigint;
   initiatorAddr: string;
   minAsset1Amount: number | bigint;
@@ -270,7 +270,7 @@ async function generateSingleAssetOutTxns({
   minOutputAssetAmount
 }: {
   client: Algodv2;
-  pool: PoolInfo;
+  pool: V2PoolInfo;
   outputAssetId: number;
   poolTokenAssetAmount: number | bigint;
   initiatorAddr: string;
@@ -348,7 +348,7 @@ async function signTxns({
   txGroup,
   initiatorSigner
 }: {
-  pool: PoolInfo;
+  pool: V2PoolInfo;
   network: SupportedNetwork;
   txGroup: SignerTransaction[];
   initiatorSigner: InitiatorSigner;
@@ -379,7 +379,7 @@ async function execute({
   signedTxns
 }: {
   client: Algodv2;
-  pool: PoolInfo;
+  pool: V2PoolInfo;
   txGroup: SignerTransaction[];
   signedTxns: Uint8Array[];
   // initiatorAddr: string;

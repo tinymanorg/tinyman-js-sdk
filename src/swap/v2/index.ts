@@ -7,7 +7,7 @@ import algosdk, {Algodv2, ALGORAND_MIN_TX_FEE, Transaction} from "algosdk";
 import {isAlgo, roundNumber} from "../../util/util";
 import {InitiatorSigner, SignerTransaction} from "../../util/commonTypes";
 import TinymanError from "../../util/error/TinymanError";
-import {PoolInfo, PoolReserves, PoolStatus} from "../../util/pool/poolTypes";
+import {PoolReserves, PoolStatus, V2PoolInfo} from "../../util/pool/poolTypes";
 import {SwapQuote, SwapType} from "../types";
 import {
   V2_SWAP_APP_CALL_ARG_ENCODED,
@@ -15,7 +15,6 @@ import {
   V2SwapTxnGroupIndices,
   V2_SWAP_APP_CALL_INNER_TXN_COUNT
 } from "./constants";
-import {V2_TOTAL_FEE_SHARE} from "../../contract/constants";
 
 async function generateTxns({
   client,
@@ -26,7 +25,7 @@ async function generateTxns({
   initiatorAddr
 }: {
   client: Algodv2;
-  pool: PoolInfo;
+  pool: V2PoolInfo;
   swapType: SwapType;
   assetIn: {assetID: number; amount: number | bigint};
   assetOut: {assetID: number; amount: number | bigint};
@@ -94,7 +93,7 @@ async function signTxns({
   txGroup,
   initiatorSigner
 }: {
-  pool: PoolInfo;
+  pool: V2PoolInfo;
   txGroup: SignerTransaction[];
   initiatorSigner: InitiatorSigner;
 }): Promise<Uint8Array[]> {
@@ -159,7 +158,7 @@ function executeFixedOutputSwap(_args: any) {
  */
 function getQuote(
   type: SwapType,
-  pool: PoolInfo,
+  pool: V2PoolInfo,
   reserves: PoolReserves,
   asset: {assetID: number; amount: number | bigint},
   decimals: {assetIn: number; assetOut: number}
@@ -188,7 +187,7 @@ function getFixedInputSwapQuote({
   assetIn,
   decimals
 }: {
-  pool: PoolInfo;
+  pool: V2PoolInfo;
   reserves: PoolReserves;
   assetIn: {assetID: number; amount: number | bigint};
   decimals: {assetIn: number; assetOut: number};
@@ -205,6 +204,8 @@ function getFixedInputSwapQuote({
   }
 
   const assetInAmount = BigInt(assetIn.amount);
+  // TODO: remove `!` once pool info shape is updated
+  const totalFeeShare = pool.totalFeeShare!;
 
   let assetOutID: number;
   let inputSupply: bigint;
@@ -224,7 +225,7 @@ function getFixedInputSwapQuote({
     input_supply: inputSupply,
     output_supply: outputSupply,
     swap_input_amount: assetInAmount,
-    total_fee_share: V2_TOTAL_FEE_SHARE
+    total_fee_share: totalFeeShare
   });
 
   return {
@@ -249,17 +250,17 @@ function getFixedOutputSwapQuote({
   assetOut
 }: // decimals
 {
-  pool: PoolInfo;
+  pool: V2PoolInfo;
   reserves: PoolReserves;
   assetOut: {assetID: number; amount: number | bigint};
   // decimals: {assetIn: number; assetOut: number};
 }): SwapQuote {
   // fetch_fixed_output_swap_quote
   // console.log(params);
-  // throw new Error("Not implemented");
 
   const assetOutAmount = BigInt(assetOut.amount);
-
+  // TODO: remove `!` once pool info shape is updated
+  const totalFeeShare = pool.totalFeeShare!;
   let assetInID: number;
   let inputSupply: bigint;
   let outputSupply: bigint;
@@ -279,8 +280,7 @@ function getFixedOutputSwapQuote({
     input_supply: inputSupply,
     output_supply: outputSupply,
     swap_output_amount: assetOutAmount,
-    // todo: extract fee share from pool
-    total_fee_share: V2_TOTAL_FEE_SHARE
+    total_fee_share: totalFeeShare
   });
 
   return {
@@ -306,7 +306,7 @@ function calculateFixedInputSwap({
   input_supply: bigint;
   output_supply: bigint;
   swap_input_amount: bigint;
-  total_fee_share: number;
+  total_fee_share: bigint;
 }) {
   const total_fee_amount = BigInt(
     calculate_fixed_input_fee_amount({
@@ -340,7 +340,7 @@ function calculateFixedOutputSwap({
   input_supply: bigint;
   output_supply: bigint;
   swap_output_amount: bigint;
-  total_fee_share: number;
+  total_fee_share: bigint;
 }) {
   const swap_amount = calculate_swap_amount_of_fixed_output_swap(
     input_supply,
@@ -368,7 +368,7 @@ function calculate_fixed_input_fee_amount({
   total_fee_share
 }: {
   input_amount: bigint;
-  total_fee_share: number | bigint;
+  total_fee_share: bigint;
 }) {
   return Math.floor(Number(input_amount * BigInt(total_fee_share)) / 10_000);
 }
@@ -378,7 +378,7 @@ function calculate_fixed_output_fee_amount({
   total_fee_share
 }: {
   swap_amount: bigint;
-  total_fee_share: number | bigint;
+  total_fee_share: bigint;
 }) {
   const input_amount = Math.floor(
     Number((swap_amount * BigInt(10_000)) / (BigInt(10_000) - BigInt(total_fee_share)))
