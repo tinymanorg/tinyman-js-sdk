@@ -4,7 +4,7 @@ import {ContractVersionValue} from "../contract/types";
 import {CONTRACT_VERSION} from "../contract/constants";
 import {TinymanAnalyticsApiAsset} from "../util/asset/assetModels";
 import {SupportedNetwork, SignerTransaction, InitiatorSigner} from "../util/commonTypes";
-import {PoolInfo} from "../util/pool/poolTypes";
+import {V1PoolInfo, V2PoolInfo} from "../util/pool/poolTypes";
 import {BootstrapV1_1} from "./v1_1";
 import {BootstrapV2} from "./v2";
 
@@ -45,12 +45,13 @@ export function execute(params: {
   pool: {asset1ID: number; asset2ID: number};
   signedTxns: Uint8Array[];
   txnIDs: string[];
-}): Promise<PoolInfo> {
+  // TODO: can we solve this better? (return type actually depends on contract version arg)
+}): Promise<V1PoolInfo | V2PoolInfo> {
   if (params.contractVersion === CONTRACT_VERSION.V1_1) {
-    return BootstrapV1_1.execute(params);
+    return BootstrapV1_1.execute(params) as Promise<V1PoolInfo>;
   }
 
-  return BootstrapV2.execute(params);
+  return BootstrapV2.execute(params) as Promise<V2PoolInfo>;
 }
 
 /**

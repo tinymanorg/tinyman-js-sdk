@@ -14,7 +14,7 @@ import {
 } from "../../util/commonTypes";
 import {MINIMUM_BALANCE_REQUIRED_PER_ASSET} from "../../util/constant";
 import TinymanError from "../../util/error/TinymanError";
-import {PoolInfo, PoolStatus} from "../../util/pool/poolTypes";
+import {PoolStatus, V2PoolInfo} from "../../util/pool/poolTypes";
 import {encodeString, waitForConfirmation} from "../../util/util";
 import {getValidatorAppID} from "../../validator";
 import {getPoolAccountMinBalance} from "../common/utils";
@@ -22,6 +22,7 @@ import {isAlgo, prepareAssetPairData, sortAssetIds} from "../../util/asset/asset
 import {tinymanContract_v2} from "../../contract/v2/contract";
 import {AccountInformation} from "../../util/account/accountTypes";
 import {poolUtils} from "../../util/pool";
+import {DECODED_APP_STATE_KEYS} from "../../util/pool/poolConstants";
 
 enum BootstrapTxnGroupIndices {
   FUNDING_TXN = 0,
@@ -193,7 +194,7 @@ async function doBootstrap({
     await client.sendRawTransaction(signedTxns).do();
 
     /**
-     * TODO: We will do this extraction part in a better way once PoolInfo shape is updated
+     * TODO: Try to improve this data extraction part
      **/
     const assetCreationResult = (await waitForConfirmation(
       client,
@@ -205,10 +206,10 @@ async function doBootstrap({
       }[];
       txn: Transaction;
     };
-    const POOL_TOKEN_ASSET_ID_KEY = btoa("pool_token_asset_id");
     const localState = assetCreationResult["local-state-delta"][0].delta;
-    const poolTokenAssetId = localState?.find((kv) => kv.key === POOL_TOKEN_ASSET_ID_KEY)
-      ?.value.uint;
+    const poolTokenAssetId = localState?.find(
+      (kv) => kv.key === btoa(DECODED_APP_STATE_KEYS.v2.liquidityTokenID)
+    )?.value.uint;
 
     if (typeof poolTokenAssetId !== "number") {
       throw new Error(`Generated ID is not valid: got ${poolTokenAssetId}`);
@@ -241,7 +242,7 @@ async function execute({
   pool: {asset1ID: number; asset2ID: number};
   signedTxns: Uint8Array[];
   txnIDs: string[];
-}): Promise<PoolInfo> {
+}): Promise<V2PoolInfo> {
   await doBootstrap({client, signedTxns, txnIDs});
 
   return poolUtils.v2.getPoolInfo({

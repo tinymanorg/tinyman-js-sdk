@@ -8,7 +8,7 @@ import {
 import {encodeString, waitForConfirmation} from "../../util/util";
 import TinymanError from "../../util/error/TinymanError";
 import {LIQUIDITY_TOKEN_UNIT_NAME} from "../../util/asset/assetConstants";
-import {PoolInfo} from "../../util/pool/poolTypes";
+import {V1PoolInfo} from "../../util/pool/poolTypes";
 import {getPoolAccountMinBalance} from "../common/utils";
 import {getValidatorAppID} from "../../validator";
 import {CONTRACT_VERSION} from "../../contract/constants";
@@ -238,7 +238,7 @@ async function execute({
   pool: {asset1ID: number; asset2ID: number};
   signedTxns: Uint8Array[];
   txnIDs: string[];
-}): Promise<PoolInfo> {
+}): Promise<V1PoolInfo> {
   await doBootstrap({client, signedTxns, txnIDs});
 
   return poolUtils.v1_1.getPoolInfo({
