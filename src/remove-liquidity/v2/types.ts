@@ -1,7 +1,3 @@
-/**
- * TODO: If quote and execution shapes are same with v1, we can use a common type
- */
-
 interface QuoteAssetAmount {
   assetId: number;
   amount: bigint;
@@ -22,16 +18,13 @@ export interface V2RemoveLiquidityQuote {
 export interface V2SingleAssetRemoveLiquidityQuote {
   /** The round that this quote is based on. */
   round: number;
-
   assetOut: QuoteAssetAmount;
   poolTokenAsset: QuoteAssetAmount;
-
   slippage: number;
-
-  internalSwapQuote: InternalSwapQuote;
+  internalSwapQuote: V2InternalSwapQuote;
 }
 
-interface InternalSwapQuote {
+interface V2InternalSwapQuote {
   amount_in: QuoteAssetAmount;
   amount_out: QuoteAssetAmount;
   swap_fees: QuoteAssetAmount;

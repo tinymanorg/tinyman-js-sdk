@@ -11,6 +11,7 @@ import {PoolReserves, V2PoolInfo} from "../../util/pool/poolTypes";
 import {getTxnGroupID, sendAndWaitRawTransaction} from "../../util/util";
 import {
   V2RemoveLiquidityTxnIndices,
+  V2_LOCKED_POOL_TOKENS,
   V2_REMOVE_LIQUIDITY_APP_ARGUMENT,
   V2_REMOVE_LIQUIDITY_APP_CALL_INNER_TXN_COUNT
 } from "./constants";
@@ -157,9 +158,6 @@ export function getSingleAssetRemoveLiquidityQuote({
   return quote;
 }
 
-// TODO: what is this?
-const LOCKED_POOL_TOKENS = 1000;
-
 function calculateRemoveLiquidityOutputAmounts(
   pool_token_asset_amount: number | bigint,
   reserves: PoolReserves
@@ -168,7 +166,7 @@ function calculateRemoveLiquidityOutputAmounts(
   const poolTokenAssetAmountBigInt = BigInt(pool_token_asset_amount);
   const issuedPoolTokens = reserves.issuedLiquidity;
 
-  if (issuedPoolTokens > poolTokenAssetAmountBigInt + BigInt(LOCKED_POOL_TOKENS)) {
+  if (issuedPoolTokens > poolTokenAssetAmountBigInt + BigInt(V2_LOCKED_POOL_TOKENS)) {
     asset_1_output_amount =
       (poolTokenAssetAmountBigInt * reserves.asset1) / issuedPoolTokens;
     asset_2_output_amount =

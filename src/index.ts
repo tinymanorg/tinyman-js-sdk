@@ -75,9 +75,14 @@ export {
 
 export type {MintQuote, MintExecution} from "./mint";
 
-// TODO: export these./remove-liquidity
-// export type {BurnQuote, BurnExecution} from "./burn/";
-// eslint-disable-next-line no-duplicate-imports
+export type {
+  V1_1RemoveLiquidityExecution,
+  V1_1RemoveLiquidityQuote
+} from "./remove-liquidity/v1_1/types";
+export type {
+  V2RemoveLiquidityQuote,
+  V2SingleAssetRemoveLiquidityQuote
+} from "./remove-liquidity/v2/types";
 export {RemoveLiquidity} from "./remove-liquidity";
 
 export {Swap} from "./swap";
