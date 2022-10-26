@@ -13,7 +13,7 @@ import {InitiatorSigner, SignerTransaction} from "../../util/commonTypes";
 import TinymanError from "../../util/error/TinymanError";
 import {DEFAULT_FEE_TXN_NOTE} from "../../util/constant";
 import {ALGO_ASSET_ID} from "../../util/asset/assetConstants";
-import {PoolInfo, PoolReserves, PoolStatus} from "../../util/pool/poolTypes";
+import {PoolReserves, PoolStatus, V1PoolInfo} from "../../util/pool/poolTypes";
 import {getAccountExcessWithinPool} from "../../util/account/accountUtils";
 import {SwapType, SwapQuote, SwapExecution} from "../types";
 
@@ -33,7 +33,7 @@ async function signTxns({
   txGroup,
   initiatorSigner
 }: {
-  pool: PoolInfo;
+  pool: V1PoolInfo;
   txGroup: SignerTransaction[];
   initiatorSigner: InitiatorSigner;
 }): Promise<Uint8Array[]> {
@@ -65,7 +65,7 @@ async function generateTxns({
   poolAddress
 }: {
   client: Algodv2;
-  pool: PoolInfo;
+  pool: V1PoolInfo;
   poolAddress: string;
   swapType: SwapType;
   assetIn: {assetID: number; amount: number | bigint};
@@ -174,7 +174,7 @@ async function generateTxns({
  */
 function getQuote(
   type: SwapType,
-  pool: PoolInfo,
+  pool: V1PoolInfo,
   reserves: PoolReserves,
   asset: {assetID: number; amount: number | bigint},
   decimals: {assetIn: number; assetOut: number}
@@ -209,7 +209,7 @@ function getFixedInputSwapQuote({
   assetIn,
   decimals
 }: {
-  pool: PoolInfo;
+  pool: V1PoolInfo;
   reserves: PoolReserves;
   assetIn: {assetID: number; amount: number | bigint};
   decimals: {assetIn: number; assetOut: number};
@@ -286,7 +286,7 @@ async function executeFixedInputSwap({
   initiatorAddr
 }: {
   client: any;
-  pool: PoolInfo;
+  pool: V1PoolInfo;
   signedTxns: Uint8Array[];
   assetIn: {assetID: number; amount: number | bigint};
   assetOut: {assetID: number; amount: number | bigint};
@@ -352,7 +352,7 @@ function getFixedOutputSwapQuote({
   assetOut,
   decimals
 }: {
-  pool: PoolInfo;
+  pool: V1PoolInfo;
   reserves: PoolReserves;
   assetOut: {assetID: number; amount: number | bigint};
   decimals: {assetIn: number; assetOut: number};
@@ -432,7 +432,7 @@ async function executeFixedOutputSwap({
   initiatorAddr
 }: {
   client: any;
-  pool: PoolInfo;
+  pool: V1PoolInfo;
   signedTxns: Uint8Array[];
   assetIn: {assetID: number; amount: number | bigint};
   assetOut: {assetID: number; amount: number | bigint};
@@ -508,7 +508,7 @@ async function execute({
   initiatorAddr
 }: {
   client: Algodv2;
-  pool: PoolInfo;
+  pool: V1PoolInfo;
   swapType: SwapType;
   txGroup: SignerTransaction[];
   signedTxns: Uint8Array[];
