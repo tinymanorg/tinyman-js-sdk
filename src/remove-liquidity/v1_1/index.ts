@@ -4,7 +4,7 @@ import {getAccountExcessWithinPool} from "../../util/account/accountUtils";
 import {SignerTransaction, InitiatorSigner} from "../../util/commonTypes";
 import {DEFAULT_FEE_TXN_NOTE} from "../../util/constant";
 import TinymanError from "../../util/error/TinymanError";
-import {PoolInfo, PoolReserves} from "../../util/pool/poolTypes";
+import {PoolReserves, V1PoolInfo} from "../../util/pool/poolTypes";
 import {
   encodeString,
   applySlippageToAmount,
@@ -25,7 +25,7 @@ export function getQuote({
   reserves,
   liquidityIn
 }: {
-  pool: PoolInfo;
+  pool: V1PoolInfo;
   reserves: PoolReserves;
   /**
    * The quantity of the liquidity being deposited.
@@ -62,7 +62,7 @@ async function generateTxns({
   initiatorAddr
 }: {
   client: Algodv2;
-  pool: PoolInfo;
+  pool: V1PoolInfo;
   liquidityIn: number | bigint;
   asset1Out: number | bigint;
   asset2Out: number | bigint;
@@ -169,7 +169,7 @@ async function signTxns({
   txGroup,
   initiatorSigner
 }: {
-  pool: PoolInfo;
+  pool: V1PoolInfo;
   txGroup: SignerTransaction[];
   initiatorSigner: InitiatorSigner;
 }): Promise<Uint8Array[]> {
@@ -199,7 +199,7 @@ async function execute({
   initiatorAddr
 }: {
   client: Algodv2;
-  pool: PoolInfo;
+  pool: V1PoolInfo;
   txGroup: SignerTransaction[];
   signedTxns: Uint8Array[];
   /**
