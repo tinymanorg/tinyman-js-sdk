@@ -1,8 +1,9 @@
-import { Algodv2 } from "algosdk";
-import { PoolInfo } from "../pool/poolTypes";
+import { Algodv2, IntDecoding } from "algosdk";
+import { V1PoolInfo } from "../pool/poolTypes";
 import { AccountExcessWithinPool, AccountInformation, AccountInformationData, AccountExcess } from "./accountTypes";
 import { ContractVersionValue } from "../../contract/types";
-export declare function getAccountInformation(client: Algodv2, address: string): Promise<AccountInformationData>;
+export declare function getAccountInformation(client: Algodv2, address: string, intDecoding?: IntDecoding): Promise<AccountInformationData>;
+export declare function getDecodedAccountApplicationLocalState(accountInfo: AccountInformationData, validatorAppID: number): Record<string, string | number> | null;
 export declare function calculateAccountMinimumRequiredBalance(account: AccountInformation): number;
 export declare function hasSufficientMinimumBalance(accountData: AccountInformationData): boolean;
 /**
@@ -14,7 +15,7 @@ export declare function hasSufficientMinimumBalance(accountData: AccountInformat
  */
 export declare function getAccountExcessWithinPool({ client, pool, accountAddr }: {
     client: Algodv2;
-    pool: PoolInfo;
+    pool: V1PoolInfo;
     accountAddr: string;
 }): Promise<AccountExcessWithinPool>;
 /**

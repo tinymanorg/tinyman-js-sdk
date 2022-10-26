@@ -1,45 +1,12 @@
 import { Algodv2 } from "algosdk";
-import { ContractVersionValue } from "../../contract/types";
-import { PoolInfo, PoolReserves, V2PoolInfo } from "./poolTypes";
-import { SupportedNetwork } from "../commonTypes";
-export declare function getPoolInfo(params: {
-    client: Algodv2;
-    network: SupportedNetwork;
-    contractVersion: ContractVersionValue;
-    asset1ID: number;
-    asset2ID: number;
-}): Promise<PoolInfo>;
-/**
- * @returns Information object for the pool with given arguments
- */
-export declare function getV2PoolInfo(params: {
-    client: Algodv2;
-    network: SupportedNetwork;
-    contractVersion: ContractVersionValue;
-    asset1ID: number;
-    asset2ID: number;
-}): Promise<V2PoolInfo>;
-export declare function getPoolReserves(client: Algodv2, pool: PoolInfo): Promise<PoolReserves>;
+import { SupportedNetwork } from "../../commonTypes";
+import { PoolInfo, PoolReserves } from "../poolTypes";
 /**
  * @param {bigint} totalLiquidity Total amount of issued liquidity within a pool
  * @param {bigint} ownedLiquidity Amount of liquidity tokens within an account
  * @returns Percentage of liquidity that the account holds
  */
 export declare function getPoolShare(totalLiquidity: bigint, ownedLiquidity: bigint): number;
-interface PoolAssets {
-    asset1ID: number;
-    asset2ID: number;
-    liquidityTokenID: number;
-}
-/**
- * Find out the ids of a pool's liquidity token and assets
- */
-export declare function getPoolAssets({ client, address, network, contractVersion }: {
-    client: Algodv2;
-    address: string;
-    network: SupportedNetwork;
-    contractVersion: ContractVersionValue;
-}, cache?: Record<string, PoolAssets>): Promise<PoolAssets | null>;
 /**
  * Calculates the pair ratio for the pool reserves
  */
@@ -73,4 +40,3 @@ export declare function getPoolsForPair(params: {
     asset1ID: number;
     asset2ID: number;
 }): Promise<PoolInfo[]>;
-export {};

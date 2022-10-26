@@ -9,14 +9,11 @@ import {CONTRACT_VERSION} from "../constants";
 import {V2PoolLogicSig, V2ValidatorApp} from "./types";
 import {sortAssetIds} from "../../util/asset/assetUtils";
 
-export class TinymanContractV2 extends BaseTinymanContract<
-  V2ValidatorApp,
-  V2PoolLogicSig
-> {
+export class TinymanContractV2 extends BaseTinymanContract<V2ValidatorApp> {
   private poolLogicSigContractTemplate: string;
 
   constructor(validatorApp: V2ValidatorApp, poolLogicSig: V2PoolLogicSig) {
-    super(validatorApp, poolLogicSig);
+    super(validatorApp);
 
     this.poolLogicSigContractTemplate = poolLogicSig.logic.bytecode;
   }

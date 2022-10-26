@@ -2,26 +2,25 @@ import {LogicSigAccount} from "algosdk";
 import {toByteArray} from "base64-js";
 
 import {SupportedNetwork} from "../../util/commonTypes";
-import {V1_1PoolLogicSig, V1_1ValidatorApp} from "../v1_1/types";
-import {V2PoolLogicSig, V2ValidatorApp} from "../v2/types";
+import {V1_1ValidatorApp} from "../v1_1/types";
+import {V2ValidatorApp} from "../v2/types";
 
 export interface ValidatorAppSchema {
-  numLocalInts: any;
-  numLocalByteSlices: any;
-  numGlobalInts: any;
-  numGlobalByteSlices: any;
+  numLocalInts: number;
+  numLocalByteSlices: number;
+  numGlobalInts: number;
+  numGlobalByteSlices: number;
 }
 
 export abstract class BaseTinymanContract<
-  ValidatorApp extends V1_1ValidatorApp | V2ValidatorApp,
-  PoolLogicSig extends V1_1PoolLogicSig | V2PoolLogicSig
+  ValidatorApp extends V1_1ValidatorApp | V2ValidatorApp
 > {
   validatorApprovalContract: Uint8Array;
   validatorClearStateContract: Uint8Array;
 
   schema: ValidatorAppSchema;
 
-  constructor(validatorApp: ValidatorApp, _poolLogicSig: PoolLogicSig) {
+  constructor(validatorApp: ValidatorApp) {
     this.validatorApprovalContract = toByteArray(validatorApp.approval_program.bytecode);
     this.validatorClearStateContract = toByteArray(validatorApp.clear_program.bytecode);
 
