@@ -12,7 +12,7 @@ import TinymanError from "./util/error/TinymanError";
 import {DEFAULT_FEE_TXN_NOTE, MINIMUM_LIQUIDITY_MINTING_AMOUNT} from "./util/constant";
 import {ALGO_ASSET_ID} from "./util/asset/assetConstants";
 import {PoolInfo, PoolReserves} from "./util/pool/poolTypes";
-import {getPoolShare} from "./util/pool/poolUtils";
+import {poolUtils} from "./util/pool";
 import {getAccountExcessWithinPool} from "./util/account/accountUtils";
 
 /** An object containing information about a mint quote. */
@@ -122,7 +122,7 @@ export function getMintLiquidityQuote({
     asset2In: BigInt(asset2In),
     liquidityID: pool.liquidityTokenID!,
     liquidityOut,
-    share: getPoolShare(reserves.issuedLiquidity + liquidityOut, liquidityOut)
+    share: poolUtils.getPoolShare(reserves.issuedLiquidity + liquidityOut, liquidityOut)
   };
 }
 

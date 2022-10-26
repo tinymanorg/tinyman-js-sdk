@@ -1,13 +1,21 @@
 import {CONTRACT_VERSION} from "../../contract/constants";
 
-export const ENCODED_APP_STATE_KEYS = {
+export const DECODED_APP_STATE_KEYS = {
   [CONTRACT_VERSION.V1_1]: {
-    asset1: btoa("a1"),
-    asset2: btoa("a2")
+    asset1: "a1",
+    asset2: "a2"
   },
   [CONTRACT_VERSION.V2]: {
-    asset1: btoa("asset_1_id"),
-    asset2: btoa("asset_2_id"),
-    liquidityTokenID: btoa("pool_token_asset_id")
+    asset1: "asset_1_id",
+    asset2: "asset_2_id",
+    liquidityTokenID: "pool_token_asset_id",
+    issuedPoolTokens: "issued_pool_tokens",
+    asset1Reserves: "asset_1_reserves",
+    asset2Reserves: "asset_2_reserves",
+    asset1ProtocolFees: "asset_1_protocol_fees",
+    asset2ProtocolFees: "asset_2_protocol_fees",
+    totalFeeShare: "total_fee_share",
+    protocolFeeRatio: "protocol_fee_ratio",
+    cumulativePriceUpdateTimeStamp: "cumulative_price_update_timestamp"
   }
 };
