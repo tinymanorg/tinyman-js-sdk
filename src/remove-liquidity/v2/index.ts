@@ -62,12 +62,14 @@ export function getSingleAssetRemoveLiquidityQuote({
   reserves,
   poolTokenAssetInAmount: poolTokenAssetIn,
   assetOutID,
+  decimals,
   slippage = 0.05
 }: {
   pool: V2PoolInfo;
   reserves: PoolReserves;
   poolTokenAssetInAmount: number | bigint;
   assetOutID: number;
+  decimals: {assetIn: number; assetOut: number};
   slippage?: number;
 }): V2SingleAssetRemoveLiquidityQuote {
   const poolTokenAssetIn_bigInt = BigInt(poolTokenAssetIn);
@@ -84,7 +86,8 @@ export function getSingleAssetRemoveLiquidityQuote({
         input_supply: reserves.asset2 - asset_2_output_amount,
         output_supply: reserves.asset1 - asset_1_output_amount,
         swap_input_amount: asset_2_output_amount,
-        total_fee_share
+        total_fee_share,
+        decimals
       });
 
     quote = {
@@ -120,7 +123,8 @@ export function getSingleAssetRemoveLiquidityQuote({
         input_supply: reserves.asset1 - asset_1_output_amount,
         output_supply: reserves.asset2 - asset_2_output_amount,
         swap_input_amount: asset_1_output_amount,
-        total_fee_share
+        total_fee_share,
+        decimals
       });
 
     quote = {
