@@ -12,7 +12,7 @@ import TinymanError from "../../util/error/TinymanError";
 import {PoolInfo, PoolReserves, PoolStatus} from "../../util/pool/poolTypes";
 import {getTxnGroupID, sendAndWaitRawTransaction, sumUpTxnFees} from "../../util/util";
 import {getValidatorAppID} from "../../validator";
-import {MintExecution, MintTxnIndices} from "../types";
+import {MintExecution} from "../types";
 import {isAlgo} from "../../util/asset/assetUtils";
 import {getPoolShare} from "../../util/pool/poolUtils";
 import {calculateSubsequentAddLiquidity} from "./util";
@@ -61,6 +61,8 @@ export function getQuote({
     swapFees: swapTotalFeeAmount,
     priceImpact: swapPriceImpact
   };
+
+  console.log(poolTokenAssetAmount, "pool token asset amount");
 
   return {
     asset1ID: pool.asset1ID,
@@ -186,10 +188,6 @@ export async function execute({
   signedTxns: Uint8Array[];
 }): Promise<MintExecution> {
   try {
-    const liquidityOutAmount = BigInt(
-      txGroup[MintTxnIndices.LIQUDITY_OUT_TXN].txn.amount
-    );
-
     const [{confirmedRound, txnID}] = await sendAndWaitRawTransaction(client, [
       signedTxns
     ]);
@@ -200,7 +198,6 @@ export async function execute({
       round: confirmedRound,
       fees,
       liquidityID: pool.liquidityTokenID!,
-      liquidityOut: liquidityOutAmount,
       txnID,
       groupID
     };

@@ -34,7 +34,7 @@ export function calculateSubsequentAddLiquidity(
   if (asset1SwapAmount > asset2SwapAmount) {
     const swapInAmountWithoutFee = asset1SwapAmount;
 
-    swapOutAmount = BigInt(-Math.min(Number(asset2SwapAmount), 0));
+    swapOutAmount = BigInt(Math.abs(Math.min(Number(asset2SwapAmount), 0)));
     swapFromAsset1ToAsset2 = true;
     swapTotalFeeAmount = calculateInternalSwapFeeAmount(
       swapInAmountWithoutFee,
@@ -49,7 +49,7 @@ export function calculateSubsequentAddLiquidity(
   } else {
     const swapInAmountWithoutFee = asset2SwapAmount;
 
-    swapOutAmount = BigInt(-Math.min(Number(asset1SwapAmount), 0));
+    swapOutAmount = BigInt(Math.abs(Math.min(Number(asset1SwapAmount), 0)));
     swapFromAsset1ToAsset2 = false;
     swapTotalFeeAmount = calculateInternalSwapFeeAmount(
       swapInAmountWithoutFee,
@@ -81,23 +81,20 @@ export function calculateSubsequentAddLiquidity(
 }
 
 function calculateInternalSwapFeeAmount(
-  swapAmount: number | bigint,
+  swapAmount: bigint,
   totalFeeShare: number | bigint
 ) {
-  return (
-    //  ?????
-    BigInt(swapAmount) * BigInt(totalFeeShare) * (BigInt(10_000) - BigInt(totalFeeShare))
-  );
+  return swapAmount * BigInt(totalFeeShare) * (BigInt(10_000) - BigInt(totalFeeShare));
 }
 
 function calculatePriceImpact(
-  inputSupply: number | bigint,
-  outputSupply: number | bigint,
-  swapInputAmount: number | bigint,
-  swapOutputAmount: number | bigint
+  inputSupply: bigint,
+  outputSupply: bigint,
+  swapInputAmount: bigint,
+  swapOutputAmount: bigint
 ) {
-  const swapPrice = BigInt(swapOutputAmount) / BigInt(swapInputAmount);
-  const poolPrice = BigInt(outputSupply) / BigInt(inputSupply);
+  const swapPrice = swapOutputAmount / swapInputAmount;
+  const poolPrice = outputSupply / inputSupply;
   const priceImpact = BigInt(
     Math.abs(Math.round(Number(swapPrice / poolPrice - BigInt(1))))
   );
