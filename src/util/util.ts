@@ -24,7 +24,7 @@ export function decodeState(
       throw new Error(`Unexpected state type: ${pair.value.type}`);
     }
 
-    state[key] = value;
+    state[atob(key)] = value;
   }
 
   return state;

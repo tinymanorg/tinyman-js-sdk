@@ -11,15 +11,12 @@ import {CONTRACT_VERSION} from "../constants";
 import {PoolLogicSigVariables, V1_1PoolLogicSig, V1_1ValidatorApp} from "./types";
 import {sortAssetIds} from "../../util/asset/assetUtils";
 
-export class TinymanContractV1_1 extends BaseTinymanContract<
-  V1_1ValidatorApp,
-  V1_1PoolLogicSig
-> {
+export class TinymanContractV1_1 extends BaseTinymanContract<V1_1ValidatorApp> {
   private poolLogicSigContractTemplate: string;
   private templateVariables: PoolLogicSigVariables;
 
   constructor(validatorApp: V1_1ValidatorApp, poolLogicSig: V1_1PoolLogicSig) {
-    super(validatorApp, poolLogicSig);
+    super(validatorApp);
 
     this.poolLogicSigContractTemplate = poolLogicSig.logic.bytecode;
     this.templateVariables = poolLogicSig.logic.variables;

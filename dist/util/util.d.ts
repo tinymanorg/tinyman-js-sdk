@@ -45,6 +45,7 @@ export declare function sendAndWaitRawTransaction(client: Algodv2, signedTxnGrou
 }[]>;
 export declare function sumUpTxnFees(txns: SignerTransaction[]): number;
 export declare function getTxnGroupID(txns: SignerTransaction[]): string;
+export declare function encodeInteger(number: any): number[];
 /**
  * Converts a text into bytes
  */

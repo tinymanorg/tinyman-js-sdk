@@ -63,17 +63,7 @@ export {
 
 export type {PoolStatus, PoolInfo, PoolReserves} from "./util/pool/poolTypes";
 
-export {
-  getPoolInfo,
-  getPoolReserves,
-  getPoolShare,
-  getPoolPairRatio,
-  isPoolEmpty,
-  isPoolNotCreated,
-  isPoolReady,
-  getPoolAssets,
-  getPoolsForPair
-} from "./util/pool/poolUtils";
+export {poolUtils} from "./util/pool";
 
 export {Bootstrap} from "./bootstrap";
 

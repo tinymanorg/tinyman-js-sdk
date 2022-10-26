@@ -15,13 +15,13 @@ import {
 import {MINIMUM_BALANCE_REQUIRED_PER_ASSET} from "../../util/constant";
 import TinymanError from "../../util/error/TinymanError";
 import {PoolInfo, PoolStatus} from "../../util/pool/poolTypes";
-import {getPoolInfo} from "../../util/pool/poolUtils";
 import {encodeString, waitForConfirmation} from "../../util/util";
 import {getValidatorAppID} from "../../validator";
 import {getPoolAccountMinBalance} from "../common/utils";
 import {isAlgo, prepareAssetPairData, sortAssetIds} from "../../util/asset/assetUtils";
 import {tinymanContract_v2} from "../../contract/v2/contract";
 import {AccountInformation} from "../../util/account/accountTypes";
+import {poolUtils} from "../../util/pool";
 
 enum BootstrapTxnGroupIndices {
   FUNDING_TXN = 0,
@@ -56,10 +56,9 @@ async function generateTxns({
   // Make sure asset1 has greater ID
   const [{id: asset1ID}, {id: asset2ID}] = prepareAssetPairData(asset_1, asset_2);
 
-  const poolInfo = await getPoolInfo({
+  const poolInfo = await poolUtils.v2.getPoolInfo({
     client,
     network,
-    contractVersion: CONTRACT_VERSION.V2,
     asset1ID,
     asset2ID
   });
@@ -245,10 +244,9 @@ async function execute({
 }): Promise<PoolInfo> {
   await doBootstrap({client, signedTxns, txnIDs});
 
-  return getPoolInfo({
+  return poolUtils.v2.getPoolInfo({
     client,
     network,
-    contractVersion: CONTRACT_VERSION.V2,
     asset1ID,
     asset2ID
   });
