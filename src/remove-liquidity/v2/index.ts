@@ -426,8 +426,17 @@ function getSingleAssetRemoveLiquidityQuoteAmountWithSlippage(
   };
 }
 
-function getAmountWithSlippage(amount: bigint, slippage: number | bigint): bigint {
-  return amount - amount * BigInt(slippage);
+function getAmountWithSlippage(amount: bigint, slippage: number): bigint {
+  return amount - multiplyBigIntWithFloat(amount, slippage);
+}
+
+/**
+ * TODO: this is a workaround just for testing, probably we can find a better way
+ */
+function multiplyBigIntWithFloat(bigIntNumber: bigint, floatNumber: number): bigint {
+  const MULTIPLIER = 1_000_000_000_000_000;
+
+  return (bigIntNumber * BigInt(MULTIPLIER * floatNumber)) / BigInt(MULTIPLIER);
 }
 
 export const RemoveLiquidityV2 = {
