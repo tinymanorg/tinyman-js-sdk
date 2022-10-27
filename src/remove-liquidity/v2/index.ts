@@ -169,7 +169,7 @@ function calculateRemoveLiquidityOutputAmounts(
     asset_1_output_amount =
       (poolTokenAssetAmountBigInt * reserves.asset1) / issuedPoolTokens;
     asset_2_output_amount =
-      (poolTokenAssetAmountBigInt * reserves.asset1) / issuedPoolTokens;
+      (poolTokenAssetAmountBigInt * reserves.asset2) / issuedPoolTokens;
   } else {
     asset_1_output_amount = reserves.asset1;
     asset_2_output_amount = reserves.asset2;
@@ -312,7 +312,7 @@ async function generateSingleAssetOutTxns({
       algosdk.encodeUint64(minAsset2Amount)
     ],
     accounts: [poolAddress],
-    foreignAssets: [pool.asset1ID, pool.asset2ID],
+    foreignAssets: [outputAssetId],
     suggestedParams
   });
 
