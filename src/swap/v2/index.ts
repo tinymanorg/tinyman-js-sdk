@@ -69,11 +69,10 @@ async function generateTxns({
     ],
     accounts: [poolAddress],
     foreignAssets: [pool.asset1ID, pool.asset2ID],
-    suggestedParams: {
-      ...suggestedParams,
-      fee: getSwapAppCallFeeAmount(swapType)
-    }
+    suggestedParams
   });
+
+  appCallTxn.fee = getSwapAppCallFeeAmount(swapType);
 
   let txns: Transaction[] = [];
 
@@ -116,7 +115,7 @@ function getSwapAppCallFeeAmount(swapType: SwapType) {
   return totalTxnCount * ALGORAND_MIN_TX_FEE;
 }
 
-interface V2SwapExecution {
+export interface V2SwapExecution {
   assetIn: {assetID: number; amount: number | bigint};
   assetOut: {assetID: number; amount: number | bigint};
   pool: V2PoolInfo;
