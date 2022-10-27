@@ -89,31 +89,22 @@ async function generateTxns({
     },
     {
       txn: txGroup[V2SwapTxnGroupIndices.APP_CALL_TXN],
-      signers: [poolAddress]
+      signers: [initiatorAddr]
     }
   ];
 }
 
 async function signTxns({
-  pool,
   txGroup,
   initiatorSigner
 }: {
-  pool: V2PoolInfo;
   txGroup: SignerTransaction[];
   initiatorSigner: InitiatorSigner;
 }): Promise<Uint8Array[]> {
-  const [signedInputTxn] = await initiatorSigner([txGroup]);
-
-  const signedTxns = txGroup.map((txDetail, index) => {
-    if (index === V2SwapTxnGroupIndices.INPUT_TXN) {
-      return signedInputTxn;
-    }
-
-    const {blob} = algosdk.signLogicSigTransactionObject(txDetail.txn, pool.account.lsig);
-
-    return blob;
-  });
+  /**
+   * TODO: do we still need `signTxns` function?
+   */
+  const signedTxns = await initiatorSigner([txGroup]);
 
   return signedTxns;
 }
