@@ -69,11 +69,10 @@ async function generateTxns({
     ],
     accounts: [poolAddress],
     foreignAssets: [pool.asset1ID, pool.asset2ID],
-    suggestedParams: {
-      ...suggestedParams,
-      fee: getSwapAppCallFeeAmount(swapType)
-    }
+    suggestedParams
   });
+
+  appCallTxn.fee = getSwapAppCallFeeAmount(swapType);
 
   let txns: Transaction[] = [];
 
