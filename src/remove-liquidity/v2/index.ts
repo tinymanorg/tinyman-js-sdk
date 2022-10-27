@@ -1,12 +1,7 @@
 import algosdk, {Algodv2, ALGORAND_MIN_TX_FEE, Transaction} from "algosdk";
 
-import {tinymanContract_v2} from "../../contract/v2/contract";
 import {SwapV2} from "../../swap/v2";
-import {
-  SignerTransaction,
-  InitiatorSigner,
-  SupportedNetwork
-} from "../../util/commonTypes";
+import {SignerTransaction, InitiatorSigner} from "../../util/commonTypes";
 import {PoolReserves, V2PoolInfo} from "../../util/pool/poolTypes";
 import {getTxnGroupID, sendAndWaitRawTransaction} from "../../util/util";
 import {
@@ -253,7 +248,7 @@ async function generateTxns({
     },
     {
       txn: txGroup[V2RemoveLiquidityTxnIndices.APP_CALL_TXN],
-      signers: [poolAddress]
+      signers: [initiatorAddr]
     }
   ];
 }
@@ -332,6 +327,10 @@ async function generateSingleAssetOutTxns({
 
   const txGroup = algosdk.assignGroupID(txns);
 
+  /**
+   * TODO: Both are to be signed by `initiatorAddr`,
+   * so should we remove indices enum etc?
+   */
   return [
     {
       txn: txGroup[V2RemoveLiquidityTxnIndices.ASSET_TRANSFER_TXN],
@@ -339,37 +338,20 @@ async function generateSingleAssetOutTxns({
     },
     {
       txn: txGroup[V2RemoveLiquidityTxnIndices.APP_CALL_TXN],
-      signers: [poolAddress]
+      signers: [initiatorAddr]
     }
   ];
 }
 
 async function signTxns({
-  pool,
-  network,
   txGroup,
   initiatorSigner
 }: {
-  pool: V2PoolInfo;
-  network: SupportedNetwork;
   txGroup: SignerTransaction[];
   initiatorSigner: InitiatorSigner;
 }): Promise<Uint8Array[]> {
-  const [signedAssetTransferTxn] = await initiatorSigner([txGroup]);
-  const poolLogicSig = tinymanContract_v2.generateLogicSigAccountForPool({
-    network,
-    asset1ID: pool.asset1ID,
-    asset2ID: pool.asset2ID
-  });
-
-  const signedTxns = txGroup.map((txDetail, index) => {
-    if (index === V2RemoveLiquidityTxnIndices.ASSET_TRANSFER_TXN) {
-      return signedAssetTransferTxn;
-    }
-    const {blob} = algosdk.signLogicSigTransactionObject(txDetail.txn, poolLogicSig);
-
-    return blob;
-  });
+  // TODO: Do we still need this function? It just runs `initiatorSigner`
+  const signedTxns = await initiatorSigner([txGroup]);
 
   return signedTxns;
 }
