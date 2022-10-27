@@ -318,7 +318,7 @@ async function generateSingleAssetOutTxns({
 
   // Add + 1 for outer txn cost
   validatorAppCallTxn.fee =
-    (V2_REMOVE_LIQUIDITY_APP_CALL_INNER_TXN_COUNT + 1) * suggestedParams.fee;
+    (V2_REMOVE_LIQUIDITY_APP_CALL_INNER_TXN_COUNT + 1) * ALGORAND_MIN_TX_FEE;
 
   const txns: Transaction[] = [];
 
