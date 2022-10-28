@@ -20,6 +20,7 @@ export function calculateSubsequentAddLiquidity(
       )
     )
   );
+
   let poolTokenAssetAmount = newIssuedPoolTokens - reserves.issuedLiquidity;
   const calculatedAsset1Amount =
     (poolTokenAssetAmount * newAsset1Reserves) / newIssuedPoolTokens;
@@ -96,7 +97,7 @@ function calculateInternalSwapFeeAmount(
   swapAmount: bigint,
   totalFeeShare: number | bigint
 ) {
-  return swapAmount * BigInt(totalFeeShare) * (BigInt(10_000) - BigInt(totalFeeShare));
+  return (swapAmount * BigInt(totalFeeShare)) / (BigInt(10_000) - BigInt(totalFeeShare));
 }
 
 function calculatePriceImpact(
@@ -107,9 +108,7 @@ function calculatePriceImpact(
 ) {
   const swapPrice = swapOutputAmount / swapInputAmount;
   const poolPrice = outputSupply / inputSupply;
-  const priceImpact = BigInt(
-    Math.abs(Math.round(Number(swapPrice / poolPrice - BigInt(1))))
-  );
+  const swapPoolPriceRatio = swapPrice / poolPrice;
 
-  return priceImpact;
+  return BigInt(Math.abs(Math.round(Number(swapPoolPriceRatio - BigInt(1)))));
 }
