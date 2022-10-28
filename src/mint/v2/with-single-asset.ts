@@ -4,10 +4,81 @@ import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
 import {MINT_APP_CALL_ARGUMENTS, V2_MINT_INNER_TXN_COUNT} from "../constants";
 import {CONTRACT_VERSION} from "../../contract/constants";
 import {SupportedNetwork} from "../../util/commonTypes";
-import {PoolInfo} from "../../util/pool/poolTypes";
+import {PoolInfo, PoolReserves, PoolStatus} from "../../util/pool/poolTypes";
 import {getValidatorAppID} from "../../validator";
 import {isAlgo} from "../../util/asset/assetUtils";
+import {calculateSubsequentAddLiquidity} from "./util";
+import {poolUtils} from "../../util/pool";
 export * from "./common";
+
+/**
+ * Get a quote for how many liquidity tokens a deposit of asset1In and asset2In is worth at this
+ * moment. This does not execute any transactions.
+ *
+ * @param params.pool Information for the pool.
+ * @param params.reserves Pool reserves.
+ * @param params.asset1In The quantity of the first asset being deposited.
+ * @param params.asset2In The quantity of the second asset being deposited.
+ */
+export function getQuote({
+  pool,
+  reserves,
+  assetIn,
+  slippage = 0.05
+}: {
+  pool: PoolInfo;
+  reserves: PoolReserves;
+  assetIn: {
+    id: number;
+    amount: number | bigint;
+  };
+  slippage?: number;
+}) {
+  if (reserves.issuedLiquidity === 0n) {
+    throw new Error("Pool has no liquidity");
+  }
+
+  if (pool.status !== PoolStatus.READY) {
+    throw new Error("Pool is not ready");
+  }
+
+  const isAsset1 = assetIn.id === pool.asset1ID;
+
+  const {
+    poolTokenAssetAmount,
+    swapInAmount,
+    swapOutAmount,
+    swapPriceImpact,
+    swapTotalFeeAmount
+  } = calculateSubsequentAddLiquidity(
+    reserves,
+    pool.totalFeeShare!,
+    isAsset1 ? assetIn.amount : 0,
+    isAsset1 ? 0 : assetIn.amount
+  );
+
+  const swapQuote = {
+    amountIn: swapInAmount,
+    amountOut: swapOutAmount,
+    swapFees: swapTotalFeeAmount,
+    priceImpact: swapPriceImpact
+  };
+
+  return {
+    asset1ID: pool.asset1ID,
+    asset2ID: pool.asset2ID,
+    assetIn: BigInt(assetIn.amount),
+    liquidityOut: poolTokenAssetAmount,
+    liquidityID: pool.liquidityTokenID!,
+    round: reserves.round,
+    share: poolUtils.getPoolShare(
+      reserves.issuedLiquidity + swapOutAmount,
+      swapOutAmount
+    ),
+    slippage,
+    swapQuote
+  };
+}
 
 export async function generateTxns({
   client,
