@@ -93,19 +93,14 @@ async function generateTxns({
   ];
 }
 
-async function signTxns({
+function signTxns({
   txGroup,
   initiatorSigner
 }: {
   txGroup: SignerTransaction[];
   initiatorSigner: InitiatorSigner;
 }): Promise<Uint8Array[]> {
-  /**
-   * TODO: do we still need `signTxns` function?
-   */
-  const signedTxns = await initiatorSigner([txGroup]);
-
-  return signedTxns;
+  return initiatorSigner([txGroup]);
 }
 
 function getSwapAppCallFeeAmount(swapType: SwapType) {
@@ -227,11 +222,11 @@ function getFixedInputSwapQuote({
     outputSupply = reserves.asset1;
   }
 
-  const {swap_output_amount, total_fee_amount, price_impact} = calculateFixedInputSwap({
-    input_supply: inputSupply,
-    output_supply: outputSupply,
-    swap_input_amount: assetInAmount,
-    total_fee_share: totalFeeShare,
+  const {swapOutputAmount, totalFeeAmount, priceImpact} = calculateFixedInputSwap({
+    inputSupply,
+    outputSupply,
+    swapInputAmount: assetInAmount,
+    totalFeeShare,
     decimals
   });
 
@@ -240,13 +235,12 @@ function getFixedInputSwapQuote({
     assetInID: assetIn.assetID,
     assetInAmount,
     assetOutID,
-    assetOutAmount: swap_output_amount,
-    swapFee: Number(total_fee_amount),
-    // slippage,
+    assetOutAmount: swapOutputAmount,
+    swapFee: Number(totalFeeAmount),
     rate:
-      convertFromBaseUnits(decimals.assetOut, Number(swap_output_amount)) /
+      convertFromBaseUnits(decimals.assetOut, Number(swapOutputAmount)) /
       convertFromBaseUnits(decimals.assetIn, Number(assetInAmount)),
-    priceImpact: price_impact
+    priceImpact
   };
 }
 
@@ -271,7 +265,6 @@ function getFixedOutputSwapQuote({
   let inputSupply: bigint;
   let outputSupply: bigint;
 
-  // check this again
   if (assetOut.assetID === pool.asset1ID) {
     assetInID = pool.asset2ID;
     inputSupply = reserves.asset2;
@@ -282,172 +275,186 @@ function getFixedOutputSwapQuote({
     outputSupply = reserves.asset2;
   }
 
-  const {swap_input_amount, total_fee_amount, price_impact} = calculateFixedOutputSwap({
-    input_supply: inputSupply,
-    output_supply: outputSupply,
-    swap_output_amount: assetOutAmount,
-    total_fee_share: totalFeeShare,
+  const {swapInputAmount, totalFeeAmount, priceImpact} = calculateFixedOutputSwap({
+    inputSupply,
+    outputSupply,
+    swapOutputAmount: assetOutAmount,
+    totalFeeShare,
     decimals
   });
 
   return {
     round: reserves.round,
     assetInID,
-    assetInAmount: swap_input_amount,
+    assetInAmount: swapInputAmount,
     assetOutID: assetOut.assetID,
     assetOutAmount,
-    swapFee: Number(total_fee_amount),
-    // TODO: do we need slippage?
-    // slippage,
+    swapFee: Number(totalFeeAmount),
     rate:
       convertFromBaseUnits(decimals.assetOut, Number(assetOutAmount)) /
-      convertFromBaseUnits(decimals.assetIn, Number(swap_input_amount)),
-    priceImpact: price_impact
+      convertFromBaseUnits(decimals.assetIn, Number(swapInputAmount)),
+    priceImpact
   };
 }
 
 function calculateFixedInputSwap({
-  input_supply,
-  output_supply,
-  swap_input_amount,
-  total_fee_share,
+  inputSupply,
+  outputSupply,
+  swapInputAmount,
+  totalFeeShare,
   decimals
 }: {
-  input_supply: bigint;
-  output_supply: bigint;
-  swap_input_amount: bigint;
-  total_fee_share: bigint;
+  inputSupply: bigint;
+  outputSupply: bigint;
+  swapInputAmount: bigint;
+  totalFeeShare: bigint;
   decimals: {assetIn: number; assetOut: number};
 }) {
-  const total_fee_amount = BigInt(
-    calculate_fixed_input_fee_amount({
-      input_amount: swap_input_amount,
-      total_fee_share
+  const totalFeeAmount = BigInt(
+    calculateFixedInputFeeAmount({
+      inputAmount: swapInputAmount,
+      totalFeeShare
     })
   );
-  const swap_amount = swap_input_amount - total_fee_amount;
-  const swap_output_amount = calculate_output_amount_of_fixed_input_swap(
-    input_supply,
-    output_supply,
-    swap_amount
-  );
-
-  const price_impact = calculate_price_impact(
-    input_supply,
-    output_supply,
-    swap_input_amount,
-    swap_output_amount,
+  const swapAmount = swapInputAmount - totalFeeAmount;
+  const swapOutputAmount = calculateOutputAmountOfFixedInputSwap({
+    inputSupply,
+    outputSupply,
+    swapAmount
+  });
+  const priceImpact = calculatePriceImpact({
+    inputSupply,
+    outputSupply,
+    swapInputAmount,
+    swapOutputAmount,
     decimals
-  );
+  });
 
-  return {swap_output_amount, total_fee_amount, price_impact};
+  return {
+    swapOutputAmount,
+    totalFeeAmount,
+    priceImpact
+  };
 }
 
 function calculateFixedOutputSwap({
-  input_supply,
-  output_supply,
-  swap_output_amount,
-  total_fee_share,
+  inputSupply,
+  outputSupply,
+  swapOutputAmount,
+  totalFeeShare,
   decimals
 }: {
-  input_supply: bigint;
-  output_supply: bigint;
-  swap_output_amount: bigint;
-  total_fee_share: bigint;
+  inputSupply: bigint;
+  outputSupply: bigint;
+  swapOutputAmount: bigint;
+  totalFeeShare: bigint;
   decimals: {assetIn: number; assetOut: number};
 }) {
-  const swap_amount = calculate_swap_amount_of_fixed_output_swap(
-    input_supply,
-    output_supply,
-    swap_output_amount
-  );
-  const total_fee_amount = calculate_fixed_output_fee_amount({
-    swap_amount,
-    total_fee_share
+  const swapAmount = calculateSwapAmountOfFixedOutputSwap({
+    inputSupply,
+    outputSupply,
+    outputAmount: swapOutputAmount
   });
-  const swap_input_amount = swap_amount + total_fee_amount;
-
-  const price_impact = calculate_price_impact(
-    input_supply,
-    output_supply,
-    swap_input_amount,
-    swap_output_amount,
+  const totalFeeAmount = calculateFixedOutputFeeAmount({
+    swapAmount,
+    totalFeeShare
+  });
+  const swapInputAmount = swapAmount + totalFeeAmount;
+  const priceImpact = calculatePriceImpact({
+    inputSupply,
+    outputSupply,
+    swapInputAmount,
+    swapOutputAmount,
     decimals
-  );
+  });
 
-  return {swap_input_amount, total_fee_amount, price_impact};
+  return {
+    swapInputAmount,
+    totalFeeAmount,
+    priceImpact
+  };
 }
 
-function calculate_fixed_input_fee_amount({
-  input_amount,
-  total_fee_share
+function calculateFixedInputFeeAmount({
+  inputAmount,
+  totalFeeShare
 }: {
-  input_amount: bigint;
-  total_fee_share: bigint;
+  inputAmount: bigint;
+  totalFeeShare: bigint;
 }) {
-  return Math.floor(Number(input_amount * BigInt(total_fee_share)) / 10_000);
+  return Math.floor(Number(inputAmount * BigInt(totalFeeShare)) / 10_000);
 }
 
-function calculate_fixed_output_fee_amount({
-  swap_amount,
-  total_fee_share
+function calculateFixedOutputFeeAmount({
+  swapAmount,
+  totalFeeShare
 }: {
-  swap_amount: bigint;
-  total_fee_share: bigint;
+  swapAmount: bigint;
+  totalFeeShare: bigint;
 }) {
   const input_amount = Math.floor(
-    Number((swap_amount * BigInt(10_000)) / (BigInt(10_000) - BigInt(total_fee_share)))
+    Number((swapAmount * BigInt(10_000)) / (BigInt(10_000) - BigInt(totalFeeShare)))
   );
-  const total_fee_amount = BigInt(input_amount) - swap_amount;
+  const total_fee_amount = BigInt(input_amount) - swapAmount;
 
   return total_fee_amount;
 }
 
-function calculate_output_amount_of_fixed_input_swap(
-  input_supply: bigint,
-  output_supply: bigint,
-  swap_amount: bigint
-): bigint {
-  const k = input_supply * output_supply;
-  let output_amount = output_supply - BigInt(k / (input_supply + BigInt(swap_amount)));
+function calculateOutputAmountOfFixedInputSwap({
+  inputSupply,
+  outputSupply,
+  swapAmount
+}: {
+  inputSupply: bigint;
+  outputSupply: bigint;
+  swapAmount: bigint;
+}): bigint {
+  const k = inputSupply * outputSupply;
+  let outputAmount = outputSupply - BigInt(k / (inputSupply + BigInt(swapAmount)));
 
-  output_amount -= BigInt(1);
+  outputAmount -= BigInt(1);
 
-  return output_amount;
+  return outputAmount;
 }
 
-function calculate_swap_amount_of_fixed_output_swap(
-  input_supply: bigint,
-  output_supply: bigint,
-  output_amount: bigint
-): bigint {
-  const k = input_supply * output_supply;
-  let swap_amount = BigInt(k / (output_supply - output_amount)) - input_supply;
+function calculateSwapAmountOfFixedOutputSwap({
+  inputSupply,
+  outputSupply,
+  outputAmount
+}: {
+  inputSupply: bigint;
+  outputSupply: bigint;
+  outputAmount: bigint;
+}): bigint {
+  const k = inputSupply * outputSupply;
+  let swapAmount = BigInt(k / (outputSupply - outputAmount)) - inputSupply;
 
-  swap_amount += BigInt(1);
+  swapAmount += BigInt(1);
 
-  return swap_amount;
+  return swapAmount;
 }
 
-function calculate_price_impact(
-  input_supply: bigint,
-  output_supply: bigint,
-  swap_input_amount: bigint,
-  swap_output_amount: bigint,
-  decimals: {assetIn: number; assetOut: number}
-): number {
-  const swap_price =
-    convertFromBaseUnits(decimals.assetOut, Number(swap_output_amount)) /
-    convertFromBaseUnits(decimals.assetIn, Number(swap_input_amount));
-  const pool_price =
-    convertFromBaseUnits(decimals.assetOut, Number(output_supply)) /
-    convertFromBaseUnits(decimals.assetIn, Number(input_supply));
-  const price_impact = roundNumber(
-    {decimalPlaces: 5},
-    Math.abs(swap_price / pool_price - 1)
-  );
+function calculatePriceImpact({
+  inputSupply,
+  outputSupply,
+  swapInputAmount,
+  swapOutputAmount,
+  decimals
+}: {
+  inputSupply: bigint;
+  outputSupply: bigint;
+  swapInputAmount: bigint;
+  swapOutputAmount: bigint;
+  decimals: {assetIn: number; assetOut: number};
+}): number {
+  const swapPrice =
+    convertFromBaseUnits(decimals.assetOut, Number(swapOutputAmount)) /
+    convertFromBaseUnits(decimals.assetIn, Number(swapInputAmount));
+  const poolPrice =
+    convertFromBaseUnits(decimals.assetOut, Number(outputSupply)) /
+    convertFromBaseUnits(decimals.assetIn, Number(inputSupply));
 
-  return price_impact;
+  return roundNumber({decimalPlaces: 5}, Math.abs(swapPrice / poolPrice - 1));
 }
 
 export const SwapV2 = {

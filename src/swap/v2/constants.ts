@@ -13,7 +13,9 @@ export const V2_SWAP_APP_CALL_INNER_TXN_COUNT = {
   [SwapType.FixedInput]: 1,
   [SwapType.FixedOutput]: 2
 } as const;
+
 export const V2_SWAP_APP_CALL_ARG_ENCODED = encodeString("swap");
+
 export const V2_SWAP_APP_CALL_SWAP_TYPE_ARGS_ENCODED = {
   [SwapType.FixedInput]: encodeString("fixed-input"),
   [SwapType.FixedOutput]: encodeString("fixed-output")
