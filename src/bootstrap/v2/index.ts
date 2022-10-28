@@ -20,22 +20,9 @@ import {getValidatorAppID} from "../../validator";
 import {getPoolAccountMinBalance} from "../common/utils";
 import {isAlgo, prepareAssetPairData, sortAssetIds} from "../../util/asset/assetUtils";
 import {tinymanContract_v2} from "../../contract/v2/contract";
-import {AccountInformation} from "../../util/account/accountTypes";
 import {poolUtils} from "../../util/pool";
 import {DECODED_APP_STATE_KEYS} from "../../util/pool/poolConstants";
-
-enum BootstrapTxnGroupIndices {
-  FUNDING_TXN = 0,
-  VALIDATOR_APP_CALL
-}
-
-/**
- * Inner txn counts according to the pool type (ASA-ALGO or ASA-ASA)
- */
-const V2_BOOTSTRAP_INNER_TXN_COUNT = {
-  ASA_ALGO: 5,
-  ASA_ASA: 6
-} as const;
+import {V2BootstrapTxnGroupIndices, V2_BOOTSTRAP_INNER_TXN_COUNT} from "./constants";
 
 async function generateTxns({
   client,
@@ -95,8 +82,8 @@ async function generateTxns({
 
   let txns: Transaction[] = [];
 
-  txns[BootstrapTxnGroupIndices.FUNDING_TXN] = fundingTxn;
-  txns[BootstrapTxnGroupIndices.VALIDATOR_APP_CALL] = appCallTxn;
+  txns[V2BootstrapTxnGroupIndices.FUNDING_TXN] = fundingTxn;
+  txns[V2BootstrapTxnGroupIndices.VALIDATOR_APP_CALL] = appCallTxn;
 
   /**
    * TODO: Ideally we need to return txns without grouping them
@@ -107,12 +94,12 @@ async function generateTxns({
 
   let signerTxns: SignerTransaction[] = [];
 
-  signerTxns[BootstrapTxnGroupIndices.FUNDING_TXN] = {
-    txn: txGroup[BootstrapTxnGroupIndices.FUNDING_TXN],
+  signerTxns[V2BootstrapTxnGroupIndices.FUNDING_TXN] = {
+    txn: txGroup[V2BootstrapTxnGroupIndices.FUNDING_TXN],
     signers: [initiatorAddr]
   };
-  signerTxns[BootstrapTxnGroupIndices.VALIDATOR_APP_CALL] = {
-    txn: txGroup[BootstrapTxnGroupIndices.VALIDATOR_APP_CALL],
+  signerTxns[V2BootstrapTxnGroupIndices.VALIDATOR_APP_CALL] = {
+    txn: txGroup[V2BootstrapTxnGroupIndices.VALIDATOR_APP_CALL],
     signers: [poolLogicSigAddress]
   };
 
@@ -164,7 +151,7 @@ async function signTxns({
   const txnIDs: string[] = [];
   const signedTxns = txGroup.map((txDetail, index) => {
     // Funding txn should be signed by the user
-    if (index === BootstrapTxnGroupIndices.FUNDING_TXN) {
+    if (index === V2BootstrapTxnGroupIndices.FUNDING_TXN) {
       txnIDs.push(txDetail.txn.txID().toString());
       return signedFundingTxn;
     }
@@ -193,22 +180,13 @@ async function doBootstrap({
   try {
     await client.sendRawTransaction(signedTxns).do();
 
-    /**
-     * TODO: Try to improve this data extraction part
-     **/
-    const assetCreationResult = (await waitForConfirmation(
+    const assetCreationResult = await waitForConfirmation(
       client,
-      txnIDs[BootstrapTxnGroupIndices.VALIDATOR_APP_CALL]
-    )) as {
-      "confirmed-round": number;
-      "local-state-delta": {
-        delta: AccountInformation["apps-local-state"][0]["key-value"];
-      }[];
-      txn: Transaction;
-    };
-    const localState = assetCreationResult["local-state-delta"][0].delta;
-    const poolTokenAssetId = localState?.find(
-      (kv) => kv.key === btoa(DECODED_APP_STATE_KEYS.v2.liquidityTokenID)
+      txnIDs[V2BootstrapTxnGroupIndices.VALIDATOR_APP_CALL]
+    );
+    // TODO: We can maybe improve this part, add some type to `assetCreationResult`
+    const poolTokenAssetId = assetCreationResult["local-state-delta"][0].delta?.find(
+      ({key}) => key === btoa(DECODED_APP_STATE_KEYS.v2.liquidityTokenID)
     )?.value.uint;
 
     if (typeof poolTokenAssetId !== "number") {

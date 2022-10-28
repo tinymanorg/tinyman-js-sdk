@@ -48,10 +48,10 @@ export function execute(params: {
   // TODO: can we solve this better? (return type actually depends on contract version arg)
 }): Promise<V1PoolInfo | V2PoolInfo> {
   if (params.contractVersion === CONTRACT_VERSION.V1_1) {
-    return BootstrapV1_1.execute(params) as Promise<V1PoolInfo>;
+    return BootstrapV1_1.execute(params);
   }
 
-  return BootstrapV2.execute(params) as Promise<V2PoolInfo>;
+  return BootstrapV2.execute(params);
 }
 
 /**

@@ -14,7 +14,7 @@ import {getValidatorAppID} from "../../validator";
 import {CONTRACT_VERSION} from "../../contract/constants";
 import {TinymanAnalyticsApiAsset} from "../../util/asset/assetModels";
 import {isAlgo, prepareAssetPairData, sortAssetIds} from "../../util/asset/assetUtils";
-import {V1_1BootstrapTxnGroupIndices, V1_BOOTSTRAP_TXN_COUNT} from "./constants";
+import {V1_1BootstrapTxnGroupIndices, V1_1_BOOTSTRAP_TXN_COUNT} from "./constants";
 import {tinymanContract_v1_1} from "../../contract/v1_1/contract";
 import {poolUtils} from "../../util/pool";
 
@@ -143,7 +143,9 @@ function getBootstrapFundingTxnAmount(isAlgoPool: boolean) {
 }
 
 function getBootstrapProcessTxnCount(isAlgoPool: boolean) {
-  return isAlgoPool ? V1_BOOTSTRAP_TXN_COUNT.ASA_ALGO : V1_BOOTSTRAP_TXN_COUNT.ASA_ASA;
+  return isAlgoPool
+    ? V1_1_BOOTSTRAP_TXN_COUNT.ASA_ALGO
+    : V1_1_BOOTSTRAP_TXN_COUNT.ASA_ASA;
 }
 
 async function signTxns({
