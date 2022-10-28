@@ -2,6 +2,7 @@ import algosdk from "algosdk";
 import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
 import { SupportedNetwork } from "../../util/commonTypes";
 import { PoolInfo } from "../../util/pool/poolTypes";
+export * from "./common";
 export declare function generateTxns({ client, network, poolAddress, asset_1, asset_2, liquidityToken, initiatorAddr }: {
     client: AlgodClient;
     pool: PoolInfo;

@@ -1,25 +1,16 @@
 import algosdk, {ALGORAND_MIN_TX_FEE, encodeUint64} from "algosdk";
 import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
 
-import {MINT_APP_CALL_ARGUMENTS, V2_MINT_INNER_TXN_COUNT} from "../constants";
 import {CONTRACT_VERSION} from "../../contract/constants";
-import {SupportedNetwork} from "../../util/commonTypes";
-import {PoolInfo, PoolReserves, PoolStatus} from "../../util/pool/poolTypes";
-import {getValidatorAppID} from "../../validator";
-import {calculateSubsequentAddLiquidity} from "./util";
-import {poolUtils} from "../../util/pool";
 import {isAlgo} from "../../util/asset/assetUtils";
+import {SupportedNetwork} from "../../util/commonTypes";
+import {PoolReserves, V2PoolInfo} from "../../util/pool/poolTypes";
+import {getValidatorAppID} from "../../validator";
+import {MINT_APP_CALL_ARGUMENTS, V2_MINT_INNER_TXN_COUNT} from "../constants";
+import {calculateInitialAddLiquidity} from "./util";
 export * from "./common";
 
-/**
- * Get a quote for how many liquidity tokens a deposit of asset1In and asset2In is worth at this
- * moment. This does not execute any transactions.
- *
- * @param params.pool Information for the pool.
- * @param params.reserves Pool reserves.
- * @param params.asset1In The quantity of the first asset being deposited.
- * @param params.asset2In The quantity of the second asset being deposited.
- */
+//  TO-DO: Add types
 export function getQuote({
   pool,
   reserves,
@@ -27,49 +18,25 @@ export function getQuote({
   asset2In,
   slippage = 0.05
 }: {
-  pool: PoolInfo;
+  pool: V2PoolInfo;
   reserves: PoolReserves;
   asset1In: number | bigint;
   asset2In: number | bigint;
   slippage?: number;
 }) {
-  if (reserves.issuedLiquidity === 0n) {
-    throw new Error("Pool has no liquidity");
+  if (reserves.issuedLiquidity !== 0n) {
+    throw new Error("Pool already has liquidity");
   }
 
-  if (pool.status !== PoolStatus.READY) {
-    throw new Error("Pool is not ready");
-  }
-
-  const {
-    poolTokenAssetAmount,
-    swapInAmount,
-    swapOutAmount,
-    swapPriceImpact,
-    swapTotalFeeAmount
-  } = calculateSubsequentAddLiquidity(reserves, pool.totalFeeShare!, asset1In, asset2In);
-
-  const swapQuote = {
-    amountIn: swapInAmount,
-    amountOut: swapOutAmount,
-    swapFees: swapTotalFeeAmount,
-    priceImpact: swapPriceImpact
-  };
+  const poolTokenAssetAmount = calculateInitialAddLiquidity(asset1In, asset2In);
 
   return {
-    asset1ID: pool.asset1ID,
-    asset2ID: pool.asset2ID,
-    asset1In: BigInt(asset1In),
-    asset2In: BigInt(asset2In),
-    liquidityOut: poolTokenAssetAmount,
-    liquidityID: pool.liquidityTokenID!,
-    round: reserves.round,
-    share: poolUtils.getPoolShare(
-      reserves.issuedLiquidity + swapOutAmount,
-      swapOutAmount
-    ),
-    slippage,
-    swapQuote
+    assetInID: pool.asset1ID,
+    assetOutID: pool.asset2ID,
+    assetInAmount: BigInt(asset1In),
+    assetOutAmount: BigInt(asset2In),
+    poolTokenAssetAmount,
+    slippage
   };
 }
 
@@ -84,7 +51,7 @@ export async function generateTxns({
   initiatorAddr
 }: {
   client: AlgodClient;
-  pool: PoolInfo;
+  pool: V2PoolInfo;
   network: SupportedNetwork;
   poolAddress: string;
   asset_1: {id: number; amount: number | bigint};
@@ -92,8 +59,9 @@ export async function generateTxns({
   liquidityToken: {id: number; amount: number | bigint};
   initiatorAddr: string;
 }) {
-  const suggestedParams = await client.getTransactionParams().do();
   const isAlgoPool = isAlgo(asset_2.id);
+  const suggestedParams = await client.getTransactionParams().do();
+
   const asset1InTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
     from: initiatorAddr,
     to: poolAddress,
@@ -115,11 +83,12 @@ export async function generateTxns({
         amount: asset_2.amount,
         suggestedParams
       });
+
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
     from: poolAddress,
     appIndex: getValidatorAppID(network, CONTRACT_VERSION.V2),
     appArgs: [
-      ...MINT_APP_CALL_ARGUMENTS.v2.FLEXIBLE_MODE,
+      ...MINT_APP_CALL_ARGUMENTS.v2.INITIAL_LIQUIDITY,
       encodeUint64(liquidityToken.amount)
     ],
     accounts: [poolAddress],
@@ -127,7 +96,7 @@ export async function generateTxns({
     suggestedParams: {
       ...suggestedParams,
       // Add +1 to account for the fee of the outer txn
-      fee: (V2_MINT_INNER_TXN_COUNT.FLEXIBLE_MODE + 1) * ALGORAND_MIN_TX_FEE
+      fee: (V2_MINT_INNER_TXN_COUNT.INITIAL_LIQUIDITY + 1) * ALGORAND_MIN_TX_FEE
     }
   });
 

@@ -3,6 +3,7 @@ export declare const V2_MINT_INNER_TXN_COUNT: {
     SINGLE_ASSET_MODE: number;
     FLEXIBLE_MODE: number;
 };
+export declare const LOCKED_POOL_TOKENS = 1000;
 export declare const MINT_APP_CALL_ARGUMENTS: {
     v1_1: Uint8Array[];
     v2: {

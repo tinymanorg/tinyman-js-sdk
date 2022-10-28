@@ -9,6 +9,8 @@ export const V2_MINT_INNER_TXN_COUNT = {
   FLEXIBLE_MODE: 2
 };
 
+export const LOCKED_POOL_TOKENS = 1000;
+
 export const MINT_APP_CALL_ARGUMENTS = {
   [CONTRACT_VERSION.V1_1]: [encodeString("mint")],
   [CONTRACT_VERSION.V2]: {

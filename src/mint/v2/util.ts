@@ -1,4 +1,5 @@
 import {PoolReserves} from "../../util/pool/poolTypes";
+import {LOCKED_POOL_TOKENS} from "../constants";
 
 export function calculateSubsequentAddLiquidity(
   reserves: PoolReserves,
@@ -78,6 +79,17 @@ export function calculateSubsequentAddLiquidity(
     swapTotalFeeAmount,
     swapPriceImpact
   };
+}
+
+export function calculateInitialAddLiquidity(
+  asset1Amount: number | bigint,
+  asset2Amount: number | bigint
+) {
+  if (!asset1Amount || !asset2Amount) {
+    throw new Error("Both assets are required for the initial add liquidity");
+  }
+
+  return Math.sqrt(Number(asset1Amount) * Number(asset2Amount)) - LOCKED_POOL_TOKENS;
 }
 
 function calculateInternalSwapFeeAmount(
