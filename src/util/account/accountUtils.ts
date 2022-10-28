@@ -1,7 +1,7 @@
 import algosdk, {Algodv2, IntDecoding} from "algosdk";
 import {fromByteArray, toByteArray} from "base64-js";
 
-import {PoolInfo} from "../pool/poolTypes";
+import {V1PoolInfo} from "../pool/poolTypes";
 import {
   BASE_MINIMUM_BALANCE,
   MINIMUM_BALANCE_REQUIRED_PER_APP,
@@ -21,11 +21,16 @@ import {
 import {ContractVersionValue} from "../../contract/types";
 import {getContract} from "../../contract";
 
-export function getAccountInformation(client: Algodv2, address: string) {
+export function getAccountInformation(
+  client: Algodv2,
+  address: string,
+  intDecoding: IntDecoding = IntDecoding.DEFAULT
+) {
   return new Promise<AccountInformationData>(async (resolve, reject) => {
     try {
       const accountInfo = await (client
         .accountInformation(address)
+        .setIntDecoding(intDecoding)
         .do() as Promise<AccountInformation>);
 
       resolve({
@@ -36,6 +41,24 @@ export function getAccountInformation(client: Algodv2, address: string) {
       reject(new Error(error.message || "Failed to fetch account information"));
     }
   });
+}
+
+export function getDecodedAccountApplicationLocalState(
+  accountInfo: AccountInformationData,
+  validatorAppID: number
+) {
+  const appState = accountInfo["apps-local-state"].find(
+    (app) => app.id === validatorAppID
+  );
+
+  if (!appState) {
+    return null;
+  }
+
+  const keyValue = appState["key-value"];
+  const decodedState = decodeState(keyValue);
+
+  return decodedState;
 }
 
 export function calculateAccountMinimumRequiredBalance(
@@ -75,7 +98,7 @@ export async function getAccountExcessWithinPool({
   accountAddr
 }: {
   client: Algodv2;
-  pool: PoolInfo;
+  pool: V1PoolInfo;
   accountAddr: string;
 }): Promise<AccountExcessWithinPool> {
   const info = (await client

@@ -15,7 +15,6 @@ import {
 } from "../../util/constant";
 import TinymanError from "../../util/error/TinymanError";
 import {PoolInfo, PoolReserves} from "../../util/pool/poolTypes";
-import {getPoolShare} from "../../util/pool/poolUtils";
 import {
   applySlippageToAmount,
   sendAndWaitRawTransaction,
@@ -24,6 +23,7 @@ import {
 } from "../../util/util";
 import {getValidatorAppID} from "../../validator";
 import {MintQuote, MintExecution, MintTxnIndices} from "../types";
+import {poolUtils} from "../../util/pool";
 
 /**
  * Get a quote for how many liquidity tokens a deposit of asset1In and asset2In is worth at this
@@ -79,7 +79,7 @@ export function getQuote({
     asset2In: BigInt(asset2In),
     liquidityID: pool.liquidityTokenID!,
     liquidityOut,
-    share: getPoolShare(reserves.issuedLiquidity + liquidityOut, liquidityOut)
+    share: poolUtils.getPoolShare(reserves.issuedLiquidity + liquidityOut, liquidityOut)
   };
 }
 

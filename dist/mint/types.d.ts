@@ -29,7 +29,7 @@ export interface MintExecution {
     /** The ID of the output liquidity token asset. */
     liquidityID: number;
     /** The quantity of the output liquidity token asset. */
-    liquidityOut: bigint;
+    liquidityOut?: bigint;
     excessAmount?: {
         /** Excess amount for the current mint */
         excessAmountForMinting: bigint;

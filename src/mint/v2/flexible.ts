@@ -13,9 +13,9 @@ import {PoolInfo, PoolReserves, PoolStatus} from "../../util/pool/poolTypes";
 import {getTxnGroupID, sendAndWaitRawTransaction, sumUpTxnFees} from "../../util/util";
 import {getValidatorAppID} from "../../validator";
 import {MintExecution} from "../types";
-import {isAlgo} from "../../util/asset/assetUtils";
-import {getPoolShare} from "../../util/pool/poolUtils";
 import {calculateSubsequentAddLiquidity} from "./util";
+import {poolUtils} from "../../util/pool";
+import {isAlgo} from "../../util/asset/assetUtils";
 
 /**
  * Get a quote for how many liquidity tokens a deposit of asset1In and asset2In is worth at this
@@ -72,7 +72,10 @@ export function getQuote({
     liquidityOut: poolTokenAssetAmount,
     liquidityID: pool.liquidityTokenID!,
     round: reserves.round,
-    share: getPoolShare(reserves.issuedLiquidity + swapOutAmount, swapOutAmount),
+    share: poolUtils.getPoolShare(
+      reserves.issuedLiquidity + swapOutAmount,
+      swapOutAmount
+    ),
     slippage,
     swapQuote
   };
