@@ -6,6 +6,7 @@ import algosdk, {
 } from "algosdk";
 
 import {
+  applySlippageToAmount,
   convertFromBaseUnits,
   isAlgo,
   roundNumber,
@@ -33,7 +34,8 @@ async function generateTxns({
   swapType,
   assetIn,
   assetOut,
-  initiatorAddr
+  initiatorAddr,
+  slippage
 }: {
   client: Algodv2;
   pool: V2PoolInfo;
@@ -41,10 +43,19 @@ async function generateTxns({
   assetIn: {assetID: number; amount: number | bigint};
   assetOut: {assetID: number; amount: number | bigint};
   initiatorAddr: string;
+  slippage: number;
 }): Promise<SignerTransaction[]> {
   const suggestedParams = await client.getTransactionParams().do();
   const poolAddress = pool.account.address();
   const isAssetInAlgo = isAlgo(assetIn.assetID);
+  const assetInAmount =
+    swapType === SwapType.FixedInput
+      ? assetIn.amount
+      : applySlippageToAmount("positive", slippage, assetIn.amount);
+  const assetOutAmount =
+    swapType === SwapType.FixedOutput
+      ? assetOut.amount
+      : applySlippageToAmount("negative", slippage, assetOut.amount);
 
   /**
    * If the input asset is Algo, a payment txn, otherwise an asset transfer txn is required
@@ -53,13 +64,13 @@ async function generateTxns({
     ? algosdk.makePaymentTxnWithSuggestedParamsFromObject({
         from: initiatorAddr,
         to: poolAddress,
-        amount: assetIn.amount,
+        amount: assetInAmount,
         suggestedParams
       })
     : algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
         from: initiatorAddr,
         to: poolAddress,
-        amount: assetIn.amount,
+        amount: assetInAmount,
         assetIndex: assetIn.assetID,
         suggestedParams
       });
@@ -70,7 +81,7 @@ async function generateTxns({
     appArgs: [
       V2_SWAP_APP_CALL_ARG_ENCODED,
       V2_SWAP_APP_CALL_SWAP_TYPE_ARGS_ENCODED[swapType],
-      algosdk.encodeUint64(assetOut.amount)
+      algosdk.encodeUint64(assetOutAmount)
     ],
     accounts: [poolAddress],
     foreignAssets: [pool.asset1ID, pool.asset2ID],
