@@ -1,9 +1,14 @@
-import algosdk, {Algodv2, ALGORAND_MIN_TX_FEE, Transaction} from "algosdk";
+import algosdk, {
+  Algodv2,
+  ALGORAND_MIN_TX_FEE,
+  Transaction,
+  waitForConfirmation
+} from "algosdk";
 
 import {SwapV2} from "../../swap/v2";
 import {SignerTransaction, InitiatorSigner} from "../../util/commonTypes";
+import {DEFAULT_WAIT_FOR_CONFIRMATION_ROUNDS} from "../../util/constant";
 import {PoolReserves, V2PoolInfo} from "../../util/pool/poolTypes";
-import {getTxnGroupID, sendAndWaitRawTransaction} from "../../util/util";
 import {
   V2RemoveLiquidityTxnIndices,
   V2_LOCKED_POOL_TOKENS,
@@ -308,33 +313,56 @@ function signTxns({
 
 async function execute({
   client,
-  pool,
   txGroup,
   signedTxns
 }: {
   client: Algodv2;
-  pool: V2PoolInfo;
   txGroup: SignerTransaction[];
   signedTxns: Uint8Array[];
 }) {
-  const [{confirmedRound, txnID}] = await sendAndWaitRawTransaction(client, [signedTxns]);
+  await client.sendRawTransaction(signedTxns).do();
+
+  const appCallTxnId = txGroup[V2RemoveLiquidityTxnIndices.APP_CALL_TXN].txn.txID();
+
+  console.log(`App Call Txn ID: ${appCallTxnId}`);
+  console.log("Waiting for confirmation...");
+  const appCallTxnResult = await waitForConfirmation(
+    client,
+    appCallTxnId,
+    DEFAULT_WAIT_FOR_CONFIRMATION_ROUNDS
+  );
+
+  const outputAssets = appCallTxnResult["inner-txns"].map((data) => ({
+    assetId: data.txn.txn.xaid,
+    amount: data.txn.txn.aamt
+  }));
+
+  console.log({
+    outputAssets
+  });
+
+  console.log({
+    appCallTxnResult
+  });
+
+  return appCallTxnResult;
 
   /**
    * TODO: How to get amounts?
    * check: 07_remove_liquidity.py
    */
 
-  console.log({
-    confirmedRound,
-    txnID
-  });
+  // console.log({
+  //   confirmedRound,
+  //   txnID
+  // });
 
-  return {
-    round: confirmedRound,
-    txnID,
-    liquidityID: pool.liquidityTokenID!,
-    groupID: getTxnGroupID(txGroup)
-  };
+  // return {
+  //   round: confirmedRound,
+  //   txnID,
+  //   liquidityID: pool.liquidityTokenID!,
+  //   groupID: getTxnGroupID(txGroup)
+  // };
 }
 
 function getRemoveLiquidityQuoteAmountsWithSlippage(
