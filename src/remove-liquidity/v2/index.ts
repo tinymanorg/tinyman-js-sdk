@@ -16,7 +16,7 @@ import {V2RemoveLiquidityQuote, V2SingleAssetRemoveLiquidityQuote} from "./types
  * Get a quote for how many of assets 1 and 2 a deposit of `poolTokenAssetIn` is worth at this moment. This
  * does not execute any transactions.
  */
-export function getQuote({
+function getQuote({
   pool,
   reserves,
   poolTokenAssetIn,
@@ -49,7 +49,7 @@ export function getQuote({
   };
 }
 
-export function getSingleAssetRemoveLiquidityQuote({
+function getSingleAssetRemoveLiquidityQuote({
   pool,
   reserves,
   poolTokenAssetInAmount: poolTokenAssetIn,
@@ -408,12 +408,12 @@ function multiplyBigIntWithFloat(bigIntNumber: bigint, floatNumber: number): big
 
 export const RemoveLiquidityV2 = {
   getQuote,
+  getRemoveLiquidityQuoteAmountsWithSlippage,
+  getSingleAssetRemoveLiquidityQuote,
+  getSingleAssetRemoveLiquidityQuoteAmountWithSlippage,
+  getAmountWithSlippage,
   generateTxns,
   generateSingleAssetOutTxns,
   signTxns,
-  execute,
-  getSingleAssetRemoveLiquidityQuote,
-  getSingleAssetRemoveLiquidityQuoteAmountWithSlippage,
-  getRemoveLiquidityQuoteAmountsWithSlippage,
-  getAmountWithSlippage
+  execute
 };
