@@ -85,7 +85,7 @@ export async function generateTxns({
       });
 
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
-    from: poolAddress,
+    from: initiatorAddr,
     appIndex: getValidatorAppID(network, CONTRACT_VERSION.V2),
     appArgs: [
       ...MINT_APP_CALL_ARGUMENTS.v2.INITIAL_LIQUIDITY,

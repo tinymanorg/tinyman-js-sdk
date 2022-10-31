@@ -131,7 +131,7 @@ export async function generateTxns({
         suggestedParams
       });
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
-    from: poolAddress,
+    from: initiatorAddr,
     appIndex: getValidatorAppID(network, CONTRACT_VERSION.V2),
     appArgs: MINT_APP_CALL_ARGUMENTS.v2.SINGLE_ASSET_MODE,
     accounts: [poolAddress],
