@@ -19,9 +19,6 @@ import {V2RemoveLiquidityQuote, V2SingleAssetRemoveLiquidityQuote} from "./types
 export function getQuote({
   pool,
   reserves,
-  /**
-   * previously `liquidityIn`
-   */
   poolTokenAssetIn,
   slippage = 0.05
 }: {
@@ -97,19 +94,19 @@ export function getSingleAssetRemoveLiquidityQuote({
       },
       slippage,
       internalSwapQuote: {
-        amount_in: {
+        amountIn: {
           assetId: pool.asset2ID,
           amount: asset_2_output_amount
         },
-        amount_out: {
+        amountOut: {
           assetId: pool.asset1ID,
           amount: swap_output_amount
         },
-        swap_fees: {
+        swapFees: {
           assetId: pool.asset2ID,
           amount: total_fee_amount
         },
-        price_impact
+        priceImpact: price_impact
       }
     };
   } else if (assetOutID === pool.asset2ID) {
@@ -133,21 +130,20 @@ export function getSingleAssetRemoveLiquidityQuote({
         amount: poolTokenAssetIn_bigInt
       },
       slippage,
-      // TODO: How is this same with first if:?
       internalSwapQuote: {
-        amount_in: {
+        amountIn: {
           assetId: pool.asset2ID,
           amount: asset_2_output_amount
         },
-        amount_out: {
+        amountOut: {
           assetId: pool.asset1ID,
           amount: swap_output_amount
         },
-        swap_fees: {
+        swapFees: {
           assetId: pool.asset2ID,
           amount: total_fee_amount
         },
-        price_impact
+        priceImpact: price_impact
       }
     };
   } else {
@@ -177,10 +173,9 @@ function calculateRemoveLiquidityOutputAmounts(
 
   return {asset_1_output_amount, asset_2_output_amount};
 }
+
 /**
- * MULTIPLE ASSET OUT
- * py-sdk reference: prepare_remove_liquidity_transactions
- * doc reference: https://docs.google.com/document/d/1O3QBkWmUDoaUM63hpniqa2_7G_6wZcCpkvCqVrGrDlc/edit#heading=h.pwio5v1fkpcj
+ * Generates transactions for multiple asset out remove liquidity operation
  */
 async function generateTxns({
   client,
@@ -197,10 +192,6 @@ async function generateTxns({
   minAsset1Amount: number | bigint;
   minAsset2Amount: number | bigint;
 }): Promise<SignerTransaction[]> {
-  /**
-   * TODO: Refactor: most of this is the same with single out
-   */
-
   const suggestedParams = await client.getTransactionParams().do();
   const poolAddress = pool.account.address();
   const poolTokenAssetId = pool.liquidityTokenID;
@@ -254,9 +245,7 @@ async function generateTxns({
 }
 
 /**
- * SINGLE ASSET OUT
- * py-sdk reference: prepare_single_asset_remove_liquidity_transactions
- * doc reference: https://docs.google.com/document/d/1O3QBkWmUDoaUM63hpniqa2_7G_6wZcCpkvCqVrGrDlc/edit#heading=h.sr7e79a28ufn
+ * Generates transactions for single asset out remove liquidity operation
  */
 async function generateSingleAssetOutTxns({
   client,
@@ -327,10 +316,6 @@ async function generateSingleAssetOutTxns({
 
   const txGroup = algosdk.assignGroupID(txns);
 
-  /**
-   * TODO: Both are to be signed by `initiatorAddr`,
-   * so should we remove indices enum etc?
-   */
   return [
     {
       txn: txGroup[V2RemoveLiquidityTxnIndices.ASSET_TRANSFER_TXN],
@@ -343,17 +328,14 @@ async function generateSingleAssetOutTxns({
   ];
 }
 
-async function signTxns({
+function signTxns({
   txGroup,
   initiatorSigner
 }: {
   txGroup: SignerTransaction[];
   initiatorSigner: InitiatorSigner;
 }): Promise<Uint8Array[]> {
-  // TODO: Do we still need this function? It just runs `initiatorSigner`
-  const signedTxns = await initiatorSigner([txGroup]);
-
-  return signedTxns;
+  return initiatorSigner([txGroup]);
 }
 
 async function execute({
@@ -366,7 +348,6 @@ async function execute({
   pool: V2PoolInfo;
   txGroup: SignerTransaction[];
   signedTxns: Uint8Array[];
-  // initiatorAddr: string;
 }) {
   const [{confirmedRound, txnID}] = await sendAndWaitRawTransaction(client, [signedTxns]);
 

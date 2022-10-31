@@ -25,8 +25,8 @@ export interface V2SingleAssetRemoveLiquidityQuote {
 }
 
 interface V2InternalSwapQuote {
-  amount_in: V2QuoteAssetAmount;
-  amount_out: V2QuoteAssetAmount;
-  swap_fees: V2QuoteAssetAmount;
-  price_impact: number;
+  amountIn: V2QuoteAssetAmount;
+  amountOut: V2QuoteAssetAmount;
+  swapFees: V2QuoteAssetAmount;
+  priceImpact: number;
 }

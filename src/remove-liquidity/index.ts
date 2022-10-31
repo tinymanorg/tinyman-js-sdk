@@ -6,5 +6,3 @@ export const RemoveLiquidity = {
   [CONTRACT_VERSION.V1_1]: RemoveLiquidityV1_1,
   [CONTRACT_VERSION.V2]: RemoveLiquidityV2
 };
-export * from "./v1_1/types";
-export * from "./v2/types";
