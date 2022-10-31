@@ -1,4 +1,9 @@
-import algosdk, {Algodv2, ALGORAND_MIN_TX_FEE, Transaction} from "algosdk";
+import algosdk, {
+  Algodv2,
+  ALGORAND_MIN_TX_FEE,
+  Transaction,
+  waitForConfirmation
+} from "algosdk";
 
 import {
   convertFromBaseUnits,
@@ -124,32 +129,47 @@ export interface V2SwapExecution {
 async function execute({
   client,
   pool,
+  txGroup,
   signedTxns,
   network,
-  assetIn,
-  assetOut
+  assetIn
 }: {
   client: Algodv2;
   pool: V2PoolInfo;
   network: SupportedNetwork;
+  txGroup: SignerTransaction[];
   signedTxns: Uint8Array[];
   assetIn: {assetID: number; amount: number | bigint};
-  assetOut: {assetID: number; amount: number | bigint};
-}): Promise<V2SwapExecution> {
+}) {
   let [{confirmedRound, txnID}] = await sendAndWaitRawTransaction(client, [signedTxns]);
 
-  const updatedPoolInfo = await poolUtils.v2.getPoolInfo({
-    client,
-    network,
-    asset1ID: pool.asset1ID,
-    asset2ID: pool.asset2ID
-  });
+  const appCallTxnId = txGroup[V2SwapTxnGroupIndices.APP_CALL_TXN].txn.txID();
+  const appCallTxnResponse = await waitForConfirmation(client, appCallTxnId, 1000);
+  const assetOutInnerTxn = appCallTxnResponse["inner-txns"].find(
+    (item) => item.txn.txn.type === "axfer"
+  ).txn.txn;
 
   return {
     round: confirmedRound,
     assetIn,
-    assetOut,
-    pool: updatedPoolInfo,
+
+    /**
+     * TODO: For FO swap, there can be one more txn with type `change`.
+     * We should handle that case as well.
+     * (see: https://docs.google.com/document/d/1O3QBkWmUDoaUM63hpniqa2_7G_6wZcCpkvCqVrGrDlc/edit# )
+     */
+    assetOut: {
+      amount: assetOutInnerTxn.aamt,
+      assetID: assetOutInnerTxn.xaid
+    } as typeof assetIn,
+
+    pool: await poolUtils.v2.getPoolInfo({
+      client,
+      network,
+      asset1ID: pool.asset1ID,
+      asset2ID: pool.asset2ID
+    }),
+    appCallTxnResponse,
     txnID
   };
 }
