@@ -12,7 +12,6 @@ export interface V2RemoveLiquidityQuote {
   asset2Out: V2QuoteAssetAmount;
   /** input liquidity */
   poolTokenAsset: V2QuoteAssetAmount;
-  slippage: number;
 }
 
 export interface V2SingleAssetRemoveLiquidityQuote {
@@ -20,7 +19,6 @@ export interface V2SingleAssetRemoveLiquidityQuote {
   round: number;
   assetOut: V2QuoteAssetAmount;
   poolTokenAsset: V2QuoteAssetAmount;
-  slippage: number;
   internalSwapQuote: V2InternalSwapQuote;
 }
 

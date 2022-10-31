@@ -25,13 +25,11 @@ import {V2RemoveLiquidityQuote, V2SingleAssetRemoveLiquidityQuote} from "./types
 function getQuote({
   pool,
   reserves,
-  poolTokenAssetIn,
-  slippage = 0.05
+  poolTokenAssetIn
 }: {
   pool: V2PoolInfo;
   reserves: PoolReserves;
   poolTokenAssetIn: number | bigint;
-  slippage?: number;
 }): V2RemoveLiquidityQuote {
   const poolTokenAssetIn_bigInt = BigInt(poolTokenAssetIn);
   const {asset1OutputAmount, asset2OutputAmount} = calculateRemoveLiquidityOutputAmounts(
@@ -43,8 +41,7 @@ function getQuote({
     round: reserves.round,
     asset1Out: {assetId: pool.asset1ID, amount: asset1OutputAmount},
     asset2Out: {assetId: pool.asset2ID, amount: asset2OutputAmount},
-    poolTokenAsset: {assetId: pool.liquidityTokenID!, amount: poolTokenAssetIn_bigInt},
-    slippage
+    poolTokenAsset: {assetId: pool.liquidityTokenID!, amount: poolTokenAssetIn_bigInt}
   };
 }
 
@@ -53,15 +50,13 @@ function getSingleAssetRemoveLiquidityQuote({
   reserves,
   poolTokenAssetInAmount,
   assetOutID,
-  decimals,
-  slippage = 0.05
+  decimals
 }: {
   pool: V2PoolInfo;
   reserves: PoolReserves;
   poolTokenAssetInAmount: number | bigint;
   assetOutID: number;
   decimals: {assetIn: number; assetOut: number};
-  slippage?: number;
 }): V2SingleAssetRemoveLiquidityQuote {
   const poolTokenAssetIn_bigInt = BigInt(poolTokenAssetInAmount);
   const {asset1OutputAmount, asset2OutputAmount} = calculateRemoveLiquidityOutputAmounts(
@@ -87,7 +82,6 @@ function getSingleAssetRemoveLiquidityQuote({
       round: reserves.round,
       assetOut: {assetId: assetOutID, amount: asset1OutputAmount + swapOutputAmount},
       poolTokenAsset: {assetId: pool.liquidityTokenID!, amount: poolTokenAssetIn_bigInt},
-      slippage,
       internalSwapQuote: {
         amountIn: {assetId: pool.asset2ID, amount: asset2OutputAmount},
         amountOut: {assetId: pool.asset1ID, amount: swapOutputAmount},
@@ -109,7 +103,6 @@ function getSingleAssetRemoveLiquidityQuote({
       round: reserves.round,
       assetOut: {assetId: assetOutID, amount: asset2OutputAmount + swapOutputAmount},
       poolTokenAsset: {assetId: pool.liquidityTokenID!, amount: poolTokenAssetIn_bigInt},
-      slippage,
       internalSwapQuote: {
         amountIn: {assetId: pool.asset2ID, amount: asset2OutputAmount},
         amountOut: {assetId: pool.asset1ID, amount: swapOutputAmount},
@@ -157,7 +150,8 @@ async function generateTxns({
   poolTokenAssetAmount,
   initiatorAddr,
   minAsset1Amount,
-  minAsset2Amount
+  minAsset2Amount,
+  slippage
 }: {
   client: Algodv2;
   pool: V2PoolInfo;
@@ -165,6 +159,7 @@ async function generateTxns({
   initiatorAddr: string;
   minAsset1Amount: number | bigint;
   minAsset2Amount: number | bigint;
+  slippage: number;
 }): Promise<SignerTransaction[]> {
   const suggestedParams = await client.getTransactionParams().do();
   const poolAddress = pool.account.address();
@@ -187,8 +182,8 @@ async function generateTxns({
     appIndex: pool.validatorAppID,
     appArgs: [
       V2_REMOVE_LIQUIDITY_APP_ARGUMENT,
-      algosdk.encodeUint64(minAsset1Amount),
-      algosdk.encodeUint64(minAsset2Amount)
+      algosdk.encodeUint64(getAmountWithSlippage(BigInt(minAsset1Amount), slippage)),
+      algosdk.encodeUint64(getAmountWithSlippage(BigInt(minAsset2Amount), slippage))
     ],
     accounts: [poolAddress],
     foreignAssets: [pool.asset1ID, pool.asset2ID],
@@ -227,7 +222,8 @@ async function generateSingleAssetOutTxns({
   initiatorAddr,
   poolTokenAssetAmount,
   outputAssetId,
-  minOutputAssetAmount
+  minOutputAssetAmount,
+  slippage
 }: {
   client: Algodv2;
   pool: V2PoolInfo;
@@ -235,6 +231,7 @@ async function generateSingleAssetOutTxns({
   poolTokenAssetAmount: number | bigint;
   initiatorAddr: string;
   minOutputAssetAmount: number | bigint;
+  slippage: number;
 }): Promise<SignerTransaction[]> {
   const suggestedParams = await client.getTransactionParams().do();
   const {asset1ID, asset2ID} = pool;
@@ -248,12 +245,17 @@ async function generateSingleAssetOutTxns({
   let minAsset1Amount = 0 as number | bigint;
   let minAsset2Amount = 0 as number | bigint;
 
+  const minOutputAssetAmountAfterSlippage = getAmountWithSlippage(
+    BigInt(minOutputAssetAmount),
+    slippage
+  );
+
   if (outputAssetId === asset1ID) {
-    minAsset1Amount = minOutputAssetAmount;
+    minAsset1Amount = minOutputAssetAmountAfterSlippage;
     minAsset2Amount = 0;
   } else if (outputAssetId === asset2ID) {
     minAsset1Amount = 0;
-    minAsset2Amount = minOutputAssetAmount;
+    minAsset2Amount = minOutputAssetAmountAfterSlippage;
   } else {
     throw new Error("Invalid output asset id. It doesn't match with pool assets");
   }
@@ -344,30 +346,11 @@ async function execute({
   };
 }
 
-function getRemoveLiquidityQuoteAmountsWithSlippage(
-  quote: V2RemoveLiquidityQuote
-): Pick<V2RemoveLiquidityQuote, "asset1Out" | "asset2Out"> {
-  return {
-    asset1Out: {
-      assetId: quote.asset1Out.assetId,
-      amount: getAmountWithSlippage(quote.asset1Out.amount, quote.slippage)
-    },
-    asset2Out: {
-      assetId: quote.asset2Out.assetId,
-      amount: getAmountWithSlippage(quote.asset2Out.amount, quote.slippage)
-    }
-  };
-}
-
-function getSingleAssetRemoveLiquidityQuoteAmountWithSlippage(
-  quote: V2SingleAssetRemoveLiquidityQuote
-): V2SingleAssetRemoveLiquidityQuote["assetOut"] {
-  return {
-    assetId: quote.assetOut.assetId,
-    amount: getAmountWithSlippage(quote.assetOut.amount, quote.slippage)
-  };
-}
-
+/**
+ * TODO: There is also a similar function called `applySlippageToAmount`,
+ * but it actually converts amount to `Number` inside, so it can cause
+ * unexpected results. Check again.
+ * */
 function getAmountWithSlippage(amount: bigint, slippage: number): bigint {
   return amount - multiplyBigIntWithFloat(amount, slippage);
 }
@@ -383,9 +366,7 @@ function multiplyBigIntWithFloat(bigIntNumber: bigint, floatNumber: number): big
 
 export const RemoveLiquidityV2 = {
   getQuote,
-  getRemoveLiquidityQuoteAmountsWithSlippage,
   getSingleAssetRemoveLiquidityQuote,
-  getSingleAssetRemoveLiquidityQuoteAmountWithSlippage,
   getAmountWithSlippage,
   generateTxns,
   generateSingleAssetOutTxns,
