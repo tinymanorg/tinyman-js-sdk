@@ -9,6 +9,7 @@ import {SwapV2} from "../../swap/v2";
 import {SignerTransaction, InitiatorSigner} from "../../util/commonTypes";
 import {DEFAULT_WAIT_FOR_CONFIRMATION_ROUNDS} from "../../util/constant";
 import {PoolReserves, V2PoolInfo} from "../../util/pool/poolTypes";
+import {getTxnGroupID} from "../../util/util";
 import {
   V2RemoveLiquidityTxnIndices,
   V2_LOCKED_POOL_TOKENS,
@@ -323,46 +324,24 @@ async function execute({
   await client.sendRawTransaction(signedTxns).do();
 
   const appCallTxnId = txGroup[V2RemoveLiquidityTxnIndices.APP_CALL_TXN].txn.txID();
-
-  console.log(`App Call Txn ID: ${appCallTxnId}`);
-  console.log("Waiting for confirmation...");
   const appCallTxnResult = await waitForConfirmation(
     client,
     appCallTxnId,
     DEFAULT_WAIT_FOR_CONFIRMATION_ROUNDS
   );
-
   const outputAssets = appCallTxnResult["inner-txns"].map((data) => ({
     assetId: data.txn.txn.xaid,
     amount: data.txn.txn.aamt
   }));
 
-  console.log({
-    outputAssets
-  });
-
-  console.log({
-    appCallTxnResult
-  });
-
-  return appCallTxnResult;
-
   /**
-   * TODO: How to get amounts?
-   * check: 07_remove_liquidity.py
+   * TODO: We will update and type the shape according to the needs of web app
    */
-
-  // console.log({
-  //   confirmedRound,
-  //   txnID
-  // });
-
-  // return {
-  //   round: confirmedRound,
-  //   txnID,
-  //   liquidityID: pool.liquidityTokenID!,
-  //   groupID: getTxnGroupID(txGroup)
-  // };
+  return {
+    appCallTxnResult,
+    outputAssets,
+    groupId: getTxnGroupID(txGroup)
+  };
 }
 
 function getRemoveLiquidityQuoteAmountsWithSlippage(
