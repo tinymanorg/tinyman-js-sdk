@@ -28,23 +28,16 @@ function getQuote({
   slippage?: number;
 }): V2RemoveLiquidityQuote {
   const poolTokenAssetIn_bigInt = BigInt(poolTokenAssetIn);
-  const {asset_1_output_amount, asset_2_output_amount} =
-    calculateRemoveLiquidityOutputAmounts(poolTokenAssetIn_bigInt, reserves);
+  const {asset1OutputAmount, asset2OutputAmount} = calculateRemoveLiquidityOutputAmounts(
+    poolTokenAssetIn_bigInt,
+    reserves
+  );
 
   return {
     round: reserves.round,
-    asset1Out: {
-      assetId: pool.asset1ID,
-      amount: asset_1_output_amount
-    },
-    asset2Out: {
-      assetId: pool.asset2ID,
-      amount: asset_2_output_amount
-    },
-    poolTokenAsset: {
-      assetId: pool.liquidityTokenID!,
-      amount: poolTokenAssetIn_bigInt
-    },
+    asset1Out: {assetId: pool.asset1ID, amount: asset1OutputAmount},
+    asset2Out: {assetId: pool.asset2ID, amount: asset2OutputAmount},
+    poolTokenAsset: {assetId: pool.liquidityTokenID!, amount: poolTokenAssetIn_bigInt},
     slippage
   };
 }
@@ -52,7 +45,7 @@ function getQuote({
 function getSingleAssetRemoveLiquidityQuote({
   pool,
   reserves,
-  poolTokenAssetInAmount: poolTokenAssetIn,
+  poolTokenAssetInAmount,
   assetOutID,
   decimals,
   slippage = 0.05
@@ -64,86 +57,58 @@ function getSingleAssetRemoveLiquidityQuote({
   decimals: {assetIn: number; assetOut: number};
   slippage?: number;
 }): V2SingleAssetRemoveLiquidityQuote {
-  const poolTokenAssetIn_bigInt = BigInt(poolTokenAssetIn);
-  const {asset_1_output_amount, asset_2_output_amount} =
-    calculateRemoveLiquidityOutputAmounts(poolTokenAssetIn_bigInt, reserves);
+  const poolTokenAssetIn_bigInt = BigInt(poolTokenAssetInAmount);
+  const {asset1OutputAmount, asset2OutputAmount} = calculateRemoveLiquidityOutputAmounts(
+    poolTokenAssetIn_bigInt,
+    reserves
+  );
   // TODO: remove `!` once pool info shape is updated
-  const total_fee_share = pool.totalFeeShare!;
+  const totalFeeShare = pool.totalFeeShare!;
 
   let quote: V2SingleAssetRemoveLiquidityQuote;
 
   if (assetOutID === pool.asset1ID) {
-    const {swap_output_amount, total_fee_amount, price_impact} =
+    const {swapOutputAmount, totalFeeAmount, priceImpact} =
       SwapV2.calculateFixedInputSwap({
-        input_supply: reserves.asset2 - asset_2_output_amount,
-        output_supply: reserves.asset1 - asset_1_output_amount,
-        swap_input_amount: asset_2_output_amount,
-        total_fee_share,
+        inputSupply: reserves.asset2 - asset2OutputAmount,
+        outputSupply: reserves.asset1 - asset1OutputAmount,
+        swapInputAmount: asset2OutputAmount,
+        totalFeeShare,
         decimals
       });
 
     quote = {
       round: reserves.round,
-      assetOut: {
-        assetId: assetOutID,
-        amount: asset_1_output_amount + swap_output_amount
-      },
-      poolTokenAsset: {
-        assetId: pool.liquidityTokenID!,
-        amount: poolTokenAssetIn_bigInt
-      },
+      assetOut: {assetId: assetOutID, amount: asset1OutputAmount + swapOutputAmount},
+      poolTokenAsset: {assetId: pool.liquidityTokenID!, amount: poolTokenAssetIn_bigInt},
       slippage,
       internalSwapQuote: {
-        amountIn: {
-          assetId: pool.asset2ID,
-          amount: asset_2_output_amount
-        },
-        amountOut: {
-          assetId: pool.asset1ID,
-          amount: swap_output_amount
-        },
-        swapFees: {
-          assetId: pool.asset2ID,
-          amount: total_fee_amount
-        },
-        priceImpact: price_impact
+        amountIn: {assetId: pool.asset2ID, amount: asset2OutputAmount},
+        amountOut: {assetId: pool.asset1ID, amount: swapOutputAmount},
+        swapFees: {assetId: pool.asset2ID, amount: totalFeeAmount},
+        priceImpact
       }
     };
   } else if (assetOutID === pool.asset2ID) {
-    const {swap_output_amount, total_fee_amount, price_impact} =
+    const {swapOutputAmount, totalFeeAmount, priceImpact} =
       SwapV2.calculateFixedInputSwap({
-        input_supply: reserves.asset1 - asset_1_output_amount,
-        output_supply: reserves.asset2 - asset_2_output_amount,
-        swap_input_amount: asset_1_output_amount,
-        total_fee_share,
+        inputSupply: reserves.asset1 - asset1OutputAmount,
+        outputSupply: reserves.asset2 - asset2OutputAmount,
+        swapInputAmount: asset1OutputAmount,
+        totalFeeShare,
         decimals
       });
 
     quote = {
       round: reserves.round,
-      assetOut: {
-        assetId: assetOutID,
-        amount: asset_2_output_amount + swap_output_amount
-      },
-      poolTokenAsset: {
-        assetId: pool.liquidityTokenID!,
-        amount: poolTokenAssetIn_bigInt
-      },
+      assetOut: {assetId: assetOutID, amount: asset2OutputAmount + swapOutputAmount},
+      poolTokenAsset: {assetId: pool.liquidityTokenID!, amount: poolTokenAssetIn_bigInt},
       slippage,
       internalSwapQuote: {
-        amountIn: {
-          assetId: pool.asset2ID,
-          amount: asset_2_output_amount
-        },
-        amountOut: {
-          assetId: pool.asset1ID,
-          amount: swap_output_amount
-        },
-        swapFees: {
-          assetId: pool.asset2ID,
-          amount: total_fee_amount
-        },
-        priceImpact: price_impact
+        amountIn: {assetId: pool.asset2ID, amount: asset2OutputAmount},
+        amountOut: {assetId: pool.asset1ID, amount: swapOutputAmount},
+        swapFees: {assetId: pool.asset2ID, amount: totalFeeAmount},
+        priceImpact
       }
     };
   } else {
@@ -154,24 +119,27 @@ function getSingleAssetRemoveLiquidityQuote({
 }
 
 function calculateRemoveLiquidityOutputAmounts(
-  pool_token_asset_amount: number | bigint,
+  poolTokenAssetAmount: number | bigint,
   reserves: PoolReserves
 ) {
-  let asset_1_output_amount: bigint, asset_2_output_amount: bigint;
-  const poolTokenAssetAmountBigInt = BigInt(pool_token_asset_amount);
+  let asset1OutputAmount: bigint, asset2OutputAmount: bigint;
+  const poolTokenAssetAmountBigInt = BigInt(poolTokenAssetAmount);
   const issuedPoolTokens = reserves.issuedLiquidity;
 
   if (issuedPoolTokens > poolTokenAssetAmountBigInt + BigInt(V2_LOCKED_POOL_TOKENS)) {
-    asset_1_output_amount =
+    asset1OutputAmount =
       (poolTokenAssetAmountBigInt * reserves.asset1) / issuedPoolTokens;
-    asset_2_output_amount =
+    asset2OutputAmount =
       (poolTokenAssetAmountBigInt * reserves.asset2) / issuedPoolTokens;
   } else {
-    asset_1_output_amount = reserves.asset1;
-    asset_2_output_amount = reserves.asset2;
+    asset1OutputAmount = reserves.asset1;
+    asset2OutputAmount = reserves.asset2;
   }
 
-  return {asset_1_output_amount, asset_2_output_amount};
+  return {
+    asset1OutputAmount,
+    asset2OutputAmount
+  };
 }
 
 /**
