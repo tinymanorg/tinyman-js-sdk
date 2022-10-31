@@ -36,9 +36,8 @@ export declare function getQuote({ pool, reserves, assetIn, slippage }: {
         priceImpact: bigint;
     };
 };
-export declare function generateTxns({ client, network, poolAddress, asset_1, asset_2, liquidityToken, initiatorAddr }: {
+export declare function generateTxns({ client, network, poolAddress, asset_1, asset_2, liquidityToken, initiatorAddr, minPoolTokenAssetAmount }: {
     client: AlgodClient;
-    pool: PoolInfo;
     network: SupportedNetwork;
     poolAddress: string;
     asset_1: {
@@ -53,8 +52,8 @@ export declare function generateTxns({ client, network, poolAddress, asset_1, as
         id: number;
         amount: number | bigint;
     };
-    slippage: number;
     initiatorAddr: string;
+    minPoolTokenAssetAmount: bigint;
 }): Promise<{
     txn: algosdk.Transaction;
     signers: string[];

@@ -1,4 +1,4 @@
-import algosdk, {ALGORAND_MIN_TX_FEE} from "algosdk";
+import algosdk, {ALGORAND_MIN_TX_FEE, encodeUint64} from "algosdk";
 import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
 
 import {MINT_APP_CALL_ARGUMENTS, V2_MINT_INNER_TXN_COUNT} from "../constants";
@@ -87,17 +87,17 @@ export async function generateTxns({
   asset_1,
   asset_2,
   liquidityToken,
-  initiatorAddr
+  initiatorAddr,
+  minPoolTokenAssetAmount
 }: {
   client: AlgodClient;
-  pool: PoolInfo;
   network: SupportedNetwork;
   poolAddress: string;
   asset_1: {id: number; amount: number | bigint};
   asset_2: {id: number; amount: number | bigint};
   liquidityToken: {id: number; amount: number | bigint};
-  slippage: number;
   initiatorAddr: string;
+  minPoolTokenAssetAmount: bigint;
 }) {
   let assetIn: {id: number; amount: number | bigint};
 
@@ -133,7 +133,10 @@ export async function generateTxns({
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
     from: initiatorAddr,
     appIndex: getValidatorAppID(network, CONTRACT_VERSION.V2),
-    appArgs: MINT_APP_CALL_ARGUMENTS.v2.SINGLE_ASSET_MODE,
+    appArgs: [
+      ...MINT_APP_CALL_ARGUMENTS.v2.SINGLE_ASSET_MODE,
+      encodeUint64(minPoolTokenAssetAmount)
+    ],
     accounts: [poolAddress],
     foreignAssets: [liquidityToken.id],
     suggestedParams: {

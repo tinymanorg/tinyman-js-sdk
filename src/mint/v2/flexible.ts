@@ -55,6 +55,8 @@ export function getQuote({
     swapFees: swapTotalFeeAmount,
     priceImpact: swapPriceImpact
   };
+  const minPoolTokenAssetAmountWithSlippage =
+    poolTokenAssetAmount - BigInt(Math.ceil(Number(poolTokenAssetAmount) * slippage));
 
   return {
     asset1ID: pool.asset1ID,
@@ -69,7 +71,8 @@ export function getQuote({
       swapOutAmount
     ),
     slippage,
-    swapQuote
+    swapQuote,
+    minPoolTokenAssetAmountWithSlippage
   };
 }
 
@@ -81,7 +84,8 @@ export async function generateTxns({
   asset_1,
   asset_2,
   liquidityToken,
-  initiatorAddr
+  initiatorAddr,
+  minPoolTokenAssetAmount
 }: {
   client: AlgodClient;
   pool: PoolInfo;
@@ -89,8 +93,10 @@ export async function generateTxns({
   poolAddress: string;
   asset_1: {id: number; amount: number | bigint};
   asset_2: {id: number; amount: number | bigint};
+  // convert to liquidityTokenID
   liquidityToken: {id: number; amount: number | bigint};
   initiatorAddr: string;
+  minPoolTokenAssetAmount: bigint;
 }) {
   const suggestedParams = await client.getTransactionParams().do();
   const isAlgoPool = isAlgo(asset_2.id);
@@ -120,7 +126,7 @@ export async function generateTxns({
     appIndex: getValidatorAppID(network, CONTRACT_VERSION.V2),
     appArgs: [
       ...MINT_APP_CALL_ARGUMENTS.v2.FLEXIBLE_MODE,
-      encodeUint64(liquidityToken.amount)
+      encodeUint64(minPoolTokenAssetAmount)
     ],
     accounts: [poolAddress],
     foreignAssets: [liquidityToken.id],

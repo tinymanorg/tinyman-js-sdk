@@ -1,4 +1,4 @@
-import algosdk, {ALGORAND_MIN_TX_FEE, encodeUint64} from "algosdk";
+import algosdk, {ALGORAND_MIN_TX_FEE} from "algosdk";
 import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
 
 import {CONTRACT_VERSION} from "../../contract/constants";
@@ -87,10 +87,7 @@ export async function generateTxns({
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
     from: initiatorAddr,
     appIndex: getValidatorAppID(network, CONTRACT_VERSION.V2),
-    appArgs: [
-      ...MINT_APP_CALL_ARGUMENTS.v2.INITIAL_LIQUIDITY,
-      encodeUint64(liquidityToken.amount)
-    ],
+    appArgs: MINT_APP_CALL_ARGUMENTS.v2.INITIAL_LIQUIDITY,
     accounts: [poolAddress],
     foreignAssets: [liquidityToken.id],
     suggestedParams: {
