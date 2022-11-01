@@ -492,6 +492,8 @@ function calculatePriceImpact({
 
 export const SwapV2 = {
   getQuote,
+  getFixedInputSwapQuote,
+  getFixedOutputSwapQuote,
   generateTxns,
   signTxns,
   execute,
