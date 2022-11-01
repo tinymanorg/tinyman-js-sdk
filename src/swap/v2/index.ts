@@ -8,7 +8,6 @@ import algosdk, {
 import {
   applySlippageToAmount,
   convertFromBaseUnits,
-  isAlgo,
   roundNumber,
   sendAndWaitRawTransaction
 } from "../../util/util";
@@ -27,6 +26,7 @@ import {
   V2_SWAP_APP_CALL_INNER_TXN_COUNT
 } from "./constants";
 import {poolUtils} from "../../util/pool";
+import {isAlgo} from "../../util/asset/assetUtils";
 
 async function generateTxns({
   client,
