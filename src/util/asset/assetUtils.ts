@@ -64,8 +64,8 @@ export function sortAssetIds(asset1ID: number, asset2ID: number): number[] {
 }
 
 /**
- * @returns `true` if the given id is the asset id of ALGO
+ * @returns `true` if the given asset id is the ALGO asset id
  */
-export function isAlgo(id: number | string | bigint) {
+export function isAlgo(id: number | string) {
   return Number(id) === ALGO_ASSET_ID;
 }
