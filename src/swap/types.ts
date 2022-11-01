@@ -1,3 +1,5 @@
+import {V2PoolInfo} from "../util/pool/poolTypes";
+
 export enum SwapType {
   FixedInput = "fixed-input",
   FixedOutput = "fixed-output"
@@ -5,8 +7,6 @@ export enum SwapType {
 
 /** An object containing information about a swap quote. */
 export interface SwapQuote {
-  /** The round that this quote is based on. */
-  round: number;
   /** The ID of the input asset in this quote. */
   assetInID: number;
   /** The quantity of the input asset in this quote. */
@@ -21,10 +21,12 @@ export interface SwapQuote {
   rate: number;
   /** The price impact of the swap */
   priceImpact: number;
+  /** The round that this quote is based on. */
+  round?: number;
 }
 
 /** An object containing information about a successfully executed swap. */
-export interface SwapExecution {
+export interface V1SwapExecution {
   /** The round that the swap occurred in. */
   round: number;
   /**
@@ -52,4 +54,14 @@ export interface SwapExecution {
   };
   /** The group ID for the transaction group. */
   groupID: string;
+}
+
+export interface V2SwapExecution {
+  assetIn: {assetID: number; amount: number | bigint};
+  assetOut: {assetID: number; amount: number | bigint};
+  pool: V2PoolInfo;
+  txnID: string;
+  round: number;
+  // TODO: this was added temporarily for debugging and testing
+  appCallTxnResponse: any;
 }

@@ -15,7 +15,7 @@ import {DEFAULT_FEE_TXN_NOTE} from "../../util/constant";
 import {ALGO_ASSET_ID} from "../../util/asset/assetConstants";
 import {PoolReserves, PoolStatus, V1PoolInfo} from "../../util/pool/poolTypes";
 import {getAccountExcessWithinPool} from "../../util/account/accountUtils";
-import {SwapType, SwapQuote, SwapExecution} from "../types";
+import {SwapType, SwapQuote, V1SwapExecution} from "../types";
 
 // FEE = %0.3 or 3/1000
 const FEE_NUMERATOR = 3n;
@@ -185,7 +185,7 @@ function getQuote(
     throw new TinymanError({pool, asset}, "Trying to swap on a non-existent pool");
   }
 
-  if (type === "fixed-input") {
+  if (type === SwapType.FixedInput) {
     quote = getFixedInputSwapQuote({pool, reserves, assetIn: asset, decimals});
   } else {
     quote = getFixedOutputSwapQuote({pool, reserves, assetOut: asset, decimals});
@@ -291,7 +291,7 @@ async function executeFixedInputSwap({
   assetIn: {assetID: number; amount: number | bigint};
   assetOut: {assetID: number; amount: number | bigint};
   initiatorAddr: string;
-}): Promise<Omit<SwapExecution, "fees" | "groupID">> {
+}): Promise<Omit<V1SwapExecution, "fees" | "groupID">> {
   const prevExcessAssets = await getAccountExcessWithinPool({
     client,
     pool,
@@ -437,7 +437,7 @@ async function executeFixedOutputSwap({
   assetIn: {assetID: number; amount: number | bigint};
   assetOut: {assetID: number; amount: number | bigint};
   initiatorAddr: string;
-}): Promise<Omit<SwapExecution, "fees" | "groupID">> {
+}): Promise<Omit<V1SwapExecution, "fees" | "groupID">> {
   const prevExcessAssets = await getAccountExcessWithinPool({
     client,
     pool,
@@ -513,7 +513,7 @@ async function execute({
   txGroup: SignerTransaction[];
   signedTxns: Uint8Array[];
   initiatorAddr: string;
-}): Promise<SwapExecution> {
+}): Promise<V1SwapExecution> {
   if (pool.status !== PoolStatus.READY) {
     throw new TinymanError(
       {pool, swapType, txGroup},
@@ -532,7 +532,7 @@ async function execute({
         txGroup[SwapTxnGroupIndices.ASSET_OUT_TXN_INDEX].txn.assetIndex || ALGO_ASSET_ID,
       amount: txGroup[SwapTxnGroupIndices.ASSET_OUT_TXN_INDEX].txn.amount
     };
-    let swapData: Omit<SwapExecution, "fees" | "groupID">;
+    let swapData: Omit<V1SwapExecution, "fees" | "groupID">;
 
     if (swapType === SwapType.FixedInput) {
       swapData = await executeFixedInputSwap({
