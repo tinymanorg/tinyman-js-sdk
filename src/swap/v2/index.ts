@@ -19,7 +19,7 @@ import {
 } from "../../util/commonTypes";
 import TinymanError from "../../util/error/TinymanError";
 import {PoolReserves, PoolStatus, V2PoolInfo} from "../../util/pool/poolTypes";
-import {SwapQuote, SwapType} from "../types";
+import {SwapQuote, SwapType, V2SwapExecution} from "../types";
 import {
   V2_SWAP_APP_CALL_ARG_ENCODED,
   V2_SWAP_APP_CALL_SWAP_TYPE_ARGS_ENCODED,
@@ -95,7 +95,7 @@ async function generateTxns({
   txns[V2SwapTxnGroupIndices.INPUT_TXN] = inputTxn;
   txns[V2SwapTxnGroupIndices.APP_CALL_TXN] = appCallTxn;
 
-  const txGroup: algosdk.Transaction[] = algosdk.assignGroupID(txns);
+  const txGroup = algosdk.assignGroupID(txns);
 
   return [
     {
@@ -126,14 +126,6 @@ function getSwapAppCallFeeAmount(swapType: SwapType) {
   return totalTxnCount * ALGORAND_MIN_TX_FEE;
 }
 
-export interface V2SwapExecution {
-  assetIn: {assetID: number; amount: number | bigint};
-  assetOut: {assetID: number; amount: number | bigint};
-  pool: V2PoolInfo;
-  txnID: string;
-  round: number;
-}
-
 /**
  * Executes a swap with the desired quantities.
  */
@@ -151,7 +143,7 @@ async function execute({
   txGroup: SignerTransaction[];
   signedTxns: Uint8Array[];
   assetIn: {assetID: number; amount: number | bigint};
-}) {
+}): Promise<V2SwapExecution> {
   let [{confirmedRound, txnID}] = await sendAndWaitRawTransaction(client, [signedTxns]);
 
   const appCallTxnId = txGroup[V2SwapTxnGroupIndices.APP_CALL_TXN].txn.txID();
@@ -172,7 +164,7 @@ async function execute({
     assetOut: {
       amount: assetOutInnerTxn.aamt,
       assetID: assetOutInnerTxn.xaid
-    } as typeof assetIn,
+    },
 
     pool: await poolUtils.v2.getPoolInfo({
       client,
