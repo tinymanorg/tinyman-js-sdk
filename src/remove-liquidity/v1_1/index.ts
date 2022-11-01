@@ -127,9 +127,6 @@ async function generateTxns({
     suggestedParams
   });
 
-  // TODO: What does this line do?
-  txnFees += liquidityInTxn.fee + feeTxn.fee;
-
   let txns: Transaction[] = [];
 
   txns[V1_1RemoveLiquidityTxnIndices.FEE_TXN] = feeTxn;
