@@ -145,25 +145,43 @@ async function execute({
   assetIn: {assetID: number; amount: number | bigint};
 }): Promise<V2SwapExecution> {
   let [{confirmedRound, txnID}] = await sendAndWaitRawTransaction(client, [signedTxns]);
-
   const appCallTxnId = txGroup[V2SwapTxnGroupIndices.APP_CALL_TXN].txn.txID();
   const appCallTxnResponse = await waitForConfirmation(client, appCallTxnId, 1000);
-  const assetOutInnerTxn = appCallTxnResponse["inner-txns"].find(
-    (item) => item.txn.txn.type === "axfer"
-  ).txn.txn;
+  const innerTxns: {txn: {txn: {xaid: number; aamt: number}}}[] =
+    appCallTxnResponse["inner-txns"];
+  const assetOutId = [pool.asset1ID, pool.asset2ID].filter(
+    (id) => id !== assetIn.assetID
+  )[0];
+
+  /**
+   * If the swap type if Fixed Output, usually there will be a difference between
+   * input amount and the actual used input amount. The change will be returned to the user
+   * using an inner txn.
+   * If it is `undefined`, it means that the input amount was exactly the amount used,
+   * or the swap type is fixed input.
+   */
+  const assetInChangeInnerTxn = innerTxns.find(
+    (item) => item.txn.txn.xaid === assetIn.assetID
+  )?.txn.txn;
+  const assetOutInnerTxn = innerTxns.find((item) => item.txn.txn.xaid === assetOutId)?.txn
+    .txn;
+
+  if (!assetOutInnerTxn) {
+    console.log({confirmedRound, txnID});
+    throw new Error("Txn was successful, but asset out inner txn not found.");
+  }
 
   return {
     round: confirmedRound,
-    assetIn,
+    assetIn: {
+      // The actual spent amount is the input amount minus the change (refunded) amount
+      amount: BigInt(assetIn.amount) - BigInt(assetInChangeInnerTxn?.aamt || 0),
+      assetID: assetIn.assetID
+    },
 
-    /**
-     * TODO: For FO swap, there can be one more txn with type `change`.
-     * We should handle that case as well.
-     * (see: https://docs.google.com/document/d/1O3QBkWmUDoaUM63hpniqa2_7G_6wZcCpkvCqVrGrDlc/edit# )
-     */
     assetOut: {
-      amount: assetOutInnerTxn.aamt,
-      assetID: assetOutInnerTxn.xaid
+      amount: assetOutInnerTxn?.aamt,
+      assetID: assetOutInnerTxn?.xaid
     },
 
     pool: await poolUtils.v2.getPoolInfo({
