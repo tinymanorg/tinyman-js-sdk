@@ -1,6 +1,7 @@
 import algosdk, {Algodv2, Transaction} from "algosdk";
 
 import {getAccountExcessWithinPool} from "../../util/account/accountUtils";
+import {isAlgo} from "../../util/asset/assetUtils";
 import {SignerTransaction, InitiatorSigner} from "../../util/commonTypes";
 import {DEFAULT_FEE_TXN_NOTE} from "../../util/constant";
 import TinymanError from "../../util/error/TinymanError";
@@ -10,8 +11,7 @@ import {
   applySlippageToAmount,
   sendAndWaitRawTransaction,
   sumUpTxnFees,
-  getTxnGroupID,
-  isAlgo
+  getTxnGroupID
 } from "../../util/util";
 import {V1_1RemoveLiquidityTxnIndices} from "./constants";
 import {V1_1RemoveLiquidityQuote, V1_1RemoveLiquidityExecution} from "./types";
