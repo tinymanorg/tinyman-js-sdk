@@ -1,4 +1,4 @@
-import {V2PoolInfo} from "../util/pool/poolTypes";
+import {PoolInfo, PoolReserves, V2PoolInfo} from "../util/pool/poolTypes";
 
 export enum SwapType {
   FixedInput = "fixed-input",
@@ -64,4 +64,9 @@ export interface V2SwapExecution {
   round: number;
   // TODO: this was added temporarily for debugging and testing
   appCallTxnResponse: any;
+}
+
+export interface QuoteWithPool {
+  quote: SwapQuote;
+  pool: {info: PoolInfo; reserves: PoolReserves};
 }
