@@ -7,8 +7,6 @@ export enum SwapType {
 
 /** An object containing information about a swap quote. */
 export interface SwapQuote {
-  /** The round that this quote is based on. */
-  round: number;
   /** The ID of the input asset in this quote. */
   assetInID: number;
   /** The quantity of the input asset in this quote. */
@@ -23,6 +21,8 @@ export interface SwapQuote {
   rate: number;
   /** The price impact of the swap */
   priceImpact: number;
+  /** The round that this quote is based on. */
+  round?: number;
 }
 
 /** An object containing information about a successfully executed swap. */
