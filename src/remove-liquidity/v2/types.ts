@@ -11,14 +11,14 @@ export interface V2RemoveLiquidityQuote {
   asset1Out: V2QuoteAssetAmount;
   asset2Out: V2QuoteAssetAmount;
   /** input liquidity */
-  poolTokenAsset: V2QuoteAssetAmount;
+  poolTokenIn: V2QuoteAssetAmount;
 }
 
 export interface V2SingleAssetRemoveLiquidityQuote {
   /** The round that this quote is based on. */
   round: number;
   assetOut: V2QuoteAssetAmount;
-  poolTokenAsset: V2QuoteAssetAmount;
+  poolTokenIn: V2QuoteAssetAmount;
   internalSwapQuote: V2InternalSwapQuote;
 }
 

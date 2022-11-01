@@ -19,21 +19,21 @@ import {
 import {V2RemoveLiquidityQuote, V2SingleAssetRemoveLiquidityQuote} from "./types";
 
 /**
- * Get a quote for how many of assets 1 and 2 a deposit of `poolTokenAssetIn` is worth at this moment. This
+ * Get a quote for how many of assets 1 and 2 a deposit of `poolTokenIn` is worth at this moment. This
  * does not execute any transactions.
  */
 function getQuote({
   pool,
   reserves,
-  poolTokenAssetIn
+  poolTokenIn
 }: {
   pool: V2PoolInfo;
   reserves: PoolReserves;
-  poolTokenAssetIn: number | bigint;
+  poolTokenIn: number | bigint;
 }): V2RemoveLiquidityQuote {
-  const poolTokenAssetIn_bigInt = BigInt(poolTokenAssetIn);
+  const poolTokenIn_bigInt = BigInt(poolTokenIn);
   const {asset1OutputAmount, asset2OutputAmount} = calculateRemoveLiquidityOutputAmounts(
-    poolTokenAssetIn_bigInt,
+    poolTokenIn_bigInt,
     reserves
   );
 
@@ -41,26 +41,26 @@ function getQuote({
     round: reserves.round,
     asset1Out: {assetId: pool.asset1ID, amount: asset1OutputAmount},
     asset2Out: {assetId: pool.asset2ID, amount: asset2OutputAmount},
-    poolTokenAsset: {assetId: pool.liquidityTokenID!, amount: poolTokenAssetIn_bigInt}
+    poolTokenIn: {assetId: pool.liquidityTokenID!, amount: poolTokenIn_bigInt}
   };
 }
 
 function getSingleAssetRemoveLiquidityQuote({
   pool,
   reserves,
-  poolTokenAssetInAmount,
+  poolTokenIn,
   assetOutID,
   decimals
 }: {
   pool: V2PoolInfo;
   reserves: PoolReserves;
-  poolTokenAssetInAmount: number | bigint;
+  poolTokenIn: number | bigint;
   assetOutID: number;
   decimals: {assetIn: number; assetOut: number};
 }): V2SingleAssetRemoveLiquidityQuote {
-  const poolTokenAssetIn_bigInt = BigInt(poolTokenAssetInAmount);
+  const poolTokenIn_bigInt = BigInt(poolTokenIn);
   const {asset1OutputAmount, asset2OutputAmount} = calculateRemoveLiquidityOutputAmounts(
-    poolTokenAssetIn_bigInt,
+    poolTokenIn_bigInt,
     reserves
   );
   // TODO: remove `!` once pool info shape is updated
@@ -81,7 +81,7 @@ function getSingleAssetRemoveLiquidityQuote({
     quote = {
       round: reserves.round,
       assetOut: {assetId: assetOutID, amount: asset1OutputAmount + swapOutputAmount},
-      poolTokenAsset: {assetId: pool.liquidityTokenID!, amount: poolTokenAssetIn_bigInt},
+      poolTokenIn: {assetId: pool.liquidityTokenID!, amount: poolTokenIn_bigInt},
       internalSwapQuote: {
         amountIn: {assetId: pool.asset2ID, amount: asset2OutputAmount},
         amountOut: {assetId: pool.asset1ID, amount: swapOutputAmount},
@@ -102,7 +102,7 @@ function getSingleAssetRemoveLiquidityQuote({
     quote = {
       round: reserves.round,
       assetOut: {assetId: assetOutID, amount: asset2OutputAmount + swapOutputAmount},
-      poolTokenAsset: {assetId: pool.liquidityTokenID!, amount: poolTokenAssetIn_bigInt},
+      poolTokenIn: {assetId: pool.liquidityTokenID!, amount: poolTokenIn_bigInt},
       internalSwapQuote: {
         amountIn: {assetId: pool.asset2ID, amount: asset2OutputAmount},
         amountOut: {assetId: pool.asset1ID, amount: swapOutputAmount},
@@ -118,18 +118,16 @@ function getSingleAssetRemoveLiquidityQuote({
 }
 
 function calculateRemoveLiquidityOutputAmounts(
-  poolTokenAssetAmount: number | bigint,
+  poolTokenIn: number | bigint,
   reserves: PoolReserves
 ) {
   let asset1OutputAmount: bigint, asset2OutputAmount: bigint;
-  const poolTokenAssetAmountBigInt = BigInt(poolTokenAssetAmount);
+  const poolTokenInBigInt = BigInt(poolTokenIn);
   const issuedPoolTokens = reserves.issuedLiquidity;
 
-  if (issuedPoolTokens > poolTokenAssetAmountBigInt + BigInt(V2_LOCKED_POOL_TOKENS)) {
-    asset1OutputAmount =
-      (poolTokenAssetAmountBigInt * reserves.asset1) / issuedPoolTokens;
-    asset2OutputAmount =
-      (poolTokenAssetAmountBigInt * reserves.asset2) / issuedPoolTokens;
+  if (issuedPoolTokens > poolTokenInBigInt + BigInt(V2_LOCKED_POOL_TOKENS)) {
+    asset1OutputAmount = (poolTokenInBigInt * reserves.asset1) / issuedPoolTokens;
+    asset2OutputAmount = (poolTokenInBigInt * reserves.asset2) / issuedPoolTokens;
   } else {
     asset1OutputAmount = reserves.asset1;
     asset2OutputAmount = reserves.asset2;
@@ -147,7 +145,7 @@ function calculateRemoveLiquidityOutputAmounts(
 async function generateTxns({
   client,
   pool,
-  poolTokenAssetAmount,
+  poolTokenIn,
   initiatorAddr,
   minAsset1Amount,
   minAsset2Amount,
@@ -155,7 +153,7 @@ async function generateTxns({
 }: {
   client: Algodv2;
   pool: V2PoolInfo;
-  poolTokenAssetAmount: number | bigint;
+  poolTokenIn: number | bigint;
   initiatorAddr: string;
   minAsset1Amount: number | bigint;
   minAsset2Amount: number | bigint;
@@ -163,17 +161,17 @@ async function generateTxns({
 }): Promise<SignerTransaction[]> {
   const suggestedParams = await client.getTransactionParams().do();
   const poolAddress = pool.account.address();
-  const poolTokenAssetId = pool.liquidityTokenID;
+  const poolTokenId = pool.liquidityTokenID;
 
-  if (!poolTokenAssetId) {
+  if (!poolTokenId) {
     throw new Error("Pool token asset ID is missing");
   }
 
   const assetTransferTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
     from: initiatorAddr,
     to: poolAddress,
-    assetIndex: poolTokenAssetId,
-    amount: poolTokenAssetAmount,
+    assetIndex: poolTokenId,
+    amount: poolTokenIn,
     suggestedParams
   });
 
@@ -220,7 +218,7 @@ async function generateSingleAssetOutTxns({
   client,
   pool,
   initiatorAddr,
-  poolTokenAssetAmount,
+  poolTokenIn,
   outputAssetId,
   minOutputAssetAmount,
   slippage
@@ -228,7 +226,7 @@ async function generateSingleAssetOutTxns({
   client: Algodv2;
   pool: V2PoolInfo;
   outputAssetId: number;
-  poolTokenAssetAmount: number | bigint;
+  poolTokenIn: number | bigint;
   initiatorAddr: string;
   minOutputAssetAmount: number | bigint;
   slippage: number;
@@ -236,9 +234,9 @@ async function generateSingleAssetOutTxns({
   const suggestedParams = await client.getTransactionParams().do();
   const {asset1ID, asset2ID} = pool;
   const poolAddress = pool.account.address();
-  const poolTokenAssetId = pool.liquidityTokenID;
+  const poolTokenId = pool.liquidityTokenID;
 
-  if (!poolTokenAssetId) {
+  if (!poolTokenId) {
     throw new Error("Pool token asset ID is missing");
   }
 
@@ -263,8 +261,8 @@ async function generateSingleAssetOutTxns({
   const assetTransferTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
     from: initiatorAddr,
     to: poolAddress,
-    assetIndex: poolTokenAssetId,
-    amount: poolTokenAssetAmount,
+    assetIndex: poolTokenId,
+    amount: poolTokenIn,
     suggestedParams
   });
 
