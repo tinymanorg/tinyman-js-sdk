@@ -22,7 +22,7 @@ import {
   getTxnGroupID
 } from "../../util/util";
 import {getValidatorAppID} from "../../validator";
-import {V1_1MintQuote, MintExecution, MintTxnIndices} from "../types";
+import {V1_1MintQuote, V1_1MintExecution, MintTxnIndices} from "../types";
 import {poolUtils} from "../../util/pool";
 
 /**
@@ -254,7 +254,7 @@ export async function execute({
   txGroup: SignerTransaction[];
   signedTxns: Uint8Array[];
   initiatorAddr: string;
-}): Promise<MintExecution> {
+}): Promise<V1_1MintExecution> {
   try {
     const liquidityOutAmount = BigInt(
       txGroup[MintTxnIndices.LIQUDITY_OUT_TXN].txn.amount
