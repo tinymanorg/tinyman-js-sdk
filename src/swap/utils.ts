@@ -4,7 +4,7 @@ import {CONTRACT_VERSION} from "../contract/constants";
 import {TinymanAnalyticsApiAsset} from "../util/asset/assetModels";
 import {InitiatorSigner, SignerTransaction, SupportedNetwork} from "../util/commonTypes";
 import {PoolInfo, PoolReserves, V1PoolInfo, V2PoolInfo} from "../util/pool/poolTypes";
-import {QuoteWithPool, SwapQuote, SwapType} from "./types";
+import {SwapQuoteWithPool, SwapQuote, SwapType} from "./types";
 import {SwapV1_1} from "./v1_1";
 import {SwapV2} from "./v2";
 
@@ -18,7 +18,7 @@ export function getQuote(params: {
   assetIn: Pick<TinymanAnalyticsApiAsset, "id" | "decimals">;
   assetOut: Pick<TinymanAnalyticsApiAsset, "id" | "decimals">;
   amount: number | bigint;
-}): QuoteWithPool {
+}): SwapQuoteWithPool {
   if (params.type === SwapType.FixedInput) {
     return getFixedInputSwapQuote(params);
   }
@@ -40,8 +40,8 @@ export function getFixedInputSwapQuote({
   assetIn: Pick<TinymanAnalyticsApiAsset, "id" | "decimals">;
   assetOut: Pick<TinymanAnalyticsApiAsset, "id" | "decimals">;
   amount: number | bigint;
-}): QuoteWithPool {
-  const quotes = pools.map<QuoteWithPool>((pool) => {
+}): SwapQuoteWithPool {
+  const quotes = pools.map<SwapQuoteWithPool>((pool) => {
     let quote: SwapQuote;
     const quoteGetterArgs = {
       pool: pool.info,
@@ -59,10 +59,7 @@ export function getFixedInputSwapQuote({
     return {pool, quote};
   });
 
-  const quotesByDescendingRate = quotes.sort((a, b) => b.quote.rate - a.quote.rate);
-  const bestQuote = quotesByDescendingRate[0];
-
-  return bestQuote;
+  return getBestQuote(quotes);
 }
 
 /**
@@ -79,8 +76,8 @@ export function getFixedOutputSwapQuote({
   assetIn: Pick<TinymanAnalyticsApiAsset, "id" | "decimals">;
   assetOut: Pick<TinymanAnalyticsApiAsset, "id" | "decimals">;
   amount: number | bigint;
-}): QuoteWithPool {
-  const quotes = pools.map<QuoteWithPool>((pool) => {
+}): SwapQuoteWithPool {
+  const quotes = pools.map<SwapQuoteWithPool>((pool) => {
     let quote: SwapQuote;
     const quoteGetterArgs = {
       pool: pool.info,
@@ -98,10 +95,16 @@ export function getFixedOutputSwapQuote({
     return {pool, quote};
   });
 
-  const quotesByDescendingRate = quotes.sort((a, b) => b.quote.rate - a.quote.rate);
-  const bestQuote = quotesByDescendingRate[0];
+  return getBestQuote(quotes);
+}
 
-  return bestQuote;
+/**
+ * Compares the given quotes and returns the best one (with the highest rate).
+ */
+function getBestQuote(quotes: SwapQuoteWithPool[]): SwapQuoteWithPool {
+  const quotesByDescendingRate = quotes.sort((a, b) => b.quote.rate - a.quote.rate);
+
+  return quotesByDescendingRate[0];
 }
 
 export function generateTxns(params: {
