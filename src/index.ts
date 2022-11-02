@@ -79,7 +79,11 @@ export type {
   InitialMintQuote,
   MintSwapQuote,
   SingleMintQuote,
-  MintExecution
+  V1_1MintExecution,
+  V1_1MintTxnIndices,
+  V2MintExecution,
+  V2MintTxnIndices,
+  V2MintType
 } from "./mint/types";
 export {Mint} from "./mint";
 

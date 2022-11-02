@@ -57,7 +57,7 @@ export interface InitialMintQuote {
     slippage: number;
 }
 /** An object containing information about a successfully executed mint transaction. */
-export interface MintExecution {
+export interface V1_1MintExecution {
     /** The round that the mint occurred in. */
     round: number;
     /**
@@ -80,10 +80,50 @@ export interface MintExecution {
     /** The group ID for the transaction group. */
     groupID: string;
 }
-export declare enum MintTxnIndices {
+export interface V2MintExecution {
+    /** The round that the mint occurred in. */
+    round: number;
+    /** The ID of the transaction. */
+    txnID: string;
+    /**
+     * The total amount of transaction fees that were spent (in microAlgos) to execute the mint and,
+     * if applicable, redeem transactions.
+     */
+    fees: number;
+    /** The ID of the output liquidity token asset. */
+    liquidityID: number;
+    /** The group ID for the transaction group. */
+    groupID: string;
+    assetOut: {
+        assetID: number;
+        amount: number | bigint;
+    };
+}
+export declare enum V1_1MintTxnIndices {
     FEE_TXN = 0,
     VALIDATOR_APP_CALL_TXN = 1,
     ASSET1_IN_TXN = 2,
     ASSET2_IN_TXN = 3,
     LIQUDITY_OUT_TXN = 4
 }
+export declare enum V2MintType {
+    SINGLE = "single",
+    FLEXIBLE = "flexible",
+    INITIAL = "initial"
+}
+export declare const V2MintTxnIndices: {
+    flexible: {
+        ASSET1_IN_TXN: number;
+        ASSET2_IN_TXN: number;
+        VALIDATOR_APP_CALL_TXN: number;
+    };
+    single: {
+        ASSET_IN_TXN: number;
+        VALIDATOR_APP_CALL_TXN: number;
+    };
+    initial: {
+        ASSET1_IN_TXN: number;
+        ASSET2_IN_TXN: number;
+        VALIDATOR_APP_CALL_TXN: number;
+    };
+};

@@ -1,6 +1,6 @@
 import { InitiatorSigner, SignerTransaction } from "../../util/commonTypes";
 import { V2PoolInfo } from "../../util/pool/poolTypes";
-import { MintExecution } from "../types";
+import { V2MintExecution, V2MintType } from "../types";
 export declare function signTxns({ txGroup, initiatorSigner }: {
     txGroup: SignerTransaction[];
     initiatorSigner: InitiatorSigner;
@@ -19,9 +19,10 @@ export declare function signTxns({ txGroup, initiatorSigner }: {
  * @param params.initiatorSigner A function that will sign transactions from the initiator's
  *   account.
  */
-export declare function execute({ client, pool, txGroup, signedTxns }: {
+export declare function execute({ client, pool, txGroup, signedTxns, mode }: {
     client: any;
     pool: V2PoolInfo;
     txGroup: SignerTransaction[];
     signedTxns: Uint8Array[];
-}): Promise<MintExecution>;
+    mode: V2MintType;
+}): Promise<V2MintExecution>;

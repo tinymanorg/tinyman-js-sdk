@@ -1,6 +1,6 @@
 import { SignerTransaction, InitiatorSigner, SupportedNetwork } from "../../util/commonTypes";
 import { PoolInfo, PoolReserves } from "../../util/pool/poolTypes";
-import { V1_1MintQuote, MintExecution } from "../types";
+import { V1_1MintQuote, V1_1MintExecution } from "../types";
 /**
  * Get a quote for how many liquidity tokens a deposit of asset1In and asset2In is worth at this
  * moment. This does not execute any transactions.
@@ -60,4 +60,4 @@ export declare function execute({ client, pool, txGroup, signedTxns, initiatorAd
     txGroup: SignerTransaction[];
     signedTxns: Uint8Array[];
     initiatorAddr: string;
-}): Promise<MintExecution>;
+}): Promise<V1_1MintExecution>;

@@ -103,7 +103,7 @@ export interface V2MintExecution {
   assetOut: {assetID: number; amount: number | bigint};
 }
 
-export enum MintTxnIndices {
+export enum V1_1MintTxnIndices {
   FEE_TXN = 0,
   VALIDATOR_APP_CALL_TXN,
   ASSET1_IN_TXN,

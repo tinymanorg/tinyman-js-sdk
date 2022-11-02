@@ -22,7 +22,7 @@ import {
   getTxnGroupID
 } from "../../util/util";
 import {getValidatorAppID} from "../../validator";
-import {V1_1MintQuote, V1_1MintExecution, MintTxnIndices} from "../types";
+import {V1_1MintQuote, V1_1MintExecution, V1_1MintTxnIndices} from "../types";
 import {poolUtils} from "../../util/pool";
 
 /**
@@ -211,13 +211,13 @@ export async function signTxns({
   ]);
 
   const signedTxns = txGroup.map((txDetail, index) => {
-    if (index === MintTxnIndices.FEE_TXN) {
+    if (index === V1_1MintTxnIndices.FEE_TXN) {
       return signedFeeTxn;
     }
-    if (index === MintTxnIndices.ASSET1_IN_TXN) {
+    if (index === V1_1MintTxnIndices.ASSET1_IN_TXN) {
       return signedAsset1InTxn;
     }
-    if (index === MintTxnIndices.ASSET2_IN_TXN) {
+    if (index === V1_1MintTxnIndices.ASSET2_IN_TXN) {
       return signedAsset2InTxn;
     }
     const {blob} = algosdk.signLogicSigTransactionObject(txDetail.txn, lsig);
@@ -257,7 +257,7 @@ export async function execute({
 }): Promise<V1_1MintExecution> {
   try {
     const liquidityOutAmount = BigInt(
-      txGroup[MintTxnIndices.LIQUDITY_OUT_TXN].txn.amount
+      txGroup[V1_1MintTxnIndices.LIQUDITY_OUT_TXN].txn.amount
     );
 
     const prevExcessAssets = await getAccountExcessWithinPool({
