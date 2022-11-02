@@ -8,4 +8,7 @@ export declare function generateOptIntoAssetTxns({ client, assetID, initiatorAdd
  * @returns Array of given asset ids, bigger first
  */
 export declare function sortAssetIds(asset1ID: number, asset2ID: number): number[];
-export declare function isAlgo(id: number | bigint): boolean;
+/**
+ * @returns `true` if the given asset id is the ALGO asset id
+ */
+export declare function isAlgo(id: number | string): boolean;

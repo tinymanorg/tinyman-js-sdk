@@ -35,6 +35,7 @@ export declare function getQuote({ pool, reserves, assetIn, slippage }: {
         swapFees: bigint;
         priceImpact: bigint;
     };
+    minPoolTokenAssetAmountWithSlippage: bigint;
 };
 export declare function generateTxns({ client, network, poolAddress, asset_1, asset_2, liquidityToken, initiatorAddr, minPoolTokenAssetAmount }: {
     client: AlgodClient;

@@ -36,7 +36,7 @@ export declare function getQuote({ pool, reserves, asset1In, asset2In, slippage 
     };
     minPoolTokenAssetAmountWithSlippage: bigint;
 };
-export declare function generateTxns({ client, pool, network, poolAddress, asset_1, asset_2, liquidityToken, initiatorAddr, minPoolTokenAssetAmount }: {
+export declare function generateTxns({ client, network, poolAddress, asset_1, pool, asset_2, liquidityToken, initiatorAddr, minPoolTokenAssetAmount }: {
     client: AlgodClient;
     pool: PoolInfo;
     network: SupportedNetwork;
