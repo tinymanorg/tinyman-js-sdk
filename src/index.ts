@@ -81,10 +81,10 @@ export type {
   SingleMintQuote,
   V1_1MintExecution,
   V1_1MintTxnIndices,
-  V2MintExecution,
-  V2MintTxnIndices,
-  V2MintType
+  V2MintExecution
 } from "./mint/types";
+// eslint-disable-next-line no-duplicate-imports
+export {V2MintTxnIndices, V2MintType} from "./mint/types";
 export {Mint} from "./mint";
 
 export type {BurnQuote, BurnExecution} from "./burn";
