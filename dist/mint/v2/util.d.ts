@@ -7,4 +7,4 @@ export declare function calculateSubsequentAddLiquidity(reserves: PoolReserves, 
     swapTotalFeeAmount: bigint;
     swapPriceImpact: bigint;
 };
-export declare function calculateInitialAddLiquidity(asset1Amount: number | bigint, asset2Amount: number | bigint): number;
+export declare function calculateInitialAddLiquidity(asset1Amount: number | bigint, asset2Amount: number | bigint): bigint;

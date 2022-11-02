@@ -9,6 +9,7 @@ import {getValidatorAppID} from "../../validator";
 import {calculateSubsequentAddLiquidity} from "./util";
 import {poolUtils} from "../../util/pool";
 import {isAlgo} from "../../util/asset/assetUtils";
+import {MintSwapQuote, FlexibleMintQuote} from "../types";
 export * from "./common";
 
 /**
@@ -32,7 +33,7 @@ export function getQuote({
   asset1In: number | bigint;
   asset2In: number | bigint;
   slippage?: number;
-}) {
+}): FlexibleMintQuote {
   if (reserves.issuedLiquidity === 0n) {
     throw new Error("Pool has no liquidity");
   }
@@ -49,7 +50,7 @@ export function getQuote({
     swapTotalFeeAmount
   } = calculateSubsequentAddLiquidity(reserves, pool.totalFeeShare!, asset1In, asset2In);
 
-  const swapQuote = {
+  const swapQuote: MintSwapQuote = {
     amountIn: swapInAmount,
     amountOut: swapOutAmount,
     swapFees: swapTotalFeeAmount,

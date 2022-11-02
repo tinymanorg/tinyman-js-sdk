@@ -1,5 +1,5 @@
 /** An object containing information about a mint quote. */
-export interface MintQuote {
+export interface V1_1MintQuote {
     /** The round that this quote is based on. */
     round: number;
     /** The ID of the first input asset in this quote. */
@@ -16,6 +16,45 @@ export interface MintQuote {
     liquidityOut: bigint;
     /** The share of the total liquidity in this quote. */
     share: number;
+}
+export interface MintSwapQuote {
+    amountIn: bigint;
+    amountOut: bigint;
+    swapFees: bigint;
+    priceImpact: bigint;
+}
+export interface FlexibleMintQuote {
+    asset1ID: number;
+    asset2ID: number;
+    asset1In: bigint;
+    asset2In: bigint;
+    liquidityOut: bigint;
+    liquidityID: number;
+    round: number;
+    share: number;
+    slippage: number;
+    swapQuote: MintSwapQuote;
+    minPoolTokenAssetAmountWithSlippage: bigint;
+}
+export interface SingleMintQuote {
+    asset1ID: number;
+    asset2ID: number;
+    assetIn: bigint;
+    liquidityOut: bigint;
+    liquidityID: number;
+    round: number;
+    share: number;
+    slippage: number;
+    swapQuote: MintSwapQuote;
+    minPoolTokenAssetAmountWithSlippage: bigint;
+}
+export interface InitialMintQuote {
+    asset1ID: number;
+    asset2ID: number;
+    asset1In: bigint;
+    asset2In: bigint;
+    poolTokenAssetAmount: bigint;
+    slippage: number;
 }
 /** An object containing information about a successfully executed mint transaction. */
 export interface MintExecution {

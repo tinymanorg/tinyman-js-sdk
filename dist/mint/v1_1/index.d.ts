@@ -1,6 +1,6 @@
 import { SignerTransaction, InitiatorSigner, SupportedNetwork } from "../../util/commonTypes";
 import { PoolInfo, PoolReserves } from "../../util/pool/poolTypes";
-import { MintQuote, MintExecution } from "../types";
+import { V1_1MintQuote, MintExecution } from "../types";
 /**
  * Get a quote for how many liquidity tokens a deposit of asset1In and asset2In is worth at this
  * moment. This does not execute any transactions.
@@ -15,7 +15,7 @@ export declare function getQuote({ pool, reserves, asset1In, asset2In }: {
     reserves: PoolReserves;
     asset1In: number | bigint;
     asset2In: number | bigint;
-}): MintQuote;
+}): V1_1MintQuote;
 export declare function generateTxns({ client, network, poolAddress, asset_1, asset_2, liquidityToken, slippage, initiatorAddr }: {
     client: any;
     network: SupportedNetwork;

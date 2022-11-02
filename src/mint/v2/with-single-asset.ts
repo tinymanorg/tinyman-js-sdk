@@ -9,6 +9,7 @@ import {getValidatorAppID} from "../../validator";
 import {isAlgo} from "../../util/asset/assetUtils";
 import {calculateSubsequentAddLiquidity} from "./util";
 import {poolUtils} from "../../util/pool";
+import {SingleMintQuote} from "../types";
 export * from "./common";
 
 /**
@@ -33,7 +34,7 @@ export function getQuote({
     amount: number | bigint;
   };
   slippage?: number;
-}) {
+}): SingleMintQuote {
   if (reserves.issuedLiquidity === 0n) {
     throw new Error("Pool has no liquidity");
   }

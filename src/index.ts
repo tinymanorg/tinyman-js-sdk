@@ -73,7 +73,14 @@ export {
   createPool
 } from "./bootstrap";
 
-export type {MintQuote, MintExecution} from "./mint/types";
+export type {
+  V1_1MintQuote,
+  FlexibleMintQuote,
+  InitialMintQuote,
+  MintSwapQuote,
+  SingleMintQuote,
+  MintExecution
+} from "./mint/types";
 export {Mint} from "./mint";
 
 export type {BurnQuote, BurnExecution} from "./burn";

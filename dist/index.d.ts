@@ -14,7 +14,7 @@ export { getValidatorAppID, generateOptIntoValidatorTxns, OPT_IN_VALIDATOR_APP_P
 export type { PoolStatus, PoolInfo, PoolReserves } from "./util/pool/poolTypes";
 export { poolUtils } from "./util/pool";
 export { generateBootstrapTransactions, signBootstrapTransactions, getBootstrapProcessTxnCount, calculatePoolBootstrapFundingTxnAmount, createPool } from "./bootstrap";
-export type { MintQuote, MintExecution } from "./mint/types";
+export type { V1_1MintQuote, FlexibleMintQuote, InitialMintQuote, MintSwapQuote, SingleMintQuote, MintExecution } from "./mint/types";
 export { Mint } from "./mint";
 export type { BurnQuote, BurnExecution } from "./burn";
 export { getBurnLiquidityQuote, burnLiquidity, generateBurnTxns, signBurnTxns, BURN_PROCESS_TXN_COUNT } from "./burn";

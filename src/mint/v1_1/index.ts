@@ -22,7 +22,7 @@ import {
   getTxnGroupID
 } from "../../util/util";
 import {getValidatorAppID} from "../../validator";
-import {MintQuote, MintExecution, MintTxnIndices} from "../types";
+import {V1_1MintQuote, MintExecution, MintTxnIndices} from "../types";
 import {poolUtils} from "../../util/pool";
 
 /**
@@ -44,7 +44,7 @@ export function getQuote({
   reserves: PoolReserves;
   asset1In: number | bigint;
   asset2In: number | bigint;
-}): MintQuote {
+}): V1_1MintQuote {
   if (reserves.issuedLiquidity === 0n) {
     // TODO: compute sqrt on bigints
     const geoMean = BigInt(Math.floor(Math.sqrt(Number(asset1In) * Number(asset2In))));

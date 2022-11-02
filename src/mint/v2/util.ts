@@ -91,7 +91,9 @@ export function calculateInitialAddLiquidity(
     throw new Error("Both assets are required for the initial add liquidity");
   }
 
-  return Math.sqrt(Number(asset1Amount) * Number(asset2Amount)) - LOCKED_POOL_TOKENS;
+  return BigInt(
+    Math.sqrt(Number(asset1Amount) * Number(asset2Amount)) - LOCKED_POOL_TOKENS
+  );
 }
 
 function calculateInternalSwapFeeAmount(

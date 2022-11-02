@@ -2,6 +2,7 @@ import algosdk from "algosdk";
 import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
 import { SupportedNetwork } from "../../util/commonTypes";
 import { PoolInfo, PoolReserves } from "../../util/pool/poolTypes";
+import { SingleMintQuote } from "../types";
 export * from "./common";
 /**
  * Get a quote for how many liquidity tokens a deposit of asset1In and asset2In is worth at this
@@ -20,23 +21,7 @@ export declare function getQuote({ pool, reserves, assetIn, slippage }: {
         amount: number | bigint;
     };
     slippage?: number;
-}): {
-    asset1ID: number;
-    asset2ID: number;
-    assetIn: bigint;
-    liquidityOut: bigint;
-    liquidityID: number;
-    round: number;
-    share: number;
-    slippage: number;
-    swapQuote: {
-        amountIn: bigint;
-        amountOut: bigint;
-        swapFees: bigint;
-        priceImpact: bigint;
-    };
-    minPoolTokenAssetAmountWithSlippage: bigint;
-};
+}): SingleMintQuote;
 export declare function generateTxns({ client, network, poolAddress, asset_1, asset_2, liquidityToken, initiatorAddr, minPoolTokenAssetAmount }: {
     client: AlgodClient;
     network: SupportedNetwork;

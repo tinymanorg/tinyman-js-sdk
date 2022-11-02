@@ -7,10 +7,10 @@ import {SupportedNetwork} from "../../util/commonTypes";
 import {PoolReserves, V2PoolInfo} from "../../util/pool/poolTypes";
 import {getValidatorAppID} from "../../validator";
 import {MINT_APP_CALL_ARGUMENTS, V2_MINT_INNER_TXN_COUNT} from "../constants";
+import {InitialMintQuote} from "../types";
 import {calculateInitialAddLiquidity} from "./util";
 export * from "./common";
 
-//  TO-DO: Add types
 export function getQuote({
   pool,
   reserves,
@@ -23,7 +23,7 @@ export function getQuote({
   asset1In: number | bigint;
   asset2In: number | bigint;
   slippage?: number;
-}) {
+}): InitialMintQuote {
   if (reserves.issuedLiquidity !== 0n) {
     throw new Error("Pool already has liquidity");
   }
@@ -31,10 +31,10 @@ export function getQuote({
   const poolTokenAssetAmount = calculateInitialAddLiquidity(asset1In, asset2In);
 
   return {
-    assetInID: pool.asset1ID,
-    assetOutID: pool.asset2ID,
-    assetInAmount: BigInt(asset1In),
-    assetOutAmount: BigInt(asset2In),
+    asset1ID: pool.asset1ID,
+    asset2ID: pool.asset2ID,
+    asset1In: BigInt(asset1In),
+    asset2In: BigInt(asset2In),
     poolTokenAssetAmount,
     slippage
   };
