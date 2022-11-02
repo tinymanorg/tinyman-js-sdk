@@ -97,7 +97,6 @@ export async function generateTxns({
     }
   });
 
-  //  TODO: return txns ungrouped
   const txGroup = algosdk.assignGroupID([asset1InTxn, asset2InTxn, validatorAppCallTxn]);
 
   return [

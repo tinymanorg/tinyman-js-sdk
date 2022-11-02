@@ -151,7 +151,6 @@ export async function generateTxns({
       fee: (V2_MINT_INNER_TXN_COUNT.SINGLE_ASSET_MODE + 1) * ALGORAND_MIN_TX_FEE
     }
   });
-  //  TODO: return txns ungrouped
   const txGroup = algosdk.assignGroupID([assetInTxn, validatorAppCallTxn]);
 
   return [
