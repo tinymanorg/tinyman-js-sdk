@@ -1,4 +1,5 @@
 import {PoolReserves} from "../../util/pool/poolTypes";
+import {convertFromBaseUnits} from "../../util/util";
 import {LOCKED_POOL_TOKENS} from "../constants";
 
 export function calculateSubsequentAddLiquidity(
@@ -106,9 +107,12 @@ function calculatePriceImpact(
   swapInputAmount: bigint,
   swapOutputAmount: bigint
 ) {
-  const swapPrice = swapOutputAmount / swapInputAmount;
-  const poolPrice = outputSupply / inputSupply;
+  const swapPrice =
+    convertFromBaseUnits(6, swapOutputAmount) / convertFromBaseUnits(6, swapInputAmount);
+  const poolPrice =
+    convertFromBaseUnits(6, outputSupply) / convertFromBaseUnits(6, inputSupply);
+
   const swapPoolPriceRatio = swapPrice / poolPrice;
 
-  return BigInt(Math.abs(Math.round(Number(swapPoolPriceRatio - BigInt(1)))));
+  return BigInt(Math.abs(Math.round(swapPoolPriceRatio - 1)));
 }

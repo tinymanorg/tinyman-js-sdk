@@ -59,7 +59,7 @@ export async function generateTxns({
   liquidityToken: {id: number; amount: number | bigint};
   initiatorAddr: string;
 }) {
-  const isAlgoPool = isAlgo(asset_2.id);
+  const isAlgoPool = isAlgo(pool.asset2ID);
   const suggestedParams = await client.getTransactionParams().do();
 
   const asset1InTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
@@ -97,17 +97,20 @@ export async function generateTxns({
     }
   });
 
+  //  TODO: return txns ungrouped
+  const txGroup = algosdk.assignGroupID([asset1InTxn, asset2InTxn, validatorAppCallTxn]);
+
   return [
     {
-      txn: validatorAppCallTxn,
+      txn: txGroup[0],
       signers: [initiatorAddr]
     },
     {
-      txn: asset1InTxn,
+      txn: txGroup[1],
       signers: [initiatorAddr]
     },
     {
-      txn: asset2InTxn,
+      txn: txGroup[2],
       signers: [initiatorAddr]
     }
   ];

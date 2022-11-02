@@ -78,10 +78,10 @@ export function getQuote({
 
 export async function generateTxns({
   client,
-  pool,
   network,
   poolAddress,
   asset_1,
+  pool,
   asset_2,
   liquidityToken,
   initiatorAddr,
@@ -137,17 +137,20 @@ export async function generateTxns({
     }
   });
 
+  //  TODO: return txns ungrouped
+  const txGroup = algosdk.assignGroupID([asset1InTxn, asset2InTxn, validatorAppCallTxn]);
+
   return [
     {
-      txn: validatorAppCallTxn,
+      txn: txGroup[0],
       signers: [initiatorAddr]
     },
     {
-      txn: asset1InTxn,
+      txn: txGroup[1],
       signers: [initiatorAddr]
     },
     {
-      txn: asset2InTxn,
+      txn: txGroup[2],
       signers: [initiatorAddr]
     }
   ];

@@ -63,6 +63,8 @@ export function getQuote({
     swapFees: swapTotalFeeAmount,
     priceImpact: swapPriceImpact
   };
+  const minPoolTokenAssetAmountWithSlippage =
+    poolTokenAssetAmount - BigInt(Math.ceil(Number(poolTokenAssetAmount) * slippage));
 
   return {
     asset1ID: pool.asset1ID,
@@ -76,7 +78,8 @@ export function getQuote({
       swapOutAmount
     ),
     slippage,
-    swapQuote
+    swapQuote,
+    minPoolTokenAssetAmountWithSlippage
   };
 }
 
@@ -93,12 +96,19 @@ export async function generateTxns({
   client: AlgodClient;
   network: SupportedNetwork;
   poolAddress: string;
+  // TODO: consider getting assetIn instead of asset_1 and asset_2
   asset_1: {id: number; amount: number | bigint};
   asset_2: {id: number; amount: number | bigint};
   liquidityToken: {id: number; amount: number | bigint};
   initiatorAddr: string;
   minPoolTokenAssetAmount: bigint;
 }) {
+  if (Boolean(asset_1.amount) && Boolean(asset_2.amount)) {
+    throw new Error(
+      "If you want to add asset 1 and asset 2 at the same time, please use flexible add liquidity."
+    );
+  }
+
   let assetIn: {id: number; amount: number | bigint};
 
   if (asset_1.amount) {
@@ -109,11 +119,6 @@ export async function generateTxns({
     throw new Error("Please provide at least one asset amount to add liquidity.");
   }
 
-  if (Boolean(asset_1.amount) === Boolean(asset_2.amount)) {
-    throw new Error(
-      "If you want to add asset 1 and asset 2 at the same time, please use flexible add liquidity."
-    );
-  }
   const isAlgoPool = isAlgo(assetIn.id);
   const suggestedParams = await client.getTransactionParams().do();
   const assetInTxn = isAlgoPool
@@ -145,14 +150,16 @@ export async function generateTxns({
       fee: (V2_MINT_INNER_TXN_COUNT.SINGLE_ASSET_MODE + 1) * ALGORAND_MIN_TX_FEE
     }
   });
+  //  TODO: return txns ungrouped
+  const txGroup = algosdk.assignGroupID([assetInTxn, validatorAppCallTxn]);
 
   return [
     {
-      txn: validatorAppCallTxn,
+      txn: txGroup[0],
       signers: [initiatorAddr]
     },
     {
-      txn: assetInTxn,
+      txn: txGroup[1],
       signers: [initiatorAddr]
     }
   ];
