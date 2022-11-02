@@ -152,7 +152,6 @@ async function execute({
   const assetOutId = [pool.asset1ID, pool.asset2ID].filter(
     (id) => id !== assetIn.assetID
   )[0];
-
   /**
    * If the swap type if Fixed Output, usually there will be a difference between
    * input amount and the actual used input amount. The change will be returned to the user
@@ -166,6 +165,7 @@ async function execute({
   const assetOutInnerTxn = innerTxns.find((item) => item.txn.txn.xaid === assetOutId)?.txn
     .txn;
 
+  // TODO: Improve error handling here. Check: https://github.com/Hipo/private-tinyman-js-sdk/pull/4#discussion_r1010836979
   if (!assetOutInnerTxn) {
     console.log({confirmedRound, txnID});
     throw new Error("Txn was successful, but asset out inner txn not found.");
@@ -178,12 +178,10 @@ async function execute({
       amount: BigInt(assetIn.amount) - BigInt(assetInChangeInnerTxn?.aamt || 0),
       assetID: assetIn.assetID
     },
-
     assetOut: {
       amount: assetOutInnerTxn?.aamt,
-      assetID: assetOutInnerTxn?.xaid
+      assetID: assetOutId
     },
-
     pool: await poolUtils.v2.getPoolInfo({
       client,
       network,

@@ -66,7 +66,7 @@ export interface V2SwapExecution {
   appCallTxnResponse: any;
 }
 
-export interface QuoteWithPool {
+export interface SwapQuoteWithPool {
   quote: SwapQuote;
   pool: {info: PoolInfo; reserves: PoolReserves};
 }
