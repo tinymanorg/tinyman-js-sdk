@@ -69,15 +69,15 @@ export {Bootstrap} from "./bootstrap";
 
 export type {MintQuote, MintExecution} from "./mint";
 
-export type {BurnQuote, BurnExecution} from "./burn";
-// eslint-disable-next-line no-duplicate-imports
-export {
-  getBurnLiquidityQuote,
-  burnLiquidity,
-  generateBurnTxns,
-  signBurnTxns,
-  BURN_PROCESS_TXN_COUNT
-} from "./burn";
+export type {
+  V1_1RemoveLiquidityExecution,
+  V1_1RemoveLiquidityQuote
+} from "./remove-liquidity/v1_1/types";
+export type {
+  V2RemoveLiquidityQuote,
+  V2SingleAssetRemoveLiquidityQuote
+} from "./remove-liquidity/v2/types";
+export {RemoveLiquidity} from "./remove-liquidity";
 
 export {Swap} from "./swap";
 
