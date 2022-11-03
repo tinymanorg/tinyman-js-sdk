@@ -65,13 +65,7 @@ export type {PoolStatus, PoolInfo, PoolReserves} from "./util/pool/poolTypes";
 
 export {poolUtils} from "./util/pool";
 
-export {
-  generateBootstrapTransactions,
-  signBootstrapTransactions,
-  getBootstrapProcessTxnCount,
-  calculatePoolBootstrapFundingTxnAmount,
-  createPool
-} from "./bootstrap";
+export {Bootstrap} from "./bootstrap";
 
 export type {MintQuote, MintExecution} from "./mint";
 
