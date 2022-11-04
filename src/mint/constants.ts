@@ -9,6 +9,7 @@ export const V2_MINT_INNER_TXN_COUNT = {
   FLEXIBLE_MODE: 2
 };
 
+// TODO: this is a duplicated constant. make sure there is only one.
 export const LOCKED_POOL_TOKENS = 1000;
 
 export const MINT_APP_CALL_ARGUMENTS = {

@@ -18,6 +18,7 @@ export interface V1_1MintQuote {
   share: number;
 }
 
+//  TODO: Rename all namings to AddLiquidity
 export interface MintSwapQuote {
   amountIn: bigint;
   amountOut: bigint;

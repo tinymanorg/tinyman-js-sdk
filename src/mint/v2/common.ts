@@ -49,6 +49,7 @@ export async function execute({
     ]);
     const appCallTxnId =
       txGroup[V2MintTxnIndices[mode].VALIDATOR_APP_CALL_TXN].txn.txID();
+    // TODO: instead of 1000, use the const for wait rounds here
     const appCallTxnResponse = await waitForConfirmation(client, appCallTxnId, 1000);
     const assetOutInnerTxn = appCallTxnResponse["inner-txns"].find(
       (item) => item.txn.txn.type === "axfer"
@@ -58,11 +59,7 @@ export async function execute({
 
     return {
       round: confirmedRound,
-      /**
-       * TODO: For FO swap, there can be one more txn with type `change`.
-       * We should handle that case as well.
-       * (see: https://docs.google.com/document/d/1O3QBkWmUDoaUM63hpniqa2_7G_6wZcCpkvCqVrGrDlc/edit# )
-       */
+      // TODO: make sure returned data is correct
       assetOut: {
         amount: assetOutInnerTxn.aamt,
         assetID: assetOutInnerTxn.xaid

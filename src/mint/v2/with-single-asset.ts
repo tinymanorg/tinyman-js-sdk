@@ -145,12 +145,13 @@ export async function generateTxns({
     ],
     accounts: [poolAddress],
     foreignAssets: [liquidityToken.id],
-    suggestedParams: {
-      ...suggestedParams,
-      // Add +1 to account for the fee of the outer txn
-      fee: (V2_MINT_INNER_TXN_COUNT.SINGLE_ASSET_MODE + 1) * ALGORAND_MIN_TX_FEE
-    }
+    suggestedParams
   });
+
+  // Add +1 to account for the fee of the outer txn
+  validatorAppCallTxn.fee =
+    (V2_MINT_INNER_TXN_COUNT.SINGLE_ASSET_MODE + 1) * ALGORAND_MIN_TX_FEE;
+
   const txGroup = algosdk.assignGroupID([assetInTxn, validatorAppCallTxn]);
 
   return [

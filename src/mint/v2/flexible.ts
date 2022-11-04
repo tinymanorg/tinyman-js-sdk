@@ -35,7 +35,9 @@ export function getQuote({
   slippage?: number;
 }): FlexibleMintQuote {
   if (reserves.issuedLiquidity === 0n) {
-    throw new Error("Pool has no liquidity");
+    throw new Error(
+      "Pool has no liquidity at the moment. To be able to do Flexible Swap, you should first add initial liquidity."
+    );
   }
 
   if (pool.status !== PoolStatus.READY) {
@@ -94,7 +96,7 @@ export async function generateTxns({
   poolAddress: string;
   asset_1: {id: number; amount: number | bigint};
   asset_2: {id: number; amount: number | bigint};
-  // convert to liquidityTokenID
+  // TODO: convert to liquidityTokenID
   liquidityToken: {id: number; amount: number | bigint};
   initiatorAddr: string;
   minPoolTokenAssetAmount: bigint;
@@ -131,12 +133,12 @@ export async function generateTxns({
     ],
     accounts: [poolAddress],
     foreignAssets: [liquidityToken.id],
-    suggestedParams: {
-      ...suggestedParams,
-      // Add +1 to account for the fee of the outer txn
-      fee: (V2_MINT_INNER_TXN_COUNT.FLEXIBLE_MODE + 1) * ALGORAND_MIN_TX_FEE
-    }
+    suggestedParams
   });
+
+  // Add +1 to account for the fee of the outer txn
+  validatorAppCallTxn.fee =
+    (V2_MINT_INNER_TXN_COUNT.FLEXIBLE_MODE + 1) * ALGORAND_MIN_TX_FEE;
 
   const txGroup = algosdk.assignGroupID([asset1InTxn, asset2InTxn, validatorAppCallTxn]);
 
