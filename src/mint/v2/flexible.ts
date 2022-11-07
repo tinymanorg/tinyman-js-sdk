@@ -4,7 +4,7 @@ import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
 import {MINT_APP_CALL_ARGUMENTS, V2_MINT_INNER_TXN_COUNT} from "../constants";
 import {CONTRACT_VERSION} from "../../contract/constants";
 import {SupportedNetwork} from "../../util/commonTypes";
-import {PoolInfo, PoolReserves, PoolStatus} from "../../util/pool/poolTypes";
+import {PoolInfo, PoolStatus, V2PoolInfo} from "../../util/pool/poolTypes";
 import {getValidatorAppID} from "../../validator";
 import {calculateSubsequentAddLiquidity} from "./util";
 import {poolUtils} from "../../util/pool";
@@ -20,21 +20,20 @@ export * from "./common";
  * @param params.reserves Pool reserves.
  * @param params.asset1In The quantity of the first asset being deposited.
  * @param params.asset2In The quantity of the second asset being deposited.
+ * @param params.slippage The maximum slippage allowed for the swap.
  */
 export function getQuote({
   pool,
-  reserves,
   asset1In,
   asset2In,
   slippage = 0.05
 }: {
-  pool: PoolInfo;
-  reserves: PoolReserves;
+  pool: V2PoolInfo;
   asset1In: number | bigint;
   asset2In: number | bigint;
   slippage?: number;
 }): FlexibleMintQuote {
-  if (reserves.issuedLiquidity === 0n) {
+  if (pool.issuedPoolTokens === 0n) {
     throw new Error(
       "Pool has no liquidity at the moment. To be able to do Flexible Swap, you should first add initial liquidity."
     );
@@ -44,6 +43,11 @@ export function getQuote({
     throw new Error("Pool is not ready");
   }
 
+  const reserves = {
+    asset1: pool.asset1Reserves || 0n,
+    asset2: pool.asset2Reserves || 0n,
+    issuedLiquidity: pool.issuedPoolTokens || 0n
+  };
   const {
     poolTokenAssetAmount,
     swapInAmount,
@@ -68,9 +72,8 @@ export function getQuote({
     asset2In: BigInt(asset2In),
     liquidityOut: poolTokenAssetAmount,
     liquidityID: pool.liquidityTokenID!,
-    round: reserves.round,
     share: poolUtils.getPoolShare(
-      reserves.issuedLiquidity + swapOutAmount,
+      pool.issuedPoolTokens || 0n + swapOutAmount,
       swapOutAmount
     ),
     slippage,

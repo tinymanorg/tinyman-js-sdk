@@ -3,7 +3,7 @@ import {convertFromBaseUnits} from "../../util/util";
 import {LOCKED_POOL_TOKENS} from "../constants";
 
 export function calculateSubsequentAddLiquidity(
-  reserves: PoolReserves,
+  reserves: Omit<PoolReserves, "round">,
   totalFeeShare: number | bigint,
   asset1Amount: number | bigint,
   asset2Amount: number | bigint

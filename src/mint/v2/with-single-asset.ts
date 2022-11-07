@@ -4,7 +4,7 @@ import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
 import {MINT_APP_CALL_ARGUMENTS, V2_MINT_INNER_TXN_COUNT} from "../constants";
 import {CONTRACT_VERSION} from "../../contract/constants";
 import {SupportedNetwork} from "../../util/commonTypes";
-import {PoolInfo, PoolReserves, PoolStatus} from "../../util/pool/poolTypes";
+import {PoolStatus, V2PoolInfo} from "../../util/pool/poolTypes";
 import {getValidatorAppID} from "../../validator";
 import {isAlgo} from "../../util/asset/assetUtils";
 import {calculateSubsequentAddLiquidity} from "./util";
@@ -23,19 +23,17 @@ export * from "./common";
  */
 export function getQuote({
   pool,
-  reserves,
   assetIn,
   slippage = 0.05
 }: {
-  pool: PoolInfo;
-  reserves: PoolReserves;
+  pool: V2PoolInfo;
   assetIn: {
     id: number;
     amount: number | bigint;
   };
   slippage?: number;
 }): SingleMintQuote {
-  if (reserves.issuedLiquidity === 0n) {
+  if (pool.issuedPoolTokens === 0n) {
     throw new Error("Pool has no liquidity");
   }
 
@@ -44,6 +42,11 @@ export function getQuote({
   }
 
   const isAsset1 = assetIn.id === pool.asset1ID;
+  const reserves = {
+    asset1: pool.asset1Reserves || 0n,
+    asset2: pool.asset2Reserves || 0n,
+    issuedLiquidity: pool.issuedPoolTokens || 0n
+  };
 
   const {
     poolTokenAssetAmount,
@@ -73,7 +76,6 @@ export function getQuote({
     assetIn: BigInt(assetIn.amount),
     liquidityOut: poolTokenAssetAmount,
     liquidityID: pool.liquidityTokenID!,
-    round: reserves.round,
     share: poolUtils.getPoolShare(
       reserves.issuedLiquidity + swapOutAmount,
       swapOutAmount

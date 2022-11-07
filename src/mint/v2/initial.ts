@@ -4,7 +4,7 @@ import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
 import {CONTRACT_VERSION} from "../../contract/constants";
 import {isAlgo} from "../../util/asset/assetUtils";
 import {SupportedNetwork} from "../../util/commonTypes";
-import {PoolReserves, V2PoolInfo} from "../../util/pool/poolTypes";
+import {V2PoolInfo} from "../../util/pool/poolTypes";
 import {getValidatorAppID} from "../../validator";
 import {MINT_APP_CALL_ARGUMENTS, V2_MINT_INNER_TXN_COUNT} from "../constants";
 import {InitialMintQuote} from "../types";
@@ -13,18 +13,16 @@ export * from "./common";
 
 export function getQuote({
   pool,
-  reserves,
   asset1In,
   asset2In,
   slippage = 0.05
 }: {
   pool: V2PoolInfo;
-  reserves: PoolReserves;
   asset1In: number | bigint;
   asset2In: number | bigint;
   slippage?: number;
 }): InitialMintQuote {
-  if (reserves.issuedLiquidity !== 0n) {
+  if (pool.issuedPoolTokens !== 0n) {
     throw new Error("Pool already has liquidity");
   }
 
