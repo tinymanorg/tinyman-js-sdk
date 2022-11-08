@@ -1,13 +1,11 @@
-import { execute, generateTxns, signTxns } from "./utils";
+import { calculateBootstrapFundingTxnAmount, execute, generateTxns, signTxns } from "./utils";
 export declare const Bootstrap: {
     v1_1: {
-        generateTxns: ({ client, network, asset1ID, asset2ID, asset1UnitName, asset2UnitName, initiatorAddr }: {
+        generateTxns: ({ client, network, asset_1, asset_2, initiatorAddr }: {
             client: import("algosdk").Algodv2;
             network: import("..").SupportedNetwork;
-            asset1ID: number;
-            asset2ID: number;
-            asset1UnitName: string;
-            asset2UnitName: string;
+            asset_1: Pick<import("..").TinymanAnalyticsApiAsset, "id" | "unit_name">;
+            asset_2: Pick<import("..").TinymanAnalyticsApiAsset, "id" | "unit_name">;
             initiatorAddr: string;
         }) => Promise<import("..").SignerTransaction[]>;
         signTxns: ({ txGroup, network, initiatorSigner, asset1ID, asset2ID }: {
@@ -20,7 +18,7 @@ export declare const Bootstrap: {
             signedTxns: Uint8Array[];
             txnIDs: string[];
         }>;
-        execute: ({ client, network, pool, signedTxns, txnIDs }: {
+        execute: ({ client, network, pool: { asset1ID, asset2ID }, signedTxns, txnIDs }: {
             client: import("algosdk").Algodv2;
             network: import("..").SupportedNetwork;
             pool: {
@@ -29,7 +27,8 @@ export declare const Bootstrap: {
             };
             signedTxns: Uint8Array[];
             txnIDs: string[];
-        }) => Promise<import("..").PoolInfo>;
+        }) => Promise<import("../util/pool/poolTypes").V1PoolInfo>;
+        getBootstrapFundingTxnAmount: (isAlgoPool: boolean) => number;
     };
     v2: {
         generateTxns: ({ client, network, asset_1, asset_2, initiatorAddr }: {
@@ -49,7 +48,7 @@ export declare const Bootstrap: {
             signedTxns: Uint8Array[];
             txnIDs: string[];
         }>;
-        execute: ({ client, network, pool, signedTxns, txnIDs }: {
+        execute: ({ client, network, pool: { asset1ID, asset2ID }, signedTxns, txnIDs }: {
             client: import("algosdk").Algodv2;
             network: import("..").SupportedNetwork;
             pool: {
@@ -58,9 +57,11 @@ export declare const Bootstrap: {
             };
             signedTxns: Uint8Array[];
             txnIDs: string[];
-        }) => Promise<import("..").PoolInfo>;
+        }) => Promise<import("../util/pool/poolTypes").V2PoolInfo>;
+        getBootstrapFundingTxnAmount: (isAlgoPool: boolean) => number;
     };
     generateTxns: typeof generateTxns;
     signTxns: typeof signTxns;
     execute: typeof execute;
+    calculateBootstrapFundingTxnAmount: typeof calculateBootstrapFundingTxnAmount;
 };

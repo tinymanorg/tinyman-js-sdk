@@ -2,8 +2,8 @@ import { Algodv2 } from "algosdk";
 import { ContractVersionValue } from "../contract/types";
 import { TinymanAnalyticsApiAsset } from "../util/asset/assetModels";
 import { SupportedNetwork, SignerTransaction, InitiatorSigner } from "../util/commonTypes";
-import { PoolInfo } from "../util/pool/poolTypes";
-export declare function generateTxns({ client, network, contractVersion, asset_1, asset_2, initiatorAddr }: {
+import { V1PoolInfo, V2PoolInfo } from "../util/pool/poolTypes";
+export declare function generateTxns(params: {
     client: Algodv2;
     network: SupportedNetwork;
     contractVersion: ContractVersionValue;
@@ -32,11 +32,14 @@ export declare function execute(params: {
     };
     signedTxns: Uint8Array[];
     txnIDs: string[];
-}): Promise<PoolInfo>;
+}): Promise<V1PoolInfo | V2PoolInfo>;
 /**
- * TODO: Do we need `calculateBootstrapFundingTxnAmount` instead of
- * separate functions for v1 and v2?
+ *  Calculates the amount of funding txn for creating a pool
  */
+export declare function calculateBootstrapFundingTxnAmount({ contractVersion, isAlgoPool }: {
+    contractVersion: ContractVersionValue;
+    isAlgoPool: boolean;
+}): number;
 /**
  * TODO: `function getMinBalanceRequiredToCreatePool({`
  *  * Calculates the minimum Algo balance an account should have to be able to create a pool

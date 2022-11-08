@@ -30,7 +30,6 @@ export interface FlexibleMintQuote {
     asset2In: bigint;
     liquidityOut: bigint;
     liquidityID: number;
-    round: number;
     share: number;
     slippage: number;
     swapQuote: MintSwapQuote;
@@ -42,7 +41,6 @@ export interface SingleMintQuote {
     assetIn: bigint;
     liquidityOut: bigint;
     liquidityID: number;
-    round: number;
     share: number;
     slippage: number;
     swapQuote: MintSwapQuote;

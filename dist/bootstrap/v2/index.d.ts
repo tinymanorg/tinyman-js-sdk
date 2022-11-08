@@ -1,7 +1,7 @@
 import { Algodv2 } from "algosdk";
 import { TinymanAnalyticsApiAsset } from "../../util/asset/assetModels";
 import { SupportedNetwork, SignerTransaction, InitiatorSigner } from "../../util/commonTypes";
-import { PoolInfo } from "../../util/pool/poolTypes";
+import { V2PoolInfo } from "../../util/pool/poolTypes";
 declare function generateTxns({ client, network, asset_1, asset_2, initiatorAddr }: {
     client: Algodv2;
     network: SupportedNetwork;
@@ -9,6 +9,7 @@ declare function generateTxns({ client, network, asset_1, asset_2, initiatorAddr
     asset_2: Pick<TinymanAnalyticsApiAsset, "id" | "unit_name">;
     initiatorAddr: string;
 }): Promise<SignerTransaction[]>;
+declare function getBootstrapFundingTxnAmount(isAlgoPool: boolean): number;
 declare function signTxns({ txGroup, network, initiatorSigner, asset1ID, asset2ID }: {
     txGroup: SignerTransaction[];
     network: SupportedNetwork;
@@ -22,16 +23,8 @@ declare function signTxns({ txGroup, network, initiatorSigner, asset1ID, asset2I
 /**
  * Create an pool for an asset pair if it does not already exist. The initiator will provide
  * funding to create the pool and pay for the creation transaction fees.
- *
- * @param client An Algodv2 client.
- * @param pool Parameters of the pool to create.
- * @param pool.validatorAppID The ID of the Validator App for the network.
- * @param pool.asset1ID The ID of the first asset in the pool pair.
- * @param pool.asset2ID The ID of the second asset in the pool pair.
- * @param signedTxns Signed transactions
- * @param txnIDs Transaction IDs
  */
-declare function execute({ client, network, pool, signedTxns, txnIDs }: {
+declare function execute({ client, network, pool: { asset1ID, asset2ID }, signedTxns, txnIDs }: {
     client: Algodv2;
     network: SupportedNetwork;
     pool: {
@@ -40,10 +33,11 @@ declare function execute({ client, network, pool, signedTxns, txnIDs }: {
     };
     signedTxns: Uint8Array[];
     txnIDs: string[];
-}): Promise<PoolInfo>;
+}): Promise<V2PoolInfo>;
 export declare const BootstrapV2: {
     generateTxns: typeof generateTxns;
     signTxns: typeof signTxns;
     execute: typeof execute;
+    getBootstrapFundingTxnAmount: typeof getBootstrapFundingTxnAmount;
 };
 export {};

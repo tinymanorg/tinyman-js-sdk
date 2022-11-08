@@ -1,12 +1,11 @@
 import algosdk from "algosdk";
 import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
 import { SupportedNetwork } from "../../util/commonTypes";
-import { PoolReserves, V2PoolInfo } from "../../util/pool/poolTypes";
+import { V2PoolInfo } from "../../util/pool/poolTypes";
 import { InitialMintQuote } from "../types";
 export * from "./common";
-export declare function getQuote({ pool, reserves, asset1In, asset2In, slippage }: {
+export declare function getQuote({ pool, asset1In, asset2In, slippage }: {
     pool: V2PoolInfo;
-    reserves: PoolReserves;
     asset1In: number | bigint;
     asset2In: number | bigint;
     slippage?: number;

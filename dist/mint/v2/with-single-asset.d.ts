@@ -1,7 +1,7 @@
 import algosdk from "algosdk";
 import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
 import { SupportedNetwork } from "../../util/commonTypes";
-import { PoolInfo, PoolReserves } from "../../util/pool/poolTypes";
+import { V2PoolInfo } from "../../util/pool/poolTypes";
 import { SingleMintQuote } from "../types";
 export * from "./common";
 /**
@@ -13,14 +13,17 @@ export * from "./common";
  * @param params.asset1In The quantity of the first asset being deposited.
  * @param params.asset2In The quantity of the second asset being deposited.
  */
-export declare function getQuote({ pool, reserves, assetIn, slippage }: {
-    pool: PoolInfo;
-    reserves: PoolReserves;
+export declare function getQuote({ pool, assetIn, slippage, decimals }: {
+    pool: V2PoolInfo;
     assetIn: {
         id: number;
         amount: number | bigint;
     };
     slippage?: number;
+    decimals: {
+        asset1: number;
+        asset2: number;
+    };
 }): SingleMintQuote;
 export declare function generateTxns({ client, network, poolAddress, asset_1, asset_2, liquidityToken, initiatorAddr, minPoolTokenAssetAmount }: {
     client: AlgodClient;

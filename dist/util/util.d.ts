@@ -50,7 +50,3 @@ export declare function encodeInteger(number: any): number[];
  * Converts a text into bytes
  */
 export declare function encodeString(text: string): Uint8Array;
-/**
- * @returns `true` if the given id is the asset id of ALGO
- */
-export declare function isAlgo(id: number | string | bigint): boolean;
