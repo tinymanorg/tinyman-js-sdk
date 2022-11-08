@@ -124,7 +124,7 @@ function calculatePriceImpact(
     convertFromBaseUnits(inputAsset.decimals, inputAsset.amount);
   const poolPrice =
     convertFromBaseUnits(outputAsset.decimals, outputSupply) /
-    convertFromBaseUnits(inputAsset.amount, inputSupply);
+    convertFromBaseUnits(inputAsset.decimals, inputSupply);
 
   const swapPoolPriceRatio = swapPrice / poolPrice;
 
