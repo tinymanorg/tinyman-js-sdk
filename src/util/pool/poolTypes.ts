@@ -16,6 +16,7 @@ export interface PoolInfo {
   asset1ID: number;
   asset2ID: number;
   liquidityTokenID?: number;
+  totalFeeShare?: bigint;
   status: PoolStatus;
 }
 
