@@ -65,13 +65,7 @@ export type {PoolStatus, PoolInfo, PoolReserves} from "./util/pool/poolTypes";
 
 export {poolUtils} from "./util/pool";
 
-export {
-  generateBootstrapTransactions,
-  signBootstrapTransactions,
-  getBootstrapProcessTxnCount,
-  calculatePoolBootstrapFundingTxnAmount,
-  createPool
-} from "./bootstrap";
+export {Bootstrap} from "./bootstrap";
 
 export type {
   V1_1MintQuote,
@@ -87,27 +81,17 @@ export type {
 export {V2MintTxnIndices, V2MintType} from "./mint/types";
 export {Mint} from "./mint";
 
-export type {BurnQuote, BurnExecution} from "./burn";
-// eslint-disable-next-line no-duplicate-imports
-export {
-  getBurnLiquidityQuote,
-  burnLiquidity,
-  generateBurnTxns,
-  signBurnTxns,
-  BURN_PROCESS_TXN_COUNT
-} from "./burn";
+export type {
+  V1_1RemoveLiquidityExecution,
+  V1_1RemoveLiquidityQuote
+} from "./remove-liquidity/v1_1/types";
+export type {
+  V2RemoveLiquidityQuote,
+  V2SingleAssetRemoveLiquidityQuote
+} from "./remove-liquidity/v2/types";
+export {RemoveLiquidity} from "./remove-liquidity";
 
-export type {SwapQuote, SwapExecution} from "./swap";
-
-// eslint-disable-next-line no-duplicate-imports
-export {
-  SwapType,
-  getSwapQuote,
-  issueSwap,
-  generateSwapTransactions,
-  signSwapTransactions,
-  SWAP_PROCESS_TXN_COUNT
-} from "./swap";
+export {Swap} from "./swap";
 
 export {
   redeemExcessAsset,

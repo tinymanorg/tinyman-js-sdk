@@ -8,73 +8,18 @@ import {
   sumUpTxnFees,
   roundNumber,
   encodeString
-} from "./util/util";
-import {InitiatorSigner, SignerTransaction} from "./util/commonTypes";
-import TinymanError from "./util/error/TinymanError";
-import {DEFAULT_FEE_TXN_NOTE} from "./util/constant";
-import {ALGO_ASSET_ID} from "./util/asset/assetConstants";
-import {PoolInfo, PoolReserves, PoolStatus} from "./util/pool/poolTypes";
-import {getAccountExcessWithinPool} from "./util/account/accountUtils";
+} from "../../util/util";
+import {InitiatorSigner, SignerTransaction} from "../../util/commonTypes";
+import TinymanError from "../../util/error/TinymanError";
+import {DEFAULT_FEE_TXN_NOTE} from "../../util/constant";
+import {ALGO_ASSET_ID} from "../../util/asset/assetConstants";
+import {PoolReserves, PoolStatus, V1PoolInfo} from "../../util/pool/poolTypes";
+import {getAccountExcessWithinPool} from "../../util/account/accountUtils";
+import {SwapType, SwapQuote, V1SwapExecution} from "../types";
 
 // FEE = %0.3 or 3/1000
 const FEE_NUMERATOR = 3n;
 const FEE_DENOMINATOR = 1000n;
-
-export enum SwapType {
-  FixedInput = "fixed-input",
-  FixedOutput = "fixed-output"
-}
-
-/** An object containing information about a swap quote. */
-export interface SwapQuote {
-  /** The round that this quote is based on. */
-  round: number;
-  /** The ID of the input asset in this quote. */
-  assetInID: number;
-  /** The quantity of the input asset in this quote. */
-  assetInAmount: bigint;
-  /** The ID of the output asset in this quote. */
-  assetOutID: number;
-  /** The quantity of the output asset in this quote. */
-  assetOutAmount: bigint;
-  /** The amount of fee that may be spent (in the currency of the fixed asset) for the swap  */
-  swapFee: number;
-  /** The final exchange rate for this swap expressed as  assetOutAmount / assetInAmount */
-  rate: number;
-  /** The price impact of the swap */
-  priceImpact: number;
-}
-
-/** An object containing information about a successfully executed swap. */
-export interface SwapExecution {
-  /** The round that the swap occurred in. */
-  round: number;
-  /**
-   * The total amount of transaction fees that were spent (in microAlgos) to execute the swap and,
-   * if applicable, redeem transactions.
-   */
-  fees: number;
-  /** The ID of the swap's input asset. */
-  assetInID: number;
-  /** The amount of the swap's input asset. */
-  assetInAmount: bigint;
-  /** The ID of the swap's output asset. */
-  assetOutID: number;
-  /** The amount of the swap's output asset. */
-  assetOutAmount: bigint;
-  /** The ID of the transaction. */
-  txnID: string;
-  excessAmount: {
-    /** Asset ID for which the excess amount can be redeemed with */
-    assetID: number;
-    /** Excess amount for the current swap */
-    excessAmountForSwap: bigint;
-    /** Total excess amount accumulated for the pool asset */
-    totalExcessAmount: bigint;
-  };
-  /** The group ID for the transaction group. */
-  groupID: string;
-}
 
 enum SwapTxnGroupIndices {
   FEE_TXN_INDEX = 0,
@@ -83,12 +28,12 @@ enum SwapTxnGroupIndices {
   ASSET_OUT_TXN_INDEX
 }
 
-export async function signSwapTransactions({
+async function signTxns({
   pool,
   txGroup,
   initiatorSigner
 }: {
-  pool: PoolInfo;
+  pool: V1PoolInfo;
   txGroup: SignerTransaction[];
   initiatorSigner: InitiatorSigner;
 }): Promise<Uint8Array[]> {
@@ -109,9 +54,7 @@ export async function signSwapTransactions({
   return signedTxns;
 }
 
-export const SWAP_PROCESS_TXN_COUNT = 4;
-
-export async function generateSwapTransactions({
+async function generateTxns({
   client,
   pool,
   swapType,
@@ -121,18 +64,12 @@ export async function generateSwapTransactions({
   initiatorAddr,
   poolAddress
 }: {
-  client: any;
-  pool: PoolInfo;
+  client: Algodv2;
+  pool: V1PoolInfo;
   poolAddress: string;
   swapType: SwapType;
-  assetIn: {
-    assetID: number;
-    amount: number | bigint;
-  };
-  assetOut: {
-    assetID: number;
-    amount: number | bigint;
-  };
+  assetIn: {assetID: number; amount: number | bigint};
+  assetOut: {assetID: number; amount: number | bigint};
   slippage: number;
   initiatorAddr: string;
 }): Promise<SignerTransaction[]> {
@@ -225,6 +162,39 @@ export async function generateSwapTransactions({
 }
 
 /**
+ *
+ * @param type - Type of the swap
+ * @param pool - Information for the pool.
+ * @param reserves - Pool reserves.
+ * @param asset.assetID - ID of the asset to be swapped
+ * @param asset.amount - Amount of the asset to be swapped
+ * @param decimals.assetIn - Decimals quantity for the input asset
+ * @param decimals.assetOut - Decimals quantity for the output asset
+ * @returns A promise for the Swap quote
+ */
+function getQuote(
+  type: SwapType,
+  pool: V1PoolInfo,
+  reserves: PoolReserves,
+  asset: {assetID: number; amount: number | bigint},
+  decimals: {assetIn: number; assetOut: number}
+): SwapQuote {
+  let quote;
+
+  if (pool.status !== PoolStatus.READY) {
+    throw new TinymanError({pool, asset}, "Trying to swap on a non-existent pool");
+  }
+
+  if (type === SwapType.FixedInput) {
+    quote = getFixedInputSwapQuote({pool, reserves, assetIn: asset, decimals});
+  } else {
+    quote = getFixedOutputSwapQuote({pool, reserves, assetOut: asset, decimals});
+  }
+
+  return quote;
+}
+
+/**
  * Get a quote for a fixed input swap This does not execute any transactions.
  *
  * @param params.pool Information for the pool.
@@ -239,16 +209,10 @@ function getFixedInputSwapQuote({
   assetIn,
   decimals
 }: {
-  pool: PoolInfo;
+  pool: V1PoolInfo;
   reserves: PoolReserves;
-  assetIn: {
-    assetID: number;
-    amount: number | bigint;
-  };
-  decimals: {
-    assetIn: number;
-    assetOut: number;
-  };
+  assetIn: {assetID: number; amount: number | bigint};
+  decimals: {assetIn: number; assetOut: number};
 }): SwapQuote {
   const assetInAmount = BigInt(assetIn.amount);
 
@@ -313,7 +277,7 @@ function getFixedInputSwapQuote({
  *   0 and 100 and acts as a percentage of params.assetOut.amount.
  * @param params.initiatorAddr The address of the account performing the swap operation.
  */
-async function fixedInputSwap({
+async function executeFixedInputSwap({
   client,
   pool,
   signedTxns,
@@ -322,18 +286,12 @@ async function fixedInputSwap({
   initiatorAddr
 }: {
   client: any;
-  pool: PoolInfo;
+  pool: V1PoolInfo;
   signedTxns: Uint8Array[];
-  assetIn: {
-    assetID: number;
-    amount: number | bigint;
-  };
-  assetOut: {
-    assetID: number;
-    amount: number | bigint;
-  };
+  assetIn: {assetID: number; amount: number | bigint};
+  assetOut: {assetID: number; amount: number | bigint};
   initiatorAddr: string;
-}): Promise<Omit<SwapExecution, "fees" | "groupID">> {
+}): Promise<Omit<V1SwapExecution, "fees" | "groupID">> {
   const prevExcessAssets = await getAccountExcessWithinPool({
     client,
     pool,
@@ -394,16 +352,10 @@ function getFixedOutputSwapQuote({
   assetOut,
   decimals
 }: {
-  pool: PoolInfo;
+  pool: V1PoolInfo;
   reserves: PoolReserves;
-  assetOut: {
-    assetID: number;
-    amount: number | bigint;
-  };
-  decimals: {
-    assetIn: number;
-    assetOut: number;
-  };
+  assetOut: {assetID: number; amount: number | bigint};
+  decimals: {assetIn: number; assetOut: number};
 }): SwapQuote {
   const assetOutAmount = BigInt(assetOut.amount);
 
@@ -455,55 +407,6 @@ function getFixedOutputSwapQuote({
 }
 
 /**
- *
- * @param type - Type of the swap
- * @param pool - Information for the pool.
- * @param reserves - Pool reserves.
- * @param asset.assetID - ID of the asset to be swapped
- * @param asset.amount - Amount of the asset to be swapped
- * @param decimals.assetIn - Decimals quantity for the input asset
- * @param decimals.assetOut - Decimals quantity for the output asset
- * @returns A promise for the Swap quote
- */
-export function getSwapQuote(
-  type: SwapType,
-  pool: PoolInfo,
-  reserves: PoolReserves,
-  asset: {
-    assetID: number;
-    amount: number | bigint;
-  },
-  decimals: {
-    assetIn: number;
-    assetOut: number;
-  }
-): SwapQuote {
-  let quote;
-
-  if (pool.status !== PoolStatus.READY) {
-    throw new TinymanError({pool, asset}, "Trying to swap on a non-existent pool");
-  }
-
-  if (type === "fixed-input") {
-    quote = getFixedInputSwapQuote({
-      pool,
-      reserves,
-      assetIn: asset,
-      decimals
-    });
-  } else {
-    quote = getFixedOutputSwapQuote({
-      pool,
-      reserves,
-      assetOut: asset,
-      decimals
-    });
-  }
-
-  return quote;
-}
-
-/**
  * Execute a fixed output swap with the desired quantities.
  *
  * @param params.client An Algodv2 client.
@@ -520,7 +423,7 @@ export function getSwapQuote(
  * @param params.assetOut.amount The quantity of the output asset.
  * @param params.initiatorAddr The address of the account performing the swap operation.
  */
-async function fixedOutputSwap({
+async function executeFixedOutputSwap({
   client,
   pool,
   signedTxns,
@@ -529,18 +432,12 @@ async function fixedOutputSwap({
   initiatorAddr
 }: {
   client: any;
-  pool: PoolInfo;
+  pool: V1PoolInfo;
   signedTxns: Uint8Array[];
-  assetIn: {
-    assetID: number;
-    amount: number | bigint;
-  };
-  assetOut: {
-    assetID: number;
-    amount: number | bigint;
-  };
+  assetIn: {assetID: number; amount: number | bigint};
+  assetOut: {assetID: number; amount: number | bigint};
   initiatorAddr: string;
-}): Promise<Omit<SwapExecution, "fees" | "groupID">> {
+}): Promise<Omit<V1SwapExecution, "fees" | "groupID">> {
   const prevExcessAssets = await getAccountExcessWithinPool({
     client,
     pool,
@@ -602,7 +499,7 @@ async function fixedOutputSwap({
  * @param params.slippage The maximum acceptable slippage rate.
  * @param params.initiatorAddr The address of the account performing the swap operation.
  */
-export async function issueSwap({
+async function execute({
   client,
   pool,
   swapType,
@@ -611,12 +508,12 @@ export async function issueSwap({
   initiatorAddr
 }: {
   client: Algodv2;
-  pool: PoolInfo;
+  pool: V1PoolInfo;
   swapType: SwapType;
   txGroup: SignerTransaction[];
   signedTxns: Uint8Array[];
   initiatorAddr: string;
-}): Promise<SwapExecution> {
+}): Promise<V1SwapExecution> {
   if (pool.status !== PoolStatus.READY) {
     throw new TinymanError(
       {pool, swapType, txGroup},
@@ -635,10 +532,10 @@ export async function issueSwap({
         txGroup[SwapTxnGroupIndices.ASSET_OUT_TXN_INDEX].txn.assetIndex || ALGO_ASSET_ID,
       amount: txGroup[SwapTxnGroupIndices.ASSET_OUT_TXN_INDEX].txn.amount
     };
-    let swapData: Omit<SwapExecution, "fees" | "groupID">;
+    let swapData: Omit<V1SwapExecution, "fees" | "groupID">;
 
     if (swapType === SwapType.FixedInput) {
-      swapData = await fixedInputSwap({
+      swapData = await executeFixedInputSwap({
         client,
         pool,
         signedTxns,
@@ -647,7 +544,7 @@ export async function issueSwap({
         initiatorAddr
       });
     } else {
-      swapData = await fixedOutputSwap({
+      swapData = await executeFixedOutputSwap({
         client,
         pool,
         signedTxns,
@@ -673,3 +570,13 @@ export async function issueSwap({
     throw parsedError;
   }
 }
+
+export const SwapV1_1 = {
+  getQuote,
+  getFixedInputSwapQuote,
+  getFixedOutputSwapQuote,
+  generateTxns,
+  signTxns,
+  execute,
+  executeFixedOutputSwap
+};

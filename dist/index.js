@@ -1,3 +1,3604 @@
-"use strict";Object.defineProperty(exports,"__esModule",{value:!0});var e=require("algosdk"),t=require("base64-js");function n(e){return e&&"object"==typeof e&&"default"in e?e:{default:e}}var r=n(e),s=Uint8Array.from([1]);function a(e,t){var n=Object.keys(e);if(Object.getOwnPropertySymbols){var r=Object.getOwnPropertySymbols(e);t&&(r=r.filter((function(t){return Object.getOwnPropertyDescriptor(e,t).enumerable}))),n.push.apply(n,r)}return n}function o(e){for(var t=1;t<arguments.length;t++){var n=null!=arguments[t]?arguments[t]:{};t%2?a(Object(n),!0).forEach((function(t){f(e,t,n[t])})):Object.getOwnPropertyDescriptors?Object.defineProperties(e,Object.getOwnPropertyDescriptors(n)):a(Object(n)).forEach((function(t){Object.defineProperty(e,t,Object.getOwnPropertyDescriptor(n,t))}))}return e}function i(){
-/*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */
-i=function(){return e};var e={},t=Object.prototype,n=t.hasOwnProperty,r="function"==typeof Symbol?Symbol:{},s=r.iterator||"@@iterator",a=r.asyncIterator||"@@asyncIterator",o=r.toStringTag||"@@toStringTag";function u(e,t,n){return Object.defineProperty(e,t,{value:n,enumerable:!0,configurable:!0,writable:!0}),e[t]}try{u({},"")}catch(e){u=function(e,t,n){return e[t]=n}}function c(e,t,n,r){var s=t&&t.prototype instanceof d?t:d,a=Object.create(s.prototype),o=new v(r||[]);return a._invoke=function(e,t,n){var r="suspendedStart";return function(s,a){if("executing"===r)throw new Error("Generator is already running");if("completed"===r){if("throw"===s)throw a;return b()}for(n.method=s,n.arg=a;;){var o=n.delegate;if(o){var i=y(o,n);if(i){if(i===l)continue;return i}}if("next"===n.method)n.sent=n._sent=n.arg;else if("throw"===n.method){if("suspendedStart"===r)throw r="completed",n.arg;n.dispatchException(n.arg)}else"return"===n.method&&n.abrupt("return",n.arg);r="executing";var u=p(e,t,n);if("normal"===u.type){if(r=n.done?"completed":"suspendedYield",u.arg===l)continue;return{value:u.arg,done:n.done}}"throw"===u.type&&(r="completed",n.method="throw",n.arg=u.arg)}}}(e,n,o),a}function p(e,t,n){try{return{type:"normal",arg:e.call(t,n)}}catch(e){return{type:"throw",arg:e}}}e.wrap=c;var l={};function d(){}function f(){}function A(){}var I={};u(I,s,(function(){return this}));var g=Object.getPrototypeOf,m=g&&g(g(N([])));m&&m!==t&&n.call(m,s)&&(I=m);var h=A.prototype=d.prototype=Object.create(I);function x(e){["next","throw","return"].forEach((function(t){u(e,t,(function(e){return this._invoke(t,e)}))}))}function E(e,t){function r(s,a,o,i){var u=p(e[s],e,a);if("throw"!==u.type){var c=u.arg,l=c.value;return l&&"object"==typeof l&&n.call(l,"__await")?t.resolve(l.__await).then((function(e){r("next",e,o,i)}),(function(e){r("throw",e,o,i)})):t.resolve(l).then((function(e){c.value=e,o(c)}),(function(e){return r("throw",e,o,i)}))}i(u.arg)}var s;this._invoke=function(e,n){function a(){return new t((function(t,s){r(e,n,t,s)}))}return s=s?s.then(a,a):a()}}function y(e,t){var n=e.iterator[t.method];if(void 0===n){if(t.delegate=null,"throw"===t.method){if(e.iterator.return&&(t.method="return",t.arg=void 0,y(e,t),"throw"===t.method))return l;t.method="throw",t.arg=new TypeError("The iterator does not provide a 'throw' method")}return l}var r=p(n,e.iterator,t.arg);if("throw"===r.type)return t.method="throw",t.arg=r.arg,t.delegate=null,l;var s=r.arg;return s?s.done?(t[e.resultName]=s.value,t.next=e.nextLoc,"return"!==t.method&&(t.method="next",t.arg=void 0),t.delegate=null,l):s:(t.method="throw",t.arg=new TypeError("iterator result is not an object"),t.delegate=null,l)}function T(e){var t={tryLoc:e[0]};1 in e&&(t.catchLoc=e[1]),2 in e&&(t.finallyLoc=e[2],t.afterLoc=e[3]),this.tryEntries.push(t)}function D(e){var t=e.completion||{};t.type="normal",delete t.arg,e.completion=t}function v(e){this.tryEntries=[{tryLoc:"root"}],e.forEach(T,this),this.reset(!0)}function N(e){if(e){var t=e[s];if(t)return t.call(e);if("function"==typeof e.next)return e;if(!isNaN(e.length)){var r=-1,a=function t(){for(;++r<e.length;)if(n.call(e,r))return t.value=e[r],t.done=!1,t;return t.value=void 0,t.done=!0,t};return a.next=a}}return{next:b}}function b(){return{value:void 0,done:!0}}return f.prototype=A,u(h,"constructor",A),u(A,"constructor",f),f.displayName=u(A,o,"GeneratorFunction"),e.isGeneratorFunction=function(e){var t="function"==typeof e&&e.constructor;return!!t&&(t===f||"GeneratorFunction"===(t.displayName||t.name))},e.mark=function(e){return Object.setPrototypeOf?Object.setPrototypeOf(e,A):(e.__proto__=A,u(e,o,"GeneratorFunction")),e.prototype=Object.create(h),e},e.awrap=function(e){return{__await:e}},x(E.prototype),u(E.prototype,a,(function(){return this})),e.AsyncIterator=E,e.async=function(t,n,r,s,a){void 0===a&&(a=Promise);var o=new E(c(t,n,r,s),a);return e.isGeneratorFunction(n)?o:o.next().then((function(e){return e.done?e.value:o.next()}))},x(h),u(h,o,"Generator"),u(h,s,(function(){return this})),u(h,"toString",(function(){return"[object Generator]"})),e.keys=function(e){var t=[];for(var n in e)t.push(n);return t.reverse(),function n(){for(;t.length;){var r=t.pop();if(r in e)return n.value=r,n.done=!1,n}return n.done=!0,n}},e.values=N,v.prototype={constructor:v,reset:function(e){if(this.prev=0,this.next=0,this.sent=this._sent=void 0,this.done=!1,this.delegate=null,this.method="next",this.arg=void 0,this.tryEntries.forEach(D),!e)for(var t in this)"t"===t.charAt(0)&&n.call(this,t)&&!isNaN(+t.slice(1))&&(this[t]=void 0)},stop:function(){this.done=!0;var e=this.tryEntries[0].completion;if("throw"===e.type)throw e.arg;return this.rval},dispatchException:function(e){if(this.done)throw e;var t=this;function r(n,r){return o.type="throw",o.arg=e,t.next=n,r&&(t.method="next",t.arg=void 0),!!r}for(var s=this.tryEntries.length-1;s>=0;--s){var a=this.tryEntries[s],o=a.completion;if("root"===a.tryLoc)return r("end");if(a.tryLoc<=this.prev){var i=n.call(a,"catchLoc"),u=n.call(a,"finallyLoc");if(i&&u){if(this.prev<a.catchLoc)return r(a.catchLoc,!0);if(this.prev<a.finallyLoc)return r(a.finallyLoc)}else if(i){if(this.prev<a.catchLoc)return r(a.catchLoc,!0)}else{if(!u)throw new Error("try statement without catch or finally");if(this.prev<a.finallyLoc)return r(a.finallyLoc)}}}},abrupt:function(e,t){for(var r=this.tryEntries.length-1;r>=0;--r){var s=this.tryEntries[r];if(s.tryLoc<=this.prev&&n.call(s,"finallyLoc")&&this.prev<s.finallyLoc){var a=s;break}}a&&("break"===e||"continue"===e)&&a.tryLoc<=t&&t<=a.finallyLoc&&(a=null);var o=a?a.completion:{};return o.type=e,o.arg=t,a?(this.method="next",this.next=a.finallyLoc,l):this.complete(o)},complete:function(e,t){if("throw"===e.type)throw e.arg;return"break"===e.type||"continue"===e.type?this.next=e.arg:"return"===e.type?(this.rval=this.arg=e.arg,this.method="return",this.next="end"):"normal"===e.type&&t&&(this.next=t),l},finish:function(e){for(var t=this.tryEntries.length-1;t>=0;--t){var n=this.tryEntries[t];if(n.finallyLoc===e)return this.complete(n.completion,n.afterLoc),D(n),l}},catch:function(e){for(var t=this.tryEntries.length-1;t>=0;--t){var n=this.tryEntries[t];if(n.tryLoc===e){var r=n.completion;if("throw"===r.type){var s=r.arg;D(n)}return s}}throw new Error("illegal catch attempt")},delegateYield:function(e,t,n){return this.delegate={iterator:N(e),resultName:t,nextLoc:n},"next"===this.method&&(this.arg=void 0),l}},e}function u(e,t,n,r,s,a,o){try{var i=e[a](o),u=i.value}catch(e){return void n(e)}i.done?t(u):Promise.resolve(u).then(r,s)}function c(e){return function(){var t=this,n=arguments;return new Promise((function(r,s){var a=e.apply(t,n);function o(e){u(a,r,s,o,i,"next",e)}function i(e){u(a,r,s,o,i,"throw",e)}o(void 0)}))}}function p(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}function l(e,t){for(var n=0;n<t.length;n++){var r=t[n];r.enumerable=r.enumerable||!1,r.configurable=!0,"value"in r&&(r.writable=!0),Object.defineProperty(e,r.key,r)}}function d(e,t,n){return t&&l(e.prototype,t),n&&l(e,n),Object.defineProperty(e,"prototype",{writable:!1}),e}function f(e,t,n){return t in e?Object.defineProperty(e,t,{value:n,enumerable:!0,configurable:!0,writable:!0}):e[t]=n,e}function A(e,t){if("function"!=typeof t&&null!==t)throw new TypeError("Super expression must either be null or a function");e.prototype=Object.create(t&&t.prototype,{constructor:{value:e,writable:!0,configurable:!0}}),Object.defineProperty(e,"prototype",{writable:!1}),t&&g(e,t)}function I(e){return I=Object.setPrototypeOf?Object.getPrototypeOf.bind():function(e){return e.__proto__||Object.getPrototypeOf(e)},I(e)}function g(e,t){return g=Object.setPrototypeOf?Object.setPrototypeOf.bind():function(e,t){return e.__proto__=t,e},g(e,t)}function m(){if("undefined"==typeof Reflect||!Reflect.construct)return!1;if(Reflect.construct.sham)return!1;if("function"==typeof Proxy)return!0;try{return Boolean.prototype.valueOf.call(Reflect.construct(Boolean,[],(function(){}))),!0}catch(e){return!1}}function h(e,t,n){return h=m()?Reflect.construct.bind():function(e,t,n){var r=[null];r.push.apply(r,t);var s=new(Function.bind.apply(e,r));return n&&g(s,n.prototype),s},h.apply(null,arguments)}function x(e){var t="function"==typeof Map?new Map:void 0;return x=function(e){if(null===e||(n=e,-1===Function.toString.call(n).indexOf("[native code]")))return e;var n;if("function"!=typeof e)throw new TypeError("Super expression must either be null or a function");if(void 0!==t){if(t.has(e))return t.get(e);t.set(e,r)}function r(){return h(e,arguments,I(this).constructor)}return r.prototype=Object.create(e.prototype,{constructor:{value:r,enumerable:!1,writable:!0,configurable:!0}}),g(r,e)},x(e)}function E(e,t){if(t&&("object"==typeof t||"function"==typeof t))return t;if(void 0!==t)throw new TypeError("Derived constructors may only return object or undefined");return function(e){if(void 0===e)throw new ReferenceError("this hasn't been initialised - super() hasn't been called");return e}(e)}function y(e){var t=m();return function(){var n,r=I(e);if(t){var s=I(this).constructor;n=Reflect.construct(r,arguments,s)}else n=r.apply(this,arguments);return E(this,n)}}function T(e,t){return function(e){if(Array.isArray(e))return e}(e)||function(e,t){var n=null==e?null:"undefined"!=typeof Symbol&&e[Symbol.iterator]||e["@@iterator"];if(null==n)return;var r,s,a=[],o=!0,i=!1;try{for(n=n.call(e);!(o=(r=n.next()).done)&&(a.push(r.value),!t||a.length!==t);o=!0);}catch(e){i=!0,s=e}finally{try{o||null==n.return||n.return()}finally{if(i)throw s}}return a}(e,t)||v(e,t)||function(){throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.")}()}function D(e){return function(e){if(Array.isArray(e))return N(e)}(e)||function(e){if("undefined"!=typeof Symbol&&null!=e[Symbol.iterator]||null!=e["@@iterator"])return Array.from(e)}(e)||v(e)||function(){throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.")}()}function v(e,t){if(e){if("string"==typeof e)return N(e,t);var n=Object.prototype.toString.call(e).slice(8,-1);return"Object"===n&&e.constructor&&(n=e.constructor.name),"Map"===n||"Set"===n?Array.from(e):"Arguments"===n||/^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)?N(e,t):void 0}}function N(e,t){(null==t||t>e.length)&&(t=e.length);for(var n=0,r=new Array(t);n<t;n++)r[n]=e[n];return r}function b(e,t){var n="undefined"!=typeof Symbol&&e[Symbol.iterator]||e["@@iterator"];if(!n){if(Array.isArray(e)||(n=v(e))||t&&e&&"number"==typeof e.length){n&&(e=n);var r=0,s=function(){};return{s:s,n:function(){return r>=e.length?{done:!0}:{done:!1,value:e[r++]}},e:function(e){throw e},f:s}}throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.")}var a,o=!0,i=!1;return{s:function(){n=n.call(e)},n:function(){var e=n.next();return o=e.done,e},e:function(e){i=!0,a=e},f:function(){try{o||null==n.return||n.return()}finally{if(i)throw a}}}}var w="- would result negative",_="logic eval error:",S="exceeds schema integer count",k=/transaction \w+:/,B=function(e){A(n,x(Error));var t=y(n);function n(e,r){var s;p(this,n);for(var a=arguments.length,o=new Array(a>2?a-2:0),i=2;i<a;i++)o[i-2]=arguments[i];var u=(s=t.call.apply(t,[this].concat(o))).extractMessageFromAlgoSDKError(e);return s.data=e,s.type=s.getErrorType(u),s.setMessage(s.getErrorMessage(u,s.type,r)),s}return d(n,[{key:"setMessage",value:function(e){this.message=e}},{key:"getErrorType",value:function(e){var t="Unknown";return e.includes(w)?t="SlippageTolerance":e.includes(S)?t="ExceedingExcessAmountCount":e.includes(_)?t="LogicError":e.match(k)&&(t="TransactionError"),t}},{key:"getErrorMessage",value:function(e,t,n){var r;switch(t){case"SlippageTolerance":r="The process failed due to too much slippage in the price. Please adjust the slippage tolerance and try again.";break;case"ExceedingExcessAmountCount":r="The process failed due to the number of excess amounts accumulated for your account in the Tinyman app.";break;case"LogicError":r=e.split(_)[1];break;case"TransactionError":r=e.split(k)[1];break;case"Unknown":e&&(r=e)}return r||(r=n||"We encountered an unexpected error, try again later."),r.trim()}},{key:"extractMessageFromAlgoSDKError",value:function(e){var t,n,r,s="";return null!=e&&null!==(t=e.response)&&void 0!==t&&null!==(n=t.body)&&void 0!==n&&n.message?s=e.response.body.message:null!=e&&null!==(r=e.response)&&void 0!==r&&r.text?s=e.response.text:"string"==typeof(null==e?void 0:e.message)&&(s=this.isMessageObjectString(null==e?void 0:e.message)?JSON.parse(e.message||"{message: ''}").message:e.message),"string"!=typeof s&&(s=String(s)),s}},{key:"isMessageObjectString",value:function(e){return"string"==typeof e&&e.includes("{message:")}}]),n}();function R(){var e,t=arguments.length>0&&void 0!==arguments[0]?arguments[0]:[],n={},r=b(t);try{for(r.s();!(e=r.n()).done;){var s=e.value,a=s.key,o=void 0;if(1==s.value.type)o=s.value.bytes;else{if(2!=s.value.type)throw new Error("Unexpected state type: ".concat(s.value.type));o=s.value.uint}n[atob(a)]=o}}catch(e){r.e(e)}finally{r.f()}return n}function M(e){var t,n=e.reduce((function(e,t){return e+t.length}),0),r=new Uint8Array(n),s=0,a=b(e);try{for(a.s();!(t=a.n()).done;){var o=t.value;r.set(o,s),s+=o.length}}catch(e){a.e(e)}finally{a.f()}return r}var P=100000n,Q=100000n,O=100000n,C=25000n+25000n,U=25000n+3500n;function L(e){var t=e["apps-total-schema"],n=0n,r=0n;t&&(t["num-byte-slice"]&&(n=t["num-byte-slice"]),t["num-uint"]&&(r=t["num-uint"]));var s=e["apps-local-state"]||[],a=e["created-apps"]||[],o=e.assets||[];return P+Q*BigInt(o.length)+O*BigInt(a.length+s.length)+U*r+C*n}function j(e){return new Promise((function(t){setTimeout((function(){t(null)}),e)}))}function F(e,t){return V.apply(this,arguments)}function V(){return(V=c(i().mark((function e(t,n){var r;return i().wrap((function(e){for(;;)switch(e.prev=e.next){case 0:return e.next=3,j(1e3);case 3:return r=null,e.prev=4,e.next=7,t.pendingTransactionInformation(n).do();case 7:r=e.sent,e.next=12;break;case 10:e.prev=10,e.t0=e.catch(4);case 12:if(!r){e.next=17;break}if(!r["confirmed-round"]){e.next=15;break}return e.abrupt("return",r);case 15:if(!r["pool-error"]){e.next=17;break}throw new Error("Transaction Rejected: ".concat(r["pool-error"]));case 17:e.next=0;break;case 19:case"end":return e.stop()}}),e,null,[[4,10]])})))).apply(this,arguments)}function J(e,t,n){if(t>1||t<0)throw new Error("Invalid slippage value. Must be between 0 and 1, got ".concat(t));var r;try{var s="negative"===e?1-t:1+t;r=BigInt(Math.floor(Number(n)*s))}catch(e){throw new Error(e.message)}return r}function X(e,t){var n=Number(e);return G({decimalPlaces:n},Math.pow(10,-n)*Number(t))}function G(e,t){var n=e.decimalPlaces,r=void 0===n?0:n;return Number(Math.round(Number(t+"e+".concat(r)))+"e-".concat(r))}function q(e,t){return z.apply(this,arguments)}function z(){return(z=c(i().mark((function e(t,n){var r,s,a,o,u,c,p,l;return i().wrap((function(e){for(;;)switch(e.prev=e.next){case 0:e.prev=0,r=[],s=b(n),e.prev=3,s.s();case 5:if((a=s.n()).done){e.next=18;break}return o=a.value,e.next=9,t.sendRawTransaction(o).do();case 9:return u=e.sent,c=u.txId,e.next=13,F(t,c);case 13:p=e.sent,l=p["confirmed-round"],r.push({confirmedRound:l,txnID:c});case 16:e.next=5;break;case 18:e.next=23;break;case 20:e.prev=20,e.t0=e.catch(3),s.e(e.t0);case 23:return e.prev=23,s.f(),e.finish(23);case 26:return e.abrupt("return",r);case 29:throw e.prev=29,e.t1=e.catch(0),new B(e.t1,"We encountered an error while processing this transaction. Try again later.");case 32:case"end":return e.stop()}}),e,null,[[0,29],[3,20,23,26]])})))).apply(this,arguments)}function Y(e){return e.reduce((function(e,t){return e+t.txn.fee}),0)}function W(e){return(t=e[0].txn.group)?Buffer.from(t).toString("base64"):"";var t}function Z(e){for(var t=[];;){var n=127&e;if(!(e>>=7)){t.push(n);break}t.push(128|n)}return t}function H(e){return(new TextEncoder).encode(e)}var K={id:"".concat(0),name:"Algorand",unit_name:"ALGO",decimals:6,url:"https://algorand.org",is_liquidity_token:!1,total_amount:"6615503326932151"},$={DEFAULT:"TMPOOL11",V1:"TM1POOL"};function ee(){return(ee=c(i().mark((function e(t){var n,s,a,o,u;return i().wrap((function(e){for(;;)switch(e.prev=e.next){case 0:return n=t.client,s=t.assetID,a=t.initiatorAddr,e.prev=1,e.next=4,n.getTransactionParams().do();case 4:return o=e.sent,u=r.default.makeAssetTransferTxnWithSuggestedParamsFromObject({from:a,to:a,assetIndex:s,amount:0,suggestedParams:o}),e.abrupt("return",[{txn:u,signers:[a]}]);case 9:throw e.prev=9,e.t0=e.catch(1),new B(e.t0,"We encountered something unexpected while opting into this asset. Try again later.");case 12:case"end":return e.stop()}}),e,null,[[1,9]])})))).apply(this,arguments)}function te(e,t){var n=[e,t];return[Math.max.apply(Math,n),Math.min.apply(Math,n)]}function ne(e){return 0===Number(e)}var re,se={V1_1:"v1_1",V2:"v2"},ae={type:"logicsig",logic:{bytecode:"BCAIAQCBgICAgICAgPABgICAgICAgIDwAQMEBQYlJA1EMQkyAxJEMRUyAxJEMSAyAxJEMgQiDUQzAQAxABJEMwEQIQcSRDMBGIGCgICAgICAgPABEkQzARkiEjMBGyEEEhA3ARoAgAlib290c3RyYXASEEAAXDMBGSMSRDMBG4ECEjcBGgCABHN3YXASEEACOzMBGyISRDcBGgCABG1pbnQSQAE7NwEaAIAEYnVybhJAAZg3ARoAgAZyZWRlZW0SQAJbNwEaAIAEZmVlcxJAAnkAIQYhBSQjEk0yBBJENwEaARclEjcBGgIXJBIQRDMCADEAEkQzAhAhBBJEMwIhIxJEMwIiIxwSRDMCIyEHEkQzAiQjEkQzAiWACFRNUE9PTDExEkQzAiZRAA+AD1RpbnltYW5Qb29sMS4xIBJEMwIngBNodHRwczovL3RpbnltYW4ub3JnEkQzAikyAxJEMwIqMgMSRDMCKzIDEkQzAiwyAxJEMwMAMQASRDMDECEFEkQzAxElEkQzAxQxABJEMwMSIxJEJCMTQAAQMwEBMwIBCDMDAQg1AUIBsTMEADEAEkQzBBAhBRJEMwQRJBJEMwQUMQASRDMEEiMSRDMBATMCAQgzAwEIMwQBCDUBQgF8MgQhBhJENwEcATEAE0Q3ARwBMwQUEkQzAgAxABNEMwIUMQASRDMDADMCABJEMwIRJRJEMwMUMwMHMwMQIhJNMQASRDMDESMzAxAiEk0kEkQzBAAxABJEMwQUMwIAEkQzAQEzBAEINQFCAREyBCEGEkQ3ARwBMQATRDcBHAEzAhQSRDMDFDMDBzMDECISTTcBHAESRDMCADEAEkQzAhQzBAASRDMCESUSRDMDADEAEkQzAxQzAwczAxAiEk0zBAASRDMDESMzAxAiEk0kEkQzBAAxABNEMwQUMQASRDMBATMCAQgzAwEINQFCAJAyBCEFEkQ3ARwBMQATRDMCADcBHAESRDMCADEAE0QzAwAxABJEMwIUMwIHMwIQIhJNMQASRDMDFDMDBzMDECISTTMCABJEMwEBMwMBCDUBQgA+MgQhBBJENwEcATEAE0QzAhQzAgczAhAiEk03ARwBEkQzAQEzAgEINQFCABIyBCEEEkQzAQEzAgEINQFCAAAzAAAxABNEMwAHMQASRDMACDQBD0M=",address:"ABUKAXTANWR6K6ZYV75DWJEPVWWOU6SFUVRI6QHO44E4SIDLHBTD2CZ64A",size:881,variables:[{name:"TMPL_ASSET_ID_1",type:"int",index:15,length:10},{name:"TMPL_ASSET_ID_2",type:"int",index:5,length:10},{name:"TMPL_VALIDATOR_APP_ID",type:"int",index:74,length:10}],source:"https://github.com/tinymanorg/tinyman-contracts-v1/tree/dc9ab40c58b85c15d58f63a1507e18be76720dbb/contracts/pool_logicsig.teal.tmpl"},name:"pool_logicsig"},oe={type:"app",approval_program:{bytecode:"BCAHAAHoB+UHBf///////////wHAhD0mDQFvAWUBcAJhMQJhMgJsdARzd2FwBG1pbnQBdAJjMQJwMQJjMgJwMjEZgQQSMRkhBBIRMRmBAhIRQATxMRkjEjEbIhIQQATjNhoAgAZjcmVhdGUSQATUMRkjEjYaAIAJYm9vdHN0cmFwEhBAA/MzAhIzAggINTQiK2I1ZSI0ZXAARDUBIicEYjVmNGZAABEiYCJ4CTEBCDMACAk1AkIACCI0ZnAARDUCIicFYjVnKDRlFlA1byI0b2I1PSg0ZhZQNXAiNHBiNT4oNGcWUDVxIjRxYjU/IipiNUA0ATQ9CTVHNAI0Pgk1SDEAKVA0ZRZQNXkxAClQNGYWUDV6MQApUDRnFlA1ezYaAIAGcmVkZWVtEkAAWjYaAIAEZmVlcxJAABw2GgAnBhI2GgAnBxIRNhoAgARidXJuEhFAAG0ANGdJRDMCERJEMwISRDMCFDIJEkQ0PzMCEgk1PzRAMwISCTVAIio0QGYiNHE0P2YjQzMCFDMCBzMCECMSTTYcARJENDREIigzAhEWUEpiNDQJZiMxAClQMwIRFlBKYjQ0CUlBAANmI0NIaCNDMgciJwhiCUk1+kEARiInCWIiJwpiNPodTEAANx4hBSMeHzX7SEhIIicLYiInDGI0+h1MQAAdHiEFIx4fNfxISEgiJwk0+2YiJws0/GYiJwgyB2YzAxIzAwgINTU2HAExABNENGdBACIiNGdwAEQ1BiIcNAYJND8INQQ2GgAnBhJAASA0ZzMEERJENhoAJwcSQABVNhwBMwQAEkQzBBI0Rx00BCMdH0hITEhJNRA0NAk1yTMEEjRIHTQEIx0fSEhMSEk1ETQ1CTXKNBA0ERBENEc0EAk1UTRINBEJNVI0BDMEEgk1U0ICCjYcATMCABJENEc0NAg1UTRINDUINVI0BCISQAAuNDQ0BB00RyMdH0hITEg0NTQEHTRIIx0fSEhMSEoNTUk0BAg1UzMEEgk1y0IBvyInBTMEEUk1Z2YoNGcWUDVxIjRncABERDRnNGUTRDRnNGYTRDMEEiQISR018DQ0NDUdNfFKDEAACBJENPA08Q5EMwQSJAgjCEkdNfA0NDQ1HTXxSg1AAAgSRDTwNPENRCQ1PzQEMwQSJAgINVNCAU82HAEzAgASRDMCETRlEjMDETRmEhBJNWRAABkzAhE0ZhIzAxE0ZRIQRDRINRI0RzUTQgAINEc1EjRINRM2GgGAAmZpEkAAWjYaAYACZm8SRDQ1JAs0Eh00EzQ1CSUdH0hITEgjCEk1FSINNDU0EwwQRDQ0NBUJNGRBABM1yTRHNBUINVE0SDQ1CTVSQgBnNco0SDQVCDVSNEc0NQk1UUIAVDQ0STUVJQs0Ex00EiQLNDQlCx4fSEhMSEk1FCINNBQ0EwwQRDQUNDUJNGRBABM1yjRHNDQINVE0SDQUCTVSQgATNck0RzQUCTVRNEg0NAg1UkIAADQVIQQLNAQdgaCcATQSHR9ISExISTUqNAQINVNCADsiKzYaARdJNWVmIicENhoCF0k1ZmY0ZXEDRIABLVCABEFMR080ZkEABkg0ZnEDRFAzAiZJFYEPTFISQyIqNEA0KghmIjRxND80Kgg0ywhmIjRvND00yQhmIjRwND40yghmIoACczE0UWYigAJzMjRSZiInCjRSIQYdNFEjHR9ISExIZiInDDRRIQYdNFIjHR9ISExIZiKAA2lsdDRTZjTLQQAJIzR7SmI0ywhmNMlBAAkjNHlKYjTJCGY0ykEACSM0ekpiNMoIZiNDI0MiQw==",address:"BUQHXHPLMYUVS3P2INJ2EUJFCSNT6LNUGXVM6T2SZ27TDRDYLUMWCFYW3E",size:1351,variables:[],source:"https://github.com/tinymanorg/tinyman-contracts-v1/tree/dc9ab40c58b85c15d58f63a1507e18be76720dbb/contracts/validator_approval.teal"},clear_program:{bytecode:"BIEB",address:"P7GEWDXXW5IONRW6XRIRVPJCT2XXEQGOBGG65VJPBUOYZEJCBZWTPHS3VQ",size:3,variables:[],source:"https://github.com/tinymanorg/tinyman-contracts-v1/tree/dc9ab40c58b85c15d58f63a1507e18be76720dbb/contracts/validator_clear_state.teal"},global_state_schema:{num_uints:0,num_byte_slices:0},local_state_schema:{num_uints:16,num_byte_slices:0},name:"validator_app"},ie=(f(re={},se.V1_1,{testnet:62368684,mainnet:552635992}),f(re,se.V2,{testnet:113134165,mainnet:552635992}),re);function ue(e,t){var n=ie[t][e];if(!n)throw new Error("No Validator App exists for ".concat(e," network with ").concat(t," contract version"));return n}function ce(){return(ce=c(i().mark((function e(t){var n,s,a,o,u,c;return i().wrap((function(e){for(;;)switch(e.prev=e.next){case 0:return n=t.client,s=t.network,a=t.contractVersion,o=t.initiatorAddr,e.next=3,n.getTransactionParams().do();case 3:return u=e.sent,c=r.default.makeApplicationOptInTxnFromObject({from:o,appIndex:ue(s,a),suggestedParams:u}),e.abrupt("return",[{txn:c,signers:[o]}]);case 6:case"end":return e.stop()}}),e)})))).apply(this,arguments)}function pe(){return(pe=c(i().mark((function e(t){var n,s,a,o,u,c;return i().wrap((function(e){for(;;)switch(e.prev=e.next){case 0:return n=t.client,s=t.network,a=t.contractVersion,o=t.initiatorAddr,e.next=3,n.getTransactionParams().do();case 3:return u=e.sent,c=r.default.makeApplicationClearStateTxnFromObject({from:o,appIndex:ue(s,a),suggestedParams:u}),e.abrupt("return",[{txn:c,signers:[o]}]);case 6:case"end":return e.stop()}}),e)})))).apply(this,arguments)}var le=d((function e(n){p(this,e),this.validatorApprovalContract=t.toByteArray(n.approval_program.bytecode),this.validatorClearStateContract=t.toByteArray(n.clear_program.bytecode),this.schema={numLocalInts:n.local_state_schema.num_uints,numLocalByteSlices:n.local_state_schema.num_byte_slices,numGlobalInts:n.global_state_schema.num_uints,numGlobalByteSlices:n.global_state_schema.num_byte_slices}})),de=new(function(n){A(s,le);var r=y(s);function s(e,t){var n;return p(this,s),(n=r.call(this,e)).poolLogicSigContractTemplate=t.logic.bytecode,n.templateVariables=t.logic.variables,n}return d(s,[{key:"generateLogicSigAccountForPool",value:function(n){if(n.asset1ID===n.asset2ID)throw new Error("Assets are the same");var r=ue(n.network,se.V1_1),s=T(te(n.asset1ID,n.asset2ID),2),a=s[0],o=s[1],i=Array.from(t.toByteArray(this.poolLogicSigContractTemplate)),u={asset_id_1:a,asset_id_2:o,validator_app_id:r},c=0;this.templateVariables.sort((function(e,t){return e.index-t.index}));for(var p=0;p<this.templateVariables.length;p++){var l=this.templateVariables[p],d=u[l.name.split("TMPL_")[1].toLowerCase()],f=l.index-c,A=f+l.length,I=Z(d);c+=l.length-I.length,i=i.slice(0,f).concat(I).concat(i.slice(A))}var g=new Uint8Array(i);return new e.LogicSigAccount(g)}}]),s}())(oe,ae),fe={type:"logicsig",logic:{bytecode:"BoAYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgQBbNQA0ADEYEkQxGYEBEkSBAUM="},name:"pool_logicsig"},Ae={type:"app",approval_program:{bytecode:"BCAHAAHoB+UHBf///////////wHAhD0mDQFvAWUBcAJhMQJhMgJsdARzd2FwBG1pbnQBdAJjMQJwMQJjMgJwMjEZgQQSMRkhBBIRMRmBAhIRQATxMRkjEjEbIhIQQATjNhoAgAZjcmVhdGUSQATUMRkjEjYaAIAJYm9vdHN0cmFwEhBAA/MzAhIzAggINTQiK2I1ZSI0ZXAARDUBIicEYjVmNGZAABEiYCJ4CTEBCDMACAk1AkIACCI0ZnAARDUCIicFYjVnKDRlFlA1byI0b2I1PSg0ZhZQNXAiNHBiNT4oNGcWUDVxIjRxYjU/IipiNUA0ATQ9CTVHNAI0Pgk1SDEAKVA0ZRZQNXkxAClQNGYWUDV6MQApUDRnFlA1ezYaAIAGcmVkZWVtEkAAWjYaAIAEZmVlcxJAABw2GgAnBhI2GgAnBxIRNhoAgARidXJuEhFAAG0ANGdJRDMCERJEMwISRDMCFDIJEkQ0PzMCEgk1PzRAMwISCTVAIio0QGYiNHE0P2YjQzMCFDMCBzMCECMSTTYcARJENDREIigzAhEWUEpiNDQJZiMxAClQMwIRFlBKYjQ0CUlBAANmI0NIaCNDMgciJwhiCUk1+kEARiInCWIiJwpiNPodTEAANx4hBSMeHzX7SEhIIicLYiInDGI0+h1MQAAdHiEFIx4fNfxISEgiJwk0+2YiJws0/GYiJwgyB2YzAxIzAwgINTU2HAExABNENGdBACIiNGdwAEQ1BiIcNAYJND8INQQ2GgAnBhJAASA0ZzMEERJENhoAJwcSQABVNhwBMwQAEkQzBBI0Rx00BCMdH0hITEhJNRA0NAk1yTMEEjRIHTQEIx0fSEhMSEk1ETQ1CTXKNBA0ERBENEc0EAk1UTRINBEJNVI0BDMEEgk1U0ICCjYcATMCABJENEc0NAg1UTRINDUINVI0BCISQAAuNDQ0BB00RyMdH0hITEg0NTQEHTRIIx0fSEhMSEoNTUk0BAg1UzMEEgk1y0IBvyInBTMEEUk1Z2YoNGcWUDVxIjRncABERDRnNGUTRDRnNGYTRDMEEiQISR018DQ0NDUdNfFKDEAACBJENPA08Q5EMwQSJAgjCEkdNfA0NDQ1HTXxSg1AAAgSRDTwNPENRCQ1PzQEMwQSJAgINVNCAU82HAEzAgASRDMCETRlEjMDETRmEhBJNWRAABkzAhE0ZhIzAxE0ZRIQRDRINRI0RzUTQgAINEc1EjRINRM2GgGAAmZpEkAAWjYaAYACZm8SRDQ1JAs0Eh00EzQ1CSUdH0hITEgjCEk1FSINNDU0EwwQRDQ0NBUJNGRBABM1yTRHNBUINVE0SDQ1CTVSQgBnNco0SDQVCDVSNEc0NQk1UUIAVDQ0STUVJQs0Ex00EiQLNDQlCx4fSEhMSEk1FCINNBQ0EwwQRDQUNDUJNGRBABM1yjRHNDQINVE0SDQUCTVSQgATNck0RzQUCTVRNEg0NAg1UkIAADQVIQQLNAQdgaCcATQSHR9ISExISTUqNAQINVNCADsiKzYaARdJNWVmIicENhoCF0k1ZmY0ZXEDRIABLVCABEFMR080ZkEABkg0ZnEDRFAzAiZJFYEPTFISQyIqNEA0KghmIjRxND80Kgg0ywhmIjRvND00yQhmIjRwND40yghmIoACczE0UWYigAJzMjRSZiInCjRSIQYdNFEjHR9ISExIZiInDDRRIQYdNFIjHR9ISExIZiKAA2lsdDRTZjTLQQAJIzR7SmI0ywhmNMlBAAkjNHlKYjTJCGY0ykEACSM0ekpiNMoIZiNDI0MiQw==",address:"BUQHXHPLMYUVS3P2INJ2EUJFCSNT6LNUGXVM6T2SZ27TDRDYLUMWCFYW3E",size:1351,variables:[],source:"https://github.com/tinymanorg/tinyman-contracts-v1/tree/dc9ab40c58b85c15d58f63a1507e18be76720dbb/contracts/validator_approval.teal"},clear_program:{bytecode:"BIEB",address:"P7GEWDXXW5IONRW6XRIRVPJCT2XXEQGOBGG65VJPBUOYZEJCBZWTPHS3VQ",size:3,variables:[],source:"https://github.com/tinymanorg/tinyman-contracts-v1/tree/dc9ab40c58b85c15d58f63a1507e18be76720dbb/contracts/validator_clear_state.teal"},global_state_schema:{num_uints:0,num_byte_slices:3},local_state_schema:{num_uints:12,num_byte_slices:2},name:"validator_app"},Ie=new(function(t){A(r,le);var n=y(r);function r(e,t){var s;return p(this,r),(s=n.call(this,e)).poolLogicSigContractTemplate=t.logic.bytecode,s}return d(r,[{key:"generateLogicSigAccountForPool",value:function(t){if(t.asset1ID===t.asset2ID)throw new Error("Assets are the same");var n=ue(t.network,se.V2),r=T(te(t.asset1ID,t.asset2ID),2),s=r[0],a=r[1],o={bytes:Array.from(Buffer.from(this.poolLogicSigContractTemplate,"base64")),validatorAppId:Array.from(e.encodeUint64(n)),asset1ID:Array.from(e.encodeUint64(s)),asset2ID:Array.from(e.encodeUint64(a))},i=[].concat(D(o.bytes.slice(0,3)),D(o.validatorAppId.slice(0,8)),D(o.asset1ID.slice(0,8)),D(o.asset2ID.slice(0,8)),D(o.bytes.slice(27)));return new e.LogicSigAccount(new Uint8Array(i))}}]),r}())(Ae,fe);function ge(e){return function(e){return e===se.V2}(e)?Ie:de}function me(t,n){var r=arguments.length>2&&void 0!==arguments[2]?arguments[2]:e.IntDecoding.DEFAULT;return new Promise(function(){var e=c(i().mark((function e(s,a){var u;return i().wrap((function(e){for(;;)switch(e.prev=e.next){case 0:return e.prev=0,e.next=3,t.accountInformation(n).setIntDecoding(r).do();case 3:u=e.sent,s(o(o({},u),{},{minimum_required_balance:xe(u)})),e.next=10;break;case 7:e.prev=7,e.t0=e.catch(0),a(new Error(e.t0.message||"Failed to fetch account information"));case 10:case"end":return e.stop()}}),e,null,[[0,7]])})));return function(t,n){return e.apply(this,arguments)}}())}function he(e,t){var n=e["apps-local-state"].find((function(e){return e.id===t}));return n?R(n["key-value"]):null}function xe(e){var t=e["apps-total-schema"];return 1e5+1e5*(e.assets||[]).length+1e5*(e["created-apps"]||[]).length+1e5*(e["apps-local-state"]||[]).length+5e4*(t&&t["num-byte-slice"]||0)+28500*(t&&t["num-uint"]||0)+1e5*(e["apps-total-extra-pages"]||0)}var Ee,ye,Te=H("e");function De(e){return ve.apply(this,arguments)}function ve(){return(ve=c(i().mark((function n(s){var a,o,u,c,p,l,d,f,A,I,g,m,h,x,E,y,T,D,v,N,w;return i().wrap((function(n){for(;;)switch(n.prev=n.next){case 0:return a=s.client,o=s.pool,u=s.accountAddr,n.next=3,a.accountInformation(u).setIntDecoding(e.IntDecoding.BIGINT).do();case 3:c=n.sent,p=c["apps-local-state"]||[],l=0n,d=0n,f=0n,A=o.account.address(),I=b(p),n.prev=10,I.s();case 12:if((g=I.n()).done){n.next=31;break}if((m=g.value).id==o.validatorAppID){n.next=16;break}return n.abrupt("continue",29);case 16:if(h=m["key-value"]){n.next=19;break}return n.abrupt("break",31);case 19:x=R(h),E=t.fromByteArray(M([r.default.decodeAddress(A).publicKey,Te,r.default.encodeUint64(o.asset1ID)])),y=t.fromByteArray(M([r.default.decodeAddress(A).publicKey,Te,r.default.encodeUint64(o.asset2ID)])),T=t.fromByteArray(M([r.default.decodeAddress(A).publicKey,Te,r.default.encodeUint64(o.liquidityTokenID)])),D=x[E],v=x[y],N=x[T],"bigint"==typeof D&&(l=D),"bigint"==typeof v&&(d=v),"bigint"==typeof N&&(f=N);case 29:n.next=12;break;case 31:n.next=36;break;case 33:n.prev=33,n.t0=n.catch(10),I.e(n.t0);case 36:return n.prev=36,I.f(),n.finish(36);case 39:if(!((w={excessAsset1:l,excessAsset2:d,excessLiquidityTokens:f}).excessAsset1<0n||w.excessAsset2<0n||w.excessLiquidityTokens<0n)){n.next=42;break}throw new Error("Invalid account excess: ".concat(w));case 42:return n.abrupt("return",w);case 43:case"end":return n.stop()}}),n,null,[[10,33,36,39]])})))).apply(this,arguments)}function Ne(){return(Ne=c(i().mark((function e(n){var s,a,o,u,c,p,l,d,f,A,I,g,m,h,x;return i().wrap((function(e){for(;;)switch(e.prev=e.next){case 0:return s=n.client,a=n.accountAddr,o=n.validatorAppID,e.next=3,s.accountInformation(a).setIntDecoding("bigint").do();case 3:if(u=e.sent,c=u["apps-local-state"]||[],p=c.find((function(e){return e.id==o})),l=[],p&&p["key-value"])for(d=R(p["key-value"]),f=0,A=Object.entries(d);f<A.length;f++)I=A[f],g=T(I,2),m=g[0],h=g[1],41===(x=t.toByteArray(m)).length&&101===x[32]&&l.push({poolAddress:r.default.encodeAddress(x.slice(0,32)),assetID:r.default.decodeUint64(x.slice(33,41),"safe"),amount:parseInt(h)});return e.abrupt("return",l);case 9:case"end":return e.stop()}}),e)})))).apply(this,arguments)}!function(e){e.NOT_CREATED="not created",e.BOOTSTRAP="bootstrap",e.READY="ready",e.ERROR="error"}(Ee||(Ee={}));var be=(f(ye={},se.V1_1,{asset1:"a1",asset2:"a2"}),f(ye,se.V2,{asset1:"asset_1_id",asset2:"asset_2_id",liquidityTokenID:"pool_token_asset_id",issuedPoolTokens:"issued_pool_tokens",asset1Reserves:"asset_1_reserves",asset2Reserves:"asset_2_reserves",asset1ProtocolFees:"asset_1_protocol_fees",asset2ProtocolFees:"asset_2_protocol_fees",totalFeeShare:"total_fee_share",protocolFeeRatio:"protocol_fee_ratio",cumulativePriceUpdateTimeStamp:"cumulative_price_update_timestamp"}),ye),we=H("o"),_e=0xffffffffffffffffn;function Se(e){return ke.apply(this,arguments)}function ke(){return(ke=c(i().mark((function e(t){var n,r,s,a,o,u,c,p,l,d,f,A,I,g;return i().wrap((function(e){for(;;)switch(e.prev=e.next){case 0:return r=t.client,s=t.network,a=t.asset1ID,o=t.asset2ID,u=ge(se.V1_1),c=u.generateLogicSigAccountForPool(t),p=ue(s,se.V1_1),l=c.address(),d=te(a,o),e.next=8,me(r,l);case 8:return f=e.sent,A=he(f,p),I=null===(n=f["created-assets"][0])||void 0===n?void 0:n.index,g={account:c,validatorAppID:p,asset1ID:d[0],asset2ID:d[1],status:A||I?Ee.READY:Ee.NOT_CREATED,contractVersion:se.V1_1,liquidityTokenID:I},A&&(g.asset1ID=A[be.v1_1.asset1],g.asset2ID=A[be.v1_1.asset2]),e.abrupt("return",g);case 14:case"end":return e.stop()}}),e)})))).apply(this,arguments)}function Be(){return(Be=c(i().mark((function n(s,a){var o,u,c,p,l,d,f,A,I,g,m,h,x,E,y,T,D,v,N,w,_,S,k,B,P,Q;return i().wrap((function(n){for(;;)switch(n.prev=n.next){case 0:return n.next=2,me(s,a.account.address(),e.IntDecoding.BIGINT);case 2:o=n.sent,u=o["apps-local-state"]||[],c=0n,p=0n,l=0n,d=b(u),n.prev=8,d.s();case 10:if((f=d.n()).done){n.next=29;break}if((A=f.value).id==a.validatorAppID){n.next=14;break}return n.abrupt("continue",27);case 14:if(I=A["key-value"]){n.next=17;break}return n.abrupt("break",29);case 17:g=R(I),m=t.fromByteArray(M([we,r.default.encodeUint64(a.asset1ID)])),h=t.fromByteArray(M([we,r.default.encodeUint64(a.asset2ID)])),x=t.fromByteArray(M([we,r.default.encodeUint64(a.liquidityTokenID)])),E=g[m],y=g[h],T=g[x],"bigint"==typeof E&&(c=E),"bigint"==typeof y&&(p=y),"bigint"==typeof T&&(l=T);case 27:n.next=10;break;case 29:n.next=34;break;case 31:n.prev=31,n.t0=n.catch(8),d.e(n.t0);case 34:return n.prev=34,d.f(),n.finish(34);case 37:D=0n,v=0n,N=0n,w=b(o.assets);try{for(w.s();!(_=w.n()).done;)S=_.value,k=S["asset-id"],B=S.amount,k==a.asset1ID?D=BigInt(B):k==a.asset2ID?v=BigInt(B):k==a.liquidityTokenID&&(N=BigInt(B))}catch(e){w.e(e)}finally{w.f()}if(0===a.asset2ID&&(P=L(o),v=BigInt(o.amount)-P),!((Q={asset1:D-c,asset2:v-p,issuedLiquidity:_e-N+l,round:o.round}).asset1<0n||Q.asset2<0n||Q.issuedLiquidity<0n||Q.issuedLiquidity>_e)){n.next=49;break}throw Q.asset1=Number(Q.asset1),Q.asset2=Number(Q.asset2),Q.issuedLiquidity=Number(Q.issuedLiquidity),new Error("Invalid pool reserves: ".concat(JSON.stringify(Q)));case 49:return n.abrupt("return",Q);case 50:case"end":return n.stop()}}),n,null,[[8,31,34,37]])})))).apply(this,arguments)}function Re(){return Re=c(i().mark((function e(t){var n,r,s,a,o,u,c,p,l,d=arguments;return i().wrap((function(e){for(;;)switch(e.prev=e.next){case 0:if(n=t.client,r=t.address,s=t.network,!(a=d.length>1&&void 0!==d[1]?d[1]:{})[r]){e.next=4;break}return e.abrupt("return",a[r]);case 4:return e.next=6,me(n,r);case 6:return o=e.sent,u=he(o,ue(s,se.V1_1)),c=null,u&&(l=o["created-assets"][0],p=l.index,c={asset1ID:u[be[se.V1_1].asset1],asset2ID:u[be[se.V1_1].asset2],liquidityTokenID:p},a[r]=c),e.abrupt("return",c);case 11:case"end":return e.stop()}}),e)}))),Re.apply(this,arguments)}var Me=Object.freeze({__proto__:null,getPoolInfo:Se,getPoolReserves:function(e,t){return Be.apply(this,arguments)},getPoolAssets:function(e){return Re.apply(this,arguments)}});function Pe(e){return Qe.apply(this,arguments)}function Qe(){return(Qe=c(i().mark((function e(t){var n,r,s,a,o,u,c,p,l,d,f,A;return i().wrap((function(e){for(;;)switch(e.prev=e.next){case 0:return n=t.client,r=t.network,s=t.asset1ID,a=t.asset2ID,o=ge(se.V2),u=o.generateLogicSigAccountForPool(t),c=ue(r,se.V2),p=u.address(),l=te(s,a),e.next=8,me(n,p);case 8:return d=e.sent,f=he(d,c),A={account:u,validatorAppID:c,asset1ID:l[0],asset2ID:l[1],status:f?Ee.READY:Ee.NOT_CREATED,contractVersion:se.V2},f&&(A.asset1ProtocolFees=BigInt(f[be.v2.asset1ProtocolFees]),A.asset2ProtocolFees=BigInt(f[be.v2.asset2ProtocolFees]),A.asset1Reserves=BigInt(f[be.v2.asset1Reserves]),A.asset2Reserves=BigInt(f[be.v2.asset2Reserves]),A.issuedPoolTokens=BigInt(f[be.v2.issuedPoolTokens]),A.cumulativePriceUpdateTimeStamp=Number(f[be.v2.cumulativePriceUpdateTimeStamp]),A.protocolFeeRatio=Number(f[be.v2.protocolFeeRatio]),A.totalFeeShare=BigInt(f[be.v2.totalFeeShare]),A.liquidityTokenID=Number(f[be.v2.liquidityTokenID]),A.asset1ID=Number(f[be.v2.asset1]),A.asset2ID=Number(f[be.v2.asset2])),e.abrupt("return",A);case 13:case"end":return e.stop()}}),e)})))).apply(this,arguments)}function Oe(){return(Oe=c(i().mark((function e(t,n){var r,s,a;return i().wrap((function(e){for(;;)switch(e.prev=e.next){case 0:return e.next=2,me(t,n.account.address());case 2:return r=e.sent,s=he(r,n.validatorAppID),a={asset1:0n,asset2:0n,issuedLiquidity:0n,round:r.round},s&&(a.asset1=BigInt(s[be.v2.asset1Reserves]),a.asset2=BigInt(s[be.v2.asset2Reserves]),a.issuedLiquidity=BigInt(s[be.v2.issuedPoolTokens])),e.abrupt("return",a);case 7:case"end":return e.stop()}}),e)})))).apply(this,arguments)}function Ce(){return(Ce=c(i().mark((function e(t){var n,r,s,a,o,u;return i().wrap((function(e){for(;;)switch(e.prev=e.next){case 0:return n=t.client,r=t.address,s=t.network,e.next=3,me(n,r);case 3:return a=e.sent,o=he(a,ue(s,se.V2)),u=null,o&&(u={asset1ID:o[be[se.V2].asset1],asset2ID:o[be[se.V2].asset2],liquidityTokenID:o[be[se.V2].liquidityTokenID]}),e.abrupt("return",u);case 8:case"end":return e.stop()}}),e)})))).apply(this,arguments)}var Ue=Object.freeze({__proto__:null,getPoolInfo:Pe,getPoolReserves:function(e,t){return Oe.apply(this,arguments)},getPoolAssets:function(e){return Ce.apply(this,arguments)}});function Le(e){return Boolean(e&&!(e.asset1+e.asset2))}var je,Fe,Ve,Je,Xe,Ge=Object.freeze({__proto__:null,getPoolShare:function(e,t){var n=Number(t)/Number(e);return Number.isFinite(n)||(n=0),n},getPoolPairRatio:function(e,t){var n=Le(t),r=null;return t&&!n&&t.asset1&&t.asset2&&"number"==typeof e.asset2&&"number"==typeof e.asset1&&(r=X(e.asset1,t.asset1)/X(e.asset2,t.asset2)),r},isPoolEmpty:Le,isPoolNotCreated:function(e){return(null==e?void 0:e.status)===Ee.NOT_CREATED},isPoolReady:function(e){return(null==e?void 0:e.status)===Ee.READY},getPoolsForPair:function(e){return Promise.all([Se(e),Pe(e)])}}),qe=o((f(je={},se.V1_1,o(o({},Me),Ge)),f(je,se.V2,o(o({},Ue),Ge)),je),Ge);function ze(e,t){return 3e5+(0===e?0:1e5)+1e5+28500*de.schema.numLocalInts+5e4*de.schema.numLocalByteSlices+t.liquidityTokenCreateTxn+t.asset1OptinTxn+t.asset2OptinTxn+t.validatorAppCallTxn}function Ye(){return(Ye=c(i().mark((function e(t){var n,s,a,o,u,c,p,l,d,f,A,I,g,m,h,x,E,y,T;return i().wrap((function(e){for(;;)switch(e.prev=e.next){case 0:return n=t.client,s=t.validatorAppID,a=t.asset1ID,o=t.asset2ID,u=t.asset1UnitName,c=t.asset2UnitName,p=t.initiatorAddr,e.next=3,n.getTransactionParams().do();case 3:return l=e.sent,d=a>o?{asset1:{id:a,unitName:u},asset2:{id:o,unitName:c}}:{asset1:{id:o,unitName:c},asset2:{id:a,unitName:u}},f=de.generateLogicSigAccountForPool({asset1ID:d.asset1.id,asset2ID:d.asset2.id,network:"testnet"}),A=f.address(),I=r.default.makeApplicationOptInTxnFromObject({from:A,appIndex:s,appArgs:[H("bootstrap"),r.default.encodeUint64(d.asset1.id),r.default.encodeUint64(d.asset2.id)],foreignAssets:0==d.asset2.id?[d.asset1.id]:[d.asset1.id,d.asset2.id],suggestedParams:l}),g=r.default.makeAssetCreateTxnWithSuggestedParamsFromObject({from:A,total:0xffffffffffffffffn,decimals:6,defaultFrozen:!1,unitName:$.DEFAULT,assetName:"TinymanPool1.1 ".concat(d.asset1.unitName,"-").concat(d.asset2.unitName),assetURL:"https://tinyman.org",suggestedParams:l}),m=r.default.makeAssetTransferTxnWithSuggestedParamsFromObject({from:A,to:A,assetIndex:d.asset1.id,amount:0,suggestedParams:l}),h=0===d.asset2.id?null:r.default.makeAssetTransferTxnWithSuggestedParamsFromObject({from:A,to:A,assetIndex:d.asset2.id,amount:0,suggestedParams:l}),x=r.default.makePaymentTxnWithSuggestedParamsFromObject({from:p,to:A,amount:ze(d.asset2.id,{liquidityTokenCreateTxn:g.fee,asset1OptinTxn:m.fee,asset2OptinTxn:h?h.fee:0,validatorAppCallTxn:I.fee}),suggestedParams:l}),E=[x,I,g,m],h&&E.push(h),y=r.default.assignGroupID(E),T=[{txn:y[0],signers:[p]},{txn:y[1],signers:[A]},{txn:y[2],signers:[A]},{txn:y[3],signers:[A]}],y[4]&&T.push({txn:y[4],signers:[A]}),e.abrupt("return",T);case 18:case"end":return e.stop()}}),e)})))).apply(this,arguments)}function We(){return(We=c(i().mark((function e(t){var n,s,a,o,u,c,p,l,d,f,A;return i().wrap((function(e){for(;;)switch(e.prev=e.next){case 0:return n=t.txGroup,s=t.initiatorSigner,a=t.asset1ID,o=t.asset2ID,e.next=3,s([n]);case 3:return u=e.sent,c=T(u,1),p=c[0],l=a>o?{asset1ID:a,asset2ID:o}:{asset1ID:o,asset2ID:a},d=de.generateLogicSigAccountForPool({asset1ID:l.asset1ID,asset2ID:l.asset2ID,network:"testnet"}),f=[],A=n.map((function(e,t){if(t===Fe.FUNDING_TXN)return f.push(e.txn.txID().toString()),p;var n=r.default.signLogicSigTransactionObject(e.txn,d),s=n.txID,a=n.blob;return f.push(s),a})),e.abrupt("return",{signedTxns:A,txnIDs:f});case 11:case"end":return e.stop()}}),e)})))).apply(this,arguments)}function Ze(e){return He.apply(this,arguments)}function He(){return(He=c(i().mark((function e(t){var n,r,s,a,o;return i().wrap((function(e){for(;;)switch(e.prev=e.next){case 0:return n=t.client,r=t.signedTxns,s=t.txnIDs,e.prev=1,e.next=4,n.sendRawTransaction(r).do();case 4:return e.next=6,F(n,s[Fe.LIQUIDITY_TOKEN_CREATE]);case 6:if(a=e.sent,"number"==typeof(o=a["asset-index"])){e.next=10;break}throw new Error("Generated ID is not valid: got ".concat(o));case 10:return e.abrupt("return",{liquidityTokenID:o});case 13:throw e.prev=13,e.t0=e.catch(1),new B(e.t0,"We encountered something unexpected while bootstraping the pool. Try again later.");case 16:case"end":return e.stop()}}),e,null,[[1,13]])})))).apply(this,arguments)}function Ke(){return(Ke=c(i().mark((function e(t,n,r,s){return i().wrap((function(e){for(;;)switch(e.prev=e.next){case 0:return e.next=2,Ze({client:t,signedTxns:r,txnIDs:s});case 2:return e.abrupt("return",qe.v1_1.getPoolInfo({client:t,network:"testnet",asset1ID:n.asset1ID,asset2ID:n.asset2ID}));case 3:case"end":return e.stop()}}),e)})))).apply(this,arguments)}!function(e){e[e.FUNDING_TXN=0]="FUNDING_TXN",e[e.VALIDATOR_APP_CALL=1]="VALIDATOR_APP_CALL",e[e.LIQUIDITY_TOKEN_CREATE=2]="LIQUIDITY_TOKEN_CREATE",e[e.ASSET1_OPT_IN=3]="ASSET1_OPT_IN",e[e.ASSET2_OPT_IN=4]="ASSET2_OPT_IN"}(Fe||(Fe={})),function(e){e[e.FEE_TXN=0]="FEE_TXN",e[e.VALIDATOR_APP_CALL_TXN=1]="VALIDATOR_APP_CALL_TXN",e[e.ASSET1_IN_TXN=2]="ASSET1_IN_TXN",e[e.ASSET2_IN_TXN=3]="ASSET2_IN_TXN",e[e.LIQUDITY_OUT_TXN=4]="LIQUDITY_OUT_TXN"}(Je||(Je={})),exports.V2MintType=void 0,(Xe=exports.V2MintType||(exports.V2MintType={})).SINGLE="single",Xe.FLEXIBLE="flexible",Xe.INITIAL="initial";var $e,et=(f(Ve={},exports.V2MintType.FLEXIBLE,{ASSET1_IN_TXN:0,ASSET2_IN_TXN:1,VALIDATOR_APP_CALL_TXN:2}),f(Ve,exports.V2MintType.SINGLE,{ASSET_IN_TXN:0,VALIDATOR_APP_CALL_TXN:1}),f(Ve,exports.V2MintType.INITIAL,{ASSET1_IN_TXN:0,ASSET2_IN_TXN:1,VALIDATOR_APP_CALL_TXN:2}),Ve),tt=H("add_liquidity"),nt=1,rt=2,st=2,at=(f($e={},se.V1_1,[H("mint")]),f($e,se.V2,{INITIAL_LIQUIDITY:[H("add_initial_liquidity")],SINGLE_ASSET_MODE:[tt,H("single")],FLEXIBLE_MODE:[tt,H("flexible")]}),$e);function ot(){return(ot=c(i().mark((function e(t){var n,a,o,u,c,p,l,d,f,A,I,g,m,h,x,E;return i().wrap((function(e){for(;;)switch(e.prev=e.next){case 0:return n=t.client,a=t.network,o=t.poolAddress,u=t.asset_1,c=t.asset_2,p=t.liquidityToken,l=t.slippage,d=t.initiatorAddr,f=J("negative",l,p.amount),e.next=4,n.getTransactionParams().do();case 4:return A=e.sent,I=r.default.makeApplicationNoOpTxnFromObject({from:o,appIndex:ue(a,se.V1_1),appArgs:at.v1_1,accounts:[d],foreignAssets:0==c.id?[u.id,p.id]:[u.id,c.id,p.id],suggestedParams:A}),g=r.default.makeAssetTransferTxnWithSuggestedParamsFromObject({from:d,to:o,assetIndex:u.id,amount:u.amount,suggestedParams:A}),m=0===c.id?r.default.makePaymentTxnWithSuggestedParamsFromObject({from:d,to:o,amount:c.amount,suggestedParams:A}):r.default.makeAssetTransferTxnWithSuggestedParamsFromObject({from:d,to:o,assetIndex:c.id,amount:c.amount,suggestedParams:A}),h=r.default.makeAssetTransferTxnWithSuggestedParamsFromObject({from:o,to:d,assetIndex:p.id,amount:f,suggestedParams:A}),x=r.default.makePaymentTxnWithSuggestedParamsFromObject({from:d,to:o,amount:I.fee+h.fee,note:s,suggestedParams:A}),E=r.default.assignGroupID([x,I,g,m,h]),e.abrupt("return",[{txn:E[0],signers:[d]},{txn:E[1],signers:[o]},{txn:E[2],signers:[d]},{txn:E[3],signers:[d]},{txn:E[4],signers:[o]}]);case 12:case"end":return e.stop()}}),e)})))).apply(this,arguments)}function it(){return(it=c(i().mark((function e(t){var n,s,a,o,u,c,p,l,d,f;return i().wrap((function(e){for(;;)switch(e.prev=e.next){case 0:return n=t.pool,s=t.txGroup,a=t.initiatorSigner,o=n.account,e.next=4,a([s]);case 4:return u=e.sent,c=T(u,3),p=c[0],l=c[1],d=c[2],f=s.map((function(e,t){return t===Je.FEE_TXN?p:t===Je.ASSET1_IN_TXN?l:t===Je.ASSET2_IN_TXN?d:r.default.signLogicSigTransactionObject(e.txn,o).blob})),e.abrupt("return",f);case 11:case"end":return e.stop()}}),e)})))).apply(this,arguments)}function ut(){return(ut=c(i().mark((function e(t){var n,r,s,a,o,u,c,p,l,d,f,A,I,g,m,h,x;return i().wrap((function(e){for(;;)switch(e.prev=e.next){case 0:return n=t.client,r=t.pool,s=t.txGroup,a=t.signedTxns,o=t.initiatorAddr,e.prev=1,u=BigInt(s[Je.LIQUDITY_OUT_TXN].txn.amount),e.next=5,De({client:n,pool:r,accountAddr:o});case 5:return c=e.sent,e.next=8,q(n,[a]);case 8:return p=e.sent,l=T(p,1),d=l[0],f=d.confirmedRound,A=d.txnID,I=Y(s),g=W(s),e.next=17,De({client:n,pool:r,accountAddr:o});case 17:return m=e.sent,(h=m.excessLiquidityTokens-c.excessLiquidityTokens)<0n&&(h=0n),e.abrupt("return",{round:f,fees:I,liquidityID:r.liquidityTokenID,liquidityOut:u+h,excessAmount:{excessAmountForMinting:h,totalExcessAmount:m.excessLiquidityTokens},txnID:A,groupID:g});case 23:throw e.prev=23,e.t0=e.catch(1),"SlippageTolerance"===(x=new B(e.t0,"We encountered something unexpected while minting liquidity. Try again later.")).type&&x.setMessage("Minting failed due to too much slippage in the price. Please adjust the slippage tolerance and try again."),x;case 28:case"end":return e.stop()}}),e,null,[[1,23]])})))).apply(this,arguments)}var ct=Object.freeze({__proto__:null,getQuote:function(e){var t=e.pool,n=e.reserves,r=e.asset1In,s=e.asset2In;if(0n===n.issuedLiquidity){var a=BigInt(Math.floor(Math.sqrt(Number(r)*Number(s))));if(a<=BigInt(1e3))throw new Error("Initial liquidity mint too small. Liquidity minting amount must be greater than ".concat(1e3,", this quote is for ").concat(a,"."));return{round:n.round,asset1ID:t.asset1ID,asset1In:BigInt(r),asset2ID:t.asset2ID,asset2In:BigInt(s),liquidityID:t.liquidityTokenID,liquidityOut:a-BigInt(1e3),share:1}}var o=BigInt(r)*n.issuedLiquidity/n.asset1,i=BigInt(s)*n.issuedLiquidity/n.asset2,u=o<i?o:i;return{round:n.round,asset1ID:t.asset1ID,asset1In:BigInt(r),asset2ID:t.asset2ID,asset2In:BigInt(s),liquidityID:t.liquidityTokenID,liquidityOut:u,share:qe.getPoolShare(n.issuedLiquidity+u,u)}},generateTxns:function(e){return ot.apply(this,arguments)},signTxns:function(e){return it.apply(this,arguments)},execute:function(e){return ut.apply(this,arguments)}});function pt(e,t,n,r){var s,a,o,i,u,c,p,l,d,f,A=e.asset1*e.asset2,I=e.asset1+BigInt(n),g=e.asset2+BigInt(r),m=I*g,h=BigInt(parseInt(String(Math.sqrt(Number(m*e.issuedLiquidity*e.issuedLiquidity/A))))),x=h-e.issuedLiquidity,E=x*I/h,y=x*g/h,T=BigInt(n)-E,D=BigInt(r)-y;if(T>D){var v=T;o=BigInt(Math.abs(Math.min(Number(D),0))),s=!0,a=v+(i=lt(v,t)),x-=i*h/(I*BigInt(2))}else{var N=D;o=BigInt(Math.abs(Math.min(Number(T),0))),s=!1,a=N+(i=lt(N,t)),x-=i*h/(g*BigInt(2))}return{poolTokenAssetAmount:x,swapFromAsset1ToAsset2:s,swapInAmount:a,swapOutAmount:o,swapTotalFeeAmount:i,swapPriceImpact:(u=s?e.asset1:e.asset2,c=s?e.asset2:e.asset1,p=a,l=X(6,o)/X(6,p),d=X(6,c)/X(6,u),f=l/d,BigInt(Math.abs(Math.round(f-1))))}}function lt(e,t){return e*BigInt(t)/(BigInt(1e4)-BigInt(t))}function dt(e){var t=e.txGroup;return(0,e.initiatorSigner)([t])}function ft(e){return At.apply(this,arguments)}function At(){return(At=c(i().mark((function t(n){var r,s,a,o,u,c,p,l,d,f,A,I,g,m,h,x;return i().wrap((function(t){for(;;)switch(t.prev=t.next){case 0:return r=n.client,s=n.pool,a=n.txGroup,o=n.signedTxns,u=n.mode,t.prev=1,t.next=4,q(r,[o]);case 4:return c=t.sent,p=T(c,1),l=p[0],d=l.confirmedRound,f=l.txnID,A=a[et[u].VALIDATOR_APP_CALL_TXN].txn.txID(),t.next=12,e.waitForConfirmation(r,A,1e3);case 12:return I=t.sent,g=I["inner-txns"].find((function(e){return"axfer"===e.txn.txn.type})).txn.txn,m=Y(a),h=W(a),t.abrupt("return",{round:d,assetOut:{amount:g.aamt,assetID:g.xaid},fees:m,liquidityID:s.liquidityTokenID,txnID:f,groupID:h});case 19:throw t.prev=19,t.t0=t.catch(1),"SlippageTolerance"===(x=new B(t.t0,"We encountered something unexpected while minting liquidity. Try again later.")).type&&x.setMessage("Minting failed due to too much slippage in the price. Please adjust the slippage tolerance and try again."),x;case 24:case"end":return t.stop()}}),t,null,[[1,19]])})))).apply(this,arguments)}function It(){return(It=c(i().mark((function t(n){var s,a,u,c,p,l,d,f,A,I,g,m,h,x,E;return i().wrap((function(t){for(;;)switch(t.prev=t.next){case 0:return s=n.client,a=n.network,u=n.poolAddress,c=n.asset_1,p=n.pool,l=n.asset_2,d=n.liquidityToken,f=n.initiatorAddr,A=n.minPoolTokenAssetAmount,t.next=3,s.getTransactionParams().do();case 3:return I=t.sent,g=ne(l.id),m=r.default.makeAssetTransferTxnWithSuggestedParamsFromObject({from:f,to:u,assetIndex:p.asset1ID,amount:c.amount,suggestedParams:I}),h=g?r.default.makePaymentTxnWithSuggestedParamsFromObject({from:f,to:u,amount:l.amount,suggestedParams:I}):r.default.makeAssetTransferTxnWithSuggestedParamsFromObject({from:f,to:u,assetIndex:p.asset2ID,amount:l.amount,suggestedParams:I}),x=r.default.makeApplicationNoOpTxnFromObject({from:f,appIndex:ue(a,se.V2),appArgs:[].concat(D(at.v2.FLEXIBLE_MODE),[e.encodeUint64(A)]),accounts:[u],foreignAssets:[d.id],suggestedParams:o(o({},I),{},{fee:(st+1)*e.ALGORAND_MIN_TX_FEE})}),E=r.default.assignGroupID([m,h,x]),t.abrupt("return",[{txn:E[0],signers:[f]},{txn:E[1],signers:[f]},{txn:E[2],signers:[f]}]);case 10:case"end":return t.stop()}}),t)})))).apply(this,arguments)}var gt=Object.freeze({__proto__:null,getQuote:function(e){var t=e.pool,n=e.reserves,r=e.asset1In,s=e.asset2In,a=e.slippage,o=void 0===a?.05:a;if(0n===n.issuedLiquidity)throw new Error("Pool has no liquidity");if(t.status!==Ee.READY)throw new Error("Pool is not ready");var i=pt(n,t.totalFeeShare,r,s),u=i.poolTokenAssetAmount,c=i.swapInAmount,p=i.swapOutAmount,l=i.swapPriceImpact,d={amountIn:c,amountOut:p,swapFees:i.swapTotalFeeAmount,priceImpact:l},f=u-BigInt(Math.ceil(Number(u)*o));return{asset1ID:t.asset1ID,asset2ID:t.asset2ID,asset1In:BigInt(r),asset2In:BigInt(s),liquidityOut:u,liquidityID:t.liquidityTokenID,round:n.round,share:qe.getPoolShare(n.issuedLiquidity+p,p),slippage:o,swapQuote:d,minPoolTokenAssetAmountWithSlippage:f}},generateTxns:function(e){return It.apply(this,arguments)},signTxns:dt,execute:ft});function mt(){return(mt=c(i().mark((function t(n){var s,a,u,c,p,l,d,f,A,I,g,m,h,x;return i().wrap((function(t){for(;;)switch(t.prev=t.next){case 0:if(s=n.client,a=n.network,u=n.poolAddress,c=n.asset_1,p=n.asset_2,l=n.liquidityToken,d=n.initiatorAddr,f=n.minPoolTokenAssetAmount,!Boolean(c.amount)||!Boolean(p.amount)){t.next=3;break}throw new Error("If you want to add asset 1 and asset 2 at the same time, please use flexible add liquidity.");case 3:if(!c.amount){t.next=7;break}A=c,t.next=12;break;case 7:if(!p.amount){t.next=11;break}A=p,t.next=12;break;case 11:throw new Error("Please provide at least one asset amount to add liquidity.");case 12:return I=ne(A.id),t.next=15,s.getTransactionParams().do();case 15:return g=t.sent,m=I?r.default.makePaymentTxnWithSuggestedParamsFromObject({from:d,to:u,amount:A.amount,suggestedParams:g}):r.default.makeAssetTransferTxnWithSuggestedParamsFromObject({from:d,to:u,assetIndex:A.id,amount:A.amount,suggestedParams:g}),h=r.default.makeApplicationNoOpTxnFromObject({from:d,appIndex:ue(a,se.V2),appArgs:[].concat(D(at.v2.SINGLE_ASSET_MODE),[e.encodeUint64(f)]),accounts:[u],foreignAssets:[l.id],suggestedParams:o(o({},g),{},{fee:(rt+1)*e.ALGORAND_MIN_TX_FEE})}),x=r.default.assignGroupID([m,h]),t.abrupt("return",[{txn:x[0],signers:[d]},{txn:x[1],signers:[d]}]);case 20:case"end":return t.stop()}}),t)})))).apply(this,arguments)}var ht=Object.freeze({__proto__:null,getQuote:function(e){var t=e.pool,n=e.reserves,r=e.assetIn,s=e.slippage,a=void 0===s?.05:s;if(0n===n.issuedLiquidity)throw new Error("Pool has no liquidity");if(t.status!==Ee.READY)throw new Error("Pool is not ready");var o=r.id===t.asset1ID,i=pt(n,t.totalFeeShare,o?r.amount:0,o?0:r.amount),u=i.poolTokenAssetAmount,c=i.swapInAmount,p=i.swapOutAmount,l=i.swapPriceImpact,d={amountIn:c,amountOut:p,swapFees:i.swapTotalFeeAmount,priceImpact:l},f=u-BigInt(Math.ceil(Number(u)*a));return{asset1ID:t.asset1ID,asset2ID:t.asset2ID,assetIn:BigInt(r.amount),liquidityOut:u,liquidityID:t.liquidityTokenID,round:n.round,share:qe.getPoolShare(n.issuedLiquidity+p,p),slippage:a,swapQuote:d,minPoolTokenAssetAmountWithSlippage:f}},generateTxns:function(e){return mt.apply(this,arguments)},signTxns:dt,execute:ft});function xt(){return(xt=c(i().mark((function t(n){var s,a,u,c,p,l,d,f,A,I,g,m,h,x;return i().wrap((function(t){for(;;)switch(t.prev=t.next){case 0:return s=n.client,a=n.pool,u=n.network,c=n.poolAddress,p=n.asset_1,l=n.asset_2,d=n.liquidityToken,f=n.initiatorAddr,A=ne(a.asset2ID),t.next=4,s.getTransactionParams().do();case 4:return I=t.sent,g=r.default.makeAssetTransferTxnWithSuggestedParamsFromObject({from:f,to:c,assetIndex:a.asset1ID,amount:p.amount,suggestedParams:I}),m=A?r.default.makePaymentTxnWithSuggestedParamsFromObject({from:f,to:c,amount:l.amount,suggestedParams:I}):r.default.makeAssetTransferTxnWithSuggestedParamsFromObject({from:f,to:c,assetIndex:a.asset2ID,amount:l.amount,suggestedParams:I}),h=r.default.makeApplicationNoOpTxnFromObject({from:f,appIndex:ue(u,se.V2),appArgs:at.v2.INITIAL_LIQUIDITY,accounts:[c],foreignAssets:[d.id],suggestedParams:o(o({},I),{},{fee:(nt+1)*e.ALGORAND_MIN_TX_FEE})}),x=r.default.assignGroupID([g,m,h]),t.abrupt("return",[{txn:x[0],signers:[f]},{txn:x[1],signers:[f]},{txn:x[2],signers:[f]}]);case 10:case"end":return t.stop()}}),t)})))).apply(this,arguments)}var Et,yt,Tt=Object.freeze({__proto__:null,getQuote:function(e){var t=e.pool,n=e.reserves,r=e.asset1In,s=e.asset2In,a=e.slippage,o=void 0===a?.05:a;if(0n!==n.issuedLiquidity)throw new Error("Pool already has liquidity");var i=function(e,t){if(!e||!t)throw new Error("Both assets are required for the initial add liquidity");return BigInt(Math.sqrt(Number(e)*Number(t))-1e3)}(r,s);return{asset1ID:t.asset1ID,asset2ID:t.asset2ID,asset1In:BigInt(r),asset2In:BigInt(s),poolTokenAssetAmount:i,slippage:o}},generateTxns:function(e){return xt.apply(this,arguments)},signTxns:dt,execute:ft}),Dt=Object.freeze({__proto__:null,flexible:gt,withSingleAsset:ht,initial:Tt}),vt=(f(Et={},se.V1_1,ct),f(Et,se.V2,Dt),Et);!function(e){e[e.FEE_TXN=0]="FEE_TXN",e[e.VALIDATOR_APP_CALL_TXN=1]="VALIDATOR_APP_CALL_TXN",e[e.ASSET1_OUT_TXN=2]="ASSET1_OUT_TXN",e[e.ASSET2_OUT_TXN=3]="ASSET2_OUT_TXN",e[e.LIQUDITY_IN_TXN=4]="LIQUDITY_IN_TXN"}(yt||(yt={}));function Nt(){return(Nt=c(i().mark((function e(t){var n,a,o,u,c,p,l,d,f,A,I,g,m,h,x,E,y,T;return i().wrap((function(e){for(;;)switch(e.prev=e.next){case 0:return n=t.client,a=t.pool,o=t.liquidityIn,u=t.asset1Out,c=t.asset2Out,p=t.slippage,l=t.initiatorAddr,e.next=3,n.getTransactionParams().do();case 3:return d=e.sent,f=a.account.address(),A=r.default.makeApplicationNoOpTxnFromObject({from:f,appIndex:a.validatorAppID,appArgs:[H("burn")],accounts:[l],foreignAssets:0==a.asset2ID?[a.asset1ID,a.liquidityTokenID]:[a.asset1ID,a.asset2ID,a.liquidityTokenID],suggestedParams:d}),I=J("negative",p,u),g=r.default.makeAssetTransferTxnWithSuggestedParamsFromObject({from:f,to:l,assetIndex:a.asset1ID,amount:I,suggestedParams:d}),m=J("negative",p,c),h=0===a.asset2ID?r.default.makePaymentTxnWithSuggestedParamsFromObject({from:f,to:l,amount:m,suggestedParams:d}):r.default.makeAssetTransferTxnWithSuggestedParamsFromObject({from:f,to:l,assetIndex:a.asset2ID,amount:m,suggestedParams:d}),x=r.default.makeAssetTransferTxnWithSuggestedParamsFromObject({from:l,to:f,assetIndex:a.liquidityTokenID,amount:o,suggestedParams:d}),E=A.fee+g.fee+h.fee,y=r.default.makePaymentTxnWithSuggestedParamsFromObject({from:l,to:f,amount:E,note:s,suggestedParams:d}),E+=x.fee+y.fee,T=r.default.assignGroupID([y,A,g,h,x]),e.abrupt("return",[{txn:T[yt.FEE_TXN],signers:[l]},{txn:T[yt.VALIDATOR_APP_CALL_TXN],signers:[f]},{txn:T[yt.ASSET1_OUT_TXN],signers:[f]},{txn:T[yt.ASSET2_OUT_TXN],signers:[f]},{txn:T[yt.LIQUDITY_IN_TXN],signers:[l]}]);case 16:case"end":return e.stop()}}),e)})))).apply(this,arguments)}function bt(){return(bt=c(i().mark((function e(t){var n,s,a,o,u,c,p,l,d;return i().wrap((function(e){for(;;)switch(e.prev=e.next){case 0:return n=t.pool,s=t.txGroup,a=t.initiatorSigner,e.next=3,a([s]);case 3:return o=e.sent,u=T(o,2),c=u[0],p=u[1],l=n.account,d=s.map((function(e,t){return t===yt.FEE_TXN?c:t===yt.LIQUDITY_IN_TXN?p:r.default.signLogicSigTransactionObject(e.txn,l).blob})),e.abrupt("return",d);case 10:case"end":return e.stop()}}),e)})))).apply(this,arguments)}function wt(){return(wt=c(i().mark((function e(t){var n,r,s,a,o,u,c,p,l,d,f,A,I,g,m,h,x,E;return i().wrap((function(e){for(;;)switch(e.prev=e.next){case 0:return n=t.client,r=t.pool,s=t.txGroup,a=t.signedTxns,o=t.initiatorAddr,e.prev=1,u=s[yt.ASSET1_OUT_TXN].txn.amount,c=s[yt.ASSET2_OUT_TXN].txn.amount,p=s[yt.LIQUDITY_IN_TXN].txn.amount,e.next=7,De({client:n,pool:r,accountAddr:o});case 7:return l=e.sent,e.next=10,q(n,[a]);case 10:return d=e.sent,f=T(d,1),A=f[0],I=A.confirmedRound,g=A.txnID,e.next=17,De({client:n,pool:r,accountAddr:o});case 17:return m=e.sent,(h=m.excessAsset1-l.excessAsset1)<0n&&(h=0n),(x=m.excessAsset2-l.excessAsset2)<0n&&(x=0n),e.abrupt("return",{round:I,fees:Y(s),asset1ID:r.asset1ID,asset1Out:BigInt(u)+h,asset2ID:r.asset2ID,asset2Out:BigInt(c)+x,liquidityID:r.liquidityTokenID,liquidityIn:BigInt(p),excessAmounts:[{assetID:r.asset1ID,excessAmountForBurning:h,totalExcessAmount:m.excessAsset1},{assetID:r.asset2ID,excessAmountForBurning:x,totalExcessAmount:m.excessAsset2}],txnID:g,groupID:W(s)});case 25:throw e.prev=25,e.t0=e.catch(1),"SlippageTolerance"===(E=new B(e.t0,"We encountered something unexpected while burning liquidity. Try again later.")).type&&E.setMessage("The burn failed due to too much slippage in the price. Please adjust the slippage tolerance and try again."),E;case 30:case"end":return e.stop()}}),e,null,[[1,25]])})))).apply(this,arguments)}var _t,St,kt=3n,Bt=1000n;function Rt(){return(Rt=c(i().mark((function e(t){var n,s,a,o,u,c,p,l;return i().wrap((function(e){for(;;)switch(e.prev=e.next){case 0:return n=t.pool,s=t.txGroup,a=t.initiatorSigner,e.next=3,a([s]);case 3:return o=e.sent,u=T(o,2),c=u[0],p=u[1],l=s.map((function(e,t){return t===St.FEE_TXN_INDEX?c:t===St.ASSET_IN_TXN_INDEX?p:r.default.signLogicSigTransactionObject(e.txn,n.account.lsig).blob})),e.abrupt("return",l);case 9:case"end":return e.stop()}}),e)})))).apply(this,arguments)}exports.SwapType=void 0,(_t=exports.SwapType||(exports.SwapType={})).FixedInput="fixed-input",_t.FixedOutput="fixed-output",function(e){e[e.FEE_TXN_INDEX=0]="FEE_TXN_INDEX",e[e.VALIDATOR_APP_CALL_TXN_INDEX=1]="VALIDATOR_APP_CALL_TXN_INDEX",e[e.ASSET_IN_TXN_INDEX=2]="ASSET_IN_TXN_INDEX",e[e.ASSET_OUT_TXN_INDEX=3]="ASSET_OUT_TXN_INDEX"}(St||(St={}));function Mt(){return(Mt=c(i().mark((function e(t){var n,a,o,u,c,p,l,d,f,A,I,g,m,h,x,E,y;return i().wrap((function(e){for(;;)switch(e.prev=e.next){case 0:return n=t.client,a=t.pool,o=t.swapType,u=t.assetIn,c=t.assetOut,p=t.slippage,l=t.initiatorAddr,d=t.poolAddress,e.next=3,n.getTransactionParams().do();case 3:return f=e.sent,A=[H("swap"),o===exports.SwapType.FixedInput?H("fi"):H("fo")],I=r.default.makeApplicationNoOpTxnFromObject({from:d,appIndex:a.validatorAppID,appArgs:A,accounts:[l],foreignAssets:0==a.asset2ID?[a.asset1ID,a.liquidityTokenID]:[a.asset1ID,a.asset2ID,a.liquidityTokenID],suggestedParams:f}),g=o===exports.SwapType.FixedOutput?J("positive",p,u.amount):u.amount,m=0===u.assetID?r.default.makePaymentTxnWithSuggestedParamsFromObject({from:l,to:d,amount:g,suggestedParams:f}):r.default.makeAssetTransferTxnWithSuggestedParamsFromObject({from:l,to:d,assetIndex:u.assetID,amount:g,suggestedParams:f}),h=o===exports.SwapType.FixedInput?J("negative",p,c.amount):c.amount,x=0===c.assetID?r.default.makePaymentTxnWithSuggestedParamsFromObject({from:d,to:l,amount:h,suggestedParams:f}):r.default.makeAssetTransferTxnWithSuggestedParamsFromObject({from:d,to:l,assetIndex:c.assetID,amount:h,suggestedParams:f}),E=r.default.makePaymentTxnWithSuggestedParamsFromObject({from:l,to:d,amount:I.fee+x.fee,note:s,suggestedParams:f}),y=r.default.assignGroupID([E,I,m,x]),e.abrupt("return",[{txn:y[0],signers:[l]},{txn:y[1],signers:[d]},{txn:y[2],signers:[l]},{txn:y[3],signers:[d]}]);case 13:case"end":return e.stop()}}),e)})))).apply(this,arguments)}function Pt(e){return Qt.apply(this,arguments)}function Qt(){return(Qt=c(i().mark((function e(t){var n,r,s,a,o,u,c,p,l,d,f,A,I,g,m,h;return i().wrap((function(e){for(;;)switch(e.prev=e.next){case 0:return n=t.client,r=t.pool,s=t.signedTxns,a=t.assetIn,o=t.assetOut,u=t.initiatorAddr,e.next=3,De({client:n,pool:r,accountAddr:u});case 3:return c=e.sent,e.next=6,q(n,[s]);case 6:return p=e.sent,l=T(p,1),d=l[0],f=d.confirmedRound,A=d.txnID,e.next=13,De({client:n,pool:r,accountAddr:u});case 13:return I=e.sent,o.assetID===r.asset1ID?(g=c.excessAsset1,m=I.excessAsset1):(g=c.excessAsset2,m=I.excessAsset2),(h=m-g)<0n&&(h=0n),e.abrupt("return",{round:f,assetInID:a.assetID,assetInAmount:BigInt(a.amount),assetOutID:o.assetID,assetOutAmount:BigInt(o.amount)+h,excessAmount:{assetID:o.assetID,excessAmountForSwap:h,totalExcessAmount:m},txnID:A});case 18:case"end":return e.stop()}}),e)})))).apply(this,arguments)}function Ot(e){return Ct.apply(this,arguments)}function Ct(){return(Ct=c(i().mark((function e(t){var n,r,s,a,o,u,c,p,l,d,f,A,I,g,m,h;return i().wrap((function(e){for(;;)switch(e.prev=e.next){case 0:return n=t.client,r=t.pool,s=t.signedTxns,a=t.assetIn,o=t.assetOut,u=t.initiatorAddr,e.next=3,De({client:n,pool:r,accountAddr:u});case 3:return c=e.sent,e.next=6,q(n,[s]);case 6:return p=e.sent,l=T(p,1),d=l[0],f=d.confirmedRound,A=d.txnID,e.next=13,De({client:n,pool:r,accountAddr:u});case 13:return I=e.sent,a.assetID===r.asset1ID?(g=c.excessAsset1,m=I.excessAsset1):(g=c.excessAsset2,m=I.excessAsset2),(h=m-g)<0n&&(h=0n),e.abrupt("return",{round:f,assetInID:a.assetID,assetInAmount:BigInt(a.amount)-h,assetOutID:o.assetID,assetOutAmount:BigInt(o.amount),excessAmount:{assetID:a.assetID,excessAmountForSwap:h,totalExcessAmount:m},txnID:A});case 18:case"end":return e.stop()}}),e)})))).apply(this,arguments)}function Ut(){return(Ut=c(i().mark((function e(t){var n,r,s,a,u,c,p,l,d,f;return i().wrap((function(e){for(;;)switch(e.prev=e.next){case 0:if(n=t.client,r=t.pool,s=t.swapType,a=t.txGroup,u=t.signedTxns,c=t.initiatorAddr,r.status===Ee.READY){e.next=3;break}throw new B({pool:r,swapType:s,txGroup:a},"Trying to swap on a non-existent pool");case 3:if(e.prev=3,p={assetID:a[St.ASSET_IN_TXN_INDEX].txn.assetIndex||0,amount:a[St.ASSET_IN_TXN_INDEX].txn.amount},l={assetID:a[St.ASSET_OUT_TXN_INDEX].txn.assetIndex||0,amount:a[St.ASSET_OUT_TXN_INDEX].txn.amount},s!==exports.SwapType.FixedInput){e.next=12;break}return e.next=9,Pt({client:n,pool:r,signedTxns:u,assetIn:p,assetOut:l,initiatorAddr:c});case 9:d=e.sent,e.next=15;break;case 12:return e.next=14,Ot({client:n,pool:r,signedTxns:u,assetIn:p,assetOut:l,initiatorAddr:c});case 14:d=e.sent;case 15:return e.abrupt("return",o(o({},d),{},{groupID:W(a),fees:Y(a)}));case 18:throw e.prev=18,e.t0=e.catch(3),"SlippageTolerance"===(f=new B(e.t0,"We encountered something unexpected while swapping. Try again later.")).type&&f.setMessage("The swap failed due to too much slippage in the price. Please adjust the slippage tolerance and try again."),f;case 23:case"end":return e.stop()}}),e,null,[[3,18]])})))).apply(this,arguments)}function Lt(){return(Lt=c(i().mark((function e(t){var n,r,s,a,o,u,c,p,l,d;return i().wrap((function(e){for(;;)switch(e.prev=e.next){case 0:return n=t.client,r=t.pool,s=t.txGroup,a=t.initiatorSigner,e.prev=1,e.next=4,jt({txGroup:s,pool:r,initiatorSigner:a});case 4:return o=e.sent,e.next=7,q(n,[o]);case 7:return u=e.sent,c=T(u,1),p=c[0],l=p.txnID,d=p.confirmedRound,e.abrupt("return",{fees:Y(s),confirmedRound:d,txnID:l,groupID:W(s)});case 15:throw e.prev=15,e.t0=e.catch(1),new B(e.t0,"We encountered something unexpected while redeeming. Try again later.");case 18:case"end":return e.stop()}}),e,null,[[1,15]])})))).apply(this,arguments)}function jt(e){return Ft.apply(this,arguments)}function Ft(){return(Ft=c(i().mark((function e(t){var n,s,a,o,u,c,p,l;return i().wrap((function(e){for(;;)switch(e.prev=e.next){case 0:return n=t.txGroup,s=t.pool,a=t.initiatorSigner,e.next=3,a([n]);case 3:return o=e.sent,u=T(o,1),c=u[0],p=s.account.lsig,l=n.map((function(e,t){return 0===t?c:r.default.signLogicSigTransactionObject(e.txn,p).blob})),e.abrupt("return",l);case 9:case"end":return e.stop()}}),e)})))).apply(this,arguments)}function Vt(){return Vt=c(i().mark((function e(t){var n,s,a,o,u,p;return i().wrap((function(e){for(;;)switch(e.prev=e.next){case 0:return n=t.client,s=t.data,a=t.initiatorSigner,e.prev=1,o=s.map((function(e){var t=e.txGroup,n=e.pool;return{txns:t,txnFees:Y(t),groupID:W(t),lsig:n.account.lsig}})),e.next=5,a(o.map((function(e){return e.txns})));case 5:return u=e.sent,p=Promise.all(o.map((function(e,t){return new Promise(function(){var s=c(i().mark((function s(a,o){var c,p,l,d,f,A;return i().wrap((function(s){for(;;)switch(s.prev=s.next){case 0:return s.prev=0,c=e.txns.map((function(n,s){return 0===s?u[t]:r.default.signLogicSigTransactionObject(n.txn,e.lsig).blob})),s.next=4,q(n,[c]);case 4:p=s.sent,l=T(p,1),d=l[0],f=d.txnID,A=d.confirmedRound,a({fees:e.txnFees,groupID:e.groupID,txnID:f,confirmedRound:A}),s.next=15;break;case 12:s.prev=12,s.t0=s.catch(0),o(s.t0);case 15:case"end":return s.stop()}}),s,null,[[0,12]])})));return function(e,t){return s.apply(this,arguments)}}())}))),e.abrupt("return",p);case 10:throw e.prev=10,e.t0=e.catch(1),new B(e.t0,"We encountered something unexpected while redeeming. Try again later.");case 13:case"end":return e.stop()}}),e,null,[[1,10]])}))),Vt.apply(this,arguments)}function Jt(){return(Jt=c(i().mark((function e(t){var n,a,o,u,c,p,l,d,f,A,I;return i().wrap((function(e){for(;;)switch(e.prev=e.next){case 0:return n=t.client,a=t.pool,o=t.assetID,u=t.assetOut,c=t.initiatorAddr,p=t.poolAddress,e.next=3,n.getTransactionParams().do();case 3:return l=e.sent,d=r.default.makeApplicationNoOpTxnFromObject({from:p,appIndex:a.validatorAppID,appArgs:[H("redeem")],accounts:[c],foreignAssets:0==a.asset2ID?[a.asset1ID,a.liquidityTokenID]:[a.asset1ID,a.asset2ID,a.liquidityTokenID],suggestedParams:l}),f=0===o?r.default.makePaymentTxnWithSuggestedParamsFromObject({from:p,to:c,amount:BigInt(u),suggestedParams:l}):r.default.makeAssetTransferTxnWithSuggestedParamsFromObject({from:p,to:c,assetIndex:o,amount:BigInt(u),suggestedParams:l}),A=r.default.makePaymentTxnWithSuggestedParamsFromObject({from:c,to:p,amount:d.fee+f.fee,note:s,suggestedParams:l}),I=r.default.assignGroupID([A,d,f]),e.abrupt("return",[{txn:I[0],signers:[c]},{txn:I[1],signers:[p]},{txn:I[2],signers:[p]}]);case 9:case"end":return e.stop()}}),e)})))).apply(this,arguments)}function Xt(t){var n=t.suggestedParams,r=t.stakingAppID,s=t.initiatorAddr,a=t.liquidityAssetID,o=t.program,i=t.amount,u=e.encodeUint64(i),c=e.encodeUint64(o.id);return e.makeApplicationNoOpTxnFromObject({appIndex:r,from:s,suggestedParams:n,foreignAssets:[a],accounts:[o.accountAddress],appArgs:[H("commit"),u],note:M([H("tinymanStaking/v1:b"),c,e.encodeUint64(a),u])})}function Gt(){return(Gt=c(i().mark((function t(n){var r,s,a,o,u,c,p,l,d,f,A;return i().wrap((function(t){for(;;)switch(t.prev=t.next){case 0:return r=n.client,s=n.stakingAppID,a=n.program,o=n.requiredAssetID,u=n.liquidityAssetID,c=n.amount,p=n.initiatorAddr,t.next=3,r.getTransactionParams().do();case 3:if(l=t.sent,d=Xt({suggestedParams:l,stakingAppID:s,program:a,liquidityAssetID:u,initiatorAddr:p,amount:c}),f=[d],"number"!=typeof o){t.next=10;break}return A=e.makeApplicationNoOpTxnFromObject({appIndex:s,from:p,suggestedParams:l,foreignAssets:[o],accounts:[a.accountAddress],appArgs:[H("log_balance")]}),f=e.assignGroupID([d,A]),t.abrupt("return",[{txn:f[0],signers:[p]},{txn:f[1],signers:[p]}]);case 10:return t.abrupt("return",[{txn:f[0],signers:[p]}]);case 11:case"end":return t.stop()}}),t)})))).apply(this,arguments)}exports.ALGO_ASSET=K,exports.ALGO_ASSET_ID=0,exports.ASSET_OPT_IN_PROCESS_TXN_COUNT=1,exports.BASE_MINIMUM_BALANCE=1e5,exports.BURN_PROCESS_TXN_COUNT=5,exports.CONTRACT_VERSION=se,exports.LIQUIDITY_TOKEN_UNIT_NAME=$,exports.MINIMUM_BALANCE_REQUIRED_PER_APP=1e5,exports.MINIMUM_BALANCE_REQUIRED_PER_ASSET=1e5,exports.MINIMUM_BALANCE_REQUIRED_PER_BYTE_SCHEMA=5e4,exports.MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE=28500,exports.MINIMUM_LIQUIDITY_MINTING_AMOUNT=1e3,exports.Mint=vt,exports.OPT_IN_VALIDATOR_APP_PROCESS_TXN_COUNT=1,exports.OPT_OUT_VALIDATOR_APP_PROCESS_TXN_COUNT=1,exports.REDEEM_PROCESS_TXN_COUNT=3,exports.SWAP_PROCESS_TXN_COUNT=4,exports.V2MintTxnIndices=et,exports.applySlippageToAmount=J,exports.burnLiquidity=function(e){return wt.apply(this,arguments)},exports.calculateAccountMinimumRequiredBalance=xe,exports.calculatePoolBootstrapFundingTxnAmount=ze,exports.convertFromBaseUnits=X,exports.convertToBaseUnits=function(e,t){return G({decimalPlaces:0},Math.pow(10,Number(e))*Number(t))},exports.createPool=function(e,t,n,r){return Ke.apply(this,arguments)},exports.generateBootstrapTransactions=function(e){return Ye.apply(this,arguments)},exports.generateBurnTxns=function(e){return Nt.apply(this,arguments)},exports.generateOptIntoAssetTxns=function(e){return ee.apply(this,arguments)},exports.generateOptIntoValidatorTxns=function(e){return ce.apply(this,arguments)},exports.generateOptOutOfValidatorTxns=function(e){return pe.apply(this,arguments)},exports.generateRedeemTxns=function(e){return Jt.apply(this,arguments)},exports.generateSwapTransactions=function(e){return Mt.apply(this,arguments)},exports.getAccountExcess=function(e){return Ne.apply(this,arguments)},exports.getAccountExcessWithinPool=De,exports.getAccountInformation=me,exports.getBootstrapProcessTxnCount=function(e){return 0===e?4:5},exports.getBurnLiquidityQuote=function(e){var t=e.pool,n=e.reserves,r=e.liquidityIn,s=BigInt(r),a=n.issuedLiquidity&&s*n.asset1/n.issuedLiquidity,o=n.issuedLiquidity&&s*n.asset2/n.issuedLiquidity;return{round:n.round,liquidityID:t.liquidityTokenID,liquidityIn:s,asset1ID:t.asset1ID,asset1Out:a,asset2ID:t.asset2ID,asset2Out:o}},exports.getStakingAppID=function(e){return"testnet"===e?51948952:649588853},exports.getSwapQuote=function(e,t,n,r,s){var a;if(t.status!==Ee.READY)throw new B({pool:t,asset:r},"Trying to swap on a non-existent pool");return a="fixed-input"===e?function(e){var t,n,r,s=e.pool,a=e.reserves,o=e.assetIn,i=e.decimals,u=BigInt(o.amount);o.assetID===s.asset1ID?(t=s.asset2ID,n=a.asset1,r=a.asset2):(t=s.asset1ID,n=a.asset2,r=a.asset1);var c=u*kt/Bt,p=r-n*r/(n+(u-c));if(p>r)throw new Error("Output amount exceeds available liquidity.");var l=X(i.assetOut,Number(p))/X(i.assetIn,Number(u)),d=X(i.assetOut,Number(r))/X(i.assetIn,Number(n)),f=G({decimalPlaces:5},Math.abs(l/d-1));return{round:a.round,assetInID:o.assetID,assetInAmount:u,assetOutID:t,assetOutAmount:p,swapFee:Number(c),rate:l,priceImpact:f}}({pool:t,reserves:n,assetIn:r,decimals:s}):function(e){var t,n,r,s=e.pool,a=e.reserves,o=e.assetOut,i=e.decimals,u=BigInt(o.amount);if(o.assetID===s.asset1ID?(t=s.asset2ID,n=a.asset2,r=a.asset1):(t=s.asset1ID,n=a.asset1,r=a.asset2),u>r)throw new Error("Output amount exceeds available liquidity.");var c=n*r/(r-u)-n,p=c*Bt/(Bt-kt),l=p-c,d=X(i.assetOut,Number(u))/X(i.assetIn,Number(p)),f=X(i.assetOut,Number(r))/X(i.assetIn,Number(n)),A=G({decimalPlaces:5},Math.abs(d/f-1));return{round:a.round,assetInID:t,assetInAmount:p,assetOutID:o.assetID,assetOutAmount:u,swapFee:Number(l),rate:d,priceImpact:A}}({pool:t,reserves:n,assetOut:r,decimals:s}),a},exports.getTxnGroupID=W,exports.getValidatorAppID=ue,exports.hasSufficientMinimumBalance=function(e){return e.amount>=e.minimum_required_balance},exports.isAccountOptedIntoApp=function(e){var t=e.appID;return e.accountAppsLocalState.some((function(e){return e.id===t}))},exports.issueSwap=function(e){return Ut.apply(this,arguments)},exports.poolUtils=qe,exports.prepareCommitTransactions=function(e){return Gt.apply(this,arguments)},exports.redeemAllExcessAsset=function(e){return Vt.apply(this,arguments)},exports.redeemExcessAsset=function(e){return Lt.apply(this,arguments)},exports.sendAndWaitRawTransaction=q,exports.signBootstrapTransactions=function(e){return We.apply(this,arguments)},exports.signBurnTxns=function(e){return bt.apply(this,arguments)},exports.signSwapTransactions=function(e){return Rt.apply(this,arguments)},exports.sumUpTxnFees=Y,exports.tinymanContract_v1_1=de,exports.tinymanContract_v2=Ie;
+"use strict";
+Object.defineProperty(exports, "__esModule", {value: !0});
+var e = require("algosdk"),
+  t = require("base64-js");
+function n(e) {
+  return e && "object" == typeof e && "default" in e ? e : {default: e};
+}
+var r = n(e),
+  a = Uint8Array.from([1]);
+function s(e, t) {
+  var n = Object.keys(e);
+  if (Object.getOwnPropertySymbols) {
+    var r = Object.getOwnPropertySymbols(e);
+    t &&
+      (r = r.filter(function (t) {
+        return Object.getOwnPropertyDescriptor(e, t).enumerable;
+      })),
+      n.push.apply(n, r);
+  }
+  return n;
+}
+function o(e) {
+  for (var t = 1; t < arguments.length; t++) {
+    var n = null != arguments[t] ? arguments[t] : {};
+    t % 2
+      ? s(Object(n), !0).forEach(function (t) {
+          f(e, t, n[t]);
+        })
+      : Object.getOwnPropertyDescriptors
+      ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(n))
+      : s(Object(n)).forEach(function (t) {
+          Object.defineProperty(e, t, Object.getOwnPropertyDescriptor(n, t));
+        });
+  }
+  return e;
+}
+function i() {
+  /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */
+  i = function () {
+    return t;
+  };
+  var t = {},
+    e = Object.prototype,
+    n = e.hasOwnProperty,
+    r = "function" == typeof Symbol ? Symbol : {},
+    a = r.iterator || "@@iterator",
+    s = r.asyncIterator || "@@asyncIterator",
+    o = r.toStringTag || "@@toStringTag";
+  function u(t, e, n) {
+    return (
+      Object.defineProperty(t, e, {
+        value: n,
+        enumerable: !0,
+        configurable: !0,
+        writable: !0
+      }),
+      t[e]
+    );
+  }
+  try {
+    u({}, "");
+  } catch (t) {
+    u = function (t, e, n) {
+      return (t[e] = n);
+    };
+  }
+  function c(t, e, n, r) {
+    var a = e && e.prototype instanceof f ? e : f,
+      s = Object.create(a.prototype),
+      o = new T(r || []);
+    return (
+      (s._invoke = (function (t, e, n) {
+        var r = "suspendedStart";
+        return function (a, s) {
+          if ("executing" === r) throw new Error("Generator is already running");
+          if ("completed" === r) {
+            if ("throw" === a) throw s;
+            return b();
+          }
+          for (n.method = a, n.arg = s; ; ) {
+            var o = n.delegate;
+            if (o) {
+              var i = E(o, n);
+              if (i) {
+                if (i === l) continue;
+                return i;
+              }
+            }
+            if ("next" === n.method) n.sent = n._sent = n.arg;
+            else if ("throw" === n.method) {
+              if ("suspendedStart" === r) throw ((r = "completed"), n.arg);
+              n.dispatchException(n.arg);
+            } else "return" === n.method && n.abrupt("return", n.arg);
+            r = "executing";
+            var u = p(t, e, n);
+            if ("normal" === u.type) {
+              if (((r = n.done ? "completed" : "suspendedYield"), u.arg === l)) continue;
+              return {value: u.arg, done: n.done};
+            }
+            "throw" === u.type &&
+              ((r = "completed"), (n.method = "throw"), (n.arg = u.arg));
+          }
+        };
+      })(t, n, o)),
+      s
+    );
+  }
+  function p(t, e, n) {
+    try {
+      return {type: "normal", arg: t.call(e, n)};
+    } catch (t) {
+      return {type: "throw", arg: t};
+    }
+  }
+  t.wrap = c;
+  var l = {};
+  function f() {}
+  function d() {}
+  function A() {}
+  var g = {};
+  u(g, a, function () {
+    return this;
+  });
+  var m = Object.getPrototypeOf,
+    I = m && m(m(w([])));
+  I && I !== e && n.call(I, a) && (g = I);
+  var h = (A.prototype = f.prototype = Object.create(g));
+  function x(t) {
+    ["next", "throw", "return"].forEach(function (e) {
+      u(t, e, function (t) {
+        return this._invoke(e, t);
+      });
+    });
+  }
+  function y(t, e) {
+    function r(a, s, o, i) {
+      var u = p(t[a], t, s);
+      if ("throw" !== u.type) {
+        var c = u.arg,
+          l = c.value;
+        return l && "object" == typeof l && n.call(l, "__await")
+          ? e.resolve(l.__await).then(
+              function (t) {
+                r("next", t, o, i);
+              },
+              function (t) {
+                r("throw", t, o, i);
+              }
+            )
+          : e.resolve(l).then(
+              function (t) {
+                (c.value = t), o(c);
+              },
+              function (t) {
+                return r("throw", t, o, i);
+              }
+            );
+      }
+      i(u.arg);
+    }
+    var a;
+    this._invoke = function (t, n) {
+      function s() {
+        return new e(function (e, a) {
+          r(t, n, e, a);
+        });
+      }
+      return (a = a ? a.then(s, s) : s());
+    };
+  }
+  function E(t, e) {
+    var n = t.iterator[e.method];
+    if (void 0 === n) {
+      if (((e.delegate = null), "throw" === e.method)) {
+        if (
+          t.iterator.return &&
+          ((e.method = "return"), (e.arg = void 0), E(t, e), "throw" === e.method)
+        )
+          return l;
+        (e.method = "throw"),
+          (e.arg = new TypeError("The iterator does not provide a 'throw' method"));
+      }
+      return l;
+    }
+    var r = p(n, t.iterator, e.arg);
+    if ("throw" === r.type)
+      return (e.method = "throw"), (e.arg = r.arg), (e.delegate = null), l;
+    var a = r.arg;
+    return a
+      ? a.done
+        ? ((e[t.resultName] = a.value),
+          (e.next = t.nextLoc),
+          "return" !== e.method && ((e.method = "next"), (e.arg = void 0)),
+          (e.delegate = null),
+          l)
+        : a
+      : ((e.method = "throw"),
+        (e.arg = new TypeError("iterator result is not an object")),
+        (e.delegate = null),
+        l);
+  }
+  function D(t) {
+    var e = {tryLoc: t[0]};
+    1 in t && (e.catchLoc = t[1]),
+      2 in t && ((e.finallyLoc = t[2]), (e.afterLoc = t[3])),
+      this.tryEntries.push(e);
+  }
+  function v(t) {
+    var e = t.completion || {};
+    (e.type = "normal"), delete e.arg, (t.completion = e);
+  }
+  function T(t) {
+    (this.tryEntries = [{tryLoc: "root"}]), t.forEach(D, this), this.reset(!0);
+  }
+  function w(t) {
+    if (t) {
+      var e = t[a];
+      if (e) return e.call(t);
+      if ("function" == typeof t.next) return t;
+      if (!isNaN(t.length)) {
+        var r = -1,
+          s = function e() {
+            for (; ++r < t.length; )
+              if (n.call(t, r)) return (e.value = t[r]), (e.done = !1), e;
+            return (e.value = void 0), (e.done = !0), e;
+          };
+        return (s.next = s);
+      }
+    }
+    return {next: b};
+  }
+  function b() {
+    return {value: void 0, done: !0};
+  }
+  return (
+    (d.prototype = A),
+    u(h, "constructor", A),
+    u(A, "constructor", d),
+    (d.displayName = u(A, o, "GeneratorFunction")),
+    (t.isGeneratorFunction = function (t) {
+      var e = "function" == typeof t && t.constructor;
+      return !!e && (e === d || "GeneratorFunction" === (e.displayName || e.name));
+    }),
+    (t.mark = function (t) {
+      return (
+        Object.setPrototypeOf
+          ? Object.setPrototypeOf(t, A)
+          : ((t.__proto__ = A), u(t, o, "GeneratorFunction")),
+        (t.prototype = Object.create(h)),
+        t
+      );
+    }),
+    (t.awrap = function (t) {
+      return {__await: t};
+    }),
+    x(y.prototype),
+    u(y.prototype, s, function () {
+      return this;
+    }),
+    (t.AsyncIterator = y),
+    (t.async = function (e, n, r, a, s) {
+      void 0 === s && (s = Promise);
+      var o = new y(c(e, n, r, a), s);
+      return t.isGeneratorFunction(n)
+        ? o
+        : o.next().then(function (t) {
+            return t.done ? t.value : o.next();
+          });
+    }),
+    x(h),
+    u(h, o, "Generator"),
+    u(h, a, function () {
+      return this;
+    }),
+    u(h, "toString", function () {
+      return "[object Generator]";
+    }),
+    (t.keys = function (t) {
+      var e = [];
+      for (var n in t) e.push(n);
+      return (
+        e.reverse(),
+        function n() {
+          for (; e.length; ) {
+            var r = e.pop();
+            if (r in t) return (n.value = r), (n.done = !1), n;
+          }
+          return (n.done = !0), n;
+        }
+      );
+    }),
+    (t.values = w),
+    (T.prototype = {
+      constructor: T,
+      reset: function (t) {
+        if (
+          ((this.prev = 0),
+          (this.next = 0),
+          (this.sent = this._sent = void 0),
+          (this.done = !1),
+          (this.delegate = null),
+          (this.method = "next"),
+          (this.arg = void 0),
+          this.tryEntries.forEach(v),
+          !t)
+        )
+          for (var e in this)
+            "t" === e.charAt(0) &&
+              n.call(this, e) &&
+              !isNaN(+e.slice(1)) &&
+              (this[e] = void 0);
+      },
+      stop: function () {
+        this.done = !0;
+        var t = this.tryEntries[0].completion;
+        if ("throw" === t.type) throw t.arg;
+        return this.rval;
+      },
+      dispatchException: function (t) {
+        if (this.done) throw t;
+        var e = this;
+        function r(n, r) {
+          return (
+            (o.type = "throw"),
+            (o.arg = t),
+            (e.next = n),
+            r && ((e.method = "next"), (e.arg = void 0)),
+            !!r
+          );
+        }
+        for (var a = this.tryEntries.length - 1; a >= 0; --a) {
+          var s = this.tryEntries[a],
+            o = s.completion;
+          if ("root" === s.tryLoc) return r("end");
+          if (s.tryLoc <= this.prev) {
+            var i = n.call(s, "catchLoc"),
+              u = n.call(s, "finallyLoc");
+            if (i && u) {
+              if (this.prev < s.catchLoc) return r(s.catchLoc, !0);
+              if (this.prev < s.finallyLoc) return r(s.finallyLoc);
+            } else if (i) {
+              if (this.prev < s.catchLoc) return r(s.catchLoc, !0);
+            } else {
+              if (!u) throw new Error("try statement without catch or finally");
+              if (this.prev < s.finallyLoc) return r(s.finallyLoc);
+            }
+          }
+        }
+      },
+      abrupt: function (t, e) {
+        for (var r = this.tryEntries.length - 1; r >= 0; --r) {
+          var a = this.tryEntries[r];
+          if (
+            a.tryLoc <= this.prev &&
+            n.call(a, "finallyLoc") &&
+            this.prev < a.finallyLoc
+          ) {
+            var s = a;
+            break;
+          }
+        }
+        s &&
+          ("break" === t || "continue" === t) &&
+          s.tryLoc <= e &&
+          e <= s.finallyLoc &&
+          (s = null);
+        var o = s ? s.completion : {};
+        return (
+          (o.type = t),
+          (o.arg = e),
+          s ? ((this.method = "next"), (this.next = s.finallyLoc), l) : this.complete(o)
+        );
+      },
+      complete: function (t, e) {
+        if ("throw" === t.type) throw t.arg;
+        return (
+          "break" === t.type || "continue" === t.type
+            ? (this.next = t.arg)
+            : "return" === t.type
+            ? ((this.rval = this.arg = t.arg),
+              (this.method = "return"),
+              (this.next = "end"))
+            : "normal" === t.type && e && (this.next = e),
+          l
+        );
+      },
+      finish: function (t) {
+        for (var e = this.tryEntries.length - 1; e >= 0; --e) {
+          var n = this.tryEntries[e];
+          if (n.finallyLoc === t) return this.complete(n.completion, n.afterLoc), v(n), l;
+        }
+      },
+      catch: function (t) {
+        for (var e = this.tryEntries.length - 1; e >= 0; --e) {
+          var n = this.tryEntries[e];
+          if (n.tryLoc === t) {
+            var r = n.completion;
+            if ("throw" === r.type) {
+              var a = r.arg;
+              v(n);
+            }
+            return a;
+          }
+        }
+        throw new Error("illegal catch attempt");
+      },
+      delegateYield: function (t, e, n) {
+        return (
+          (this.delegate = {iterator: w(t), resultName: e, nextLoc: n}),
+          "next" === this.method && (this.arg = void 0),
+          l
+        );
+      }
+    }),
+    t
+  );
+}
+function u(t, e, n, r, a, s, o) {
+  try {
+    var i = t[s](o),
+      u = i.value;
+  } catch (t) {
+    return void n(t);
+  }
+  i.done ? e(u) : Promise.resolve(u).then(r, a);
+}
+function c(t) {
+  return function () {
+    var e = this,
+      n = arguments;
+    return new Promise(function (r, a) {
+      var s = t.apply(e, n);
+      function o(t) {
+        u(s, r, a, o, i, "next", t);
+      }
+      function i(t) {
+        u(s, r, a, o, i, "throw", t);
+      }
+      o(void 0);
+    });
+  };
+}
+function p(t, e) {
+  if (!(t instanceof e)) throw new TypeError("Cannot call a class as a function");
+}
+function l(t, e) {
+  for (var n = 0; n < e.length; n++) {
+    var r = e[n];
+    (r.enumerable = r.enumerable || !1),
+      (r.configurable = !0),
+      "value" in r && (r.writable = !0),
+      Object.defineProperty(t, r.key, r);
+  }
+}
+function f(t, e, n) {
+  return (
+    e && l(t.prototype, e),
+    n && l(t, n),
+    Object.defineProperty(t, "prototype", {writable: !1}),
+    t
+  );
+}
+function d(t, e, n) {
+  return (
+    e in t
+      ? Object.defineProperty(t, e, {
+          value: n,
+          enumerable: !0,
+          configurable: !0,
+          writable: !0
+        })
+      : (t[e] = n),
+    t
+  );
+}
+function A(t, e) {
+  if ("function" != typeof e && null !== e)
+    throw new TypeError("Super expression must either be null or a function");
+  (t.prototype = Object.create(e && e.prototype, {
+    constructor: {value: t, writable: !0, configurable: !0}
+  })),
+    Object.defineProperty(t, "prototype", {writable: !1}),
+    e && m(t, e);
+}
+function g(t) {
+  return (
+    (g = Object.setPrototypeOf
+      ? Object.getPrototypeOf.bind()
+      : function (t) {
+          return t.__proto__ || Object.getPrototypeOf(t);
+        }),
+    g(t)
+  );
+}
+function m(t, e) {
+  return (
+    (m = Object.setPrototypeOf
+      ? Object.setPrototypeOf.bind()
+      : function (t, e) {
+          return (t.__proto__ = e), t;
+        }),
+    m(t, e)
+  );
+}
+function I() {
+  if ("undefined" == typeof Reflect || !Reflect.construct) return !1;
+  if (Reflect.construct.sham) return !1;
+  if ("function" == typeof Proxy) return !0;
+  try {
+    return (
+      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})), !0
+    );
+  } catch (t) {
+    return !1;
+  }
+}
+function h(t, e, n) {
+  return (
+    (h = I()
+      ? Reflect.construct.bind()
+      : function (t, e, n) {
+          var r = [null];
+          r.push.apply(r, e);
+          var a = new (Function.bind.apply(t, r))();
+          return n && m(a, n.prototype), a;
+        }),
+    h.apply(null, arguments)
+  );
+}
+function x(t) {
+  var e = "function" == typeof Map ? new Map() : void 0;
+  return (
+    (x = function (t) {
+      if (
+        null === t ||
+        ((n = t), -1 === Function.toString.call(n).indexOf("[native code]"))
+      )
+        return t;
+      var n;
+      if ("function" != typeof t)
+        throw new TypeError("Super expression must either be null or a function");
+      if (void 0 !== e) {
+        if (e.has(t)) return e.get(t);
+        e.set(t, r);
+      }
+      function r() {
+        return h(t, arguments, g(this).constructor);
+      }
+      return (
+        (r.prototype = Object.create(t.prototype, {
+          constructor: {value: r, enumerable: !1, writable: !0, configurable: !0}
+        })),
+        m(r, t)
+      );
+    }),
+    x(t)
+  );
+}
+function y(t, e) {
+  if (e && ("object" == typeof e || "function" == typeof e)) return e;
+  if (void 0 !== e)
+    throw new TypeError("Derived constructors may only return object or undefined");
+  return (function (t) {
+    if (void 0 === t)
+      throw new ReferenceError(
+        "this hasn't been initialised - super() hasn't been called"
+      );
+    return t;
+  })(t);
+}
+function E(t) {
+  var e = I();
+  return function () {
+    var n,
+      r = g(t);
+    if (e) {
+      var a = g(this).constructor;
+      n = Reflect.construct(r, arguments, a);
+    } else n = r.apply(this, arguments);
+    return y(this, n);
+  };
+}
+function D(t, e) {
+  return (
+    (function (t) {
+      if (Array.isArray(t)) return t;
+    })(t) ||
+    (function (t, e) {
+      var n =
+        null == t
+          ? null
+          : ("undefined" != typeof Symbol && t[Symbol.iterator]) || t["@@iterator"];
+      if (null == n) return;
+      var r,
+        a,
+        s = [],
+        o = !0,
+        i = !1;
+      try {
+        for (
+          n = n.call(t);
+          !(o = (r = n.next()).done) && (s.push(r.value), !e || s.length !== e);
+          o = !0
+        );
+      } catch (t) {
+        (i = !0), (a = t);
+      } finally {
+        try {
+          o || null == n.return || n.return();
+        } finally {
+          if (i) throw a;
+        }
+      }
+      return s;
+    })(t, e) ||
+    v(t, e) ||
+    (function () {
+      throw new TypeError(
+        "Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."
+      );
+    })()
+  );
+}
+function v(t, e) {
+  if (t) {
+    if ("string" == typeof t) return T(t, e);
+    var n = Object.prototype.toString.call(t).slice(8, -1);
+    return (
+      "Object" === n && t.constructor && (n = t.constructor.name),
+      "Map" === n || "Set" === n
+        ? Array.from(t)
+        : "Arguments" === n || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)
+        ? T(t, e)
+        : void 0
+    );
+  }
+}
+function T(t, e) {
+  (null == e || e > t.length) && (e = t.length);
+  for (var n = 0, r = new Array(e); n < e; n++) r[n] = t[n];
+  return r;
+}
+function w(t, e) {
+  var n = ("undefined" != typeof Symbol && t[Symbol.iterator]) || t["@@iterator"];
+  if (!n) {
+    if (Array.isArray(t) || (n = v(t)) || (e && t && "number" == typeof t.length)) {
+      n && (t = n);
+      var r = 0,
+        a = function () {};
+      return {
+        s: a,
+        n: function () {
+          return r >= t.length ? {done: !0} : {done: !1, value: t[r++]};
+        },
+        e: function (t) {
+          throw t;
+        },
+        f: a
+      };
+    }
+    throw new TypeError(
+      "Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."
+    );
+  }
+  var s,
+    o = !0,
+    i = !1;
+  return {
+    s: function () {
+      n = n.call(t);
+    },
+    n: function () {
+      var t = n.next();
+      return (o = t.done), t;
+    },
+    e: function (t) {
+      (i = !0), (s = t);
+    },
+    f: function () {
+      try {
+        o || null == n.return || n.return();
+      } finally {
+        if (i) throw s;
+      }
+    }
+  };
+}
+var b = "- would result negative",
+  N = "logic eval error:",
+  _ = "exceeds schema integer count",
+  S = /transaction \w+:/,
+  k = (function (t) {
+    A(n, x(Error));
+    var e = E(n);
+    function n(t, r) {
+      var a;
+      p(this, n);
+      for (var s = arguments.length, o = new Array(s > 2 ? s - 2 : 0), i = 2; i < s; i++)
+        o[i - 2] = arguments[i];
+      var u = (a = e.call.apply(e, [this].concat(o))).extractMessageFromAlgoSDKError(t);
+      return (
+        (a.data = t),
+        (a.type = a.getErrorType(u)),
+        a.setMessage(a.getErrorMessage(u, a.type, r)),
+        a
+      );
+    }
+    return (
+      f(n, [
+        {
+          key: "setMessage",
+          value: function (t) {
+            this.message = t;
+          }
+        },
+        {
+          key: "getErrorType",
+          value: function (t) {
+            var e = "Unknown";
+            return (
+              t.includes(b)
+                ? (e = "SlippageTolerance")
+                : t.includes(_)
+                ? (e = "ExceedingExcessAmountCount")
+                : t.includes(N)
+                ? (e = "LogicError")
+                : t.match(S) && (e = "TransactionError"),
+              e
+            );
+          }
+        },
+        {
+          key: "getErrorMessage",
+          value: function (t, e, n) {
+            var r;
+            switch (e) {
+              case "SlippageTolerance":
+                r =
+                  "The process failed due to too much slippage in the price. Please adjust the slippage tolerance and try again.";
+                break;
+              case "ExceedingExcessAmountCount":
+                r =
+                  "The process failed due to the number of excess amounts accumulated for your account in the Tinyman app.";
+                break;
+              case "LogicError":
+                r = t.split(N)[1];
+                break;
+              case "TransactionError":
+                r = t.split(S)[1];
+                break;
+              case "Unknown":
+                t && (r = t);
+            }
+            return (
+              r || (r = n || "We encountered an unexpected error, try again later."),
+              r.trim()
+            );
+          }
+        },
+        {
+          key: "extractMessageFromAlgoSDKError",
+          value: function (t) {
+            var e,
+              n,
+              r,
+              a = "";
+            return (
+              null != t &&
+              null !== (e = t.response) &&
+              void 0 !== e &&
+              null !== (n = e.body) &&
+              void 0 !== n &&
+              n.message
+                ? (a = t.response.body.message)
+                : null != t && null !== (r = t.response) && void 0 !== r && r.text
+                ? (a = t.response.text)
+                : "string" == typeof (null == t ? void 0 : t.message) &&
+                  (a = this.isMessageObjectString(null == t ? void 0 : t.message)
+                    ? JSON.parse(t.message || "{message: ''}").message
+                    : t.message),
+              "string" != typeof a && (a = String(a)),
+              a
+            );
+          }
+        },
+        {
+          key: "isMessageObjectString",
+          value: function (t) {
+            return "string" == typeof t && t.includes("{message:");
+          }
+        }
+      ]),
+      n
+    );
+  })(),
+  O = {
+    id: "".concat(0),
+    name: "Algorand",
+    unit_name: "ALGO",
+    decimals: 6,
+    url: "https://algorand.org",
+    is_liquidity_token: !1,
+    total_amount: "6615503326932151"
+  },
+  P = {DEFAULT: "TMPOOL11", V1: "TM1POOL"};
+function M() {
+  var t,
+    e = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : [],
+    n = {},
+    r = w(e);
+  try {
+    for (r.s(); !(t = r.n()).done; ) {
+      var a = t.value,
+        s = a.key,
+        o = void 0;
+      if (1 == a.value.type) o = a.value.bytes;
+      else {
+        if (2 != a.value.type)
+          throw new Error("Unexpected state type: ".concat(a.value.type));
+        o = a.value.uint;
+      }
+      n[s] = o;
+    }
+  } catch (t) {
+    r.e(t);
+  } finally {
+    r.f();
+  }
+  return n;
+}
+function R(t) {
+  var e,
+    n = t.reduce(function (t, e) {
+      return t + e.length;
+    }, 0),
+    r = new Uint8Array(n),
+    a = 0,
+    s = w(t);
+  try {
+    for (s.s(); !(e = s.n()).done; ) {
+      var o = e.value;
+      r.set(o, a), (a += o.length);
+    }
+  } catch (t) {
+    s.e(t);
+  } finally {
+    s.f();
+  }
+  return r;
+}
+var B = 100000n,
+  Q = 100000n,
+  C = 100000n,
+  L = 25000n + 25000n,
+  U = 25000n + 3500n;
+function j(t) {
+  var e = t["apps-total-schema"],
+    n = 0n,
+    r = 0n;
+  e &&
+    (e["num-byte-slice"] && (n = e["num-byte-slice"]),
+    e["num-uint"] && (r = e["num-uint"]));
+  var a = t["apps-local-state"] || [],
+    s = t["created-apps"] || [],
+    o = t.assets || [];
+  return B + Q * BigInt(o.length) + C * BigInt(s.length + a.length) + U * r + L * n;
+}
+function F(t) {
+  return new Promise(function (e) {
+    setTimeout(function () {
+      e(null);
+    }, t);
+  });
+}
+function V(t, e) {
+  return G.apply(this, arguments);
+}
+function G() {
+  return (G = c(
+    i().mark(function t(e, n) {
+      var r;
+      return i().wrap(
+        function (t) {
+          for (;;)
+            switch ((t.prev = t.next)) {
+              case 0:
+                return (t.next = 3), F(1e3);
+              case 3:
+                return (
+                  (r = null),
+                  (t.prev = 4),
+                  (t.next = 7),
+                  e.pendingTransactionInformation(n).do()
+                );
+              case 7:
+                (r = t.sent), (t.next = 12);
+                break;
+              case 10:
+                (t.prev = 10), (t.t0 = t.catch(4));
+              case 12:
+                if (!r) {
+                  t.next = 17;
+                  break;
+                }
+                if (!r["confirmed-round"]) {
+                  t.next = 15;
+                  break;
+                }
+                return t.abrupt("return", r);
+              case 15:
+                if (!r["pool-error"]) {
+                  t.next = 17;
+                  break;
+                }
+                throw new Error("Transaction Rejected: ".concat(r["pool-error"]));
+              case 17:
+                t.next = 0;
+                break;
+              case 19:
+              case "end":
+                return t.stop();
+            }
+        },
+        t,
+        null,
+        [[4, 10]]
+      );
+    })
+  )).apply(this, arguments);
+}
+function J(t, e, n) {
+  if (e > 1 || e < 0)
+    throw new Error("Invalid slippage value. Must be between 0 and 1, got ".concat(e));
+  var r;
+  try {
+    var a = "negative" === t ? 1 - e : 1 + e;
+    r = BigInt(Math.floor(Number(n) * a));
+  } catch (t) {
+    throw new Error(t.message);
+  }
+  return r;
+}
+function X(t, e) {
+  var n = Number(t);
+  return z({decimalPlaces: n}, Math.pow(10, -n) * Number(e));
+}
+function z(t, e) {
+  var n = t.decimalPlaces,
+    r = void 0 === n ? 0 : n;
+  return Number(Math.round(Number(e + "e+".concat(r))) + "e-".concat(r));
+}
+function Y(t, e) {
+  return W.apply(this, arguments);
+}
+function W() {
+  return (W = c(
+    i().mark(function t(e, n) {
+      var r, a, s, o, u, c, p, l;
+      return i().wrap(
+        function (t) {
+          for (;;)
+            switch ((t.prev = t.next)) {
+              case 0:
+                (t.prev = 0), (r = []), (a = w(n)), (t.prev = 3), a.s();
+              case 5:
+                if ((s = a.n()).done) {
+                  t.next = 18;
+                  break;
+                }
+                return (o = s.value), (t.next = 9), e.sendRawTransaction(o).do();
+              case 9:
+                return (u = t.sent), (c = u.txId), (t.next = 13), V(e, c);
+              case 13:
+                (p = t.sent),
+                  (l = p["confirmed-round"]),
+                  r.push({confirmedRound: l, txnID: c});
+              case 16:
+                t.next = 5;
+                break;
+              case 18:
+                t.next = 23;
+                break;
+              case 20:
+                (t.prev = 20), (t.t0 = t.catch(3)), a.e(t.t0);
+              case 23:
+                return (t.prev = 23), a.f(), t.finish(23);
+              case 26:
+                return t.abrupt("return", r);
+              case 29:
+                throw (
+                  ((t.prev = 29),
+                  (t.t1 = t.catch(0)),
+                  new k(
+                    t.t1,
+                    "We encountered an error while processing this transaction. Try again later."
+                  ))
+                );
+              case 32:
+              case "end":
+                return t.stop();
+            }
+        },
+        t,
+        null,
+        [
+          [0, 29],
+          [3, 20, 23, 26]
+        ]
+      );
+    })
+  )).apply(this, arguments);
+}
+function q(t) {
+  return t.reduce(function (t, e) {
+    return t + e.txn.fee;
+  }, 0);
+}
+function H(t) {
+  return (e = t[0].txn.group) ? Buffer.from(e).toString("base64") : "";
+  var e;
+}
+function Z(t) {
+  return new TextEncoder().encode(t);
+}
+function K(t) {
+  return 0 === Number(t);
+}
+function $() {
+  return ($ = c(
+    i().mark(function t(e) {
+      var n, a, s, o, u;
+      return i().wrap(
+        function (t) {
+          for (;;)
+            switch ((t.prev = t.next)) {
+              case 0:
+                return (
+                  (n = e.client),
+                  (a = e.assetID),
+                  (s = e.initiatorAddr),
+                  (t.prev = 1),
+                  (t.next = 4),
+                  n.getTransactionParams().do()
+                );
+              case 4:
+                return (
+                  (o = t.sent),
+                  (u = r.default.makeAssetTransferTxnWithSuggestedParamsFromObject({
+                    from: s,
+                    to: s,
+                    assetIndex: a,
+                    amount: 0,
+                    suggestedParams: o
+                  })),
+                  t.abrupt("return", [{txn: u, signers: [s]}])
+                );
+              case 9:
+                throw (
+                  ((t.prev = 9),
+                  (t.t0 = t.catch(1)),
+                  new k(
+                    t.t0,
+                    "We encountered something unexpected while opting into this asset. Try again later."
+                  ))
+                );
+              case 12:
+              case "end":
+                return t.stop();
+            }
+        },
+        t,
+        null,
+        [[1, 9]]
+      );
+    })
+  )).apply(this, arguments);
+}
+var tt,
+  et = {V1_1: "v1_1", V2: "v2"},
+  nt = {
+    type: "logicsig",
+    logic: {
+      bytecode:
+        "BCAIAQCBgICAgICAgPABgICAgICAgIDwAQMEBQYlJA1EMQkyAxJEMRUyAxJEMSAyAxJEMgQiDUQzAQAxABJEMwEQIQcSRDMBGIGCgICAgICAgPABEkQzARkiEjMBGyEEEhA3ARoAgAlib290c3RyYXASEEAAXDMBGSMSRDMBG4ECEjcBGgCABHN3YXASEEACOzMBGyISRDcBGgCABG1pbnQSQAE7NwEaAIAEYnVybhJAAZg3ARoAgAZyZWRlZW0SQAJbNwEaAIAEZmVlcxJAAnkAIQYhBSQjEk0yBBJENwEaARclEjcBGgIXJBIQRDMCADEAEkQzAhAhBBJEMwIhIxJEMwIiIxwSRDMCIyEHEkQzAiQjEkQzAiWACFRNUE9PTDExEkQzAiZRAA+AD1RpbnltYW5Qb29sMS4xIBJEMwIngBNodHRwczovL3RpbnltYW4ub3JnEkQzAikyAxJEMwIqMgMSRDMCKzIDEkQzAiwyAxJEMwMAMQASRDMDECEFEkQzAxElEkQzAxQxABJEMwMSIxJEJCMTQAAQMwEBMwIBCDMDAQg1AUIBsTMEADEAEkQzBBAhBRJEMwQRJBJEMwQUMQASRDMEEiMSRDMBATMCAQgzAwEIMwQBCDUBQgF8MgQhBhJENwEcATEAE0Q3ARwBMwQUEkQzAgAxABNEMwIUMQASRDMDADMCABJEMwIRJRJEMwMUMwMHMwMQIhJNMQASRDMDESMzAxAiEk0kEkQzBAAxABJEMwQUMwIAEkQzAQEzBAEINQFCAREyBCEGEkQ3ARwBMQATRDcBHAEzAhQSRDMDFDMDBzMDECISTTcBHAESRDMCADEAEkQzAhQzBAASRDMCESUSRDMDADEAEkQzAxQzAwczAxAiEk0zBAASRDMDESMzAxAiEk0kEkQzBAAxABNEMwQUMQASRDMBATMCAQgzAwEINQFCAJAyBCEFEkQ3ARwBMQATRDMCADcBHAESRDMCADEAE0QzAwAxABJEMwIUMwIHMwIQIhJNMQASRDMDFDMDBzMDECISTTMCABJEMwEBMwMBCDUBQgA+MgQhBBJENwEcATEAE0QzAhQzAgczAhAiEk03ARwBEkQzAQEzAgEINQFCABIyBCEEEkQzAQEzAgEINQFCAAAzAAAxABNEMwAHMQASRDMACDQBD0M=",
+      address: "ABUKAXTANWR6K6ZYV75DWJEPVWWOU6SFUVRI6QHO44E4SIDLHBTD2CZ64A",
+      size: 881,
+      variables: [
+        {name: "TMPL_ASSET_ID_1", type: "int", index: 15, length: 10},
+        {name: "TMPL_ASSET_ID_2", type: "int", index: 5, length: 10},
+        {name: "TMPL_VALIDATOR_APP_ID", type: "int", index: 74, length: 10}
+      ],
+      source:
+        "https://github.com/tinymanorg/tinyman-contracts-v1/tree/dc9ab40c58b85c15d58f63a1507e18be76720dbb/contracts/pool_logicsig.teal.tmpl"
+    },
+    name: "pool_logicsig"
+  },
+  rt = {
+    type: "app",
+    approval_program: {
+      bytecode:
+        "BCAHAAHoB+UHBf///////////wHAhD0mDQFvAWUBcAJhMQJhMgJsdARzd2FwBG1pbnQBdAJjMQJwMQJjMgJwMjEZgQQSMRkhBBIRMRmBAhIRQATxMRkjEjEbIhIQQATjNhoAgAZjcmVhdGUSQATUMRkjEjYaAIAJYm9vdHN0cmFwEhBAA/MzAhIzAggINTQiK2I1ZSI0ZXAARDUBIicEYjVmNGZAABEiYCJ4CTEBCDMACAk1AkIACCI0ZnAARDUCIicFYjVnKDRlFlA1byI0b2I1PSg0ZhZQNXAiNHBiNT4oNGcWUDVxIjRxYjU/IipiNUA0ATQ9CTVHNAI0Pgk1SDEAKVA0ZRZQNXkxAClQNGYWUDV6MQApUDRnFlA1ezYaAIAGcmVkZWVtEkAAWjYaAIAEZmVlcxJAABw2GgAnBhI2GgAnBxIRNhoAgARidXJuEhFAAG0ANGdJRDMCERJEMwISRDMCFDIJEkQ0PzMCEgk1PzRAMwISCTVAIio0QGYiNHE0P2YjQzMCFDMCBzMCECMSTTYcARJENDREIigzAhEWUEpiNDQJZiMxAClQMwIRFlBKYjQ0CUlBAANmI0NIaCNDMgciJwhiCUk1+kEARiInCWIiJwpiNPodTEAANx4hBSMeHzX7SEhIIicLYiInDGI0+h1MQAAdHiEFIx4fNfxISEgiJwk0+2YiJws0/GYiJwgyB2YzAxIzAwgINTU2HAExABNENGdBACIiNGdwAEQ1BiIcNAYJND8INQQ2GgAnBhJAASA0ZzMEERJENhoAJwcSQABVNhwBMwQAEkQzBBI0Rx00BCMdH0hITEhJNRA0NAk1yTMEEjRIHTQEIx0fSEhMSEk1ETQ1CTXKNBA0ERBENEc0EAk1UTRINBEJNVI0BDMEEgk1U0ICCjYcATMCABJENEc0NAg1UTRINDUINVI0BCISQAAuNDQ0BB00RyMdH0hITEg0NTQEHTRIIx0fSEhMSEoNTUk0BAg1UzMEEgk1y0IBvyInBTMEEUk1Z2YoNGcWUDVxIjRncABERDRnNGUTRDRnNGYTRDMEEiQISR018DQ0NDUdNfFKDEAACBJENPA08Q5EMwQSJAgjCEkdNfA0NDQ1HTXxSg1AAAgSRDTwNPENRCQ1PzQEMwQSJAgINVNCAU82HAEzAgASRDMCETRlEjMDETRmEhBJNWRAABkzAhE0ZhIzAxE0ZRIQRDRINRI0RzUTQgAINEc1EjRINRM2GgGAAmZpEkAAWjYaAYACZm8SRDQ1JAs0Eh00EzQ1CSUdH0hITEgjCEk1FSINNDU0EwwQRDQ0NBUJNGRBABM1yTRHNBUINVE0SDQ1CTVSQgBnNco0SDQVCDVSNEc0NQk1UUIAVDQ0STUVJQs0Ex00EiQLNDQlCx4fSEhMSEk1FCINNBQ0EwwQRDQUNDUJNGRBABM1yjRHNDQINVE0SDQUCTVSQgATNck0RzQUCTVRNEg0NAg1UkIAADQVIQQLNAQdgaCcATQSHR9ISExISTUqNAQINVNCADsiKzYaARdJNWVmIicENhoCF0k1ZmY0ZXEDRIABLVCABEFMR080ZkEABkg0ZnEDRFAzAiZJFYEPTFISQyIqNEA0KghmIjRxND80Kgg0ywhmIjRvND00yQhmIjRwND40yghmIoACczE0UWYigAJzMjRSZiInCjRSIQYdNFEjHR9ISExIZiInDDRRIQYdNFIjHR9ISExIZiKAA2lsdDRTZjTLQQAJIzR7SmI0ywhmNMlBAAkjNHlKYjTJCGY0ykEACSM0ekpiNMoIZiNDI0MiQw==",
+      address: "BUQHXHPLMYUVS3P2INJ2EUJFCSNT6LNUGXVM6T2SZ27TDRDYLUMWCFYW3E",
+      size: 1351,
+      variables: [],
+      source:
+        "https://github.com/tinymanorg/tinyman-contracts-v1/tree/dc9ab40c58b85c15d58f63a1507e18be76720dbb/contracts/validator_approval.teal"
+    },
+    clear_program: {
+      bytecode: "BIEB",
+      address: "P7GEWDXXW5IONRW6XRIRVPJCT2XXEQGOBGG65VJPBUOYZEJCBZWTPHS3VQ",
+      size: 3,
+      variables: [],
+      source:
+        "https://github.com/tinymanorg/tinyman-contracts-v1/tree/dc9ab40c58b85c15d58f63a1507e18be76720dbb/contracts/validator_clear_state.teal"
+    },
+    global_state_schema: {num_uints: 0, num_byte_slices: 0},
+    local_state_schema: {num_uints: 16, num_byte_slices: 0},
+    name: "validator_app"
+  };
+function at(t) {
+  for (var e = []; ; ) {
+    var n = 127 & t;
+    if (!(t >>= 7)) {
+      e.push(n);
+      break;
+    }
+    e.push(128 | n);
+  }
+  return e;
+}
+var st =
+  (d((tt = {}), et.V1_1, {testnet: 62368684, mainnet: 552635992}),
+  d(tt, et.V2, {testnet: 113134165, mainnet: 552635992}),
+  tt);
+function ot(t, e) {
+  var n = st[e][t];
+  if (!n)
+    throw new Error(
+      "No Validator App exists for "
+        .concat(t, " network with ")
+        .concat(e, " contract version")
+    );
+  return n;
+}
+function it() {
+  return (it = c(
+    i().mark(function t(e) {
+      var n, a, s, o, u, c;
+      return i().wrap(function (t) {
+        for (;;)
+          switch ((t.prev = t.next)) {
+            case 0:
+              return (
+                (n = e.client),
+                (a = e.network),
+                (s = e.contractVersion),
+                (o = e.initiatorAddr),
+                (t.next = 3),
+                n.getTransactionParams().do()
+              );
+            case 3:
+              return (
+                (u = t.sent),
+                (c = r.default.makeApplicationOptInTxnFromObject({
+                  from: o,
+                  appIndex: ot(a, s),
+                  suggestedParams: u
+                })),
+                t.abrupt("return", [{txn: c, signers: [o]}])
+              );
+            case 6:
+            case "end":
+              return t.stop();
+          }
+      }, t);
+    })
+  )).apply(this, arguments);
+}
+function ut() {
+  return (ut = c(
+    i().mark(function t(e) {
+      var n, a, s, o, u, c;
+      return i().wrap(function (t) {
+        for (;;)
+          switch ((t.prev = t.next)) {
+            case 0:
+              return (
+                (n = e.client),
+                (a = e.network),
+                (s = e.contractVersion),
+                (o = e.initiatorAddr),
+                (t.next = 3),
+                n.getTransactionParams().do()
+              );
+            case 3:
+              return (
+                (u = t.sent),
+                (c = r.default.makeApplicationClearStateTxnFromObject({
+                  from: o,
+                  appIndex: ot(a, s),
+                  suggestedParams: u
+                })),
+                t.abrupt("return", [{txn: c, signers: [o]}])
+              );
+            case 6:
+            case "end":
+              return t.stop();
+          }
+      }, t);
+    })
+  )).apply(this, arguments);
+}
+var ct = f(function t(n, r) {
+    p(this, t),
+      (this.validatorApprovalContract = e.toByteArray(n.approval_program.bytecode)),
+      (this.validatorClearStateContract = e.toByteArray(n.clear_program.bytecode)),
+      (this.schema = {
+        numLocalInts: n.local_state_schema.num_uints,
+        numLocalByteSlices: n.local_state_schema.num_byte_slices,
+        numGlobalInts: n.global_state_schema.num_uints,
+        numGlobalByteSlices: n.global_state_schema.num_byte_slices
+      });
+  }),
+  pt = (function (n) {
+    A(a, ct);
+    var r = E(a);
+    function a(t, e) {
+      var n;
+      return (
+        p(this, a),
+        ((n = r.call(this, t, e)).poolLogicSigContractTemplate = e.logic.bytecode),
+        (n.templateVariables = e.logic.variables),
+        n
+      );
+    }
+    return (
+      f(a, [
+        {
+          key: "generateLogicSigAccountForPool",
+          value: function (n) {
+            var r = n.network,
+              a = n.asset1ID,
+              s = n.asset2ID;
+            return (function (n) {
+              var r = n.validatorAppID,
+                a = n.poolLogicSigContractTemplate,
+                s = n.templateVariables,
+                o = n.asset1ID,
+                i = n.asset2ID;
+              if (o === i) throw new Error("Assets are the same");
+              if (i > o) {
+                var u = o;
+                (o = i), (i = u);
+              }
+              var c = Array.from(e.toByteArray(a)),
+                p = {asset_id_1: o, asset_id_2: i, validator_app_id: r},
+                l = 0;
+              s.sort(function (t, e) {
+                return t.index - e.index;
+              });
+              for (var f = 0; f < s.length; f++) {
+                var d = s[f],
+                  A = p[d.name.split("TMPL_")[1].toLowerCase()],
+                  g = d.index - l,
+                  m = g + d.length,
+                  I = at(A);
+                (l += d.length - I.length),
+                  (c = c.slice(0, g).concat(I).concat(c.slice(m)));
+              }
+              var h = new Uint8Array(c);
+              return new t.LogicSigAccount(h);
+            })({
+              validatorAppID: ot(r, et.V1_1),
+              asset1ID: a,
+              asset2ID: s,
+              poolLogicSigContractTemplate: this.poolLogicSigContractTemplate,
+              templateVariables: this.templateVariables
+            });
+          }
+        }
+      ]),
+      a
+    );
+  })(),
+  lt = (function (n) {
+    A(a, ct);
+    var r = E(a);
+    function a(t, e) {
+      var n;
+      return (
+        p(this, a),
+        ((n = r.call(this, t, e)).poolLogicSigContractTemplate = e.logic.bytecode),
+        n
+      );
+    }
+    return (
+      f(a, [
+        {
+          key: "generateLogicSigAccountForPool",
+          value: function (n) {
+            var r = n.network,
+              a = n.asset1ID,
+              s = n.asset2ID;
+            return (function (n) {
+              var r = n.validatorAppID,
+                a = n.poolLogicSigContractTemplate,
+                s = n.asset1ID,
+                o = n.asset2ID;
+              if (s === o) throw new Error("Assets are the same");
+              if (o > s) {
+                var i = s;
+                (s = o), (o = i);
+              }
+              var u = Array.from(e.toByteArray(a)),
+                c = Array.from(at(r)),
+                p = Array.from(at(s)),
+                l = Array.from(at(o));
+              u.slice(0, 3).concat([].concat(c, p, l)).concat(u.slice(27));
+              var f = new Uint8Array(u);
+              return new t.LogicSigAccount(f);
+            })({
+              validatorAppID: ot(r, et.V2),
+              asset1ID: a,
+              asset2ID: s,
+              poolLogicSigContractTemplate: this.poolLogicSigContractTemplate
+            });
+          }
+        }
+      ]),
+      a
+    );
+  })(),
+  ft = new pt(rt, nt),
+  dt = new lt(rt, {
+    type: "logicsig",
+    logic: {bytecode: "BoAYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgQBbNQA0ADEYEkQxGYEBEkSBAUM="},
+    name: "pool_logicsig"
+  });
+function At(t) {
+  return (function (t) {
+    return t === et.V2;
+  })(t)
+    ? dt
+    : ft;
+}
+function gt(t) {
+  var e = t["apps-total-schema"];
+  return (
+    1e5 +
+    1e5 * (t.assets || []).length +
+    1e5 * (t["created-apps"] || []).length +
+    1e5 * (t["apps-local-state"] || []).length +
+    5e4 * ((e && e["num-byte-slice"]) || 0) +
+    28500 * ((e && e["num-uint"]) || 0) +
+    1e5 * (t["apps-total-extra-pages"] || 0)
+  );
+}
+var mt,
+  It,
+  ht = Z("e");
+function xt(t) {
+  return yt.apply(this, arguments);
+}
+function yt() {
+  return (yt = c(
+    i().mark(function n(a) {
+      var s, o, u, c, p, l, f, d, A, g, m, I, h, x, y, E, D, v, T, b, N;
+      return i().wrap(
+        function (n) {
+          for (;;)
+            switch ((n.prev = n.next)) {
+              case 0:
+                return (
+                  (s = a.client),
+                  (o = a.pool),
+                  (u = a.accountAddr),
+                  (n.next = 3),
+                  s.accountInformation(u).setIntDecoding(t.IntDecoding.BIGINT).do()
+                );
+              case 3:
+                (c = n.sent),
+                  (p = c["apps-local-state"] || []),
+                  (l = 0n),
+                  (f = 0n),
+                  (d = 0n),
+                  (A = o.account.address()),
+                  (g = w(p)),
+                  (n.prev = 10),
+                  g.s();
+              case 12:
+                if ((m = g.n()).done) {
+                  n.next = 31;
+                  break;
+                }
+                if ((I = m.value).id == o.validatorAppID) {
+                  n.next = 16;
+                  break;
+                }
+                return n.abrupt("continue", 29);
+              case 16:
+                if ((h = I["key-value"])) {
+                  n.next = 19;
+                  break;
+                }
+                return n.abrupt("break", 31);
+              case 19:
+                (x = M(h)),
+                  (y = e.fromByteArray(
+                    R([
+                      r.default.decodeAddress(A).publicKey,
+                      ht,
+                      r.default.encodeUint64(o.asset1ID)
+                    ])
+                  )),
+                  (E = e.fromByteArray(
+                    R([
+                      r.default.decodeAddress(A).publicKey,
+                      ht,
+                      r.default.encodeUint64(o.asset2ID)
+                    ])
+                  )),
+                  (D = e.fromByteArray(
+                    R([
+                      r.default.decodeAddress(A).publicKey,
+                      ht,
+                      r.default.encodeUint64(o.liquidityTokenID)
+                    ])
+                  )),
+                  (v = x[y]),
+                  (T = x[E]),
+                  (b = x[D]),
+                  "bigint" == typeof v && (l = v),
+                  "bigint" == typeof T && (f = T),
+                  "bigint" == typeof b && (d = b);
+              case 29:
+                n.next = 12;
+                break;
+              case 31:
+                n.next = 36;
+                break;
+              case 33:
+                (n.prev = 33), (n.t0 = n.catch(10)), g.e(n.t0);
+              case 36:
+                return (n.prev = 36), g.f(), n.finish(36);
+              case 39:
+                if (
+                  !(
+                    (N = {excessAsset1: l, excessAsset2: f, excessLiquidityTokens: d})
+                      .excessAsset1 < 0n ||
+                    N.excessAsset2 < 0n ||
+                    N.excessLiquidityTokens < 0n
+                  )
+                ) {
+                  n.next = 42;
+                  break;
+                }
+                throw new Error("Invalid account excess: ".concat(N));
+              case 42:
+                return n.abrupt("return", N);
+              case 43:
+              case "end":
+                return n.stop();
+            }
+        },
+        n,
+        null,
+        [[10, 33, 36, 39]]
+      );
+    })
+  )).apply(this, arguments);
+}
+function Et() {
+  return (Et = c(
+    i().mark(function t(n) {
+      var a, s, o, u, c, p, l, f, d, A, g, m, I, h, x;
+      return i().wrap(function (t) {
+        for (;;)
+          switch ((t.prev = t.next)) {
+            case 0:
+              return (
+                (a = n.client),
+                (s = n.accountAddr),
+                (o = n.validatorAppID),
+                (t.next = 3),
+                a.accountInformation(s).setIntDecoding("bigint").do()
+              );
+            case 3:
+              if (
+                ((u = t.sent),
+                (c = u["apps-local-state"] || []),
+                (p = c.find(function (t) {
+                  return t.id == o;
+                })),
+                (l = []),
+                p && p["key-value"])
+              )
+                for (
+                  f = M(p["key-value"]), d = 0, A = Object.entries(f);
+                  d < A.length;
+                  d++
+                )
+                  (g = A[d]),
+                    (m = D(g, 2)),
+                    (I = m[0]),
+                    (h = m[1]),
+                    41 === (x = e.toByteArray(I)).length &&
+                      101 === x[32] &&
+                      l.push({
+                        poolAddress: r.default.encodeAddress(x.slice(0, 32)),
+                        assetID: r.default.decodeUint64(x.slice(33, 41), "safe"),
+                        amount: parseInt(h)
+                      });
+              return t.abrupt("return", l);
+            case 9:
+            case "end":
+              return t.stop();
+          }
+      }, t);
+    })
+  )).apply(this, arguments);
+}
+!(function (t) {
+  (t.NOT_CREATED = "not created"),
+    (t.BOOTSTRAP = "bootstrap"),
+    (t.READY = "ready"),
+    (t.ERROR = "error");
+})(mt || (mt = {}));
+var Dt =
+  (d((It = {}), et.V1_1, {asset1: btoa("asset_1_id"), asset2: btoa("asset_2_id")}),
+  d(It, et.V2, {asset1: btoa("a1"), asset2: btoa("a2")}),
+  It);
+function vt(t) {
+  return Tt.apply(this, arguments);
+}
+function Tt() {
+  return (Tt = c(
+    i().mark(function t(e) {
+      var n, r, a, s, o, u, c, p, l, f, d;
+      return i().wrap(function (t) {
+        for (;;)
+          switch ((t.prev = t.next)) {
+            case 0:
+              return (
+                (n = e.client),
+                (r = e.network),
+                (a = e.contractVersion),
+                (s = e.asset1ID),
+                (o = e.asset2ID),
+                (u = At(a)),
+                (c = u.generateLogicSigAccountForPool(e)),
+                (p = ot(r, a)),
+                (l = c.address()),
+                (f = {
+                  account: c,
+                  validatorAppID: p,
+                  asset1ID: Math.max(s, o),
+                  asset2ID: Math.min(s, o),
+                  status: mt.NOT_CREATED,
+                  contractVersion: a
+                }),
+                (t.next = 8),
+                kt({client: n, address: l, network: r, contractVersion: a})
+              );
+            case 8:
+              return (
+                (d = t.sent) &&
+                  ((f.asset1ID = d.asset1ID),
+                  (f.asset2ID = d.asset2ID),
+                  (f.liquidityTokenID = d.liquidityTokenID),
+                  (f.status = mt.READY)),
+                t.abrupt("return", f)
+              );
+            case 11:
+            case "end":
+              return t.stop();
+          }
+      }, t);
+    })
+  )).apply(this, arguments);
+}
+var wt = Z("o"),
+  bt = 0xffffffffffffffffn;
+function Nt() {
+  return (Nt = c(
+    i().mark(function n(a, s) {
+      var o, u, c, p, l, f, d, A, g, m, I, h, x, y, E, D, v, T, b, N, _, S, k, O, P, B;
+      return i().wrap(
+        function (n) {
+          for (;;)
+            switch ((n.prev = n.next)) {
+              case 0:
+                return (
+                  (n.next = 2),
+                  a
+                    .accountInformation(s.account.address())
+                    .setIntDecoding(t.IntDecoding.BIGINT)
+                    .do()
+                );
+              case 2:
+                (o = n.sent),
+                  (u = o["apps-local-state"] || []),
+                  (c = 0n),
+                  (p = 0n),
+                  (l = 0n),
+                  (f = w(u)),
+                  (n.prev = 8),
+                  f.s();
+              case 10:
+                if ((d = f.n()).done) {
+                  n.next = 29;
+                  break;
+                }
+                if ((A = d.value).id == s.validatorAppID) {
+                  n.next = 14;
+                  break;
+                }
+                return n.abrupt("continue", 27);
+              case 14:
+                if ((g = A["key-value"])) {
+                  n.next = 17;
+                  break;
+                }
+                return n.abrupt("break", 29);
+              case 17:
+                (m = M(g)),
+                  (I = e.fromByteArray(R([wt, r.default.encodeUint64(s.asset1ID)]))),
+                  (h = e.fromByteArray(R([wt, r.default.encodeUint64(s.asset2ID)]))),
+                  (x = e.fromByteArray(
+                    R([wt, r.default.encodeUint64(s.liquidityTokenID)])
+                  )),
+                  (y = m[I]),
+                  (E = m[h]),
+                  (D = m[x]),
+                  "bigint" == typeof y && (c = y),
+                  "bigint" == typeof E && (p = E),
+                  "bigint" == typeof D && (l = D);
+              case 27:
+                n.next = 10;
+                break;
+              case 29:
+                n.next = 34;
+                break;
+              case 31:
+                (n.prev = 31), (n.t0 = n.catch(8)), f.e(n.t0);
+              case 34:
+                return (n.prev = 34), f.f(), n.finish(34);
+              case 37:
+                (v = 0n), (T = 0n), (b = 0n), (N = w(o.assets));
+                try {
+                  for (N.s(); !(_ = N.n()).done; )
+                    (S = _.value),
+                      (k = S["asset-id"]),
+                      (O = S.amount),
+                      k == s.asset1ID
+                        ? (v = BigInt(O))
+                        : k == s.asset2ID
+                        ? (T = BigInt(O))
+                        : k == s.liquidityTokenID && (b = BigInt(O));
+                } catch (t) {
+                  N.e(t);
+                } finally {
+                  N.f();
+                }
+                if (
+                  (0 === s.asset2ID && ((P = j(o)), (T = BigInt(o.amount) - P)),
+                  !(
+                    (B = {
+                      round: Number(o.round),
+                      asset1: v - c,
+                      asset2: T - p,
+                      issuedLiquidity: bt - b + l
+                    }).asset1 < 0n ||
+                    B.asset2 < 0n ||
+                    B.issuedLiquidity < 0n ||
+                    B.issuedLiquidity > bt
+                  ))
+                ) {
+                  n.next = 49;
+                  break;
+                }
+                throw (
+                  ((B.asset1 = Number(B.asset1)),
+                  (B.asset2 = Number(B.asset2)),
+                  (B.issuedLiquidity = Number(B.issuedLiquidity)),
+                  new Error("Invalid pool reserves: ".concat(JSON.stringify(B))))
+                );
+              case 49:
+                return n.abrupt("return", B);
+              case 50:
+              case "end":
+                return n.stop();
+            }
+        },
+        n,
+        null,
+        [[8, 31, 34, 37]]
+      );
+    })
+  )).apply(this, arguments);
+}
+var _t,
+  St = {};
+function kt(t) {
+  return Ot.apply(this, arguments);
+}
+function Ot() {
+  return (
+    (Ot = c(
+      i().mark(function t(e) {
+        var n,
+          r,
+          a,
+          s,
+          o,
+          u,
+          c,
+          p,
+          l,
+          f,
+          d,
+          A,
+          g = arguments;
+        return i().wrap(function (t) {
+          for (;;)
+            switch ((t.prev = t.next)) {
+              case 0:
+                if (
+                  ((n = e.client),
+                  (r = e.address),
+                  (a = e.network),
+                  (s = e.contractVersion),
+                  !(o = g.length > 1 && void 0 !== g[1] ? g[1] : St)[r])
+                ) {
+                  t.next = 4;
+                  break;
+                }
+                return t.abrupt("return", o[r]);
+              case 4:
+                return (t.next = 6), n.accountInformation(r).do();
+              case 6:
+                return (
+                  (u = t.sent),
+                  (c = u["apps-local-state"].find(function (t) {
+                    return t.id == ot(a, s);
+                  })),
+                  (p = null),
+                  c &&
+                    ((l = c["key-value"]),
+                    (f = M(l)),
+                    (d = u["created-assets"][0]),
+                    (A = d.index),
+                    (p = {
+                      asset1ID: f[Dt[s].asset1],
+                      asset2ID: f[Dt[s].asset2],
+                      liquidityTokenID: A
+                    }),
+                    (o[r] = p)),
+                  t.abrupt("return", p)
+                );
+              case 11:
+              case "end":
+                return t.stop();
+            }
+        }, t);
+      })
+    )),
+    Ot.apply(this, arguments)
+  );
+}
+function Pt(t) {
+  return Boolean(t && !(t.asset1 + t.asset2));
+}
+function Mt(t, e) {
+  var n = (t === et.V1_1 ? ft : dt).schema,
+    r = 4e5 + 28500 * n.numLocalInts + 5e4 * n.numLocalByteSlices;
+  return e || (r += 1e5), r;
+}
+!(function (t) {
+  (t[(t.FUNDING_TXN = 0)] = "FUNDING_TXN"),
+    (t[(t.VALIDATOR_APP_CALL = 1)] = "VALIDATOR_APP_CALL"),
+    (t[(t.LIQUIDITY_TOKEN_CREATE = 2)] = "LIQUIDITY_TOKEN_CREATE"),
+    (t[(t.ASSET1_OPT_IN = 3)] = "ASSET1_OPT_IN"),
+    (t[(t.ASSET2_OPT_IN = 4)] = "ASSET2_OPT_IN");
+})(_t || (_t = {}));
+var Rt = 4,
+  Bt = 5;
+function Qt(t) {
+  return K(t) ? Rt : Bt;
+}
+function Ct(t, e) {
+  return Lt.apply(this, arguments);
+}
+function Lt() {
+  return (Lt = c(
+    i().mark(function t(e, n) {
+      var r, a;
+      return i().wrap(function (t) {
+        for (;;)
+          switch ((t.prev = t.next)) {
+            case 0:
+              return (t.next = 2), e.getTransactionParams().do();
+            case 2:
+              return (
+                (r = t.sent),
+                (a = r.fee),
+                t.abrupt("return", Mt(et.V1_1, K(n)) + Qt(n) * a)
+              );
+            case 5:
+            case "end":
+              return t.stop();
+          }
+      }, t);
+    })
+  )).apply(this, arguments);
+}
+function Ut() {
+  return (Ut = c(
+    i().mark(function t(e) {
+      var n, a, s, o, u, c, p, l, f, d, A, g, m, I, h, x, y, E, D, v;
+      return i().wrap(function (t) {
+        for (;;)
+          switch ((t.prev = t.next)) {
+            case 0:
+              return (
+                (n = e.client),
+                (a = e.network),
+                (s = e.asset1ID),
+                (o = e.asset2ID),
+                (u = e.asset1UnitName),
+                (c = e.asset2UnitName),
+                (p = e.initiatorAddr),
+                (t.next = 3),
+                n.getTransactionParams().do()
+              );
+            case 3:
+              return (
+                (l = t.sent),
+                (f = ot(a, et.V1_1)),
+                (A = K(
+                  (d =
+                    s > o
+                      ? {asset1: {id: s, unitName: u}, asset2: {id: o, unitName: c}}
+                      : {asset1: {id: o, unitName: c}, asset2: {id: s, unitName: u}})
+                    .asset2.id
+                )),
+                (g = ft.generateLogicSigAccountForPool({
+                  network: a,
+                  asset1ID: d.asset1.id,
+                  asset2ID: d.asset2.id
+                })),
+                (m = g.address()),
+                (I = r.default.makeApplicationOptInTxnFromObject({
+                  from: m,
+                  appIndex: f,
+                  appArgs: [
+                    Z("bootstrap"),
+                    r.default.encodeUint64(d.asset1.id),
+                    r.default.encodeUint64(d.asset2.id)
+                  ],
+                  foreignAssets: A ? [d.asset1.id] : [d.asset1.id, d.asset2.id],
+                  suggestedParams: l
+                })),
+                (h = r.default.makeAssetCreateTxnWithSuggestedParamsFromObject({
+                  from: m,
+                  total: 0xffffffffffffffffn,
+                  decimals: 6,
+                  defaultFrozen: !1,
+                  unitName: P.DEFAULT,
+                  assetName: "TinymanPool1.1 "
+                    .concat(d.asset1.unitName, "-")
+                    .concat(d.asset2.unitName),
+                  assetURL: "https://tinyman.org",
+                  suggestedParams: l
+                })),
+                (x = r.default.makeAssetTransferTxnWithSuggestedParamsFromObject({
+                  from: m,
+                  to: m,
+                  assetIndex: d.asset1.id,
+                  amount: 0,
+                  suggestedParams: l
+                })),
+                (t.t0 = r.default),
+                (t.t1 = p),
+                (t.t2 = m),
+                (t.next = 17),
+                Ct(n, d.asset2.id)
+              );
+            case 17:
+              return (
+                (t.t3 = t.sent),
+                (t.t4 = l),
+                (t.t5 = {from: t.t1, to: t.t2, amount: t.t3, suggestedParams: t.t4}),
+                (y = t.t0.makePaymentTxnWithSuggestedParamsFromObject.call(t.t0, t.t5)),
+                (E = [y, I, h, x]),
+                A ||
+                  E.push(
+                    r.default.makeAssetTransferTxnWithSuggestedParamsFromObject({
+                      from: m,
+                      to: m,
+                      assetIndex: d.asset2.id,
+                      amount: 0,
+                      suggestedParams: l
+                    })
+                  ),
+                (D = r.default.assignGroupID(E)),
+                (v = [
+                  {txn: D[0], signers: [p]},
+                  {txn: D[1], signers: [m]},
+                  {txn: D[2], signers: [m]},
+                  {txn: D[3], signers: [m]}
+                ]),
+                D[4] && v.push({txn: D[4], signers: [m]}),
+                t.abrupt("return", v)
+              );
+            case 27:
+            case "end":
+              return t.stop();
+          }
+      }, t);
+    })
+  )).apply(this, arguments);
+}
+function jt() {
+  return (jt = c(
+    i().mark(function t(e) {
+      var n, a, s, o, u, c, p, l, f, d, A, g;
+      return i().wrap(function (t) {
+        for (;;)
+          switch ((t.prev = t.next)) {
+            case 0:
+              return (
+                (n = e.txGroup),
+                (a = e.network),
+                (s = e.initiatorSigner),
+                (o = e.asset1ID),
+                (u = e.asset2ID),
+                (t.next = 3),
+                s([n])
+              );
+            case 3:
+              return (
+                (c = t.sent),
+                (p = D(c, 1)),
+                (l = p[0]),
+                (f = o > u ? {asset1ID: o, asset2ID: u} : {asset1ID: u, asset2ID: o}),
+                (d = ft.generateLogicSigAccountForPool({
+                  network: a,
+                  asset1ID: f.asset1ID,
+                  asset2ID: f.asset2ID
+                })),
+                (A = []),
+                (g = n.map(function (t, e) {
+                  if (e === _t.FUNDING_TXN) return A.push(t.txn.txID().toString()), l;
+                  var n = r.default.signLogicSigTransactionObject(t.txn, d),
+                    a = n.txID,
+                    s = n.blob;
+                  return A.push(a), s;
+                })),
+                t.abrupt("return", {signedTxns: g, txnIDs: A})
+              );
+            case 11:
+            case "end":
+              return t.stop();
+          }
+      }, t);
+    })
+  )).apply(this, arguments);
+}
+function Ft(t) {
+  return Vt.apply(this, arguments);
+}
+function Vt() {
+  return (Vt = c(
+    i().mark(function t(e) {
+      var n, r, a, s, o;
+      return i().wrap(
+        function (t) {
+          for (;;)
+            switch ((t.prev = t.next)) {
+              case 0:
+                return (
+                  (n = e.client),
+                  (r = e.signedTxns),
+                  (a = e.txnIDs),
+                  (t.prev = 1),
+                  (t.next = 4),
+                  n.sendRawTransaction(r).do()
+                );
+              case 4:
+                return (t.next = 6), V(n, a[_t.LIQUIDITY_TOKEN_CREATE]);
+              case 6:
+                if (((s = t.sent), "number" == typeof (o = s["asset-index"]))) {
+                  t.next = 10;
+                  break;
+                }
+                throw new Error("Generated ID is not valid: got ".concat(o));
+              case 10:
+                return t.abrupt("return", {liquidityTokenID: o});
+              case 13:
+                throw (
+                  ((t.prev = 13),
+                  (t.t0 = t.catch(1)),
+                  new k(
+                    t.t0,
+                    "We encountered something unexpected while bootstraping the pool. Try again later."
+                  ))
+                );
+              case 16:
+              case "end":
+                return t.stop();
+            }
+        },
+        t,
+        null,
+        [[1, 13]]
+      );
+    })
+  )).apply(this, arguments);
+}
+function Gt() {
+  return (Gt = c(
+    i().mark(function t(e) {
+      var n, r, a, s, o;
+      return i().wrap(function (t) {
+        for (;;)
+          switch ((t.prev = t.next)) {
+            case 0:
+              return (
+                (n = e.client),
+                (r = e.network),
+                (a = e.pool),
+                (s = e.signedTxns),
+                (o = e.txnIDs),
+                (t.next = 3),
+                Ft({client: n, signedTxns: s, txnIDs: o})
+              );
+            case 3:
+              return t.abrupt(
+                "return",
+                vt({
+                  client: n,
+                  network: r,
+                  contractVersion: et.V1_1,
+                  asset1ID: a.asset1ID,
+                  asset2ID: a.asset2ID
+                })
+              );
+            case 4:
+            case "end":
+              return t.stop();
+          }
+      }, t);
+    })
+  )).apply(this, arguments);
+}
+var Jt,
+  Xt = {
+    generateTxns: function (t) {
+      return Ut.apply(this, arguments);
+    },
+    signTxns: function (t) {
+      return jt.apply(this, arguments);
+    },
+    execute: function (t) {
+      return Gt.apply(this, arguments);
+    }
+  };
+!(function (t) {
+  (t[(t.FUNDING_TXN = 0)] = "FUNDING_TXN"),
+    (t[(t.VALIDATOR_APP_CALL = 1)] = "VALIDATOR_APP_CALL");
+})(Jt || (Jt = {}));
+var zt = 5,
+  Yt = 6;
+function Wt(t, e) {
+  return qt.apply(this, arguments);
+}
+function qt() {
+  return (qt = c(
+    i().mark(function t(e, n) {
+      return i().wrap(function (t) {
+        for (;;)
+          switch ((t.prev = t.next)) {
+            case 0:
+              return (t.t0 = Mt(et.V2, K(n))), (t.next = 3), Ht(e, n);
+            case 3:
+              return (
+                (t.t1 = t.sent),
+                (t.t2 = t.t0 + t.t1),
+                (t.t3 = 1e5),
+                t.abrupt("return", t.t2 + t.t3)
+              );
+            case 7:
+            case "end":
+              return t.stop();
+          }
+      }, t);
+    })
+  )).apply(this, arguments);
+}
+function Ht(t, e) {
+  return Zt.apply(this, arguments);
+}
+function Zt() {
+  return (Zt = c(
+    i().mark(function t(e, n) {
+      var r, a, s, o;
+      return i().wrap(function (t) {
+        for (;;)
+          switch ((t.prev = t.next)) {
+            case 0:
+              return (
+                (r = Kt(n)), (a = r + 1), (t.next = 4), e.getTransactionParams().do()
+              );
+            case 4:
+              return (s = t.sent), (o = s.fee), t.abrupt("return", a * o);
+            case 7:
+            case "end":
+              return t.stop();
+          }
+      }, t);
+    })
+  )).apply(this, arguments);
+}
+function Kt(t) {
+  return K(t) ? zt : Yt;
+}
+function $t() {
+  return ($t = c(
+    i().mark(function e(n) {
+      var a, s, u, c, p, l, f, d, A, g, m, I, h, x, y, E, D, v, T;
+      return i().wrap(function (e) {
+        for (;;)
+          switch ((e.prev = e.next)) {
+            case 0:
+              return (
+                (a = n.client),
+                (s = n.network),
+                (u = n.asset_1),
+                (c = n.asset_2),
+                (p = n.initiatorAddr),
+                (e.next = 3),
+                a.getTransactionParams().do()
+              );
+            case 3:
+              return (
+                (l = e.sent),
+                (f = u.unit_name),
+                (d = Number(u.id)),
+                (A = c.unit_name),
+                (g = Number(c.id)),
+                (m = ot(s, et.V2)),
+                (I = t.getApplicationAddress(m)),
+                (h =
+                  d > g
+                    ? {asset1: {id: d, unitName: f}, asset2: {id: g, unitName: A}}
+                    : {asset1: {id: g, unitName: A}, asset2: {id: d, unitName: f}}),
+                (x = dt.generateLogicSigAccountForPool({
+                  network: s,
+                  asset1ID: h.asset1.id,
+                  asset2ID: h.asset2.id
+                })),
+                (y = x.address()),
+                (E = ot(s, et.V2)),
+                (e.t0 = r.default),
+                (e.t1 = y),
+                (e.t2 = E),
+                (e.t3 = [Z("bootstrap")]),
+                (e.t4 = [h.asset1.id, h.asset2.id]),
+                (e.t5 = I),
+                (e.t6 = o),
+                (e.t7 = o({}, l)),
+                (e.t8 = {}),
+                (e.next = 25),
+                Ht(a, h.asset2.id)
+              );
+            case 25:
+              return (
+                (e.t9 = e.sent),
+                (e.t10 = {fee: e.t9}),
+                (e.t11 = (0, e.t6)(e.t7, e.t8, e.t10)),
+                (e.t12 = {
+                  from: e.t1,
+                  appIndex: e.t2,
+                  appArgs: e.t3,
+                  foreignAssets: e.t4,
+                  rekeyTo: e.t5,
+                  suggestedParams: e.t11
+                }),
+                (D = e.t0.makeApplicationOptInTxnFromObject.call(e.t0, e.t12)),
+                (e.t13 = r.default),
+                (e.t14 = p),
+                (e.t15 = y),
+                (e.next = 35),
+                Wt(a, h.asset2.id)
+              );
+            case 35:
+              return (
+                (e.t16 = e.sent),
+                (e.t17 = l),
+                (e.t18 = {from: e.t14, to: e.t15, amount: e.t16, suggestedParams: e.t17}),
+                (v = e.t13.makePaymentTxnWithSuggestedParamsFromObject.call(
+                  e.t13,
+                  e.t18
+                )),
+                ((T = [])[Jt.FUNDING_TXN] = {txn: v, signers: [p]}),
+                (T[Jt.VALIDATOR_APP_CALL] = {txn: D, signers: [y]}),
+                e.abrupt("return", T)
+              );
+            case 43:
+            case "end":
+              return e.stop();
+          }
+      }, e);
+    })
+  )).apply(this, arguments);
+}
+function te() {
+  return (te = c(
+    i().mark(function t(e) {
+      var n, a, s, o, u, c, p, l, f, d, A, g;
+      return i().wrap(function (t) {
+        for (;;)
+          switch ((t.prev = t.next)) {
+            case 0:
+              return (
+                (n = e.txGroup),
+                (a = e.network),
+                (s = e.initiatorSigner),
+                (o = e.asset1ID),
+                (u = e.asset2ID),
+                (t.next = 3),
+                s([n])
+              );
+            case 3:
+              return (
+                (c = t.sent),
+                (p = D(c, 1)),
+                (l = p[0]),
+                (f = o > u ? {asset1ID: o, asset2ID: u} : {asset1ID: u, asset2ID: o}),
+                (d = dt.generateLogicSigAccountForPool({
+                  network: a,
+                  asset1ID: f.asset1ID,
+                  asset2ID: f.asset2ID
+                })),
+                (A = []),
+                (g = n.map(function (t, e) {
+                  if (e === Jt.FUNDING_TXN) return A.push(t.txn.txID().toString()), l;
+                  var n = r.default.signLogicSigTransactionObject(t.txn, d),
+                    a = n.txID,
+                    s = n.blob;
+                  return A.push(a), s;
+                })),
+                t.abrupt("return", {signedTxns: g, txnIDs: A})
+              );
+            case 11:
+            case "end":
+              return t.stop();
+          }
+      }, t);
+    })
+  )).apply(this, arguments);
+}
+function ee(t) {
+  return ne.apply(this, arguments);
+}
+function ne() {
+  return (ne = c(
+    i().mark(function t(e) {
+      var n, r, a, s, o;
+      return i().wrap(
+        function (t) {
+          for (;;)
+            switch ((t.prev = t.next)) {
+              case 0:
+                return (
+                  (n = e.client),
+                  (r = e.signedTxns),
+                  (a = e.txnIDs),
+                  (t.prev = 1),
+                  (t.next = 4),
+                  n.sendRawTransaction(r).do()
+                );
+              case 4:
+                return (t.next = 6), V(n, a[Jt.VALIDATOR_APP_CALL]);
+              case 6:
+                if (((s = t.sent), "number" == typeof (o = s["asset-index"]))) {
+                  t.next = 10;
+                  break;
+                }
+                throw new Error("Generated ID is not valid: got ".concat(o));
+              case 10:
+                return t.abrupt("return", {liquidityTokenID: o});
+              case 13:
+                throw (
+                  ((t.prev = 13),
+                  (t.t0 = t.catch(1)),
+                  new k(
+                    t.t0,
+                    "We encountered something unexpected while bootstraping the pool. Try again later."
+                  ))
+                );
+              case 16:
+              case "end":
+                return t.stop();
+            }
+        },
+        t,
+        null,
+        [[1, 13]]
+      );
+    })
+  )).apply(this, arguments);
+}
+function re() {
+  return (re = c(
+    i().mark(function t(e) {
+      var n, r, a, s, o;
+      return i().wrap(function (t) {
+        for (;;)
+          switch ((t.prev = t.next)) {
+            case 0:
+              return (
+                (n = e.client),
+                (r = e.network),
+                (a = e.pool),
+                (s = e.signedTxns),
+                (o = e.txnIDs),
+                (t.next = 3),
+                ee({client: n, signedTxns: s, txnIDs: o})
+              );
+            case 3:
+              return t.abrupt(
+                "return",
+                vt({
+                  client: n,
+                  network: r,
+                  contractVersion: et.V2,
+                  asset1ID: a.asset1ID,
+                  asset2ID: a.asset2ID
+                })
+              );
+            case 4:
+            case "end":
+              return t.stop();
+          }
+      }, t);
+    })
+  )).apply(this, arguments);
+}
+var ae,
+  se = {
+    generateTxns: function (t) {
+      return $t.apply(this, arguments);
+    },
+    signTxns: function (t) {
+      return te.apply(this, arguments);
+    },
+    execute: function (t) {
+      return re.apply(this, arguments);
+    }
+  };
+var oe,
+  ie =
+    (d((ae = {}), et.V1_1, Xt),
+    d(ae, et.V2, se),
+    d(ae, "generateTxns", function (t) {
+      var e = t.client,
+        n = t.network,
+        r = t.contractVersion,
+        a = t.asset_1,
+        s = t.asset_2,
+        o = t.initiatorAddr;
+      return r === et.V1_1
+        ? Xt.generateTxns({
+            client: e,
+            network: n,
+            asset1ID: Number(a.id),
+            asset2ID: Number(s.id),
+            asset1UnitName: a.unit_name,
+            asset2UnitName: s.unit_name,
+            initiatorAddr: o
+          })
+        : se.generateTxns({
+            client: e,
+            network: n,
+            asset_1: a,
+            asset_2: s,
+            initiatorAddr: o
+          });
+    }),
+    d(ae, "signTxns", function (t) {
+      return t.contractVersion === et.V1_1 ? Xt.signTxns(t) : se.signTxns(t);
+    }),
+    d(ae, "execute", function (t) {
+      return t.contractVersion === et.V1_1 ? Xt.execute(t) : se.execute(t);
+    }),
+    ae);
+!(function (t) {
+  (t[(t.FEE_TXN = 0)] = "FEE_TXN"),
+    (t[(t.VALIDATOR_APP_CALL_TXN = 1)] = "VALIDATOR_APP_CALL_TXN"),
+    (t[(t.ASSET1_OUT_TXN = 2)] = "ASSET1_OUT_TXN"),
+    (t[(t.ASSET2_OUT_TXN = 3)] = "ASSET2_OUT_TXN"),
+    (t[(t.LIQUDITY_IN_TXN = 4)] = "LIQUDITY_IN_TXN");
+})(oe || (oe = {}));
+function ue() {
+  return (ue = c(
+    i().mark(function t(e) {
+      var n, s, o, u, c, p, l, f, d, A, g, m, I, h, x, y, E, D;
+      return i().wrap(function (t) {
+        for (;;)
+          switch ((t.prev = t.next)) {
+            case 0:
+              return (
+                (n = e.client),
+                (s = e.pool),
+                (o = e.liquidityIn),
+                (u = e.asset1Out),
+                (c = e.asset2Out),
+                (p = e.slippage),
+                (l = e.initiatorAddr),
+                (t.next = 3),
+                n.getTransactionParams().do()
+              );
+            case 3:
+              return (
+                (f = t.sent),
+                (d = s.account.address()),
+                (A = r.default.makeApplicationNoOpTxnFromObject({
+                  from: d,
+                  appIndex: s.validatorAppID,
+                  appArgs: [Z("burn")],
+                  accounts: [l],
+                  foreignAssets:
+                    0 == s.asset2ID
+                      ? [s.asset1ID, s.liquidityTokenID]
+                      : [s.asset1ID, s.asset2ID, s.liquidityTokenID],
+                  suggestedParams: f
+                })),
+                (g = J("negative", p, u)),
+                (m = r.default.makeAssetTransferTxnWithSuggestedParamsFromObject({
+                  from: d,
+                  to: l,
+                  assetIndex: s.asset1ID,
+                  amount: g,
+                  suggestedParams: f
+                })),
+                (I = J("negative", p, c)),
+                (h =
+                  0 === s.asset2ID
+                    ? r.default.makePaymentTxnWithSuggestedParamsFromObject({
+                        from: d,
+                        to: l,
+                        amount: I,
+                        suggestedParams: f
+                      })
+                    : r.default.makeAssetTransferTxnWithSuggestedParamsFromObject({
+                        from: d,
+                        to: l,
+                        assetIndex: s.asset2ID,
+                        amount: I,
+                        suggestedParams: f
+                      })),
+                (x = r.default.makeAssetTransferTxnWithSuggestedParamsFromObject({
+                  from: l,
+                  to: d,
+                  assetIndex: s.liquidityTokenID,
+                  amount: o,
+                  suggestedParams: f
+                })),
+                (y = A.fee + m.fee + h.fee),
+                (E = r.default.makePaymentTxnWithSuggestedParamsFromObject({
+                  from: l,
+                  to: d,
+                  amount: y,
+                  note: a,
+                  suggestedParams: f
+                })),
+                (y += x.fee + E.fee),
+                (D = r.default.assignGroupID([E, A, m, h, x])),
+                t.abrupt("return", [
+                  {txn: D[oe.FEE_TXN], signers: [l]},
+                  {txn: D[oe.VALIDATOR_APP_CALL_TXN], signers: [d]},
+                  {txn: D[oe.ASSET1_OUT_TXN], signers: [d]},
+                  {txn: D[oe.ASSET2_OUT_TXN], signers: [d]},
+                  {txn: D[oe.LIQUDITY_IN_TXN], signers: [l]}
+                ])
+              );
+            case 16:
+            case "end":
+              return t.stop();
+          }
+      }, t);
+    })
+  )).apply(this, arguments);
+}
+function ce() {
+  return (ce = c(
+    i().mark(function t(e) {
+      var n, a, s, o, u, c, p, l, f;
+      return i().wrap(function (t) {
+        for (;;)
+          switch ((t.prev = t.next)) {
+            case 0:
+              return (
+                (n = e.pool),
+                (a = e.txGroup),
+                (s = e.initiatorSigner),
+                (t.next = 3),
+                s([a])
+              );
+            case 3:
+              return (
+                (o = t.sent),
+                (u = D(o, 2)),
+                (c = u[0]),
+                (p = u[1]),
+                (l = n.account.lsig),
+                (f = a.map(function (t, e) {
+                  return e === oe.FEE_TXN
+                    ? c
+                    : e === oe.LIQUDITY_IN_TXN
+                    ? p
+                    : r.default.signLogicSigTransactionObject(t.txn, l).blob;
+                })),
+                t.abrupt("return", f)
+              );
+            case 10:
+            case "end":
+              return t.stop();
+          }
+      }, t);
+    })
+  )).apply(this, arguments);
+}
+function pe() {
+  return (pe = c(
+    i().mark(function t(e) {
+      var n, r, a, s, o, u, c, p, l, f, d, A, g, m, I, h, x, y;
+      return i().wrap(
+        function (t) {
+          for (;;)
+            switch ((t.prev = t.next)) {
+              case 0:
+                return (
+                  (n = e.client),
+                  (r = e.pool),
+                  (a = e.txGroup),
+                  (s = e.signedTxns),
+                  (o = e.initiatorAddr),
+                  (t.prev = 1),
+                  (u = a[oe.ASSET1_OUT_TXN].txn.amount),
+                  (c = a[oe.ASSET2_OUT_TXN].txn.amount),
+                  (p = a[oe.LIQUDITY_IN_TXN].txn.amount),
+                  (t.next = 7),
+                  xt({client: n, pool: r, accountAddr: o})
+                );
+              case 7:
+                return (l = t.sent), (t.next = 10), Y(n, [s]);
+              case 10:
+                return (
+                  (f = t.sent),
+                  (d = D(f, 1)),
+                  (A = d[0]),
+                  (g = A.confirmedRound),
+                  (m = A.txnID),
+                  (t.next = 17),
+                  xt({client: n, pool: r, accountAddr: o})
+                );
+              case 17:
+                return (
+                  (I = t.sent),
+                  (h = I.excessAsset1 - l.excessAsset1) < 0n && (h = 0n),
+                  (x = I.excessAsset2 - l.excessAsset2) < 0n && (x = 0n),
+                  t.abrupt("return", {
+                    round: g,
+                    fees: q(a),
+                    asset1ID: r.asset1ID,
+                    asset1Out: BigInt(u) + h,
+                    asset2ID: r.asset2ID,
+                    asset2Out: BigInt(c) + x,
+                    liquidityID: r.liquidityTokenID,
+                    liquidityIn: BigInt(p),
+                    excessAmounts: [
+                      {
+                        assetID: r.asset1ID,
+                        excessAmountForBurning: h,
+                        totalExcessAmount: I.excessAsset1
+                      },
+                      {
+                        assetID: r.asset2ID,
+                        excessAmountForBurning: x,
+                        totalExcessAmount: I.excessAsset2
+                      }
+                    ],
+                    txnID: m,
+                    groupID: H(a)
+                  })
+                );
+              case 25:
+                throw (
+                  ((t.prev = 25),
+                  (t.t0 = t.catch(1)),
+                  "SlippageTolerance" ===
+                    (y = new k(
+                      t.t0,
+                      "We encountered something unexpected while burning liquidity. Try again later."
+                    )).type &&
+                    y.setMessage(
+                      "The burn failed due to too much slippage in the price. Please adjust the slippage tolerance and try again."
+                    ),
+                  y)
+                );
+              case 30:
+              case "end":
+                return t.stop();
+            }
+        },
+        t,
+        null,
+        [[1, 25]]
+      );
+    })
+  )).apply(this, arguments);
+}
+var le,
+  fe,
+  de = 3n,
+  Ae = 1000n;
+function ge() {
+  return (ge = c(
+    i().mark(function t(e) {
+      var n, a, s, o, u, c, p, l;
+      return i().wrap(function (t) {
+        for (;;)
+          switch ((t.prev = t.next)) {
+            case 0:
+              return (
+                (n = e.pool),
+                (a = e.txGroup),
+                (s = e.initiatorSigner),
+                (t.next = 3),
+                s([a])
+              );
+            case 3:
+              return (
+                (o = t.sent),
+                (u = D(o, 2)),
+                (c = u[0]),
+                (p = u[1]),
+                (l = a.map(function (t, e) {
+                  return e === fe.FEE_TXN_INDEX
+                    ? c
+                    : e === fe.ASSET_IN_TXN_INDEX
+                    ? p
+                    : r.default.signLogicSigTransactionObject(t.txn, n.account.lsig).blob;
+                })),
+                t.abrupt("return", l)
+              );
+            case 9:
+            case "end":
+              return t.stop();
+          }
+      }, t);
+    })
+  )).apply(this, arguments);
+}
+(exports.SwapType = void 0),
+  ((le = exports.SwapType || (exports.SwapType = {})).FixedInput = "fixed-input"),
+  (le.FixedOutput = "fixed-output"),
+  (function (t) {
+    (t[(t.FEE_TXN_INDEX = 0)] = "FEE_TXN_INDEX"),
+      (t[(t.VALIDATOR_APP_CALL_TXN_INDEX = 1)] = "VALIDATOR_APP_CALL_TXN_INDEX"),
+      (t[(t.ASSET_IN_TXN_INDEX = 2)] = "ASSET_IN_TXN_INDEX"),
+      (t[(t.ASSET_OUT_TXN_INDEX = 3)] = "ASSET_OUT_TXN_INDEX");
+  })(fe || (fe = {}));
+function me() {
+  return (me = c(
+    i().mark(function t(e) {
+      var n, s, o, u, c, p, l, f, d, A, g, m, I, h, x, y, E;
+      return i().wrap(function (t) {
+        for (;;)
+          switch ((t.prev = t.next)) {
+            case 0:
+              return (
+                (n = e.client),
+                (s = e.pool),
+                (o = e.swapType),
+                (u = e.assetIn),
+                (c = e.assetOut),
+                (p = e.slippage),
+                (l = e.initiatorAddr),
+                (f = e.poolAddress),
+                (t.next = 3),
+                n.getTransactionParams().do()
+              );
+            case 3:
+              return (
+                (d = t.sent),
+                (A = [Z("swap"), o === exports.SwapType.FixedInput ? Z("fi") : Z("fo")]),
+                (g = r.default.makeApplicationNoOpTxnFromObject({
+                  from: f,
+                  appIndex: s.validatorAppID,
+                  appArgs: A,
+                  accounts: [l],
+                  foreignAssets:
+                    0 == s.asset2ID
+                      ? [s.asset1ID, s.liquidityTokenID]
+                      : [s.asset1ID, s.asset2ID, s.liquidityTokenID],
+                  suggestedParams: d
+                })),
+                (m =
+                  o === exports.SwapType.FixedOutput
+                    ? J("positive", p, u.amount)
+                    : u.amount),
+                (I =
+                  0 === u.assetID
+                    ? r.default.makePaymentTxnWithSuggestedParamsFromObject({
+                        from: l,
+                        to: f,
+                        amount: m,
+                        suggestedParams: d
+                      })
+                    : r.default.makeAssetTransferTxnWithSuggestedParamsFromObject({
+                        from: l,
+                        to: f,
+                        assetIndex: u.assetID,
+                        amount: m,
+                        suggestedParams: d
+                      })),
+                (h =
+                  o === exports.SwapType.FixedInput
+                    ? J("negative", p, c.amount)
+                    : c.amount),
+                (x =
+                  0 === c.assetID
+                    ? r.default.makePaymentTxnWithSuggestedParamsFromObject({
+                        from: f,
+                        to: l,
+                        amount: h,
+                        suggestedParams: d
+                      })
+                    : r.default.makeAssetTransferTxnWithSuggestedParamsFromObject({
+                        from: f,
+                        to: l,
+                        assetIndex: c.assetID,
+                        amount: h,
+                        suggestedParams: d
+                      })),
+                (y = r.default.makePaymentTxnWithSuggestedParamsFromObject({
+                  from: l,
+                  to: f,
+                  amount: g.fee + x.fee,
+                  note: a,
+                  suggestedParams: d
+                })),
+                (E = r.default.assignGroupID([y, g, I, x])),
+                t.abrupt("return", [
+                  {txn: E[0], signers: [l]},
+                  {txn: E[1], signers: [f]},
+                  {txn: E[2], signers: [l]},
+                  {txn: E[3], signers: [f]}
+                ])
+              );
+            case 13:
+            case "end":
+              return t.stop();
+          }
+      }, t);
+    })
+  )).apply(this, arguments);
+}
+function Ie(t) {
+  return he.apply(this, arguments);
+}
+function he() {
+  return (he = c(
+    i().mark(function t(e) {
+      var n, r, a, s, o, u, c, p, l, f, d, A, g, m, I, h;
+      return i().wrap(function (t) {
+        for (;;)
+          switch ((t.prev = t.next)) {
+            case 0:
+              return (
+                (n = e.client),
+                (r = e.pool),
+                (a = e.signedTxns),
+                (s = e.assetIn),
+                (o = e.assetOut),
+                (u = e.initiatorAddr),
+                (t.next = 3),
+                xt({client: n, pool: r, accountAddr: u})
+              );
+            case 3:
+              return (c = t.sent), (t.next = 6), Y(n, [a]);
+            case 6:
+              return (
+                (p = t.sent),
+                (l = D(p, 1)),
+                (f = l[0]),
+                (d = f.confirmedRound),
+                (A = f.txnID),
+                (t.next = 13),
+                xt({client: n, pool: r, accountAddr: u})
+              );
+            case 13:
+              return (
+                (g = t.sent),
+                o.assetID === r.asset1ID
+                  ? ((m = c.excessAsset1), (I = g.excessAsset1))
+                  : ((m = c.excessAsset2), (I = g.excessAsset2)),
+                (h = I - m) < 0n && (h = 0n),
+                t.abrupt("return", {
+                  round: d,
+                  assetInID: s.assetID,
+                  assetInAmount: BigInt(s.amount),
+                  assetOutID: o.assetID,
+                  assetOutAmount: BigInt(o.amount) + h,
+                  excessAmount: {
+                    assetID: o.assetID,
+                    excessAmountForSwap: h,
+                    totalExcessAmount: I
+                  },
+                  txnID: A
+                })
+              );
+            case 18:
+            case "end":
+              return t.stop();
+          }
+      }, t);
+    })
+  )).apply(this, arguments);
+}
+function xe(t) {
+  return ye.apply(this, arguments);
+}
+function ye() {
+  return (ye = c(
+    i().mark(function t(e) {
+      var n, r, a, s, o, u, c, p, l, f, d, A, g, m, I, h;
+      return i().wrap(function (t) {
+        for (;;)
+          switch ((t.prev = t.next)) {
+            case 0:
+              return (
+                (n = e.client),
+                (r = e.pool),
+                (a = e.signedTxns),
+                (s = e.assetIn),
+                (o = e.assetOut),
+                (u = e.initiatorAddr),
+                (t.next = 3),
+                xt({client: n, pool: r, accountAddr: u})
+              );
+            case 3:
+              return (c = t.sent), (t.next = 6), Y(n, [a]);
+            case 6:
+              return (
+                (p = t.sent),
+                (l = D(p, 1)),
+                (f = l[0]),
+                (d = f.confirmedRound),
+                (A = f.txnID),
+                (t.next = 13),
+                xt({client: n, pool: r, accountAddr: u})
+              );
+            case 13:
+              return (
+                (g = t.sent),
+                s.assetID === r.asset1ID
+                  ? ((m = c.excessAsset1), (I = g.excessAsset1))
+                  : ((m = c.excessAsset2), (I = g.excessAsset2)),
+                (h = I - m) < 0n && (h = 0n),
+                t.abrupt("return", {
+                  round: d,
+                  assetInID: s.assetID,
+                  assetInAmount: BigInt(s.amount) - h,
+                  assetOutID: o.assetID,
+                  assetOutAmount: BigInt(o.amount),
+                  excessAmount: {
+                    assetID: s.assetID,
+                    excessAmountForSwap: h,
+                    totalExcessAmount: I
+                  },
+                  txnID: A
+                })
+              );
+            case 18:
+            case "end":
+              return t.stop();
+          }
+      }, t);
+    })
+  )).apply(this, arguments);
+}
+function Ee() {
+  return (Ee = c(
+    i().mark(function t(e) {
+      var n, r, a, s, u, c, p, l, f, d;
+      return i().wrap(
+        function (t) {
+          for (;;)
+            switch ((t.prev = t.next)) {
+              case 0:
+                if (
+                  ((n = e.client),
+                  (r = e.pool),
+                  (a = e.swapType),
+                  (s = e.txGroup),
+                  (u = e.signedTxns),
+                  (c = e.initiatorAddr),
+                  r.status === mt.READY)
+                ) {
+                  t.next = 3;
+                  break;
+                }
+                throw new k(
+                  {pool: r, swapType: a, txGroup: s},
+                  "Trying to swap on a non-existent pool"
+                );
+              case 3:
+                if (
+                  ((t.prev = 3),
+                  (p = {
+                    assetID: s[fe.ASSET_IN_TXN_INDEX].txn.assetIndex || 0,
+                    amount: s[fe.ASSET_IN_TXN_INDEX].txn.amount
+                  }),
+                  (l = {
+                    assetID: s[fe.ASSET_OUT_TXN_INDEX].txn.assetIndex || 0,
+                    amount: s[fe.ASSET_OUT_TXN_INDEX].txn.amount
+                  }),
+                  a !== exports.SwapType.FixedInput)
+                ) {
+                  t.next = 12;
+                  break;
+                }
+                return (
+                  (t.next = 9),
+                  Ie({
+                    client: n,
+                    pool: r,
+                    signedTxns: u,
+                    assetIn: p,
+                    assetOut: l,
+                    initiatorAddr: c
+                  })
+                );
+              case 9:
+                (f = t.sent), (t.next = 15);
+                break;
+              case 12:
+                return (
+                  (t.next = 14),
+                  xe({
+                    client: n,
+                    pool: r,
+                    signedTxns: u,
+                    assetIn: p,
+                    assetOut: l,
+                    initiatorAddr: c
+                  })
+                );
+              case 14:
+                f = t.sent;
+              case 15:
+                return t.abrupt("return", o(o({}, f), {}, {groupID: H(s), fees: q(s)}));
+              case 18:
+                throw (
+                  ((t.prev = 18),
+                  (t.t0 = t.catch(3)),
+                  "SlippageTolerance" ===
+                    (d = new k(
+                      t.t0,
+                      "We encountered something unexpected while swapping. Try again later."
+                    )).type &&
+                    d.setMessage(
+                      "The swap failed due to too much slippage in the price. Please adjust the slippage tolerance and try again."
+                    ),
+                  d)
+                );
+              case 23:
+              case "end":
+                return t.stop();
+            }
+        },
+        t,
+        null,
+        [[3, 18]]
+      );
+    })
+  )).apply(this, arguments);
+}
+function De() {
+  return (De = c(
+    i().mark(function t(e) {
+      var n, r, a, s, o, u, c, p, l, f;
+      return i().wrap(
+        function (t) {
+          for (;;)
+            switch ((t.prev = t.next)) {
+              case 0:
+                return (
+                  (n = e.client),
+                  (r = e.pool),
+                  (a = e.txGroup),
+                  (s = e.initiatorSigner),
+                  (t.prev = 1),
+                  (t.next = 4),
+                  ve({txGroup: a, pool: r, initiatorSigner: s})
+                );
+              case 4:
+                return (o = t.sent), (t.next = 7), Y(n, [o]);
+              case 7:
+                return (
+                  (u = t.sent),
+                  (c = D(u, 1)),
+                  (p = c[0]),
+                  (l = p.txnID),
+                  (f = p.confirmedRound),
+                  t.abrupt("return", {
+                    fees: q(a),
+                    confirmedRound: f,
+                    txnID: l,
+                    groupID: H(a)
+                  })
+                );
+              case 15:
+                throw (
+                  ((t.prev = 15),
+                  (t.t0 = t.catch(1)),
+                  new k(
+                    t.t0,
+                    "We encountered something unexpected while redeeming. Try again later."
+                  ))
+                );
+              case 18:
+              case "end":
+                return t.stop();
+            }
+        },
+        t,
+        null,
+        [[1, 15]]
+      );
+    })
+  )).apply(this, arguments);
+}
+function ve(t) {
+  return Te.apply(this, arguments);
+}
+function Te() {
+  return (Te = c(
+    i().mark(function t(e) {
+      var n, a, s, o, u, c, p, l;
+      return i().wrap(function (t) {
+        for (;;)
+          switch ((t.prev = t.next)) {
+            case 0:
+              return (
+                (n = e.txGroup),
+                (a = e.pool),
+                (s = e.initiatorSigner),
+                (t.next = 3),
+                s([n])
+              );
+            case 3:
+              return (
+                (o = t.sent),
+                (u = D(o, 1)),
+                (c = u[0]),
+                (p = a.account.lsig),
+                (l = n.map(function (t, e) {
+                  return 0 === e
+                    ? c
+                    : r.default.signLogicSigTransactionObject(t.txn, p).blob;
+                })),
+                t.abrupt("return", l)
+              );
+            case 9:
+            case "end":
+              return t.stop();
+          }
+      }, t);
+    })
+  )).apply(this, arguments);
+}
+function we() {
+  return (
+    (we = c(
+      i().mark(function t(e) {
+        var n, a, s, o, u, p;
+        return i().wrap(
+          function (t) {
+            for (;;)
+              switch ((t.prev = t.next)) {
+                case 0:
+                  return (
+                    (n = e.client),
+                    (a = e.data),
+                    (s = e.initiatorSigner),
+                    (t.prev = 1),
+                    (o = a.map(function (t) {
+                      var e = t.txGroup,
+                        n = t.pool;
+                      return {
+                        txns: e,
+                        txnFees: q(e),
+                        groupID: H(e),
+                        lsig: n.account.lsig
+                      };
+                    })),
+                    (t.next = 5),
+                    s(
+                      o.map(function (t) {
+                        return t.txns;
+                      })
+                    )
+                  );
+                case 5:
+                  return (
+                    (u = t.sent),
+                    (p = Promise.all(
+                      o.map(function (t, e) {
+                        return new Promise(
+                          (function () {
+                            var a = c(
+                              i().mark(function a(s, o) {
+                                var c, p, l, f, d, A;
+                                return i().wrap(
+                                  function (a) {
+                                    for (;;)
+                                      switch ((a.prev = a.next)) {
+                                        case 0:
+                                          return (
+                                            (a.prev = 0),
+                                            (c = t.txns.map(function (n, a) {
+                                              return 0 === a
+                                                ? u[e]
+                                                : r.default.signLogicSigTransactionObject(
+                                                    n.txn,
+                                                    t.lsig
+                                                  ).blob;
+                                            })),
+                                            (a.next = 4),
+                                            Y(n, [c])
+                                          );
+                                        case 4:
+                                          (p = a.sent),
+                                            (l = D(p, 1)),
+                                            (f = l[0]),
+                                            (d = f.txnID),
+                                            (A = f.confirmedRound),
+                                            s({
+                                              fees: t.txnFees,
+                                              groupID: t.groupID,
+                                              txnID: d,
+                                              confirmedRound: A
+                                            }),
+                                            (a.next = 15);
+                                          break;
+                                        case 12:
+                                          (a.prev = 12), (a.t0 = a.catch(0)), o(a.t0);
+                                        case 15:
+                                        case "end":
+                                          return a.stop();
+                                      }
+                                  },
+                                  a,
+                                  null,
+                                  [[0, 12]]
+                                );
+                              })
+                            );
+                            return function (t, e) {
+                              return a.apply(this, arguments);
+                            };
+                          })()
+                        );
+                      })
+                    )),
+                    t.abrupt("return", p)
+                  );
+                case 10:
+                  throw (
+                    ((t.prev = 10),
+                    (t.t0 = t.catch(1)),
+                    new k(
+                      t.t0,
+                      "We encountered something unexpected while redeeming. Try again later."
+                    ))
+                  );
+                case 13:
+                case "end":
+                  return t.stop();
+              }
+          },
+          t,
+          null,
+          [[1, 10]]
+        );
+      })
+    )),
+    we.apply(this, arguments)
+  );
+}
+function be() {
+  return (be = c(
+    i().mark(function t(e) {
+      var n, s, o, u, c, p, l, f, d, A, g;
+      return i().wrap(function (t) {
+        for (;;)
+          switch ((t.prev = t.next)) {
+            case 0:
+              return (
+                (n = e.client),
+                (s = e.pool),
+                (o = e.assetID),
+                (u = e.assetOut),
+                (c = e.initiatorAddr),
+                (p = e.poolAddress),
+                (t.next = 3),
+                n.getTransactionParams().do()
+              );
+            case 3:
+              return (
+                (l = t.sent),
+                (f = r.default.makeApplicationNoOpTxnFromObject({
+                  from: p,
+                  appIndex: s.validatorAppID,
+                  appArgs: [Z("redeem")],
+                  accounts: [c],
+                  foreignAssets:
+                    0 == s.asset2ID
+                      ? [s.asset1ID, s.liquidityTokenID]
+                      : [s.asset1ID, s.asset2ID, s.liquidityTokenID],
+                  suggestedParams: l
+                })),
+                (d =
+                  0 === o
+                    ? r.default.makePaymentTxnWithSuggestedParamsFromObject({
+                        from: p,
+                        to: c,
+                        amount: BigInt(u),
+                        suggestedParams: l
+                      })
+                    : r.default.makeAssetTransferTxnWithSuggestedParamsFromObject({
+                        from: p,
+                        to: c,
+                        assetIndex: o,
+                        amount: BigInt(u),
+                        suggestedParams: l
+                      })),
+                (A = r.default.makePaymentTxnWithSuggestedParamsFromObject({
+                  from: c,
+                  to: p,
+                  amount: f.fee + d.fee,
+                  note: a,
+                  suggestedParams: l
+                })),
+                (g = r.default.assignGroupID([A, f, d])),
+                t.abrupt("return", [
+                  {txn: g[0], signers: [c]},
+                  {txn: g[1], signers: [p]},
+                  {txn: g[2], signers: [p]}
+                ])
+              );
+            case 9:
+            case "end":
+              return t.stop();
+          }
+      }, t);
+    })
+  )).apply(this, arguments);
+}
+function Ne(e) {
+  var n = e.suggestedParams,
+    r = e.stakingAppID,
+    a = e.initiatorAddr,
+    s = e.liquidityAssetID,
+    o = e.program,
+    i = e.amount,
+    u = t.encodeUint64(i),
+    c = t.encodeUint64(o.id);
+  return t.makeApplicationNoOpTxnFromObject({
+    appIndex: r,
+    from: a,
+    suggestedParams: n,
+    foreignAssets: [s],
+    accounts: [o.accountAddress],
+    appArgs: [Z("commit"), u],
+    note: R([Z("tinymanStaking/v1:b"), c, t.encodeUint64(s), u])
+  });
+}
+function _e() {
+  return (_e = c(
+    i().mark(function e(n) {
+      var r, a, s, o, u, c, p, l, f, d, A;
+      return i().wrap(function (e) {
+        for (;;)
+          switch ((e.prev = e.next)) {
+            case 0:
+              return (
+                (r = n.client),
+                (a = n.stakingAppID),
+                (s = n.program),
+                (o = n.requiredAssetID),
+                (u = n.liquidityAssetID),
+                (c = n.amount),
+                (p = n.initiatorAddr),
+                (e.next = 3),
+                r.getTransactionParams().do()
+              );
+            case 3:
+              if (
+                ((l = e.sent),
+                (f = Ne({
+                  suggestedParams: l,
+                  stakingAppID: a,
+                  program: s,
+                  liquidityAssetID: u,
+                  initiatorAddr: p,
+                  amount: c
+                })),
+                (d = [f]),
+                "number" != typeof o)
+              ) {
+                e.next = 10;
+                break;
+              }
+              return (
+                (A = t.makeApplicationNoOpTxnFromObject({
+                  appIndex: a,
+                  from: p,
+                  suggestedParams: l,
+                  foreignAssets: [o],
+                  accounts: [s.accountAddress],
+                  appArgs: [Z("log_balance")]
+                })),
+                (d = t.assignGroupID([f, A])),
+                e.abrupt("return", [
+                  {txn: d[0], signers: [p]},
+                  {txn: d[1], signers: [p]}
+                ])
+              );
+            case 10:
+              return e.abrupt("return", [{txn: d[0], signers: [p]}]);
+            case 11:
+            case "end":
+              return e.stop();
+          }
+      }, e);
+    })
+  )).apply(this, arguments);
+}
+(exports.ALGO_ASSET = O),
+  (exports.ALGO_ASSET_ID = 0),
+  (exports.ASSET_OPT_IN_PROCESS_TXN_COUNT = 1),
+  (exports.BASE_MINIMUM_BALANCE = 1e5),
+  (exports.BURN_PROCESS_TXN_COUNT = 5),
+  (exports.Bootstrap = ie),
+  (exports.CONTRACT_VERSION = et),
+  (exports.LIQUIDITY_TOKEN_UNIT_NAME = P),
+  (exports.MINIMUM_BALANCE_REQUIRED_PER_APP = 1e5),
+  (exports.MINIMUM_BALANCE_REQUIRED_PER_ASSET = 1e5),
+  (exports.MINIMUM_BALANCE_REQUIRED_PER_BYTE_SCHEMA = 5e4),
+  (exports.MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE = 28500),
+  (exports.MINIMUM_LIQUIDITY_MINTING_AMOUNT = 1e3),
+  (exports.OPT_IN_VALIDATOR_APP_PROCESS_TXN_COUNT = 1),
+  (exports.OPT_OUT_VALIDATOR_APP_PROCESS_TXN_COUNT = 1),
+  (exports.REDEEM_PROCESS_TXN_COUNT = 3),
+  (exports.SWAP_PROCESS_TXN_COUNT = 4),
+  (exports.applySlippageToAmount = J),
+  (exports.burnLiquidity = function (t) {
+    return pe.apply(this, arguments);
+  }),
+  (exports.calculateAccountMinimumRequiredBalance = gt),
+  (exports.convertFromBaseUnits = X),
+  (exports.convertToBaseUnits = function (t, e) {
+    return z({decimalPlaces: 0}, Math.pow(10, Number(t)) * Number(e));
+  }),
+  (exports.generateBurnTxns = function (t) {
+    return ue.apply(this, arguments);
+  }),
+  (exports.generateOptIntoAssetTxns = function (t) {
+    return $.apply(this, arguments);
+  }),
+  (exports.generateOptIntoValidatorTxns = function (t) {
+    return it.apply(this, arguments);
+  }),
+  (exports.generateOptOutOfValidatorTxns = function (t) {
+    return ut.apply(this, arguments);
+  }),
+  (exports.generateRedeemTxns = function (t) {
+    return be.apply(this, arguments);
+  }),
+  (exports.generateSwapTransactions = function (t) {
+    return me.apply(this, arguments);
+  }),
+  (exports.getAccountExcess = function (t) {
+    return Et.apply(this, arguments);
+  }),
+  (exports.getAccountExcessWithinPool = xt),
+  (exports.getAccountInformation = function (t, e) {
+    return new Promise(
+      (function () {
+        var n = c(
+          i().mark(function n(r, a) {
+            var s;
+            return i().wrap(
+              function (n) {
+                for (;;)
+                  switch ((n.prev = n.next)) {
+                    case 0:
+                      return (n.prev = 0), (n.next = 3), t.accountInformation(e).do();
+                    case 3:
+                      (s = n.sent),
+                        r(o(o({}, s), {}, {minimum_required_balance: gt(s)})),
+                        (n.next = 10);
+                      break;
+                    case 7:
+                      (n.prev = 7),
+                        (n.t0 = n.catch(0)),
+                        a(
+                          new Error(n.t0.message || "Failed to fetch account information")
+                        );
+                    case 10:
+                    case "end":
+                      return n.stop();
+                  }
+              },
+              n,
+              null,
+              [[0, 7]]
+            );
+          })
+        );
+        return function (t, e) {
+          return n.apply(this, arguments);
+        };
+      })()
+    );
+  }),
+  (exports.getBurnLiquidityQuote = function (t) {
+    var e = t.pool,
+      n = t.reserves,
+      r = t.liquidityIn,
+      a = BigInt(r),
+      s = n.issuedLiquidity && (a * n.asset1) / n.issuedLiquidity,
+      o = n.issuedLiquidity && (a * n.asset2) / n.issuedLiquidity;
+    return {
+      round: n.round,
+      liquidityID: e.liquidityTokenID,
+      liquidityIn: a,
+      asset1ID: e.asset1ID,
+      asset1Out: s,
+      asset2ID: e.asset2ID,
+      asset2Out: o
+    };
+  }),
+  (exports.getPoolAssets = kt),
+  (exports.getPoolInfo = vt),
+  (exports.getPoolPairRatio = function (t, e) {
+    var n = Pt(e),
+      r = null;
+    return (
+      e &&
+        !n &&
+        e.asset1 &&
+        e.asset2 &&
+        "number" == typeof t.asset2 &&
+        "number" == typeof t.asset1 &&
+        (r = X(t.asset1, e.asset1) / X(t.asset2, e.asset2)),
+      r
+    );
+  }),
+  (exports.getPoolReserves = function (t, e) {
+    return Nt.apply(this, arguments);
+  }),
+  (exports.getPoolShare = function (t, e) {
+    var n = Number(e) / Number(t);
+    return Number.isFinite(n) || (n = 0), n;
+  }),
+  (exports.getPoolsForPair = function (t) {
+    return Promise.all(
+      Object.values(et).map(function (e) {
+        return vt(o(o({}, t), {}, {contractVersion: e}));
+      })
+    );
+  }),
+  (exports.getStakingAppID = function (t) {
+    return "testnet" === t ? 51948952 : 649588853;
+  }),
+  (exports.getSwapQuote = function (t, e, n, r, a) {
+    var s;
+    if (e.status !== mt.READY)
+      throw new k({pool: e, asset: r}, "Trying to swap on a non-existent pool");
+    return (
+      (s =
+        "fixed-input" === t
+          ? (function (t) {
+              var e,
+                n,
+                r,
+                a = t.pool,
+                s = t.reserves,
+                o = t.assetIn,
+                i = t.decimals,
+                u = BigInt(o.amount);
+              o.assetID === a.asset1ID
+                ? ((e = a.asset2ID), (n = s.asset1), (r = s.asset2))
+                : ((e = a.asset1ID), (n = s.asset2), (r = s.asset1));
+              var c = (u * de) / Ae,
+                p = r - (n * r) / (n + (u - c));
+              if (p > r) throw new Error("Output amount exceeds available liquidity.");
+              var l = X(i.assetOut, Number(p)) / X(i.assetIn, Number(u)),
+                f = X(i.assetOut, Number(r)) / X(i.assetIn, Number(n)),
+                d = z({decimalPlaces: 5}, Math.abs(l / f - 1));
+              return {
+                round: s.round,
+                assetInID: o.assetID,
+                assetInAmount: u,
+                assetOutID: e,
+                assetOutAmount: p,
+                swapFee: Number(c),
+                rate: l,
+                priceImpact: d
+              };
+            })({pool: e, reserves: n, assetIn: r, decimals: a})
+          : (function (t) {
+              var e,
+                n,
+                r,
+                a = t.pool,
+                s = t.reserves,
+                o = t.assetOut,
+                i = t.decimals,
+                u = BigInt(o.amount);
+              if (
+                (o.assetID === a.asset1ID
+                  ? ((e = a.asset2ID), (n = s.asset2), (r = s.asset1))
+                  : ((e = a.asset1ID), (n = s.asset1), (r = s.asset2)),
+                u > r)
+              )
+                throw new Error("Output amount exceeds available liquidity.");
+              var c = (n * r) / (r - u) - n,
+                p = (c * Ae) / (Ae - de),
+                l = p - c,
+                f = X(i.assetOut, Number(u)) / X(i.assetIn, Number(p)),
+                d = X(i.assetOut, Number(r)) / X(i.assetIn, Number(n)),
+                A = z({decimalPlaces: 5}, Math.abs(f / d - 1));
+              return {
+                round: s.round,
+                assetInID: e,
+                assetInAmount: p,
+                assetOutID: o.assetID,
+                assetOutAmount: u,
+                swapFee: Number(l),
+                rate: f,
+                priceImpact: A
+              };
+            })({pool: e, reserves: n, assetOut: r, decimals: a})),
+      s
+    );
+  }),
+  (exports.getTxnGroupID = H),
+  (exports.getValidatorAppID = ot),
+  (exports.hasSufficientMinimumBalance = function (t) {
+    return t.amount >= t.minimum_required_balance;
+  }),
+  (exports.isAccountOptedIntoApp = function (t) {
+    var e = t.appID;
+    return t.accountAppsLocalState.some(function (t) {
+      return t.id === e;
+    });
+  }),
+  (exports.isPoolEmpty = Pt),
+  (exports.isPoolNotCreated = function (t) {
+    return (null == t ? void 0 : t.status) === mt.NOT_CREATED;
+  }),
+  (exports.isPoolReady = function (t) {
+    return (null == t ? void 0 : t.status) === mt.READY;
+  }),
+  (exports.issueSwap = function (t) {
+    return Ee.apply(this, arguments);
+  }),
+  (exports.prepareCommitTransactions = function (t) {
+    return _e.apply(this, arguments);
+  }),
+  (exports.redeemAllExcessAsset = function (t) {
+    return we.apply(this, arguments);
+  }),
+  (exports.redeemExcessAsset = function (t) {
+    return De.apply(this, arguments);
+  }),
+  (exports.sendAndWaitRawTransaction = Y),
+  (exports.signBurnTxns = function (t) {
+    return ce.apply(this, arguments);
+  }),
+  (exports.signSwapTransactions = function (t) {
+    return ge.apply(this, arguments);
+  }),
+  (exports.sumUpTxnFees = q),
+  (exports.tinymanContract_v1_1 = ft),
+  (exports.tinymanContract_v2 = dt);
