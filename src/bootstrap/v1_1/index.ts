@@ -7,7 +7,7 @@ import {
 } from "../../util/commonTypes";
 import {encodeString, waitForConfirmation} from "../../util/util";
 import TinymanError from "../../util/error/TinymanError";
-import {LIQUIDITY_TOKEN_UNIT_NAME} from "../../util/asset/assetConstants";
+import {POOL_TOKEN_UNIT_NAME} from "../../util/asset/assetConstants";
 import {V1PoolInfo} from "../../util/pool/poolTypes";
 import {getPoolAccountMinBalance} from "../common/utils";
 import {getValidatorAppID} from "../../validator";
@@ -64,7 +64,7 @@ async function generateTxns({
       total: 0xffffffffffffffffn,
       decimals: 6,
       defaultFrozen: false,
-      unitName: LIQUIDITY_TOKEN_UNIT_NAME.DEFAULT,
+      unitName: POOL_TOKEN_UNIT_NAME.V1_1,
       assetName: `TinymanPool1.1 ${asset1UnitName}-${asset2UnitName}`,
       assetURL: "https://tinyman.org",
       suggestedParams

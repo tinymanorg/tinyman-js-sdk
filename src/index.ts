@@ -34,7 +34,7 @@ export type {
 export {
   ALGO_ASSET,
   ALGO_ASSET_ID,
-  LIQUIDITY_TOKEN_UNIT_NAME
+  POOL_TOKEN_UNIT_NAME
 } from "./util/asset/assetConstants";
 
 export {

@@ -12,7 +12,8 @@ export const ALGO_ASSET: TinymanAnalyticsApiAsset = {
   total_amount: "6615503326932151"
 };
 
-export const LIQUIDITY_TOKEN_UNIT_NAME = {
-  DEFAULT: "TMPOOL11",
-  V1: "TM1POOL"
+export const POOL_TOKEN_UNIT_NAME = {
+  V1: "TM1POOL",
+  V1_1: "TMPOOL11",
+  V2: "TMPOOL2"
 };
