@@ -4,7 +4,7 @@ import {tinymanContract} from "./contract/contract";
 import {InitiatorSigner, SignerTransaction} from "./util/commonTypes";
 import {encodeString, waitForConfirmation} from "./util/util";
 import TinymanError from "./util/error/TinymanError";
-import {ALGO_ASSET_ID, LIQUIDITY_TOKEN_UNIT_NAME} from "./util/asset/assetConstants";
+import {ALGO_ASSET_ID, POOL_TOKEN_UNIT_NAME} from "./util/asset/assetConstants";
 import {
   BASE_MINIMUM_BALANCE,
   MINIMUM_BALANCE_REQUIRED_PER_APP,
@@ -111,7 +111,7 @@ export async function generateBootstrapTransactions({
       total: 0xffffffffffffffffn,
       decimals: 6,
       defaultFrozen: false,
-      unitName: LIQUIDITY_TOKEN_UNIT_NAME.DEFAULT,
+      unitName: POOL_TOKEN_UNIT_NAME.V1_1,
       assetName: `TinymanPool1.1 ${assets.asset1.unitName}-${assets.asset2.unitName}`,
       assetURL: "https://tinyman.org",
       suggestedParams
