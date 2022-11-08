@@ -1,4 +1,8 @@
-export type {InitiatorSigner, SignerTransaction} from "./util/commonTypes";
+export type {
+  InitiatorSigner,
+  SignerTransaction,
+  SupportedNetwork
+} from "./util/commonTypes";
 
 export {
   BASE_MINIMUM_BALANCE,
@@ -44,7 +48,10 @@ export {
 
 export type {AccountInformationData} from "./util/account/accountTypes";
 
-export {validatorAppSchema, ContractVersion} from "./contract/contract";
+export type {ContractVersionValue} from "./contract/types";
+export {CONTRACT_VERSION} from "./contract/constants";
+export {tinymanContract_v2} from "./contract/v2/contract";
+export {tinymanContract_v1_1} from "./contract/v1_1/contract";
 
 export {
   getValidatorAppID,
@@ -56,58 +63,35 @@ export {
 
 export type {PoolStatus, PoolInfo, PoolReserves} from "./util/pool/poolTypes";
 
-export {
-  getPoolInfo,
-  getPoolReserves,
-  getPoolShare,
-  getPoolPairRatio,
-  isPoolEmpty,
-  isPoolNotCreated,
-  isPoolReady,
-  getPoolAssets
-} from "./util/pool/poolUtils";
+export {poolUtils} from "./util/pool";
 
-export {
-  generateBootstrapTransactions,
-  signBootstrapTransactions,
-  getBootstrapProcessTxnCount,
-  calculatePoolBootstrapFundingTxnAmount,
-  createPool
-} from "./bootstrap";
+export {Bootstrap} from "./bootstrap";
 
-export type {MintQuote, MintExecution} from "./mint";
-
+export type {
+  V1_1MintQuote,
+  FlexibleMintQuote,
+  InitialMintQuote,
+  MintSwapQuote,
+  SingleMintQuote,
+  V1_1MintExecution,
+  V1_1MintTxnIndices,
+  V2MintExecution
+} from "./mint/types";
 // eslint-disable-next-line no-duplicate-imports
-export {
-  getMintLiquidityQuote,
-  mintLiquidity,
-  generateMintTxns,
-  signMintTxns,
-  MINT_PROCESS_TXN_COUNT
-} from "./mint";
+export {V2MintTxnIndices, V2MintType} from "./mint/types";
+export {Mint} from "./mint";
 
-export type {BurnQuote, BurnExecution} from "./burn";
+export type {
+  V1_1RemoveLiquidityExecution,
+  V1_1RemoveLiquidityQuote
+} from "./remove-liquidity/v1_1/types";
+export type {
+  V2RemoveLiquidityQuote,
+  V2SingleAssetRemoveLiquidityQuote
+} from "./remove-liquidity/v2/types";
+export {RemoveLiquidity} from "./remove-liquidity";
 
-// eslint-disable-next-line no-duplicate-imports
-export {
-  getBurnLiquidityQuote,
-  burnLiquidity,
-  generateBurnTxns,
-  signBurnTxns,
-  BURN_PROCESS_TXN_COUNT
-} from "./burn";
-
-export type {SwapQuote, SwapExecution} from "./swap";
-
-// eslint-disable-next-line no-duplicate-imports
-export {
-  SwapType,
-  getSwapQuote,
-  issueSwap,
-  generateSwapTransactions,
-  signSwapTransactions,
-  SWAP_PROCESS_TXN_COUNT
-} from "./swap";
+export {Swap} from "./swap";
 
 export {
   redeemExcessAsset,

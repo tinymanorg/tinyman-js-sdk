@@ -60,9 +60,10 @@ export declare function signSwapTransactions({ pool, txGroup, initiatorSigner }:
     initiatorSigner: InitiatorSigner;
 }): Promise<Uint8Array[]>;
 export declare const SWAP_PROCESS_TXN_COUNT = 4;
-export declare function generateSwapTransactions({ client, pool, swapType, assetIn, assetOut, slippage, initiatorAddr }: {
+export declare function generateSwapTransactions({ client, pool, swapType, assetIn, assetOut, slippage, initiatorAddr, poolAddress }: {
     client: any;
     pool: PoolInfo;
+    poolAddress: string;
     swapType: SwapType;
     assetIn: {
         assetID: number;
