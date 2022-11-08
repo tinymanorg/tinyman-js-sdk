@@ -6,7 +6,11 @@ export function calculateSubsequentAddLiquidity(
   reserves: Omit<PoolReserves, "round">,
   totalFeeShare: number | bigint,
   asset1Amount: number | bigint,
-  asset2Amount: number | bigint
+  asset2Amount: number | bigint,
+  decimals: {
+    asset1: number;
+    asset2: number;
+  }
 ) {
   const oldK = reserves.asset1 * reserves.asset2;
   const newAsset1Reserves = reserves.asset1 + BigInt(asset1Amount);
@@ -69,8 +73,8 @@ export function calculateSubsequentAddLiquidity(
   const swapPriceImpact = calculatePriceImpact(
     swapFromAsset1ToAsset2 ? reserves.asset1 : reserves.asset2,
     swapFromAsset1ToAsset2 ? reserves.asset2 : reserves.asset1,
-    swapInAmount,
-    swapOutAmount
+    {amount: swapInAmount, decimals: decimals.asset1},
+    {amount: swapOutAmount, decimals: decimals.asset2}
   );
 
   return {
@@ -106,13 +110,21 @@ function calculateInternalSwapFeeAmount(
 function calculatePriceImpact(
   inputSupply: bigint,
   outputSupply: bigint,
-  swapInputAmount: bigint,
-  swapOutputAmount: bigint
+  outputAsset: {
+    amount: bigint;
+    decimals: number;
+  },
+  inputAsset: {
+    amount: bigint;
+    decimals: number;
+  }
 ) {
   const swapPrice =
-    convertFromBaseUnits(6, swapOutputAmount) / convertFromBaseUnits(6, swapInputAmount);
+    convertFromBaseUnits(outputAsset.decimals, outputAsset.amount) /
+    convertFromBaseUnits(inputAsset.decimals, inputAsset.amount);
   const poolPrice =
-    convertFromBaseUnits(6, outputSupply) / convertFromBaseUnits(6, inputSupply);
+    convertFromBaseUnits(outputAsset.decimals, outputSupply) /
+    convertFromBaseUnits(inputAsset.amount, inputSupply);
 
   const swapPoolPriceRatio = swapPrice / poolPrice;
 

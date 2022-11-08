@@ -24,13 +24,19 @@ export * from "./common";
  */
 export function getQuote({
   pool,
-  asset1In,
-  asset2In,
-  slippage = 0.05
+  slippage = 0.05,
+  asset1,
+  asset2
 }: {
   pool: V2PoolInfo;
-  asset1In: number | bigint;
-  asset2In: number | bigint;
+  asset1: {
+    amount: number | bigint;
+    decimals: number;
+  };
+  asset2: {
+    amount: number | bigint;
+    decimals: number;
+  };
   slippage?: number;
 }): FlexibleMintQuote {
   if (pool.issuedPoolTokens === 0n) {
@@ -54,7 +60,16 @@ export function getQuote({
     swapOutAmount,
     swapPriceImpact,
     swapTotalFeeAmount
-  } = calculateSubsequentAddLiquidity(reserves, pool.totalFeeShare!, asset1In, asset2In);
+  } = calculateSubsequentAddLiquidity(
+    reserves,
+    pool.totalFeeShare!,
+    asset1.amount,
+    asset2.amount,
+    {
+      asset1: asset1.decimals,
+      asset2: asset2.decimals
+    }
+  );
 
   const swapQuote: MintSwapQuote = {
     amountIn: swapInAmount,
@@ -68,8 +83,8 @@ export function getQuote({
   return {
     asset1ID: pool.asset1ID,
     asset2ID: pool.asset2ID,
-    asset1In: BigInt(asset1In),
-    asset2In: BigInt(asset2In),
+    asset1In: BigInt(asset1.amount),
+    asset2In: BigInt(asset2.amount),
     liquidityOut: poolTokenAssetAmount,
     liquidityID: pool.liquidityTokenID!,
     share: poolUtils.getPoolShare(

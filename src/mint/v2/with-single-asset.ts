@@ -24,14 +24,20 @@ export * from "./common";
 export function getQuote({
   pool,
   assetIn,
-  slippage = 0.05
+  slippage = 0.05,
+  decimals
 }: {
   pool: V2PoolInfo;
   assetIn: {
     id: number;
     amount: number | bigint;
   };
+
   slippage?: number;
+  decimals: {
+    asset1: number;
+    asset2: number;
+  };
 }): SingleMintQuote {
   if (pool.issuedPoolTokens === 0n) {
     throw new Error("Pool has no liquidity");
@@ -58,7 +64,8 @@ export function getQuote({
     reserves,
     pool.totalFeeShare!,
     isAsset1 ? assetIn.amount : 0,
-    isAsset1 ? 0 : assetIn.amount
+    isAsset1 ? 0 : assetIn.amount,
+    decimals
   );
 
   const swapQuote = {
