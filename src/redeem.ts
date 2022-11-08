@@ -1,4 +1,4 @@
-import algosdk, {Algodv2, LogicSigAccount} from "algosdk";
+import algosdk, {Algodv2} from "algosdk";
 
 import {
   encodeString,
@@ -73,7 +73,7 @@ async function signRedeemTxns({
   initiatorSigner: InitiatorSigner;
 }): Promise<Uint8Array[]> {
   const [signedFeeTxn] = await initiatorSigner([txGroup]);
-  const lsig = new LogicSigAccount(pool.program);
+  const {lsig} = pool.account;
 
   const signedTxns = txGroup.map((txDetail, index) => {
     if (index === 0) {
@@ -121,7 +121,7 @@ export async function redeemAllExcessAsset({
         txns: txGroup,
         txnFees: sumUpTxnFees(txGroup),
         groupID: getTxnGroupID(txGroup),
-        lsig: new LogicSigAccount(pool.program)
+        lsig: pool.account.lsig
       };
     });
 
@@ -183,18 +183,20 @@ export async function generateRedeemTxns({
   pool,
   assetID,
   assetOut,
-  initiatorAddr
+  initiatorAddr,
+  poolAddress
 }: {
   client: Algodv2;
   pool: PoolInfo;
   assetID: number;
   assetOut: number | bigint;
   initiatorAddr: string;
+  poolAddress: string;
 }): Promise<SignerTransaction[]> {
   const suggestedParams = await client.getTransactionParams().do();
 
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
-    from: pool.addr,
+    from: poolAddress,
     appIndex: pool.validatorAppID,
     appArgs: [encodeString("redeem")],
     accounts: [initiatorAddr],
@@ -209,14 +211,14 @@ export async function generateRedeemTxns({
 
   if (assetID === 0) {
     assetOutTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-      from: pool.addr,
+      from: poolAddress,
       to: initiatorAddr,
       amount: BigInt(assetOut),
       suggestedParams
     });
   } else {
     assetOutTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-      from: pool.addr,
+      from: poolAddress,
       to: initiatorAddr,
       assetIndex: assetID,
       amount: BigInt(assetOut),
@@ -226,7 +228,7 @@ export async function generateRedeemTxns({
 
   const feeTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
     from: initiatorAddr,
-    to: pool.addr,
+    to: poolAddress,
     amount: validatorAppCallTxn.fee + assetOutTxn.fee,
     note: DEFAULT_FEE_TXN_NOTE,
     suggestedParams
@@ -241,11 +243,11 @@ export async function generateRedeemTxns({
     },
     {
       txn: txGroup[1],
-      signers: [pool.addr]
+      signers: [poolAddress]
     },
     {
       txn: txGroup[2],
-      signers: [pool.addr]
+      signers: [poolAddress]
     }
   ];
 }

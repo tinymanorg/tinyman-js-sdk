@@ -17,10 +17,9 @@ export declare function generateBootstrapTransactions({ client, validatorAppID, 
     asset2UnitName: string;
     initiatorAddr: string;
 }): Promise<SignerTransaction[]>;
-export declare function signBootstrapTransactions({ txGroup, initiatorSigner, validatorAppID, asset1ID, asset2ID }: {
+export declare function signBootstrapTransactions({ txGroup, initiatorSigner, asset1ID, asset2ID }: {
     txGroup: SignerTransaction[];
     initiatorSigner: InitiatorSigner;
-    validatorAppID: number;
     asset1ID: number;
     asset2ID: number;
 }): Promise<{

@@ -1,18 +1,19 @@
 import algosdk, {Algodv2} from "algosdk";
 
-import {ContractVersion} from "./contract/contract";
+import {CONTRACT_VERSION} from "./contract/constants";
+import {ContractVersionValue} from "./contract/types";
 import {SignerTransaction, SupportedNetwork} from "./util/commonTypes";
 
 export const OPT_IN_VALIDATOR_APP_PROCESS_TXN_COUNT = 1;
 
-const VALIDATOR_APP_ID: Record<ContractVersion, Record<SupportedNetwork, number>> = {
-  [ContractVersion.V1_1]: {
+const VALIDATOR_APP_ID: Record<ContractVersionValue, Record<SupportedNetwork, number>> = {
+  [CONTRACT_VERSION.V1_1]: {
     testnet: 62368684,
     mainnet: 552635992
   },
-  [ContractVersion.V2]: {
+  [CONTRACT_VERSION.V2]: {
     //  TODO: update the values when new validator app is deployed
-    testnet: 62368684,
+    testnet: 113134165,
     mainnet: 552635992
   }
 };
@@ -26,7 +27,7 @@ const VALIDATOR_APP_ID: Record<ContractVersion, Record<SupportedNetwork, number>
  */
 export function getValidatorAppID(
   network: SupportedNetwork,
-  contractVersion: ContractVersion
+  contractVersion: ContractVersionValue
 ): number {
   const id = VALIDATOR_APP_ID[contractVersion][network];
 
@@ -47,7 +48,7 @@ export async function generateOptIntoValidatorTxns({
 }: {
   client: Algodv2;
   network: SupportedNetwork;
-  contractVersion: ContractVersion;
+  contractVersion: ContractVersionValue;
   initiatorAddr: string;
 }): Promise<SignerTransaction[]> {
   const suggestedParams = await client.getTransactionParams().do();
@@ -71,7 +72,7 @@ export async function generateOptOutOfValidatorTxns({
 }: {
   client: Algodv2;
   network: SupportedNetwork;
-  contractVersion: ContractVersion;
+  contractVersion: ContractVersionValue;
   initiatorAddr: string;
 }): Promise<SignerTransaction[]> {
   const suggestedParams = await client.getTransactionParams().do();

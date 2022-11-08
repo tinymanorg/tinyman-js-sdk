@@ -50,10 +50,11 @@ export declare function redeemAllExcessAsset({ client, data, initiatorSigner }: 
     txnID: string;
 }[]>;
 export declare const REDEEM_PROCESS_TXN_COUNT = 3;
-export declare function generateRedeemTxns({ client, pool, assetID, assetOut, initiatorAddr }: {
+export declare function generateRedeemTxns({ client, pool, assetID, assetOut, initiatorAddr, poolAddress }: {
     client: Algodv2;
     pool: PoolInfo;
     assetID: number;
     assetOut: number | bigint;
     initiatorAddr: string;
+    poolAddress: string;
 }): Promise<SignerTransaction[]>;
