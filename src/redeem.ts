@@ -183,18 +183,16 @@ export async function generateRedeemTxns({
   pool,
   assetID,
   assetOut,
-  initiatorAddr,
-  poolAddress
+  initiatorAddr
 }: {
   client: Algodv2;
   pool: V1PoolInfo;
   assetID: number;
   assetOut: number | bigint;
   initiatorAddr: string;
-  poolAddress: string;
 }): Promise<SignerTransaction[]> {
   const suggestedParams = await client.getTransactionParams().do();
-
+  const poolAddress = pool.account.address();
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
     from: poolAddress,
     appIndex: pool.validatorAppID,

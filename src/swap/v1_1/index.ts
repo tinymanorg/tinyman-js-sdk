@@ -61,12 +61,10 @@ async function generateTxns({
   assetIn,
   assetOut,
   slippage,
-  initiatorAddr,
-  poolAddress
+  initiatorAddr
 }: {
   client: Algodv2;
   pool: V1PoolInfo;
-  poolAddress: string;
   swapType: SwapType;
   assetIn: {assetID: number; amount: number | bigint};
   assetOut: {assetID: number; amount: number | bigint};
@@ -74,7 +72,7 @@ async function generateTxns({
   initiatorAddr: string;
 }): Promise<SignerTransaction[]> {
   const suggestedParams = await client.getTransactionParams().do();
-
+  const poolAddress = pool.account.address();
   const validatorAppCallArgs = [
     encodeString("swap"),
     swapType === SwapType.FixedInput ? encodeString("fi") : encodeString("fo")
