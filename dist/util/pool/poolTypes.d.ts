@@ -6,16 +6,6 @@ export declare enum PoolStatus {
     READY = "ready",
     ERROR = "error"
 }
-export interface PoolInfo {
-    account: LogicSigAccount;
-    contractVersion: ContractVersionValue;
-    validatorAppID: number;
-    asset1ID: number;
-    asset2ID: number;
-    liquidityTokenID?: number;
-    totalFeeShare?: bigint;
-    status: PoolStatus;
-}
 export interface V1PoolInfo {
     account: LogicSigAccount;
     contractVersion: ContractVersionValue;
@@ -25,7 +15,7 @@ export interface V1PoolInfo {
     liquidityTokenID?: number;
     status: PoolStatus;
 }
-export interface V2PoolInfo extends V1PoolInfo {
+export declare type V2PoolInfo = V1PoolInfo & {
     issuedPoolTokens?: bigint;
     asset1Reserves?: bigint;
     asset2Reserves?: bigint;
@@ -34,7 +24,7 @@ export interface V2PoolInfo extends V1PoolInfo {
     totalFeeShare?: bigint;
     protocolFeeRatio?: number;
     cumulativePriceUpdateTimeStamp?: number;
-}
+};
 export interface PoolReserves {
     asset1: bigint;
     asset2: bigint;

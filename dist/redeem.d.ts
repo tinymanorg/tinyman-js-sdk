@@ -1,6 +1,6 @@
 import { Algodv2 } from "algosdk";
 import { InitiatorSigner, SignerTransaction } from "./util/commonTypes";
-import { PoolInfo } from "./util/pool/poolTypes";
+import { V1PoolInfo } from "./util/pool/poolTypes";
 /**
  * Execute a redeem operation to collect excess assets from previous operations.
  *
@@ -14,8 +14,8 @@ import { PoolInfo } from "./util/pool/poolTypes";
  *   account.
  */
 export declare function redeemExcessAsset({ client, pool, txGroup, initiatorSigner }: {
-    client: any;
-    pool: PoolInfo;
+    client: Algodv2;
+    pool: V1PoolInfo;
     txGroup: SignerTransaction[];
     initiatorSigner: InitiatorSigner;
 }): Promise<{
@@ -39,7 +39,7 @@ export declare function redeemExcessAsset({ client, pool, txGroup, initiatorSign
 export declare function redeemAllExcessAsset({ client, data, initiatorSigner }: {
     client: any;
     data: {
-        pool: PoolInfo;
+        pool: V1PoolInfo;
         txGroup: SignerTransaction[];
     }[];
     initiatorSigner: InitiatorSigner;
@@ -50,11 +50,10 @@ export declare function redeemAllExcessAsset({ client, data, initiatorSigner }: 
     txnID: string;
 }[]>;
 export declare const REDEEM_PROCESS_TXN_COUNT = 3;
-export declare function generateRedeemTxns({ client, pool, assetID, assetOut, initiatorAddr, poolAddress }: {
+export declare function generateRedeemTxns({ client, pool, assetID, assetOut, initiatorAddr }: {
     client: Algodv2;
-    pool: PoolInfo;
+    pool: V1PoolInfo;
     assetID: number;
     assetOut: number | bigint;
     initiatorAddr: string;
-    poolAddress: string;
 }): Promise<SignerTransaction[]>;

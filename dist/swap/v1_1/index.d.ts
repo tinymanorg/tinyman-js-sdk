@@ -7,10 +7,9 @@ declare function signTxns({ pool, txGroup, initiatorSigner }: {
     txGroup: SignerTransaction[];
     initiatorSigner: InitiatorSigner;
 }): Promise<Uint8Array[]>;
-declare function generateTxns({ client, pool, swapType, assetIn, assetOut, slippage, initiatorAddr, poolAddress }: {
+declare function generateTxns({ client, pool, swapType, assetIn, assetOut, slippage, initiatorAddr }: {
     client: Algodv2;
     pool: V1PoolInfo;
-    poolAddress: string;
     swapType: SwapType;
     assetIn: {
         assetID: number;

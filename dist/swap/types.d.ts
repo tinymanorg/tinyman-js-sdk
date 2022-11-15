@@ -1,4 +1,4 @@
-import { PoolInfo, PoolReserves, V2PoolInfo } from "../util/pool/poolTypes";
+import { PoolReserves, V1PoolInfo, V2PoolInfo } from "../util/pool/poolTypes";
 export declare enum SwapType {
     FixedInput = "fixed-input",
     FixedOutput = "fixed-output"
@@ -69,7 +69,7 @@ export interface V2SwapExecution {
 export interface SwapQuoteWithPool {
     quote: SwapQuote;
     pool: {
-        info: PoolInfo;
+        info: V1PoolInfo | V2PoolInfo;
         reserves: PoolReserves;
     };
 }

@@ -1,6 +1,6 @@
 import { Algodv2 } from "algosdk";
 import { SupportedNetwork } from "../../commonTypes";
-import { PoolInfo, PoolReserves } from "../poolTypes";
+import { V1PoolInfo, V2PoolInfo, PoolReserves } from "../poolTypes";
 /**
  * @param {bigint} totalLiquidity Total amount of issued liquidity within a pool
  * @param {bigint} ownedLiquidity Amount of liquidity tokens within an account
@@ -25,12 +25,12 @@ export declare function isPoolEmpty(poolReserves: undefined | null | PoolReserve
  * @param pool - Pool info
  * @returns true if pool's status is NOT_CREATED, otherwise returns false
  */
-export declare function isPoolNotCreated(pool: undefined | null | PoolInfo): boolean;
+export declare function isPoolNotCreated(pool: undefined | null | V1PoolInfo | V2PoolInfo): boolean;
 /**
  * @param pool - Pool info
  * @returns true if pool's status is READY, otherwise returns false
  */
-export declare function isPoolReady(pool: undefined | null | PoolInfo): boolean;
+export declare function isPoolReady(pool: undefined | null | V1PoolInfo | V2PoolInfo): boolean;
 /**
  * @returns {PoolInfo[]} - Pool info for the given asset pair for all contract versions
  */
@@ -39,4 +39,4 @@ export declare function getPoolsForPair(params: {
     network: SupportedNetwork;
     asset1ID: number;
     asset2ID: number;
-}): Promise<PoolInfo[]>;
+}): Promise<[V1PoolInfo, V2PoolInfo]>;

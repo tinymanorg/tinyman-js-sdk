@@ -1,7 +1,7 @@
 import algosdk from "algosdk";
 import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
 import { SupportedNetwork } from "../../util/commonTypes";
-import { PoolInfo, V2PoolInfo } from "../../util/pool/poolTypes";
+import { V2PoolInfo } from "../../util/pool/poolTypes";
 import { FlexibleMintQuote } from "../types";
 export * from "./common";
 /**
@@ -28,7 +28,7 @@ export declare function getQuote({ pool, slippage, asset1, asset2 }: {
 }): FlexibleMintQuote;
 export declare function generateTxns({ client, network, poolAddress, asset_1, pool, asset_2, liquidityToken, initiatorAddr, minPoolTokenAssetAmount }: {
     client: AlgodClient;
-    pool: PoolInfo;
+    pool: V2PoolInfo;
     network: SupportedNetwork;
     poolAddress: string;
     asset_1: {

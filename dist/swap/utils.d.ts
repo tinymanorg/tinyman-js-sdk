@@ -2,7 +2,7 @@ import { Algodv2 } from "algosdk";
 import { CONTRACT_VERSION } from "../contract/constants";
 import { TinymanAnalyticsApiAsset } from "../util/asset/assetModels";
 import { InitiatorSigner, SignerTransaction, SupportedNetwork } from "../util/commonTypes";
-import { PoolInfo, PoolReserves, V1PoolInfo, V2PoolInfo } from "../util/pool/poolTypes";
+import { PoolReserves, V1PoolInfo, V2PoolInfo } from "../util/pool/poolTypes";
 import { SwapQuoteWithPool, SwapType } from "./types";
 /**
  * Gets quotes for swap from each pool passed as an argument,
@@ -11,7 +11,7 @@ import { SwapQuoteWithPool, SwapType } from "./types";
 export declare function getQuote(params: {
     type: SwapType;
     pools: {
-        info: PoolInfo;
+        info: V1PoolInfo | V2PoolInfo;
         reserves: PoolReserves;
     }[];
     assetIn: Pick<TinymanAnalyticsApiAsset, "id" | "decimals">;
@@ -24,7 +24,7 @@ export declare function getQuote(params: {
  */
 export declare function getFixedInputSwapQuote({ pools, assetIn, assetOut, amount }: {
     pools: {
-        info: PoolInfo;
+        info: V1PoolInfo | V2PoolInfo;
         reserves: PoolReserves;
     }[];
     assetIn: Pick<TinymanAnalyticsApiAsset, "id" | "decimals">;
@@ -37,7 +37,7 @@ export declare function getFixedInputSwapQuote({ pools, assetIn, assetOut, amoun
  */
 export declare function getFixedOutputSwapQuote({ pools, assetIn, assetOut, amount }: {
     pools: {
-        info: PoolInfo;
+        info: V1PoolInfo | V2PoolInfo;
         reserves: PoolReserves;
     }[];
     assetIn: Pick<TinymanAnalyticsApiAsset, "id" | "decimals">;

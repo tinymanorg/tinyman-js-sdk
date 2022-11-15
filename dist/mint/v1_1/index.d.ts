@@ -1,5 +1,5 @@
 import { SignerTransaction, InitiatorSigner, SupportedNetwork } from "../../util/commonTypes";
-import { PoolInfo, PoolReserves } from "../../util/pool/poolTypes";
+import { PoolReserves, V1PoolInfo } from "../../util/pool/poolTypes";
 import { V1_1MintQuote, V1_1MintExecution } from "../types";
 /**
  * Get a quote for how many liquidity tokens a deposit of asset1In and asset2In is worth at this
@@ -11,7 +11,7 @@ import { V1_1MintQuote, V1_1MintExecution } from "../types";
  * @param params.asset2In The quantity of the second asset being deposited.
  */
 export declare function getQuote({ pool, reserves, asset1In, asset2In }: {
-    pool: PoolInfo;
+    pool: V1PoolInfo;
     reserves: PoolReserves;
     asset1In: number | bigint;
     asset2In: number | bigint;
@@ -36,7 +36,7 @@ export declare function generateTxns({ client, network, poolAddress, asset_1, as
     initiatorAddr: string;
 }): Promise<SignerTransaction[]>;
 export declare function signTxns({ pool, txGroup, initiatorSigner }: {
-    pool: PoolInfo;
+    pool: V1PoolInfo;
     txGroup: SignerTransaction[];
     initiatorSigner: InitiatorSigner;
 }): Promise<Uint8Array[]>;
@@ -56,7 +56,7 @@ export declare function signTxns({ pool, txGroup, initiatorSigner }: {
  */
 export declare function execute({ client, pool, txGroup, signedTxns, initiatorAddr }: {
     client: any;
-    pool: PoolInfo;
+    pool: V1PoolInfo;
     txGroup: SignerTransaction[];
     signedTxns: Uint8Array[];
     initiatorAddr: string;

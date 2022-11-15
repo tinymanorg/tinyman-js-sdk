@@ -27,7 +27,7 @@ export declare const Bootstrap: {
             };
             signedTxns: Uint8Array[];
             txnIDs: string[];
-        }) => Promise<import("../util/pool/poolTypes").V1PoolInfo>;
+        }) => Promise<import("..").V1PoolInfo>;
         getBootstrapFundingTxnAmount: (isAlgoPool: boolean) => number;
     };
     v2: {
@@ -57,7 +57,7 @@ export declare const Bootstrap: {
             };
             signedTxns: Uint8Array[];
             txnIDs: string[];
-        }) => Promise<import("../util/pool/poolTypes").V2PoolInfo>;
+        }) => Promise<import("..").V2PoolInfo>;
         getBootstrapFundingTxnAmount: (isAlgoPool: boolean) => number;
     };
     generateTxns: typeof generateTxns;
