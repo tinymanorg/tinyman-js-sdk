@@ -94,8 +94,18 @@ export type {
   V2RemoveLiquidityQuote,
   V2SingleAssetRemoveLiquidityQuote
 } from "./remove-liquidity/v2/types";
+
+export {V1_1_REMOVE_LIQUIDITY_TXN_COUNT} from "./remove-liquidity/v1_1/constants";
+export {V2_REMOVE_LIQUIDITY_APP_CALL_INNER_TXN_COUNT} from "./remove-liquidity/v2/constants";
 export {RemoveLiquidity} from "./remove-liquidity";
 
+export type {
+  SwapType,
+  SwapQuote,
+  SwapQuoteWithPool,
+  V1SwapExecution,
+  V2SwapExecution
+} from "./swap/types";
 export {Swap} from "./swap";
 
 export {
