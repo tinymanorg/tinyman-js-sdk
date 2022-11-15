@@ -281,6 +281,7 @@ async function execute({
 
 export const RemoveLiquidityV1_1 = {
   generateTxns,
+  getQuote,
   signTxns,
   execute
 };

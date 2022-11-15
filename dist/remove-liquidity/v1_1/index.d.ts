@@ -40,6 +40,7 @@ declare function execute({ client, pool, txGroup, signedTxns, initiatorAddr }: {
 }): Promise<V1_1RemoveLiquidityExecution>;
 export declare const RemoveLiquidityV1_1: {
     generateTxns: typeof generateTxns;
+    getQuote: typeof getQuote;
     signTxns: typeof signTxns;
     execute: typeof execute;
 };

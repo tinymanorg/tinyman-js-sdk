@@ -9,6 +9,7 @@ export declare const RemoveLiquidity: {
             slippage: number;
             initiatorAddr: string;
         }) => Promise<import("..").SignerTransaction[]>;
+        getQuote: typeof import("./v1_1").getQuote;
         signTxns: ({ pool, txGroup, initiatorSigner }: {
             pool: import("..").V1PoolInfo;
             txGroup: import("..").SignerTransaction[];

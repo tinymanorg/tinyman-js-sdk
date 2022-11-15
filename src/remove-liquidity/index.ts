@@ -5,4 +5,5 @@ import {RemoveLiquidityV2} from "./v2";
 export const RemoveLiquidity = {
   [CONTRACT_VERSION.V1_1]: RemoveLiquidityV1_1,
   [CONTRACT_VERSION.V2]: RemoveLiquidityV2
+  // TODO: we need to export utils here
 };
