@@ -1,7 +1,7 @@
 import algosdk, {Algodv2, IntDecoding} from "algosdk";
 import {fromByteArray} from "base64-js";
 
-import {PoolInfo, PoolReserves, PoolStatus, PoolAssets} from "../poolTypes";
+import {PoolReserves, PoolStatus, PoolAssets, V1PoolInfo} from "../poolTypes";
 import {getContract} from "../../../contract";
 import {
   getAccountInformation,
@@ -27,7 +27,7 @@ export async function getPoolInfo(params: {
   network: SupportedNetwork;
   asset1ID: number;
   asset2ID: number;
-}): Promise<PoolInfo> {
+}): Promise<V1PoolInfo> {
   const {client, network, asset1ID, asset2ID} = params;
   const contract = getContract(CONTRACT_VERSION.V1_1);
   const poolLogicSig = contract.generateLogicSigAccountForPool(params);
@@ -40,7 +40,7 @@ export async function getPoolInfo(params: {
     validatorAppID
   );
   const liquidityTokenID = accountInformation["created-assets"][0]?.index;
-  let result: PoolInfo = {
+  let result: V1PoolInfo = {
     account: poolLogicSig,
     validatorAppID,
     asset1ID: sortedAssetIDs[0],
@@ -61,7 +61,7 @@ export async function getPoolInfo(params: {
 /* eslint-disable complexity */
 export async function getPoolReserves(
   client: Algodv2,
-  pool: PoolInfo
+  pool: V1PoolInfo
 ): Promise<PoolReserves> {
   const info = await getAccountInformation(
     client,

@@ -2,7 +2,7 @@ import {Algodv2} from "algosdk";
 
 import {SupportedNetwork} from "../../commonTypes";
 import {convertFromBaseUnits} from "../../util";
-import {PoolInfo, PoolReserves, PoolStatus} from "../poolTypes";
+import {V1PoolInfo, V2PoolInfo, PoolReserves, PoolStatus} from "../poolTypes";
 import {getPoolInfo as getV1_1PoolInfo} from "../v1_1";
 import {getPoolInfo as getV2PoolInfo} from "../v2";
 
@@ -64,7 +64,7 @@ export function isPoolEmpty(poolReserves: undefined | null | PoolReserves) {
  * @param pool - Pool info
  * @returns true if pool's status is NOT_CREATED, otherwise returns false
  */
-export function isPoolNotCreated(pool: undefined | null | PoolInfo) {
+export function isPoolNotCreated(pool: undefined | null | V1PoolInfo | V2PoolInfo) {
   return pool?.status === PoolStatus.NOT_CREATED;
 }
 
@@ -72,7 +72,7 @@ export function isPoolNotCreated(pool: undefined | null | PoolInfo) {
  * @param pool - Pool info
  * @returns true if pool's status is READY, otherwise returns false
  */
-export function isPoolReady(pool: undefined | null | PoolInfo) {
+export function isPoolReady(pool: undefined | null | V1PoolInfo | V2PoolInfo) {
   return pool?.status === PoolStatus.READY;
 }
 
@@ -84,6 +84,6 @@ export function getPoolsForPair(params: {
   network: SupportedNetwork;
   asset1ID: number;
   asset2ID: number;
-}): Promise<PoolInfo[]> {
+}): Promise<[V1PoolInfo, V2PoolInfo]> {
   return Promise.all([getV1_1PoolInfo(params), getV2PoolInfo(params)]);
 }

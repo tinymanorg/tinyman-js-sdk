@@ -9,7 +9,7 @@ import {
 import {InitiatorSigner, SignerTransaction} from "./util/commonTypes";
 import {DEFAULT_FEE_TXN_NOTE} from "./util/constant";
 import TinymanError from "./util/error/TinymanError";
-import {PoolInfo} from "./util/pool/poolTypes";
+import {V1PoolInfo} from "./util/pool/poolTypes";
 
 /**
  * Execute a redeem operation to collect excess assets from previous operations.
@@ -29,8 +29,8 @@ export async function redeemExcessAsset({
   txGroup,
   initiatorSigner
 }: {
-  client: any;
-  pool: PoolInfo;
+  client: Algodv2;
+  pool: V1PoolInfo;
   txGroup: SignerTransaction[];
   initiatorSigner: InitiatorSigner;
 }): Promise<{
@@ -69,7 +69,7 @@ async function signRedeemTxns({
   initiatorSigner
 }: {
   txGroup: SignerTransaction[];
-  pool: PoolInfo;
+  pool: V1PoolInfo;
   initiatorSigner: InitiatorSigner;
 }): Promise<Uint8Array[]> {
   const [signedFeeTxn] = await initiatorSigner([txGroup]);
@@ -105,7 +105,7 @@ export async function redeemAllExcessAsset({
   initiatorSigner
 }: {
   client: any;
-  data: {pool: PoolInfo; txGroup: SignerTransaction[]}[];
+  data: {pool: V1PoolInfo; txGroup: SignerTransaction[]}[];
   initiatorSigner: InitiatorSigner;
 }): Promise<
   {
@@ -187,7 +187,7 @@ export async function generateRedeemTxns({
   poolAddress
 }: {
   client: Algodv2;
-  pool: PoolInfo;
+  pool: V1PoolInfo;
   assetID: number;
   assetOut: number | bigint;
   initiatorAddr: string;

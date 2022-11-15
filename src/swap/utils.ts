@@ -3,7 +3,7 @@ import {Algodv2} from "algosdk";
 import {CONTRACT_VERSION} from "../contract/constants";
 import {TinymanAnalyticsApiAsset} from "../util/asset/assetModels";
 import {InitiatorSigner, SignerTransaction, SupportedNetwork} from "../util/commonTypes";
-import {PoolInfo, PoolReserves, V1PoolInfo, V2PoolInfo} from "../util/pool/poolTypes";
+import {PoolReserves, V1PoolInfo, V2PoolInfo} from "../util/pool/poolTypes";
 import {SwapQuoteWithPool, SwapQuote, SwapType} from "./types";
 import {SwapV1_1} from "./v1_1";
 import {SwapV2} from "./v2";
@@ -14,7 +14,7 @@ import {SwapV2} from "./v2";
  */
 export function getQuote(params: {
   type: SwapType;
-  pools: {info: PoolInfo; reserves: PoolReserves}[];
+  pools: {info: V1PoolInfo | V2PoolInfo; reserves: PoolReserves}[];
   assetIn: Pick<TinymanAnalyticsApiAsset, "id" | "decimals">;
   assetOut: Pick<TinymanAnalyticsApiAsset, "id" | "decimals">;
   amount: number | bigint;
@@ -36,7 +36,7 @@ export function getFixedInputSwapQuote({
   assetOut,
   amount
 }: {
-  pools: {info: PoolInfo; reserves: PoolReserves}[];
+  pools: {info: V1PoolInfo | V2PoolInfo; reserves: PoolReserves}[];
   assetIn: Pick<TinymanAnalyticsApiAsset, "id" | "decimals">;
   assetOut: Pick<TinymanAnalyticsApiAsset, "id" | "decimals">;
   amount: number | bigint;
@@ -72,7 +72,7 @@ export function getFixedOutputSwapQuote({
   assetOut,
   amount
 }: {
-  pools: {info: PoolInfo; reserves: PoolReserves}[];
+  pools: {info: V1PoolInfo | V2PoolInfo; reserves: PoolReserves}[];
   assetIn: Pick<TinymanAnalyticsApiAsset, "id" | "decimals">;
   assetOut: Pick<TinymanAnalyticsApiAsset, "id" | "decimals">;
   amount: number | bigint;

@@ -4,7 +4,7 @@ import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
 import {MINT_APP_CALL_ARGUMENTS, V2_MINT_INNER_TXN_COUNT} from "../constants";
 import {CONTRACT_VERSION} from "../../contract/constants";
 import {SupportedNetwork} from "../../util/commonTypes";
-import {PoolInfo, PoolStatus, V2PoolInfo} from "../../util/pool/poolTypes";
+import {PoolStatus, V2PoolInfo} from "../../util/pool/poolTypes";
 import {getValidatorAppID} from "../../validator";
 import {calculateSubsequentAddLiquidity} from "./util";
 import {poolUtils} from "../../util/pool";
@@ -109,7 +109,7 @@ export async function generateTxns({
   minPoolTokenAssetAmount
 }: {
   client: AlgodClient;
-  pool: PoolInfo;
+  pool: V2PoolInfo;
   network: SupportedNetwork;
   poolAddress: string;
   asset_1: {id: number; amount: number | bigint};

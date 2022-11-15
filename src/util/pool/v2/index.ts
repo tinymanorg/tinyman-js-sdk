@@ -10,7 +10,7 @@ import {
 import {sortAssetIds} from "../../asset/assetUtils";
 import {SupportedNetwork} from "../../commonTypes";
 import {DECODED_APP_STATE_KEYS} from "../poolConstants";
-import {V2PoolInfo, PoolStatus, PoolInfo, PoolReserves, PoolAssets} from "../poolTypes";
+import {V2PoolInfo, PoolStatus, PoolReserves, PoolAssets} from "../poolTypes";
 
 /**
  * @returns Information object for the pool with given arguments
@@ -74,7 +74,7 @@ export async function getPoolInfo(params: {
 
 export async function getPoolReserves(
   client: Algodv2,
-  pool: PoolInfo
+  pool: V2PoolInfo
 ): Promise<PoolReserves> {
   const accountInformation = await getAccountInformation(client, pool.account.address());
   const appState = getDecodedAccountApplicationLocalState(

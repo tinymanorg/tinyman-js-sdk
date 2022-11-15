@@ -14,7 +14,7 @@ import {
   DEFAULT_FEE_TXN_NOTE
 } from "../../util/constant";
 import TinymanError from "../../util/error/TinymanError";
-import {PoolInfo, PoolReserves} from "../../util/pool/poolTypes";
+import {PoolReserves, V1PoolInfo} from "../../util/pool/poolTypes";
 import {
   applySlippageToAmount,
   sendAndWaitRawTransaction,
@@ -40,7 +40,7 @@ export function getQuote({
   asset1In,
   asset2In
 }: {
-  pool: PoolInfo;
+  pool: V1PoolInfo;
   reserves: PoolReserves;
   asset1In: number | bigint;
   asset2In: number | bigint;
@@ -201,7 +201,7 @@ export async function signTxns({
   txGroup,
   initiatorSigner
 }: {
-  pool: PoolInfo;
+  pool: V1PoolInfo;
   txGroup: SignerTransaction[];
   initiatorSigner: InitiatorSigner;
 }): Promise<Uint8Array[]> {
@@ -250,7 +250,7 @@ export async function execute({
   initiatorAddr
 }: {
   client: any;
-  pool: PoolInfo;
+  pool: V1PoolInfo;
   txGroup: SignerTransaction[];
   signedTxns: Uint8Array[];
   initiatorAddr: string;
