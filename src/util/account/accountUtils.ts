@@ -43,6 +43,9 @@ export function getAccountInformation(
   });
 }
 
+/**
+ * @returns the decoded application local state object (both keys and values are decoded)
+ */
 export function getDecodedAccountApplicationLocalState(
   accountInfo: AccountInformationData,
   validatorAppID: number
@@ -56,7 +59,7 @@ export function getDecodedAccountApplicationLocalState(
   }
 
   const keyValue = appState["key-value"];
-  const decodedState = decodeState(keyValue);
+  const decodedState = decodeState({stateArray: keyValue, shouldDecodeKeys: true});
 
   return decodedState;
 }
@@ -72,9 +75,9 @@ export function calculateAccountMinimumRequiredBalance(
     MINIMUM_BALANCE_REQUIRED_PER_CREATED_APP * (account["created-apps"] || []).length +
     MINIMUM_BALANCE_REQUIRED_PER_APP * (account["apps-local-state"] || []).length +
     MINIMUM_BALANCE_REQUIRED_PER_BYTE_SCHEMA *
-      ((totalSchema && totalSchema["num-byte-slice"]) || 0) +
+      Number((totalSchema && totalSchema["num-byte-slice"]) || 0) +
     MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE *
-      ((totalSchema && totalSchema["num-uint"]) || 0) +
+      Number((totalSchema && totalSchema["num-uint"]) || 0) +
     MINIMUM_BALANCE_REQUIRED_PER_EXTRA_APP_PAGE * (account["apps-total-extra-pages"] || 0)
   );
 }
@@ -125,7 +128,7 @@ export async function getAccountExcessWithinPool({
       break;
     }
 
-    const state = decodeState(keyValue);
+    const state = decodeState({stateArray: keyValue});
 
     const excessAsset1Key = fromByteArray(
       joinByteArrays([
@@ -212,7 +215,7 @@ export async function getAccountExcess({
   let excessData: AccountExcess[] = [];
 
   if (appState && appState["key-value"]) {
-    const state = decodeState(appState["key-value"]);
+    const state = decodeState({stateArray: appState["key-value"]});
 
     for (let entry of Object.entries(state)) {
       const [key, value] = entry;

@@ -84,7 +84,7 @@ export async function getPoolReserves(
       break;
     }
 
-    const state = decodeState(keyValue);
+    const state = decodeState({stateArray: keyValue});
 
     const outstandingAsset1Key = fromByteArray(
       joinByteArrays([OUTSTANDING_ENCODED, algosdk.encodeUint64(pool.asset1ID)])
@@ -121,7 +121,6 @@ export async function getPoolReserves(
     const id = asset["asset-id"];
     const {amount} = asset;
 
-    /* eslint-disable eqeqeq */
     if (id == pool.asset1ID) {
       asset1Balance = BigInt(amount);
     } else if (id == pool.asset2ID) {
@@ -129,7 +128,6 @@ export async function getPoolReserves(
     } else if (id == pool.liquidityTokenID) {
       liquidityTokenBalance = BigInt(amount);
     }
-    /* eslint-enable eqeqeq */
   }
 
   if (pool.asset2ID === 0) {

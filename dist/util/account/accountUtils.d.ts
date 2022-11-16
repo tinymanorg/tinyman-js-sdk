@@ -3,6 +3,9 @@ import { V1PoolInfo } from "../pool/poolTypes";
 import { AccountExcessWithinPool, AccountInformation, AccountInformationData, AccountExcess } from "./accountTypes";
 import { ContractVersionValue } from "../../contract/types";
 export declare function getAccountInformation(client: Algodv2, address: string, intDecoding?: IntDecoding): Promise<AccountInformationData>;
+/**
+ * @returns the decoded application local state object (both keys and values are decoded)
+ */
 export declare function getDecodedAccountApplicationLocalState(accountInfo: AccountInformationData, validatorAppID: number): Record<string, string | number> | null;
 export declare function calculateAccountMinimumRequiredBalance(account: AccountInformation): number;
 export declare function hasSufficientMinimumBalance(accountData: AccountInformationData): boolean;

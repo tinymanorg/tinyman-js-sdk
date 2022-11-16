@@ -4,9 +4,16 @@ import {SignerTransaction} from "./commonTypes";
 import {AccountInformation} from "./account/accountTypes";
 import TinymanError from "./error/TinymanError";
 
-export function decodeState(
-  stateArray: AccountInformation["apps-local-state"][0]["key-value"] = []
-): Record<string, number | string> {
+export function decodeState({
+  stateArray = [],
+  shouldDecodeKeys = false
+}: {
+  stateArray: AccountInformation["apps-local-state"][0]["key-value"];
+  /**
+   * If `true`, the returned object will have decoded keys instead of base64 encoded keys.
+   */
+  shouldDecodeKeys?: boolean;
+}): Record<string, number | string> {
   const state: Record<string, number | string> = {};
 
   for (const pair of stateArray) {
@@ -24,7 +31,9 @@ export function decodeState(
       throw new Error(`Unexpected state type: ${pair.value.type}`);
     }
 
-    state[atob(key)] = value;
+    let finalKey = shouldDecodeKeys ? atob(key) : key;
+
+    state[finalKey] = value;
   }
 
   return state;
