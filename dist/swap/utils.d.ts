@@ -3,7 +3,8 @@ import { CONTRACT_VERSION } from "../contract/constants";
 import { TinymanAnalyticsApiAsset } from "../util/asset/assetModels";
 import { InitiatorSigner, SignerTransaction, SupportedNetwork } from "../util/commonTypes";
 import { PoolReserves, V1PoolInfo, V2PoolInfo } from "../util/pool/poolTypes";
-import { SwapQuoteWithPool, SwapType } from "./types";
+import { SwapQuoteWithPool } from "./types";
+import { SwapType } from "./constants";
 /**
  * Gets quotes for swap from each pool passed as an argument,
  * and returns the best quote (with the highest rate).

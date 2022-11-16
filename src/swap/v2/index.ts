@@ -18,7 +18,8 @@ import {
 } from "../../util/commonTypes";
 import TinymanError from "../../util/error/TinymanError";
 import {PoolStatus, V2PoolInfo} from "../../util/pool/poolTypes";
-import {SwapQuote, SwapType, V2SwapExecution} from "../types";
+import {SwapQuote, V2SwapExecution} from "../types";
+import {SwapType} from "../constants";
 import {
   V2_SWAP_APP_CALL_ARG_ENCODED,
   V2_SWAP_APP_CALL_SWAP_TYPE_ARGS_ENCODED,

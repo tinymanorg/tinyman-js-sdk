@@ -1,5 +1,5 @@
 import {encodeString} from "../../util/util";
-import {SwapType} from "../types";
+import {SwapType} from "../constants";
 
 export enum V2SwapTxnGroupIndices {
   /**

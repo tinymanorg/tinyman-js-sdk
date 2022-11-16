@@ -1,7 +1,8 @@
 import { Algodv2 } from "algosdk";
 import { InitiatorSigner, SignerTransaction } from "../../util/commonTypes";
 import { PoolReserves, V1PoolInfo } from "../../util/pool/poolTypes";
-import { SwapType, SwapQuote, V1SwapExecution } from "../types";
+import { SwapQuote, V1SwapExecution } from "../types";
+import { SwapType } from "../constants";
 declare function signTxns({ pool, txGroup, initiatorSigner }: {
     pool: V1PoolInfo;
     txGroup: SignerTransaction[];

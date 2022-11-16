@@ -15,7 +15,8 @@ import {DEFAULT_FEE_TXN_NOTE} from "../../util/constant";
 import {ALGO_ASSET_ID} from "../../util/asset/assetConstants";
 import {PoolReserves, PoolStatus, V1PoolInfo} from "../../util/pool/poolTypes";
 import {getAccountExcessWithinPool} from "../../util/account/accountUtils";
-import {SwapType, SwapQuote, V1SwapExecution} from "../types";
+import {SwapQuote, V1SwapExecution} from "../types";
+import {SwapType} from "../constants";
 
 // FEE = %0.3 or 3/1000
 const FEE_NUMERATOR = 3n;

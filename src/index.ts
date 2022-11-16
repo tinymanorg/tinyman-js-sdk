@@ -100,12 +100,12 @@ export {V2_REMOVE_LIQUIDITY_APP_CALL_INNER_TXN_COUNT} from "./remove-liquidity/v
 export {RemoveLiquidity} from "./remove-liquidity";
 
 export type {
-  SwapType,
   SwapQuote,
   SwapQuoteWithPool,
   V1SwapExecution,
   V2SwapExecution
 } from "./swap/types";
+export {SwapType} from "./swap/constants";
 export {Swap} from "./swap";
 
 export {

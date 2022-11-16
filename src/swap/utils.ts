@@ -4,7 +4,8 @@ import {CONTRACT_VERSION} from "../contract/constants";
 import {TinymanAnalyticsApiAsset} from "../util/asset/assetModels";
 import {InitiatorSigner, SignerTransaction, SupportedNetwork} from "../util/commonTypes";
 import {PoolReserves, V1PoolInfo, V2PoolInfo} from "../util/pool/poolTypes";
-import {SwapQuoteWithPool, SwapQuote, SwapType} from "./types";
+import {SwapQuoteWithPool, SwapQuote} from "./types";
+import {SwapType} from "./constants";
 import {SwapV1_1} from "./v1_1";
 import {SwapV2} from "./v2";
 

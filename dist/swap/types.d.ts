@@ -1,8 +1,4 @@
 import { PoolReserves, V1PoolInfo, V2PoolInfo } from "../util/pool/poolTypes";
-export declare enum SwapType {
-    FixedInput = "fixed-input",
-    FixedOutput = "fixed-output"
-}
 /** An object containing information about a swap quote. */
 export interface SwapQuote {
     /** The ID of the input asset in this quote. */

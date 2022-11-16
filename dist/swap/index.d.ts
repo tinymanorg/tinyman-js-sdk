@@ -1,7 +1,7 @@
 import { execute, generateTxns, getQuote, signTxns } from "./utils";
 export declare const Swap: {
     v1_1: {
-        getQuote: (type: import("./types").SwapType, pool: import("..").V1PoolInfo, reserves: import("..").PoolReserves, asset: {
+        getQuote: (type: import("./constants").SwapType, pool: import("..").V1PoolInfo, reserves: import("..").PoolReserves, asset: {
             assetID: number;
             amount: number | bigint;
         }, decimals: {
@@ -35,7 +35,7 @@ export declare const Swap: {
         generateTxns: ({ client, pool, swapType, assetIn, assetOut, slippage, initiatorAddr }: {
             client: import("algosdk").Algodv2;
             pool: import("..").V1PoolInfo;
-            swapType: import("./types").SwapType;
+            swapType: import("./constants").SwapType;
             assetIn: {
                 assetID: number;
                 amount: number | bigint;
@@ -55,7 +55,7 @@ export declare const Swap: {
         execute: ({ client, pool, swapType, txGroup, signedTxns, initiatorAddr }: {
             client: import("algosdk").Algodv2;
             pool: import("..").V1PoolInfo;
-            swapType: import("./types").SwapType;
+            swapType: import("./constants").SwapType;
             txGroup: import("..").SignerTransaction[];
             signedTxns: Uint8Array[];
             initiatorAddr: string;
@@ -76,7 +76,7 @@ export declare const Swap: {
         }) => Promise<Omit<import("./types").V1SwapExecution, "fees" | "groupID">>;
     };
     v2: {
-        getQuote: (type: import("./types").SwapType, pool: import("..").V2PoolInfo, asset: {
+        getQuote: (type: import("./constants").SwapType, pool: import("..").V2PoolInfo, asset: {
             assetID: number;
             amount: number | bigint;
         }, decimals: {
@@ -108,7 +108,7 @@ export declare const Swap: {
         generateTxns: ({ client, pool, swapType, assetIn, assetOut, initiatorAddr, slippage }: {
             client: import("algosdk").Algodv2;
             pool: import("..").V2PoolInfo;
-            swapType: import("./types").SwapType;
+            swapType: import("./constants").SwapType;
             assetIn: {
                 assetID: number;
                 amount: number | bigint;

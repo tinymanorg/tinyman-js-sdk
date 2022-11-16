@@ -1,7 +1,8 @@
 import { Algodv2 } from "algosdk";
 import { InitiatorSigner, SignerTransaction, SupportedNetwork } from "../../util/commonTypes";
 import { V2PoolInfo } from "../../util/pool/poolTypes";
-import { SwapQuote, SwapType, V2SwapExecution } from "../types";
+import { SwapQuote, V2SwapExecution } from "../types";
+import { SwapType } from "../constants";
 declare function generateTxns({ client, pool, swapType, assetIn, assetOut, initiatorAddr, slippage }: {
     client: Algodv2;
     pool: V2PoolInfo;
