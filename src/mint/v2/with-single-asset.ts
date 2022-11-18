@@ -12,15 +12,6 @@ import {poolUtils} from "../../util/pool";
 import {SingleMintQuote} from "../types";
 export * from "./common";
 
-/**
- * Get a quote for how many liquidity tokens a deposit of asset1In and asset2In is worth at this
- * moment. This does not execute any transactions.
- *
- * @param params.pool Information for the pool.
- * @param params.reserves Pool reserves.
- * @param params.asset1In The quantity of the first asset being deposited.
- * @param params.asset2In The quantity of the second asset being deposited.
- */
 export function getQuote({
   pool,
   assetIn,
@@ -28,16 +19,9 @@ export function getQuote({
   decimals
 }: {
   pool: V2PoolInfo;
-  assetIn: {
-    id: number;
-    amount: number | bigint;
-  };
-
+  assetIn: {id: number; amount: number | bigint};
+  decimals: {asset1: number; asset2: number};
   slippage?: number;
-  decimals: {
-    asset1: number;
-    asset2: number;
-  };
 }): SingleMintQuote {
   if (pool.issuedPoolTokens === 0n) {
     throw new Error("Pool has no liquidity");
@@ -97,8 +81,7 @@ export async function generateTxns({
   client,
   network,
   poolAddress,
-  asset_1,
-  asset_2,
+  assetIn,
   liquidityToken,
   initiatorAddr,
   minPoolTokenAssetAmount
@@ -106,31 +89,13 @@ export async function generateTxns({
   client: AlgodClient;
   network: SupportedNetwork;
   poolAddress: string;
-  // TODO: consider getting assetIn instead of asset_1 and asset_2
-  asset_1: {id: number; amount: number | bigint};
-  asset_2: {id: number; amount: number | bigint};
+  assetIn: {id: number; amount: number | bigint};
   liquidityToken: {id: number; amount: number | bigint};
   initiatorAddr: string;
   minPoolTokenAssetAmount: bigint;
 }) {
-  if (Boolean(asset_1.amount) && Boolean(asset_2.amount)) {
-    throw new Error(
-      "If you want to add asset 1 and asset 2 at the same time, please use flexible add liquidity."
-    );
-  }
-
-  let assetIn: {id: number; amount: number | bigint};
-
-  if (asset_1.amount) {
-    assetIn = asset_1;
-  } else if (asset_2.amount) {
-    assetIn = asset_2;
-  } else {
-    throw new Error("Please provide at least one asset amount to add liquidity.");
-  }
-
-  const isAlgoPool = isAlgo(assetIn.id);
   const suggestedParams = await client.getTransactionParams().do();
+  const isAlgoPool = isAlgo(assetIn.id);
   const assetInTxn = isAlgoPool
     ? algosdk.makePaymentTxnWithSuggestedParamsFromObject({
         from: initiatorAddr,
@@ -164,13 +129,7 @@ export async function generateTxns({
   const txGroup = algosdk.assignGroupID([assetInTxn, validatorAppCallTxn]);
 
   return [
-    {
-      txn: txGroup[0],
-      signers: [initiatorAddr]
-    },
-    {
-      txn: txGroup[1],
-      signers: [initiatorAddr]
-    }
+    {txn: txGroup[0], signers: [initiatorAddr]},
+    {txn: txGroup[1], signers: [initiatorAddr]}
   ];
 }
