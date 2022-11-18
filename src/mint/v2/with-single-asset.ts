@@ -1,7 +1,7 @@
 import algosdk, {ALGORAND_MIN_TX_FEE, encodeUint64} from "algosdk";
 import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
 
-import {MINT_APP_CALL_ARGUMENTS, V2_MINT_INNER_TXN_COUNT} from "../constants";
+import {ADD_LIQUIDITY_APP_CALL_ARGUMENTS} from "../constants";
 import {CONTRACT_VERSION} from "../../contract/constants";
 import {SupportedNetwork} from "../../util/commonTypes";
 import {PoolStatus, V2PoolInfo} from "../../util/pool/poolTypes";
@@ -9,7 +9,8 @@ import {getValidatorAppID} from "../../validator";
 import {isAlgo} from "../../util/asset/assetUtils";
 import {calculateSubsequentAddLiquidity} from "./util";
 import {poolUtils} from "../../util/pool";
-import {SingleMintQuote} from "../types";
+import {V2SingleAssetInAddLiquidityQuote} from "./types";
+import {V2_ADD_LIQUIDITY_INNER_TXN_COUNT} from "./constants";
 export * from "./common";
 
 export function getQuote({
@@ -22,7 +23,7 @@ export function getQuote({
   assetIn: {id: number; amount: number | bigint};
   decimals: {asset1: number; asset2: number};
   slippage?: number;
-}): SingleMintQuote {
+}): V2SingleAssetInAddLiquidityQuote {
   if (pool.issuedPoolTokens === 0n) {
     throw new Error("Pool has no liquidity");
   }
@@ -114,7 +115,7 @@ export async function generateTxns({
     from: initiatorAddr,
     appIndex: getValidatorAppID(network, CONTRACT_VERSION.V2),
     appArgs: [
-      ...MINT_APP_CALL_ARGUMENTS.v2.SINGLE_ASSET_MODE,
+      ...ADD_LIQUIDITY_APP_CALL_ARGUMENTS.v2.SINGLE_ASSET_MODE,
       encodeUint64(minPoolTokenAssetAmount)
     ],
     accounts: [poolAddress],
@@ -124,7 +125,7 @@ export async function generateTxns({
 
   // Add +1 to account for the fee of the outer txn
   validatorAppCallTxn.fee =
-    (V2_MINT_INNER_TXN_COUNT.SINGLE_ASSET_MODE + 1) * ALGORAND_MIN_TX_FEE;
+    (V2_ADD_LIQUIDITY_INNER_TXN_COUNT.SINGLE_ASSET_MODE + 1) * ALGORAND_MIN_TX_FEE;
 
   const txGroup = algosdk.assignGroupID([assetInTxn, validatorAppCallTxn]);
 

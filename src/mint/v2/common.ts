@@ -4,7 +4,8 @@ import {InitiatorSigner, SignerTransaction} from "../../util/commonTypes";
 import TinymanError from "../../util/error/TinymanError";
 import {V2PoolInfo} from "../../util/pool/poolTypes";
 import {getTxnGroupID, sendAndWaitRawTransaction, sumUpTxnFees} from "../../util/util";
-import {V2MintExecution, V2MintTxnIndices, V2MintType} from "../types";
+import {V2AddLiquidityExecution} from "./types";
+import {V2AddLiquidityTxnIndices, V2AddLiquidityType} from "./constants";
 
 export function signTxns({
   txGroup,
@@ -17,12 +18,12 @@ export function signTxns({
 }
 
 /**
- * Execute a mint operation with the desired quantities.
+ * Execute an add liquidity operation with the desired quantities.
  *
  * @param params.client An Algodv2 client.
  * @param params.pool Information for the pool.
  * @param params.txGroup The transaction group to execute.
- * @param params.mode The mint mode.
+ * @param params.mode The add liquidity mode.
  */
 export async function execute({
   client,
@@ -35,14 +36,14 @@ export async function execute({
   pool: V2PoolInfo;
   txGroup: SignerTransaction[];
   signedTxns: Uint8Array[];
-  mode: V2MintType;
-}): Promise<V2MintExecution> {
+  mode: V2AddLiquidityType;
+}): Promise<V2AddLiquidityExecution> {
   try {
     const [{confirmedRound, txnID}] = await sendAndWaitRawTransaction(client, [
       signedTxns
     ]);
     const appCallTxnId =
-      txGroup[V2MintTxnIndices[mode].VALIDATOR_APP_CALL_TXN].txn.txID();
+      txGroup[V2AddLiquidityTxnIndices[mode].VALIDATOR_APP_CALL_TXN].txn.txID();
     // TODO: instead of 1000, use the const for wait rounds here
     const appCallTxnResponse = await waitForConfirmation(client, appCallTxnId, 1000);
     const assetOutInnerTxn = appCallTxnResponse["inner-txns"].find(
@@ -66,12 +67,12 @@ export async function execute({
   } catch (error: any) {
     const parsedError = new TinymanError(
       error,
-      "We encountered something unexpected while minting liquidity. Try again later."
+      "We encountered something unexpected while adding liquidity. Try again later."
     );
 
     if (parsedError.type === "SlippageTolerance") {
       parsedError.setMessage(
-        "Minting failed due to too much slippage in the price. Please adjust the slippage tolerance and try again."
+        "Adding liquidity failed due to too much slippage in the price. Please adjust the slippage tolerance and try again."
       );
     }
 

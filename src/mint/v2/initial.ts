@@ -6,8 +6,9 @@ import {isAlgo} from "../../util/asset/assetUtils";
 import {SupportedNetwork} from "../../util/commonTypes";
 import {V2PoolInfo} from "../../util/pool/poolTypes";
 import {getValidatorAppID} from "../../validator";
-import {MINT_APP_CALL_ARGUMENTS, V2_MINT_INNER_TXN_COUNT} from "../constants";
-import {InitialMintQuote} from "../types";
+import {ADD_LIQUIDITY_APP_CALL_ARGUMENTS} from "../constants";
+import {V2_ADD_LIQUIDITY_INNER_TXN_COUNT} from "./constants";
+import {V2InitialAddLiquidityQuote} from "./types";
 import {calculateInitialAddLiquidity} from "./util";
 export * from "./common";
 
@@ -21,7 +22,7 @@ export function getQuote({
   asset1In: number | bigint;
   asset2In: number | bigint;
   slippage?: number;
-}): InitialMintQuote {
+}): V2InitialAddLiquidityQuote {
   if (pool.issuedPoolTokens !== 0n) {
     throw new Error("Pool already has liquidity");
   }
@@ -85,7 +86,7 @@ export async function generateTxns({
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
     from: initiatorAddr,
     appIndex: getValidatorAppID(network, CONTRACT_VERSION.V2),
-    appArgs: MINT_APP_CALL_ARGUMENTS.v2.INITIAL_LIQUIDITY,
+    appArgs: ADD_LIQUIDITY_APP_CALL_ARGUMENTS.v2.INITIAL_LIQUIDITY,
     accounts: [poolAddress],
     foreignAssets: [liquidityToken.id],
     suggestedParams
@@ -93,7 +94,7 @@ export async function generateTxns({
 
   // Add +1 to account for the fee of the outer txn
   validatorAppCallTxn.fee =
-    (V2_MINT_INNER_TXN_COUNT.INITIAL_LIQUIDITY + 1) * ALGORAND_MIN_TX_FEE;
+    (V2_ADD_LIQUIDITY_INNER_TXN_COUNT.INITIAL_LIQUIDITY + 1) * ALGORAND_MIN_TX_FEE;
 
   const txGroup = algosdk.assignGroupID([asset1InTxn, asset2InTxn, validatorAppCallTxn]);
 

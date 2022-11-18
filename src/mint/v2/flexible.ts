@@ -1,7 +1,7 @@
 import algosdk, {ALGORAND_MIN_TX_FEE, encodeUint64} from "algosdk";
 import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
 
-import {MINT_APP_CALL_ARGUMENTS, V2_MINT_INNER_TXN_COUNT} from "../constants";
+import {ADD_LIQUIDITY_APP_CALL_ARGUMENTS} from "../constants";
 import {CONTRACT_VERSION} from "../../contract/constants";
 import {SupportedNetwork} from "../../util/commonTypes";
 import {PoolStatus, V2PoolInfo} from "../../util/pool/poolTypes";
@@ -9,7 +9,8 @@ import {getValidatorAppID} from "../../validator";
 import {calculateSubsequentAddLiquidity} from "./util";
 import {poolUtils} from "../../util/pool";
 import {isAlgo} from "../../util/asset/assetUtils";
-import {MintSwapQuote, FlexibleMintQuote} from "../types";
+import {V2AddLiquidityInternalSwapQuote, V2FlexibleAddLiquidityQuote} from "./types";
+import {V2_ADD_LIQUIDITY_INNER_TXN_COUNT} from "./constants";
 export * from "./common";
 
 /**
@@ -38,7 +39,7 @@ export function getQuote({
     decimals: number;
   };
   slippage?: number;
-}): FlexibleMintQuote {
+}): V2FlexibleAddLiquidityQuote {
   if (pool.issuedPoolTokens === 0n) {
     throw new Error(
       "Pool has no liquidity at the moment. To be able to do Flexible Swap, you should first add initial liquidity."
@@ -71,7 +72,7 @@ export function getQuote({
     }
   );
 
-  const swapQuote: MintSwapQuote = {
+  const swapQuote: V2AddLiquidityInternalSwapQuote = {
     amountIn: swapInAmount,
     amountOut: swapOutAmount,
     swapFees: swapTotalFeeAmount,
@@ -146,7 +147,7 @@ export async function generateTxns({
     from: initiatorAddr,
     appIndex: getValidatorAppID(network, CONTRACT_VERSION.V2),
     appArgs: [
-      ...MINT_APP_CALL_ARGUMENTS.v2.FLEXIBLE_MODE,
+      ...ADD_LIQUIDITY_APP_CALL_ARGUMENTS.v2.FLEXIBLE_MODE,
       encodeUint64(minPoolTokenAssetAmount)
     ],
     accounts: [poolAddress],
@@ -156,7 +157,7 @@ export async function generateTxns({
 
   // Add +1 to account for the fee of the outer txn
   validatorAppCallTxn.fee =
-    (V2_MINT_INNER_TXN_COUNT.FLEXIBLE_MODE + 1) * ALGORAND_MIN_TX_FEE;
+    (V2_ADD_LIQUIDITY_INNER_TXN_COUNT.FLEXIBLE_MODE + 1) * ALGORAND_MIN_TX_FEE;
 
   const txGroup = algosdk.assignGroupID([asset1InTxn, asset2InTxn, validatorAppCallTxn]);
 

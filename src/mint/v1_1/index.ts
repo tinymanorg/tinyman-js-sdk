@@ -1,6 +1,6 @@
 import algosdk from "algosdk";
 
-import {MINT_APP_CALL_ARGUMENTS} from "../constants";
+import {ADD_LIQUIDITY_APP_CALL_ARGUMENTS} from "../constants";
 import {CONTRACT_VERSION} from "../../contract/constants";
 import {getAccountExcessWithinPool} from "../../util/account/accountUtils";
 import {ALGO_ASSET_ID} from "../../util/asset/assetConstants";
@@ -9,10 +9,7 @@ import {
   InitiatorSigner,
   SupportedNetwork
 } from "../../util/commonTypes";
-import {
-  MINIMUM_LIQUIDITY_MINTING_AMOUNT,
-  DEFAULT_FEE_TXN_NOTE
-} from "../../util/constant";
+import {MINIMUM_ADD_LIQUIDITY_AMOUNT, DEFAULT_FEE_TXN_NOTE} from "../../util/constant";
 import TinymanError from "../../util/error/TinymanError";
 import {PoolReserves, V1PoolInfo} from "../../util/pool/poolTypes";
 import {
@@ -22,7 +19,8 @@ import {
   getTxnGroupID
 } from "../../util/util";
 import {getValidatorAppID} from "../../validator";
-import {V1_1MintQuote, V1_1MintExecution, V1_1MintTxnIndices} from "../types";
+import {V1_1AddLiquidityQuote, V1_1AddLiquidityExecution} from "./types";
+import {V1_1AddLiquidityTxnIndices} from "./constants";
 import {poolUtils} from "../../util/pool";
 
 /**
@@ -44,14 +42,14 @@ export function getQuote({
   reserves: PoolReserves;
   asset1In: number | bigint;
   asset2In: number | bigint;
-}): V1_1MintQuote {
+}): V1_1AddLiquidityQuote {
   if (reserves.issuedLiquidity === 0n) {
     // TODO: compute sqrt on bigints
     const geoMean = BigInt(Math.floor(Math.sqrt(Number(asset1In) * Number(asset2In))));
 
-    if (geoMean <= BigInt(MINIMUM_LIQUIDITY_MINTING_AMOUNT)) {
+    if (geoMean <= BigInt(MINIMUM_ADD_LIQUIDITY_AMOUNT)) {
       throw new Error(
-        `Initial liquidity mint too small. Liquidity minting amount must be greater than ${MINIMUM_LIQUIDITY_MINTING_AMOUNT}, this quote is for ${geoMean}.`
+        `Initial liquidity amount is too small. The amount must be greater than ${MINIMUM_ADD_LIQUIDITY_AMOUNT}, this quote is for ${geoMean}.`
       );
     }
 
@@ -62,7 +60,7 @@ export function getQuote({
       asset2ID: pool.asset2ID,
       asset2In: BigInt(asset2In),
       liquidityID: pool.liquidityTokenID!,
-      liquidityOut: geoMean - BigInt(MINIMUM_LIQUIDITY_MINTING_AMOUNT),
+      liquidityOut: geoMean - BigInt(MINIMUM_ADD_LIQUIDITY_AMOUNT),
       share: 1
     };
   }
@@ -112,7 +110,7 @@ export async function generateTxns({
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
     from: poolAddress,
     appIndex: getValidatorAppID(network, CONTRACT_VERSION.V1_1),
-    appArgs: MINT_APP_CALL_ARGUMENTS.v1_1,
+    appArgs: ADD_LIQUIDITY_APP_CALL_ARGUMENTS.v1_1,
     accounts: [initiatorAddr],
     foreignAssets:
       asset_2.id == ALGO_ASSET_ID
@@ -211,13 +209,13 @@ export async function signTxns({
   ]);
 
   const signedTxns = txGroup.map((txDetail, index) => {
-    if (index === V1_1MintTxnIndices.FEE_TXN) {
+    if (index === V1_1AddLiquidityTxnIndices.FEE_TXN) {
       return signedFeeTxn;
     }
-    if (index === V1_1MintTxnIndices.ASSET1_IN_TXN) {
+    if (index === V1_1AddLiquidityTxnIndices.ASSET1_IN_TXN) {
       return signedAsset1InTxn;
     }
-    if (index === V1_1MintTxnIndices.ASSET2_IN_TXN) {
+    if (index === V1_1AddLiquidityTxnIndices.ASSET2_IN_TXN) {
       return signedAsset2InTxn;
     }
     const {blob} = algosdk.signLogicSigTransactionObject(txDetail.txn, lsig);
@@ -229,7 +227,7 @@ export async function signTxns({
 }
 
 /**
- * Execute a mint operation with the desired quantities.
+ * Execute adding liquidity operation with the desired quantities.
  *
  * @param params.client An Algodv2 client.
  * @param params.pool Information for the pool.
@@ -238,7 +236,7 @@ export async function signTxns({
  * @param params.liquidityOut The quantity of liquidity tokens being withdrawn.
  * @param params.slippage The maximum acceptable slippage rate. Should be a number between 0 and 100
  *   and acts as a percentage of params.liquidityOut.
- * @param params.initiatorAddr The address of the account performing the mint operation.
+ * @param params.initiatorAddr The address of the account performing the add liquidity operation.
  * @param params.initiatorSigner A function that will sign transactions from the initiator's
  *   account.
  */
@@ -254,10 +252,10 @@ export async function execute({
   txGroup: SignerTransaction[];
   signedTxns: Uint8Array[];
   initiatorAddr: string;
-}): Promise<V1_1MintExecution> {
+}): Promise<V1_1AddLiquidityExecution> {
   try {
     const liquidityOutAmount = BigInt(
-      txGroup[V1_1MintTxnIndices.LIQUDITY_OUT_TXN].txn.amount
+      txGroup[V1_1AddLiquidityTxnIndices.LIQUDITY_OUT_TXN].txn.amount
     );
 
     const prevExcessAssets = await getAccountExcessWithinPool({
@@ -291,7 +289,7 @@ export async function execute({
       liquidityID: pool.liquidityTokenID!,
       liquidityOut: liquidityOutAmount + excessAmountDelta,
       excessAmount: {
-        excessAmountForMinting: excessAmountDelta,
+        excessAmountForAddingLiquidity: excessAmountDelta,
         totalExcessAmount: excessAssets.excessLiquidityTokens
       },
       txnID,
@@ -300,12 +298,12 @@ export async function execute({
   } catch (error: any) {
     const parsedError = new TinymanError(
       error,
-      "We encountered something unexpected while minting liquidity. Try again later."
+      "We encountered something unexpected while adding liquidity. Try again later."
     );
 
     if (parsedError.type === "SlippageTolerance") {
       parsedError.setMessage(
-        "Minting failed due to too much slippage in the price. Please adjust the slippage tolerance and try again."
+        "Adding liquidity failed due to too much slippage in the price. Please adjust the slippage tolerance and try again."
       );
     }
 
