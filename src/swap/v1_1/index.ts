@@ -17,6 +17,7 @@ import {PoolReserves, PoolStatus, V1PoolInfo} from "../../util/pool/poolTypes";
 import {getAccountExcessWithinPool} from "../../util/account/accountUtils";
 import {SwapQuote, V1SwapExecution} from "../types";
 import {SwapType} from "../constants";
+import {calculatePriceImpact, calculateSwapRate} from "../common/utils";
 
 // FEE = %0.3 or 3/1000
 const FEE_NUMERATOR = 3n;
@@ -239,15 +240,10 @@ function getFixedInputSwapQuote({
     throw new Error("Output amount exceeds available liquidity.");
   }
 
-  const rate =
-    convertFromBaseUnits(decimals.assetOut, Number(assetOutAmount)) /
-    convertFromBaseUnits(decimals.assetIn, Number(assetInAmount));
-
-  const poolPrice =
-    convertFromBaseUnits(decimals.assetOut, Number(outputSupply)) /
-    convertFromBaseUnits(decimals.assetIn, Number(inputSupply));
-
-  const priceImpact = roundNumber({decimalPlaces: 5}, Math.abs(rate / poolPrice - 1));
+  const assetDataForSwapUtils = {
+    assetIn: {amount: assetInAmount, decimals: decimals.assetIn},
+    assetOut: {amount: assetOutAmount, decimals: decimals.assetOut}
+  };
 
   return {
     round: reserves.round,
@@ -256,8 +252,12 @@ function getFixedInputSwapQuote({
     assetOutID,
     assetOutAmount,
     swapFee: Number(swapFee),
-    rate,
-    priceImpact
+    rate: calculateSwapRate(assetDataForSwapUtils),
+    priceImpact: calculatePriceImpact({
+      inputSupply,
+      outputSupply,
+      ...assetDataForSwapUtils
+    })
   };
 }
 

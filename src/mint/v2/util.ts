@@ -1,5 +1,5 @@
+import {calculatePriceImpact} from "../../swap/common/utils";
 import {PoolReserves} from "../../util/pool/poolTypes";
-import {convertFromBaseUnits} from "../../util/util";
 import {LOCKED_POOL_TOKENS} from "../constants";
 
 export function calculateSubsequentAddLiquidity(
@@ -70,12 +70,12 @@ export function calculateSubsequentAddLiquidity(
     poolTokenAssetAmount -= feeAsPoolTokens;
   }
 
-  const swapPriceImpact = calculatePriceImpact(
-    swapFromAsset1ToAsset2 ? reserves.asset1 : reserves.asset2,
-    swapFromAsset1ToAsset2 ? reserves.asset2 : reserves.asset1,
-    {amount: swapInAmount, decimals: decimals.asset1},
-    {amount: swapOutAmount, decimals: decimals.asset2}
-  );
+  const swapPriceImpact = calculatePriceImpact({
+    inputSupply: swapFromAsset1ToAsset2 ? reserves.asset1 : reserves.asset2,
+    outputSupply: swapFromAsset1ToAsset2 ? reserves.asset2 : reserves.asset1,
+    assetIn: {amount: swapInAmount, decimals: decimals.asset1},
+    assetOut: {amount: swapOutAmount, decimals: decimals.asset2}
+  });
 
   return {
     poolTokenAssetAmount,
@@ -105,28 +105,4 @@ function calculateInternalSwapFeeAmount(
   totalFeeShare: number | bigint
 ) {
   return (swapAmount * BigInt(totalFeeShare)) / (BigInt(10_000) - BigInt(totalFeeShare));
-}
-
-function calculatePriceImpact(
-  inputSupply: bigint,
-  outputSupply: bigint,
-  outputAsset: {
-    amount: bigint;
-    decimals: number;
-  },
-  inputAsset: {
-    amount: bigint;
-    decimals: number;
-  }
-) {
-  const swapPrice =
-    convertFromBaseUnits(outputAsset.decimals, outputAsset.amount) /
-    convertFromBaseUnits(inputAsset.decimals, inputAsset.amount);
-  const poolPrice =
-    convertFromBaseUnits(outputAsset.decimals, outputSupply) /
-    convertFromBaseUnits(inputAsset.decimals, inputSupply);
-
-  const swapPoolPriceRatio = swapPrice / poolPrice;
-
-  return BigInt(Math.abs(Math.round(swapPoolPriceRatio - 1)));
 }

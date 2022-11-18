@@ -8,7 +8,6 @@ import algosdk, {
 import {
   applySlippageToAmount,
   convertFromBaseUnits,
-  roundNumber,
   sendAndWaitRawTransaction
 } from "../../util/util";
 import {
@@ -28,6 +27,7 @@ import {
 } from "./constants";
 import {poolUtils} from "../../util/pool";
 import {isAlgo} from "../../util/asset/assetUtils";
+import {calculatePriceImpact} from "../common/utils";
 
 async function generateTxns({
   client,
@@ -357,9 +357,14 @@ function calculateFixedInputSwap({
   const priceImpact = calculatePriceImpact({
     inputSupply,
     outputSupply,
-    swapInputAmount,
-    swapOutputAmount,
-    decimals
+    assetIn: {
+      amount: swapInputAmount,
+      decimals: decimals.assetIn
+    },
+    assetOut: {
+      amount: swapOutputAmount,
+      decimals: decimals.assetOut
+    }
   });
 
   return {
@@ -395,9 +400,14 @@ function calculateFixedOutputSwap({
   const priceImpact = calculatePriceImpact({
     inputSupply,
     outputSupply,
-    swapInputAmount,
-    swapOutputAmount,
-    decimals
+    assetIn: {
+      amount: swapInputAmount,
+      decimals: decimals.assetIn
+    },
+    assetOut: {
+      amount: swapOutputAmount,
+      decimals: decimals.assetOut
+    }
   });
 
   return {
@@ -464,29 +474,6 @@ function calculateSwapAmountOfFixedOutputSwap({
   swapAmount += BigInt(1);
 
   return swapAmount;
-}
-
-function calculatePriceImpact({
-  inputSupply,
-  outputSupply,
-  swapInputAmount,
-  swapOutputAmount,
-  decimals
-}: {
-  inputSupply: bigint;
-  outputSupply: bigint;
-  swapInputAmount: bigint;
-  swapOutputAmount: bigint;
-  decimals: {assetIn: number; assetOut: number};
-}): number {
-  const swapPrice =
-    convertFromBaseUnits(decimals.assetOut, Number(swapOutputAmount)) /
-    convertFromBaseUnits(decimals.assetIn, Number(swapInputAmount));
-  const poolPrice =
-    convertFromBaseUnits(decimals.assetOut, Number(outputSupply)) /
-    convertFromBaseUnits(decimals.assetIn, Number(inputSupply));
-
-  return roundNumber({decimalPlaces: 5}, Math.abs(swapPrice / poolPrice - 1));
 }
 
 export const SwapV2 = {

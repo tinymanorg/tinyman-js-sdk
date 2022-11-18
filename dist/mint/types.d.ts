@@ -21,7 +21,7 @@ export interface MintSwapQuote {
     amountIn: bigint;
     amountOut: bigint;
     swapFees: bigint;
-    priceImpact: bigint;
+    priceImpact: number;
 }
 export interface FlexibleMintQuote {
     asset1ID: number;
