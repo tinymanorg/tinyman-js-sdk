@@ -103,7 +103,7 @@ export function getFixedOutputSwapQuote({
  * Compares the given quotes and returns the best one (with the highest rate).
  */
 function getBestQuote(quotes: SwapQuoteWithPool[]): SwapQuoteWithPool {
-  const quotesByDescendingRate = quotes.sort((a, b) => b.quote.rate - a.quote.rate);
+  const quotesByDescendingRate = [...quotes].sort((a, b) => b.quote.rate - a.quote.rate);
 
   return quotesByDescendingRate[0];
 }
