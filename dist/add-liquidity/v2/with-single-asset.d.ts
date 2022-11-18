@@ -2,24 +2,25 @@ import algosdk from "algosdk";
 import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
 import { SupportedNetwork } from "../../util/commonTypes";
 import { V2PoolInfo } from "../../util/pool/poolTypes";
-import { InitialMintQuote } from "../types";
+import { V2SingleAssetInAddLiquidityQuote } from "./types";
 export * from "./common";
-export declare function getQuote({ pool, asset1In, asset2In, slippage }: {
+export declare function getQuote({ pool, assetIn, slippage, decimals }: {
     pool: V2PoolInfo;
-    asset1In: number | bigint;
-    asset2In: number | bigint;
-    slippage?: number;
-}): InitialMintQuote;
-export declare function generateTxns({ client, pool, network, poolAddress, asset_1, asset_2, liquidityToken, initiatorAddr }: {
-    client: AlgodClient;
-    pool: V2PoolInfo;
-    network: SupportedNetwork;
-    poolAddress: string;
-    asset_1: {
+    assetIn: {
         id: number;
         amount: number | bigint;
     };
-    asset_2: {
+    decimals: {
+        asset1: number;
+        asset2: number;
+    };
+    slippage?: number;
+}): V2SingleAssetInAddLiquidityQuote;
+export declare function generateTxns({ client, network, poolAddress, assetIn, liquidityToken, initiatorAddr, minPoolTokenAssetAmount }: {
+    client: AlgodClient;
+    network: SupportedNetwork;
+    poolAddress: string;
+    assetIn: {
         id: number;
         amount: number | bigint;
     };
@@ -28,6 +29,7 @@ export declare function generateTxns({ client, pool, network, poolAddress, asset
         amount: number | bigint;
     };
     initiatorAddr: string;
+    minPoolTokenAssetAmount: bigint;
 }): Promise<{
     txn: algosdk.Transaction;
     signers: string[];

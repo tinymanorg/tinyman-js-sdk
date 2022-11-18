@@ -2,7 +2,7 @@ import algosdk from "algosdk";
 import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
 import { SupportedNetwork } from "../../util/commonTypes";
 import { V2PoolInfo } from "../../util/pool/poolTypes";
-import { FlexibleMintQuote } from "../types";
+import { V2FlexibleAddLiquidityQuote } from "./types";
 export * from "./common";
 /**
  * Get a quote for how many liquidity tokens a deposit of asset1In and asset2In is worth at this
@@ -25,7 +25,7 @@ export declare function getQuote({ pool, slippage, asset1, asset2 }: {
         decimals: number;
     };
     slippage?: number;
-}): FlexibleMintQuote;
+}): V2FlexibleAddLiquidityQuote;
 export declare function generateTxns({ client, network, poolAddress, asset_1, pool, asset_2, liquidityToken, initiatorAddr, minPoolTokenAssetAmount }: {
     client: AlgodClient;
     pool: V2PoolInfo;

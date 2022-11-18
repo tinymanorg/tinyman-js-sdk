@@ -17,3 +17,7 @@ export declare const DECODED_APP_STATE_KEYS: {
         cumulativePriceUpdateTimeStamp: string;
     };
 };
+/**
+ * A small portion of the pool is reserved (locked) for possible rounding errors.
+ */
+export declare const V2_LOCKED_POOL_TOKENS = 1000;

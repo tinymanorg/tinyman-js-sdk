@@ -1,5 +1,5 @@
 export type { InitiatorSigner, SignerTransaction, SupportedNetwork } from "./util/commonTypes";
-export { BASE_MINIMUM_BALANCE, MINIMUM_BALANCE_REQUIRED_PER_ASSET, MINIMUM_BALANCE_REQUIRED_PER_APP, MINIMUM_BALANCE_REQUIRED_PER_BYTE_SCHEMA, MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE, MINIMUM_LIQUIDITY_MINTING_AMOUNT } from "./util/constant";
+export { BASE_MINIMUM_BALANCE, MINIMUM_BALANCE_REQUIRED_PER_ASSET, MINIMUM_BALANCE_REQUIRED_PER_APP, MINIMUM_BALANCE_REQUIRED_PER_BYTE_SCHEMA, MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE, MINIMUM_ADD_LIQUIDITY_AMOUNT } from "./util/constant";
 export { applySlippageToAmount, ASSET_OPT_IN_PROCESS_TXN_COUNT, convertFromBaseUnits, convertToBaseUnits, sendAndWaitRawTransaction, getTxnGroupID, sumUpTxnFees } from "./util/util";
 export { generateOptIntoAssetTxns } from "./util/asset/assetUtils";
 export type { AccountAsset, TinymanAnalyticsApiAsset, IndexerAssetInformation } from "./util/asset/assetModels";
@@ -14,9 +14,11 @@ export { getValidatorAppID, generateOptIntoValidatorTxns, OPT_IN_VALIDATOR_APP_P
 export type { PoolStatus, V1PoolInfo, V2PoolInfo, PoolReserves } from "./util/pool/poolTypes";
 export { poolUtils } from "./util/pool";
 export { Bootstrap } from "./bootstrap";
-export type { V1_1MintQuote, FlexibleMintQuote, InitialMintQuote, MintSwapQuote, SingleMintQuote, V1_1MintExecution, V1_1MintTxnIndices, V2MintExecution } from "./mint/types";
-export { V2MintTxnIndices, V2MintType } from "./mint/types";
-export { Mint } from "./mint";
+export type { V1_1AddLiquidityQuote, V1_1AddLiquidityExecution } from "./add-liquidity/v1_1/types";
+export { V1_1AddLiquidityTxnIndices, V1_1_ADD_LIQUIDITY_PROCESS_TXN_COUNT } from "./add-liquidity/v1_1/constants";
+export type { V2InitialAddLiquidityQuote, V2AddLiquidityInternalSwapQuote, V2FlexibleAddLiquidityQuote, V2SingleAssetInAddLiquidityQuote, V2AddLiquidityExecution } from "./add-liquidity/v2/types";
+export { V2AddLiquidityType, V2AddLiquidityTxnIndices } from "./add-liquidity/v2/constants";
+export { AddLiquidity } from "./add-liquidity";
 export type { V1_1RemoveLiquidityExecution, V1_1RemoveLiquidityQuote } from "./remove-liquidity/v1_1/types";
 export type { V2RemoveLiquidityQuote, V2SingleAssetRemoveLiquidityQuote } from "./remove-liquidity/v2/types";
 export { V1_1_REMOVE_LIQUIDITY_TXN_COUNT } from "./remove-liquidity/v1_1/constants";
