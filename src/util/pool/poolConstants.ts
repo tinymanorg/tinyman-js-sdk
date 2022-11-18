@@ -19,3 +19,8 @@ export const DECODED_APP_STATE_KEYS = {
     cumulativePriceUpdateTimeStamp: "cumulative_price_update_timestamp"
   }
 };
+
+/**
+ * A small portion of the pool is reserved (locked) for possible rounding errors.
+ */
+export const V2_LOCKED_POOL_TOKENS = 1000;

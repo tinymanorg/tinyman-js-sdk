@@ -8,11 +8,11 @@ import algosdk, {
 import {SwapV2} from "../../swap/v2";
 import {SignerTransaction, InitiatorSigner} from "../../util/commonTypes";
 import {DEFAULT_WAIT_FOR_CONFIRMATION_ROUNDS} from "../../util/constant";
+import {V2_LOCKED_POOL_TOKENS} from "../../util/pool/poolConstants";
 import {PoolReserves, V2PoolInfo} from "../../util/pool/poolTypes";
 import {getTxnGroupID} from "../../util/util";
 import {
   V2RemoveLiquidityTxnIndices,
-  V2_LOCKED_POOL_TOKENS,
   V2_REMOVE_LIQUIDITY_APP_ARGUMENT,
   V2_REMOVE_LIQUIDITY_APP_CALL_INNER_TXN_COUNT
 } from "./constants";

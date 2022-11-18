@@ -1,6 +1,6 @@
 import {calculatePriceImpact} from "../../swap/common/utils";
+import {V2_LOCKED_POOL_TOKENS} from "../../util/pool/poolConstants";
 import {PoolReserves} from "../../util/pool/poolTypes";
-import {LOCKED_POOL_TOKENS} from "../constants";
 
 export function calculateSubsequentAddLiquidity(
   reserves: Omit<PoolReserves, "round">,
@@ -96,7 +96,7 @@ export function calculateInitialAddLiquidity(
   }
 
   return BigInt(
-    Math.sqrt(Number(asset1Amount) * Number(asset2Amount)) - LOCKED_POOL_TOKENS
+    Math.sqrt(Number(asset1Amount) * Number(asset2Amount)) - V2_LOCKED_POOL_TOKENS
   );
 }
 
