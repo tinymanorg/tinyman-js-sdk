@@ -96,7 +96,8 @@ export type {
 } from "./remove-liquidity/v1_1/types";
 export type {
   V2RemoveLiquidityQuote,
-  V2SingleAssetRemoveLiquidityQuote
+  V2SingleAssetRemoveLiquidityQuote,
+  V2RemoveLiquidityExecution
 } from "./remove-liquidity/v2/types";
 
 export {V1_1_REMOVE_LIQUIDITY_TXN_COUNT} from "./remove-liquidity/v1_1/constants";

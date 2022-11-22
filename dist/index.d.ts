@@ -20,7 +20,7 @@ export type { V2InitialAddLiquidityQuote, V2AddLiquidityInternalSwapQuote, V2Fle
 export { V2AddLiquidityType, V2AddLiquidityTxnIndices } from "./add-liquidity/v2/constants";
 export { AddLiquidity } from "./add-liquidity";
 export type { V1_1RemoveLiquidityExecution, V1_1RemoveLiquidityQuote } from "./remove-liquidity/v1_1/types";
-export type { V2RemoveLiquidityQuote, V2SingleAssetRemoveLiquidityQuote } from "./remove-liquidity/v2/types";
+export type { V2RemoveLiquidityQuote, V2SingleAssetRemoveLiquidityQuote, V2RemoveLiquidityExecution } from "./remove-liquidity/v2/types";
 export { V1_1_REMOVE_LIQUIDITY_TXN_COUNT } from "./remove-liquidity/v1_1/constants";
 export { V2_REMOVE_LIQUIDITY_APP_CALL_INNER_TXN_COUNT } from "./remove-liquidity/v2/constants";
 export { RemoveLiquidity } from "./remove-liquidity";

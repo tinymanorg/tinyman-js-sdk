@@ -28,3 +28,10 @@ interface V2InternalSwapQuote {
   swapFees: V2QuoteAssetAmount;
   priceImpact: number;
 }
+
+export interface V2RemoveLiquidityExecution {
+  appCallTxnResult: Record<string, any>;
+  outputAssets: {assetId: string; amount: string}[];
+  txnID: string;
+  appCallTxnId: string;
+}

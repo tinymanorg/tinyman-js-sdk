@@ -1,7 +1,7 @@
 import { Algodv2 } from "algosdk";
 import { SignerTransaction, InitiatorSigner } from "../../util/commonTypes";
 import { PoolReserves, V2PoolInfo } from "../../util/pool/poolTypes";
-import { V2RemoveLiquidityQuote, V2SingleAssetRemoveLiquidityQuote } from "./types";
+import { V2RemoveLiquidityExecution, V2RemoveLiquidityQuote, V2SingleAssetRemoveLiquidityQuote } from "./types";
 /**
  * Get a quote for how many of assets 1 and 2 a deposit of `poolTokenIn` is worth at this moment. This
  * does not execute any transactions.
@@ -53,11 +53,7 @@ declare function execute({ client, txGroup, signedTxns }: {
     client: Algodv2;
     txGroup: SignerTransaction[];
     signedTxns: Uint8Array[];
-}): Promise<{
-    appCallTxnResult: Record<string, any>;
-    outputAssets: any;
-    groupId: string;
-}>;
+}): Promise<V2RemoveLiquidityExecution>;
 /**
  * TODO: There is also a similar function called `applySlippageToAmount`,
  * but it actually converts amount to `Number` inside, so it can cause

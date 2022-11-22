@@ -66,10 +66,6 @@ export declare const RemoveLiquidity: {
             client: import("algosdk").Algodv2;
             txGroup: import("..").SignerTransaction[];
             signedTxns: Uint8Array[];
-        }) => Promise<{
-            appCallTxnResult: Record<string, any>;
-            outputAssets: any;
-            groupId: string;
-        }>;
+        }) => Promise<import("..").V2RemoveLiquidityExecution>;
     };
 };

@@ -10,13 +10,17 @@ import {SignerTransaction, InitiatorSigner} from "../../util/commonTypes";
 import {DEFAULT_WAIT_FOR_CONFIRMATION_ROUNDS} from "../../util/constant";
 import {V2_LOCKED_POOL_TOKENS} from "../../util/pool/poolConstants";
 import {PoolReserves, V2PoolInfo} from "../../util/pool/poolTypes";
-import {getTxnGroupID} from "../../util/util";
+import {sendAndWaitRawTransaction} from "../../util/util";
 import {
   V2RemoveLiquidityTxnIndices,
   V2_REMOVE_LIQUIDITY_APP_ARGUMENT,
   V2_REMOVE_LIQUIDITY_APP_CALL_INNER_TXN_COUNT
 } from "./constants";
-import {V2RemoveLiquidityQuote, V2SingleAssetRemoveLiquidityQuote} from "./types";
+import {
+  V2RemoveLiquidityExecution,
+  V2RemoveLiquidityQuote,
+  V2SingleAssetRemoveLiquidityQuote
+} from "./types";
 
 /**
  * Get a quote for how many of assets 1 and 2 a deposit of `poolTokenIn` is worth at this moment. This
@@ -63,7 +67,6 @@ function getSingleAssetRemoveLiquidityQuote({
     poolTokenIn_bigInt,
     reserves
   );
-  // TODO: remove `!` once pool info shape is updated
   const totalFeeShare = pool.totalFeeShare!;
 
   let quote: V2SingleAssetRemoveLiquidityQuote;
@@ -320,9 +323,8 @@ async function execute({
   client: Algodv2;
   txGroup: SignerTransaction[];
   signedTxns: Uint8Array[];
-}) {
-  await client.sendRawTransaction(signedTxns).do();
-
+}): Promise<V2RemoveLiquidityExecution> {
+  const [{txnID}] = await sendAndWaitRawTransaction(client, [signedTxns]);
   const appCallTxnId = txGroup[V2RemoveLiquidityTxnIndices.APP_CALL_TXN].txn.txID();
   const appCallTxnResult = await waitForConfirmation(
     client,
@@ -340,7 +342,8 @@ async function execute({
   return {
     appCallTxnResult,
     outputAssets,
-    groupId: getTxnGroupID(txGroup)
+    txnID,
+    appCallTxnId
   };
 }
 
