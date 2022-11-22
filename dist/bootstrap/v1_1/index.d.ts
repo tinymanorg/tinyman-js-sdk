@@ -9,7 +9,12 @@ declare function generateTxns({ client, network, asset_1, asset_2, initiatorAddr
     asset_2: Pick<TinymanAnalyticsApiAsset, "id" | "unit_name">;
     initiatorAddr: string;
 }): Promise<SignerTransaction[]>;
-declare function getBootstrapFundingTxnAmount(isAlgoPool: boolean): number;
+/**
+ * To get the total Bootstrap fee, one extra transaction fee (1000) can be added
+ * to the result of this function.
+ * @returns the bootstrap funding txn amount
+ */
+declare function getBootstrapFundingTxnAmount(isAlgoPool: boolean): 960000 | 850900;
 declare function signTxns({ txGroup, network, initiatorSigner, asset1ID, asset2ID }: {
     txGroup: SignerTransaction[];
     network: SupportedNetwork;

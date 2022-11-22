@@ -14,3 +14,12 @@ export const V1_1_BOOTSTRAP_TXN_COUNT = {
   ASA_ALGO: 4,
   ASA_ASA: 5
 } as const;
+
+/**
+ * Bootstrap operation funding txn amounts according to
+ * the pool type (ASA-ASA or ASA-Algo) in microalgos.
+ */
+export const V1_1_BOOTSTRAP_FUNDING_TXN_AMOUNT = {
+  ASA_ALGO: 960_000,
+  ASA_ASA: 850_900
+} as const;

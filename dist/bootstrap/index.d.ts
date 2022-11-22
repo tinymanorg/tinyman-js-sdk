@@ -28,7 +28,7 @@ export declare const Bootstrap: {
             signedTxns: Uint8Array[];
             txnIDs: string[];
         }) => Promise<import("..").V1PoolInfo>;
-        getBootstrapFundingTxnAmount: (isAlgoPool: boolean) => number;
+        getBootstrapFundingTxnAmount: (isAlgoPool: boolean) => 960000 | 850900;
     };
     v2: {
         generateTxns: ({ client, network, asset_1, asset_2, initiatorAddr }: {
