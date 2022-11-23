@@ -61,12 +61,9 @@ export {
   OPT_OUT_VALIDATOR_APP_PROCESS_TXN_COUNT
 } from "./validator";
 
-export type {
-  PoolStatus,
-  V1PoolInfo,
-  V2PoolInfo,
-  PoolReserves
-} from "./util/pool/poolTypes";
+export type {V1PoolInfo, V2PoolInfo, PoolReserves} from "./util/pool/poolTypes";
+// eslint-disable-next-line no-duplicate-imports
+export {PoolStatus} from "./util/pool/poolTypes";
 
 export {poolUtils} from "./util/pool";
 

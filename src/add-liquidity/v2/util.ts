@@ -1,6 +1,7 @@
 import {calculatePriceImpact} from "../../swap/common/utils";
-import {V2_LOCKED_POOL_TOKENS} from "../../util/pool/poolConstants";
 import {PoolReserves} from "../../util/pool/poolTypes";
+import {convertToBaseUnits} from "../../util/util";
+import {V2_LOCKED_POOL_TOKENS} from "../../util/pool/poolConstants";
 
 export function calculateSubsequentAddLiquidity(
   reserves: Omit<PoolReserves, "round">,
@@ -88,15 +89,28 @@ export function calculateSubsequentAddLiquidity(
 }
 
 export function calculateInitialAddLiquidity(
-  asset1Amount: number | bigint,
-  asset2Amount: number | bigint
+  asset1: {
+    amount: bigint | number;
+    decimals: number;
+  },
+  asset2: {
+    amount: bigint | number;
+    decimals: number;
+  }
 ) {
-  if (!asset1Amount || !asset2Amount) {
+  if (!asset1.amount || !asset2.amount) {
     throw new Error("Both assets are required for the initial add liquidity");
   }
 
   return BigInt(
-    Math.sqrt(Number(asset1Amount) * Number(asset2Amount)) - V2_LOCKED_POOL_TOKENS
+    Math.abs(
+      Math.floor(
+        Math.sqrt(
+          convertToBaseUnits(asset1.decimals, Math.floor(Number(asset1.amount))) *
+            convertToBaseUnits(asset2.decimals, Math.floor(Number(asset2.amount)))
+        ) - V2_LOCKED_POOL_TOKENS
+      )
+    )
   );
 }
 

@@ -5,7 +5,6 @@ import TinymanError from "../../util/error/TinymanError";
 import {V2PoolInfo} from "../../util/pool/poolTypes";
 import {getTxnGroupID, sendAndWaitRawTransaction, sumUpTxnFees} from "../../util/util";
 import {V2AddLiquidityExecution} from "./types";
-import {V2AddLiquidityTxnIndices, V2AddLiquidityType} from "./constants";
 
 export function signTxns({
   txGroup,
@@ -23,27 +22,23 @@ export function signTxns({
  * @param params.client An Algodv2 client.
  * @param params.pool Information for the pool.
  * @param params.txGroup The transaction group to execute.
- * @param params.mode The add liquidity mode.
  */
 export async function execute({
   client,
   pool,
   txGroup,
-  signedTxns,
-  mode
+  signedTxns
 }: {
   client: any;
   pool: V2PoolInfo;
   txGroup: SignerTransaction[];
   signedTxns: Uint8Array[];
-  mode: V2AddLiquidityType;
 }): Promise<V2AddLiquidityExecution> {
   try {
     const [{confirmedRound, txnID}] = await sendAndWaitRawTransaction(client, [
       signedTxns
     ]);
-    const appCallTxnId =
-      txGroup[V2AddLiquidityTxnIndices[mode].VALIDATOR_APP_CALL_TXN].txn.txID();
+    const appCallTxnId = txGroup[txGroup.length - 1].txn.txID();
     // TODO: instead of 1000, use the const for wait rounds here
     const appCallTxnResponse = await waitForConfirmation(client, appCallTxnId, 1000);
     const assetOutInnerTxn = appCallTxnResponse["inner-txns"].find(

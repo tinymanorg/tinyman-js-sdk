@@ -4,10 +4,16 @@ import { SupportedNetwork } from "../../util/commonTypes";
 import { V2PoolInfo } from "../../util/pool/poolTypes";
 import { V2InitialAddLiquidityQuote } from "./types";
 export * from "./common";
-export declare function getQuote({ pool, asset1In, asset2In, slippage }: {
+export declare function getQuote({ pool, asset1, asset2, slippage }: {
     pool: V2PoolInfo;
-    asset1In: number | bigint;
-    asset2In: number | bigint;
+    asset1: {
+        amount: number | bigint;
+        decimals: number;
+    };
+    asset2: {
+        amount: number | bigint;
+        decimals: number;
+    };
     slippage?: number;
 }): V2InitialAddLiquidityQuote;
 export declare function generateTxns({ client, pool, network, poolAddress, asset_1, asset_2, liquidityToken, initiatorAddr }: {
