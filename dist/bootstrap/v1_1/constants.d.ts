@@ -19,5 +19,5 @@ export declare const V1_1_BOOTSTRAP_TXN_COUNT: {
  */
 export declare const V1_1_BOOTSTRAP_FUNDING_TXN_AMOUNT: {
     readonly ASA_ALGO: 960000;
-    readonly ASA_ASA: 850900;
+    readonly ASA_ASA: 859000;
 };
