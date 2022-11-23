@@ -21,5 +21,5 @@ export const V1_1_BOOTSTRAP_TXN_COUNT = {
  */
 export const V1_1_BOOTSTRAP_FUNDING_TXN_AMOUNT = {
   ASA_ALGO: 960_000,
-  ASA_ASA: 850_900
+  ASA_ASA: 859_000
 } as const;
