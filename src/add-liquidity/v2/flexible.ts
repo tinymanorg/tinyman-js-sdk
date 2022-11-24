@@ -8,7 +8,7 @@ import {PoolStatus, V2PoolInfo} from "../../util/pool/poolTypes";
 import {getValidatorAppID} from "../../validator";
 import {calculateSubsequentAddLiquidity} from "./util";
 import {poolUtils} from "../../util/pool";
-import {isAlgo} from "../../util/asset/assetUtils";
+import {isAlgo, prepareAssetPairData} from "../../util/asset/assetUtils";
 import {V2AddLiquidityInternalSwapQuote, V2FlexibleAddLiquidityQuote} from "./types";
 import {V2_ADD_LIQUIDITY_INNER_TXN_COUNT} from "./constants";
 export * from "./common";
@@ -103,14 +103,12 @@ export async function generateTxns({
   network,
   poolAddress,
   asset_1,
-  pool,
   asset_2,
   liquidityToken,
   initiatorAddr,
   minPoolTokenAssetAmount
 }: {
   client: AlgodClient;
-  pool: V2PoolInfo;
   network: SupportedNetwork;
   poolAddress: string;
   asset_1: {id: number; amount: number | bigint};
@@ -121,26 +119,27 @@ export async function generateTxns({
   minPoolTokenAssetAmount: bigint;
 }) {
   const suggestedParams = await client.getTransactionParams().do();
-  const isAlgoPool = isAlgo(asset_2.id);
+  const [asset1, asset2] = prepareAssetPairData(asset_1, asset_2);
+  const isAlgoPool = isAlgo(asset2.id);
   const asset1InTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
     from: initiatorAddr,
     to: poolAddress,
-    assetIndex: pool.asset1ID,
-    amount: asset_1.amount,
+    assetIndex: asset1.id,
+    amount: asset1.amount,
     suggestedParams
   });
   const asset2InTxn = isAlgoPool
     ? algosdk.makePaymentTxnWithSuggestedParamsFromObject({
         from: initiatorAddr,
         to: poolAddress,
-        amount: asset_2.amount,
+        amount: asset2.amount,
         suggestedParams
       })
     : algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
         from: initiatorAddr,
         to: poolAddress,
-        assetIndex: pool.asset2ID,
-        amount: asset_2.amount,
+        assetIndex: asset2.id,
+        amount: asset2.amount,
         suggestedParams
       });
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({

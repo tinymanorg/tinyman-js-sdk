@@ -26,9 +26,8 @@ export declare function getQuote({ pool, slippage, asset1, asset2 }: {
     };
     slippage?: number;
 }): V2FlexibleAddLiquidityQuote;
-export declare function generateTxns({ client, network, poolAddress, asset_1, pool, asset_2, liquidityToken, initiatorAddr, minPoolTokenAssetAmount }: {
+export declare function generateTxns({ client, network, poolAddress, asset_1, asset_2, liquidityToken, initiatorAddr, minPoolTokenAssetAmount }: {
     client: AlgodClient;
-    pool: V2PoolInfo;
     network: SupportedNetwork;
     poolAddress: string;
     asset_1: {
