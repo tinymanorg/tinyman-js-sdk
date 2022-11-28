@@ -61,16 +61,16 @@ export function getQuote({
     swapOutAmount,
     swapPriceImpact,
     swapTotalFeeAmount
-  } = calculateSubsequentAddLiquidity(
+  } = calculateSubsequentAddLiquidity({
     reserves,
-    pool.totalFeeShare!,
-    asset1.amount,
-    asset2.amount,
-    {
+    totalFeeShare: pool.totalFeeShare!,
+    asset1Amount: asset1.amount,
+    asset2Amount: asset2.amount,
+    decimals: {
       asset1: asset1.decimals,
       asset2: asset2.decimals
     }
-  );
+  });
 
   const swapQuote: V2AddLiquidityInternalSwapQuote = {
     amountIn: swapInAmount,

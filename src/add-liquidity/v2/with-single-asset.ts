@@ -32,28 +32,26 @@ export function getQuote({
     throw new Error("Pool is not ready");
   }
 
-  const isAsset1 = assetIn.id === pool.asset1ID;
+  const isAsset1In = assetIn.id === pool.asset1ID;
   const reserves = {
     asset1: pool.asset1Reserves || 0n,
     asset2: pool.asset2Reserves || 0n,
     issuedLiquidity: pool.issuedPoolTokens || 0n
   };
-
   const {
     poolTokenAssetAmount,
     swapInAmount,
     swapOutAmount,
     swapPriceImpact,
     swapTotalFeeAmount
-  } = calculateSubsequentAddLiquidity(
+  } = calculateSubsequentAddLiquidity({
     reserves,
-    pool.totalFeeShare!,
-    isAsset1 ? assetIn.amount : 0,
-    isAsset1 ? 0 : assetIn.amount,
+    totalFeeShare: pool.totalFeeShare!,
+    asset1Amount: isAsset1In ? assetIn.amount : 0,
+    asset2Amount: isAsset1In ? 0 : assetIn.amount,
     decimals
-  );
-
-  const swapQuote = {
+  });
+  const internalSwapQuote = {
     amountIn: swapInAmount,
     amountOut: swapOutAmount,
     swapFees: swapTotalFeeAmount,
@@ -63,17 +61,20 @@ export function getQuote({
     poolTokenAssetAmount - BigInt(Math.ceil(Number(poolTokenAssetAmount) * slippage));
 
   return {
-    asset1ID: pool.asset1ID,
-    asset2ID: pool.asset2ID,
-    assetIn: BigInt(assetIn.amount),
-    liquidityOut: poolTokenAssetAmount,
-    liquidityID: pool.liquidityTokenID!,
+    assetIn: {
+      id: isAsset1In ? pool.asset1ID : pool.asset2ID,
+      amount: BigInt(assetIn.amount)
+    },
+    poolTokenOut: {
+      id: pool.liquidityTokenID!,
+      amount: poolTokenAssetAmount
+    },
     share: poolUtils.getPoolShare(
       reserves.issuedLiquidity + swapOutAmount,
       swapOutAmount
     ),
     slippage,
-    swapQuote,
+    internalSwapQuote,
     minPoolTokenAssetAmountWithSlippage
   };
 }

@@ -3,16 +3,22 @@ import {PoolReserves} from "../../util/pool/poolTypes";
 import {convertToBaseUnits} from "../../util/util";
 import {V2_LOCKED_POOL_TOKENS} from "../../util/pool/poolConstants";
 
-export function calculateSubsequentAddLiquidity(
-  reserves: Omit<PoolReserves, "round">,
-  totalFeeShare: number | bigint,
-  asset1Amount: number | bigint,
-  asset2Amount: number | bigint,
+export function calculateSubsequentAddLiquidity({
+  reserves,
+  totalFeeShare,
+  asset1Amount,
+  asset2Amount,
+  decimals
+}: {
+  reserves: Omit<PoolReserves, "round">;
+  totalFeeShare: number | bigint;
+  asset1Amount: number | bigint;
+  asset2Amount: number | bigint;
   decimals: {
     asset1: number;
     asset2: number;
-  }
-) {
+  };
+}) {
   const oldK = reserves.asset1 * reserves.asset2;
   const newAsset1Reserves = reserves.asset1 + BigInt(asset1Amount);
   const newAsset2Reserves = reserves.asset2 + BigInt(asset2Amount);
