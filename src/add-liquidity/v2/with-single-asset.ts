@@ -51,12 +51,6 @@ export function getQuote({
     asset2Amount: isAsset1In ? 0 : assetIn.amount,
     decimals
   });
-  const internalSwapQuote = {
-    amountIn: swapInAmount,
-    amountOut: swapOutAmount,
-    swapFees: swapTotalFeeAmount,
-    priceImpact: swapPriceImpact
-  };
   const minPoolTokenAssetAmountWithSlippage =
     poolTokenAssetAmount - BigInt(Math.ceil(Number(poolTokenAssetAmount) * slippage));
 
@@ -70,11 +64,16 @@ export function getQuote({
       amount: poolTokenAssetAmount
     },
     share: poolUtils.getPoolShare(
-      reserves.issuedLiquidity + swapOutAmount,
-      swapOutAmount
+      reserves.issuedLiquidity + poolTokenAssetAmount,
+      poolTokenAssetAmount
     ),
     slippage,
-    internalSwapQuote,
+    internalSwapQuote: {
+      amountIn: swapInAmount,
+      amountOut: swapOutAmount,
+      swapFees: swapTotalFeeAmount,
+      priceImpact: swapPriceImpact
+    },
     minPoolTokenAssetAmountWithSlippage
   };
 }

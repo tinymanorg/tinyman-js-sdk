@@ -9,7 +9,7 @@ import {getValidatorAppID} from "../../validator";
 import {calculateSubsequentAddLiquidity} from "./util";
 import {poolUtils} from "../../util/pool";
 import {isAlgo, prepareAssetPairData} from "../../util/asset/assetUtils";
-import {V2AddLiquidityInternalSwapQuote, V2FlexibleAddLiquidityQuote} from "./types";
+import {V2FlexibleAddLiquidityQuote} from "./types";
 import {V2_ADD_LIQUIDITY_INNER_TXN_COUNT} from "./constants";
 export * from "./common";
 
@@ -71,13 +71,6 @@ export function getQuote({
       asset2: asset2.decimals
     }
   });
-
-  const swapQuote: V2AddLiquidityInternalSwapQuote = {
-    amountIn: swapInAmount,
-    amountOut: swapOutAmount,
-    swapFees: swapTotalFeeAmount,
-    priceImpact: swapPriceImpact
-  };
   const minPoolTokenAssetAmountWithSlippage =
     poolTokenAssetAmount - BigInt(Math.ceil(Number(poolTokenAssetAmount) * slippage));
 
@@ -89,11 +82,16 @@ export function getQuote({
     liquidityOut: poolTokenAssetAmount,
     liquidityID: pool.liquidityTokenID!,
     share: poolUtils.getPoolShare(
-      pool.issuedPoolTokens || 0n + swapOutAmount,
-      swapOutAmount
+      reserves.issuedLiquidity + poolTokenAssetAmount,
+      poolTokenAssetAmount
     ),
     slippage,
-    swapQuote,
+    swapQuote: {
+      amountIn: swapInAmount,
+      amountOut: swapOutAmount,
+      swapFees: swapTotalFeeAmount,
+      priceImpact: swapPriceImpact
+    },
     minPoolTokenAssetAmountWithSlippage
   };
 }
