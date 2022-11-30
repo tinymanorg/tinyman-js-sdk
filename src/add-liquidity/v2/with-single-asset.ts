@@ -1,4 +1,4 @@
-import algosdk, {ALGORAND_MIN_TX_FEE, encodeUint64} from "algosdk";
+import algosdk, {encodeUint64} from "algosdk";
 import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
 
 import {ADD_LIQUIDITY_APP_CALL_ARGUMENTS} from "../constants";
@@ -7,10 +7,10 @@ import {SupportedNetwork} from "../../util/commonTypes";
 import {PoolStatus, V2PoolInfo} from "../../util/pool/poolTypes";
 import {getValidatorAppID} from "../../validator";
 import {isAlgo} from "../../util/asset/assetUtils";
-import {calculateSubsequentAddLiquidity} from "./util";
+import {calculateSubsequentAddLiquidity, getV2AddLiquidityTotalFee} from "./util";
 import {poolUtils} from "../../util/pool";
 import {V2SingleAssetInAddLiquidityQuote} from "./types";
-import {V2_ADD_LIQUIDITY_INNER_TXN_COUNT} from "./constants";
+import {V2AddLiquidityType} from "./constants";
 export * from "./common";
 
 export function getQuote({
@@ -123,9 +123,7 @@ export async function generateTxns({
     suggestedParams
   });
 
-  // Add +1 to account for the fee of the outer txn
-  validatorAppCallTxn.fee =
-    (V2_ADD_LIQUIDITY_INNER_TXN_COUNT.SINGLE_ASSET_MODE + 1) * ALGORAND_MIN_TX_FEE;
+  validatorAppCallTxn.fee = getV2AddLiquidityTotalFee(V2AddLiquidityType.SINGLE);
 
   const txGroup = algosdk.assignGroupID([assetInTxn, validatorAppCallTxn]);
 

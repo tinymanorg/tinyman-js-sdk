@@ -21,8 +21,8 @@ export const V2AddLiquidityTxnIndices = {
   }
 };
 
-export const V2_ADD_LIQUIDITY_INNER_TXN_COUNT = {
-  INITIAL_LIQUIDITY: 1,
-  SINGLE_ASSET_MODE: 2,
-  FLEXIBLE_MODE: 2
+export const V2_ADD_LIQUIDITY_INNER_TXN_COUNT: Record<V2AddLiquidityType, number> = {
+  [V2AddLiquidityType.INITIAL]: 1,
+  [V2AddLiquidityType.SINGLE]: 2,
+  [V2AddLiquidityType.FLEXIBLE]: 2
 };

@@ -6,3 +6,4 @@ export declare enum V1_1AddLiquidityTxnIndices {
     LIQUDITY_OUT_TXN = 4
 }
 export declare const V1_1_ADD_LIQUIDITY_PROCESS_TXN_COUNT = 5;
+export declare const V1_1_ADD_LIQUIDITY_TOTAL_FEE: number;

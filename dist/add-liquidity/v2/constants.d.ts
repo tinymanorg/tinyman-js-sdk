@@ -19,8 +19,4 @@ export declare const V2AddLiquidityTxnIndices: {
         VALIDATOR_APP_CALL_TXN: number;
     };
 };
-export declare const V2_ADD_LIQUIDITY_INNER_TXN_COUNT: {
-    INITIAL_LIQUIDITY: number;
-    SINGLE_ASSET_MODE: number;
-    FLEXIBLE_MODE: number;
-};
+export declare const V2_ADD_LIQUIDITY_INNER_TXN_COUNT: Record<V2AddLiquidityType, number>;

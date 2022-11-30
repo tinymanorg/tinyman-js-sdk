@@ -1,4 +1,4 @@
-import algosdk, {ALGORAND_MIN_TX_FEE} from "algosdk";
+import algosdk from "algosdk";
 import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
 
 import {CONTRACT_VERSION} from "../../contract/constants";
@@ -8,9 +8,9 @@ import {V2_LOCKED_POOL_TOKENS} from "../../util/pool/poolConstants";
 import {V2PoolInfo} from "../../util/pool/poolTypes";
 import {getValidatorAppID} from "../../validator";
 import {ADD_LIQUIDITY_APP_CALL_ARGUMENTS} from "../constants";
-import {V2_ADD_LIQUIDITY_INNER_TXN_COUNT} from "./constants";
+import {V2AddLiquidityType} from "./constants";
 import {V2InitialAddLiquidityQuote} from "./types";
-import {calculateInitialAddLiquidity} from "./util";
+import {calculateInitialAddLiquidity, getV2AddLiquidityTotalFee} from "./util";
 export * from "./common";
 
 export function getQuote({
@@ -118,9 +118,7 @@ export async function generateTxns({
     suggestedParams
   });
 
-  // Add +1 to account for the fee of the outer txn
-  validatorAppCallTxn.fee =
-    (V2_ADD_LIQUIDITY_INNER_TXN_COUNT.INITIAL_LIQUIDITY + 1) * ALGORAND_MIN_TX_FEE;
+  validatorAppCallTxn.fee = getV2AddLiquidityTotalFee(V2AddLiquidityType.INITIAL);
 
   const txGroup = algosdk.assignGroupID([
     assetOptInTxn,

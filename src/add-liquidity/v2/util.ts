@@ -1,7 +1,10 @@
+import {ALGORAND_MIN_TX_FEE} from "algosdk";
+
 import {calculatePriceImpact} from "../../swap/common/utils";
 import {PoolReserves} from "../../util/pool/poolTypes";
 import {convertToBaseUnits} from "../../util/util";
 import {V2_LOCKED_POOL_TOKENS} from "../../util/pool/poolConstants";
+import {V2AddLiquidityType, V2_ADD_LIQUIDITY_INNER_TXN_COUNT} from "./constants";
 
 export function calculateSubsequentAddLiquidity({
   reserves,
@@ -125,4 +128,14 @@ function calculateInternalSwapFeeAmount(
   totalFeeShare: number | bigint
 ) {
   return (swapAmount * BigInt(totalFeeShare)) / (BigInt(10_000) - BigInt(totalFeeShare));
+}
+
+/**
+ * @returns the total fee for the add liquidity operation including all transaction fees
+ */
+export function getV2AddLiquidityTotalFee(mode: V2AddLiquidityType) {
+  const innerTxnCount = V2_ADD_LIQUIDITY_INNER_TXN_COUNT[mode];
+
+  // Add +1 to account for the fee of the outer txn
+  return (innerTxnCount + 1) * ALGORAND_MIN_TX_FEE;
 }

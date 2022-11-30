@@ -19,6 +19,7 @@ export type { V1_1AddLiquidityQuote, V1_1AddLiquidityExecution } from "./add-liq
 export { V1_1AddLiquidityTxnIndices, V1_1_ADD_LIQUIDITY_PROCESS_TXN_COUNT } from "./add-liquidity/v1_1/constants";
 export type { V2InitialAddLiquidityQuote, V2AddLiquidityInternalSwapQuote, V2FlexibleAddLiquidityQuote, V2SingleAssetInAddLiquidityQuote, V2AddLiquidityExecution } from "./add-liquidity/v2/types";
 export { V2AddLiquidityType, V2AddLiquidityTxnIndices } from "./add-liquidity/v2/constants";
+export { getAddLiquidityTotalFee } from "./add-liquidity/util";
 export { AddLiquidity } from "./add-liquidity";
 export type { V1_1RemoveLiquidityExecution, V1_1RemoveLiquidityQuote } from "./remove-liquidity/v1_1/types";
 export type { V2RemoveLiquidityQuote, V2SingleAssetRemoveLiquidityQuote, V2RemoveLiquidityExecution } from "./remove-liquidity/v2/types";

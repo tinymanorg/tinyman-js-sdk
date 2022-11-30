@@ -85,6 +85,7 @@ export type {
   V2AddLiquidityExecution
 } from "./add-liquidity/v2/types";
 export {V2AddLiquidityType, V2AddLiquidityTxnIndices} from "./add-liquidity/v2/constants";
+export {getAddLiquidityTotalFee} from "./add-liquidity/util";
 export {AddLiquidity} from "./add-liquidity";
 
 export type {
