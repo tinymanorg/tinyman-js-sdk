@@ -136,6 +136,25 @@ function calculateInternalSwapFeeAmount(
 export function getV2AddLiquidityTotalFee(mode: V2AddLiquidityType) {
   const innerTxnCount = V2_ADD_LIQUIDITY_INNER_TXN_COUNT[mode];
 
-  // Add +1 to account for the fee of the outer txn
-  return (innerTxnCount + 1) * ALGORAND_MIN_TX_FEE;
+  switch (mode) {
+    case V2AddLiquidityType.INITIAL:
+    case V2AddLiquidityType.FLEXIBLE:
+      return (
+        (innerTxnCount +
+          /* app call txn */ 1 +
+          /* asset1InTxn */ 1 +
+          /* asset2InTxn */ 1) *
+        ALGORAND_MIN_TX_FEE
+      );
+
+    case V2AddLiquidityType.SINGLE:
+      return (
+        (innerTxnCount + /* app call txn */ 1 + /* assetInTxn */ 1) * ALGORAND_MIN_TX_FEE
+      );
+
+    default:
+      throw new Error(
+        `Failed to calculate the total fee associated with the Add Liquidity operation. Unsupported mode: ${mode}`
+      );
+  }
 }
