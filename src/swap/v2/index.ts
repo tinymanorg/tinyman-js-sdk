@@ -169,7 +169,9 @@ async function execute({
   // TODO: Improve error handling here. Check: https://github.com/Hipo/private-tinyman-js-sdk/pull/4#discussion_r1010836979
   if (!assetOutInnerTxn) {
     console.log({confirmedRound, txnID});
-    throw new Error("Txn was successful, but asset out inner txn not found.");
+    throw new Error(
+      "We successfully swapped your assets and your transactions went through. However, there was an error while reading the output amount from the transaction group."
+    );
   }
 
   return {
