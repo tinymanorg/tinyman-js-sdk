@@ -4,7 +4,11 @@ import {calculatePriceImpact} from "../../swap/common/utils";
 import {PoolReserves} from "../../util/pool/poolTypes";
 import {convertToBaseUnits} from "../../util/util";
 import {V2_LOCKED_POOL_TOKENS} from "../../util/pool/poolConstants";
-import {V2AddLiquidityType, V2_ADD_LIQUIDITY_INNER_TXN_COUNT} from "./constants";
+import {
+  V2AddLiquidityType,
+  V2_ADD_LIQUIDITY_INNER_TXN_COUNT,
+  V2_ADD_LIQUIDITY_TXN_COUNT
+} from "./constants";
 
 export function calculateSubsequentAddLiquidity({
   reserves,
@@ -131,30 +135,21 @@ function calculateInternalSwapFeeAmount(
 }
 
 /**
- * @returns the total fee for the add liquidity operation including all transaction fees
+ * @returns the fee that should be assigned to the app call transaction
  */
-export function getV2AddLiquidityTotalFee(mode: V2AddLiquidityType) {
+export function getV2AddLiquidityAppCallFee(mode: V2AddLiquidityType) {
   const innerTxnCount = V2_ADD_LIQUIDITY_INNER_TXN_COUNT[mode];
 
-  switch (mode) {
-    case V2AddLiquidityType.INITIAL:
-    case V2AddLiquidityType.FLEXIBLE:
-      return (
-        (innerTxnCount +
-          /* app call txn */ 1 +
-          /* asset1InTxn */ 1 +
-          /* asset2InTxn */ 1) *
-        ALGORAND_MIN_TX_FEE
-      );
+  // Add +1 to the inner transaction count to account for the app call transaction
+  return (innerTxnCount + 1) * ALGORAND_MIN_TX_FEE;
+}
 
-    case V2AddLiquidityType.SINGLE:
-      return (
-        (innerTxnCount + /* app call txn */ 1 + /* assetInTxn */ 1) * ALGORAND_MIN_TX_FEE
-      );
+/**
+ * @returns the total fee for the add liquidity operation including all transaction (including inner transactions) fees
+ */
+export function getV2AddLiquidityTotalFee(mode: V2AddLiquidityType) {
+  const totalTxnCount =
+    V2_ADD_LIQUIDITY_INNER_TXN_COUNT[mode] + V2_ADD_LIQUIDITY_TXN_COUNT[mode];
 
-    default:
-      throw new Error(
-        `Failed to calculate the total fee associated with the Add Liquidity operation. Unsupported mode: ${mode}`
-      );
-  }
+  return totalTxnCount * ALGORAND_MIN_TX_FEE;
 }
