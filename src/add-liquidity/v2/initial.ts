@@ -30,7 +30,7 @@ export function getQuote({
   };
   slippage?: number;
 }): V2InitialAddLiquidityQuote {
-  if (pool.issuedPoolTokens && pool.issuedPoolTokens > 0n) {
+  if (pool.issuedPoolTokens !== 0n) {
     throw new Error("Pool already has liquidity");
   }
 
