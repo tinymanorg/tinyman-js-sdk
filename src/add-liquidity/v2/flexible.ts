@@ -6,7 +6,7 @@ import {CONTRACT_VERSION} from "../../contract/constants";
 import {SupportedNetwork} from "../../util/commonTypes";
 import {PoolStatus, V2PoolInfo} from "../../util/pool/poolTypes";
 import {getValidatorAppID} from "../../validator";
-import {calculateSubsequentAddLiquidity, getV2AddLiquidityTotalFee} from "./util";
+import {calculateSubsequentAddLiquidity, getV2AddLiquidityAppCallFee} from "./util";
 import {poolUtils} from "../../util/pool";
 import {isAlgo, prepareAssetPairData} from "../../util/asset/assetUtils";
 import {V2FlexibleAddLiquidityQuote} from "./types";
@@ -158,7 +158,7 @@ export async function generateTxns({
     suggestedParams
   });
 
-  validatorAppCallTxn.fee = getV2AddLiquidityTotalFee(V2AddLiquidityType.FLEXIBLE);
+  validatorAppCallTxn.fee = getV2AddLiquidityAppCallFee(V2AddLiquidityType.FLEXIBLE);
 
   const txGroup = algosdk.assignGroupID([asset1InTxn, asset2InTxn, validatorAppCallTxn]);
 

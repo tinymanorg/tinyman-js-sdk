@@ -10,7 +10,7 @@ import {getValidatorAppID} from "../../validator";
 import {ADD_LIQUIDITY_APP_CALL_ARGUMENTS} from "../constants";
 import {V2AddLiquidityType} from "./constants";
 import {V2InitialAddLiquidityQuote} from "./types";
-import {calculateInitialAddLiquidity, getV2AddLiquidityTotalFee} from "./util";
+import {calculateInitialAddLiquidity, getV2AddLiquidityAppCallFee} from "./util";
 export * from "./common";
 
 export function getQuote({
@@ -125,7 +125,7 @@ export async function generateTxns({
     suggestedParams
   });
 
-  validatorAppCallTxn.fee = getV2AddLiquidityTotalFee(V2AddLiquidityType.INITIAL);
+  validatorAppCallTxn.fee = getV2AddLiquidityAppCallFee(V2AddLiquidityType.INITIAL);
 
   const txGroup = algosdk.assignGroupID([
     assetOptInTxn,
