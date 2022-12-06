@@ -20,3 +20,7 @@ export declare const V2AddLiquidityTxnIndices: {
     };
 };
 export declare const V2_ADD_LIQUIDITY_INNER_TXN_COUNT: Record<V2AddLiquidityType, number>;
+/**
+ * Number of transactions in the add liquidity transaction group (excluding inner transactions)
+ */
+export declare const V2_ADD_LIQUIDITY_TXN_COUNT: Record<V2AddLiquidityType, number>;

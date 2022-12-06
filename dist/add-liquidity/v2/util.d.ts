@@ -25,6 +25,10 @@ export declare function calculateInitialAddLiquidity(asset1: {
     decimals: number;
 }): bigint;
 /**
- * @returns the total fee for the add liquidity operation including all transaction fees
+ * @returns the fee that should be assigned to the app call transaction
+ */
+export declare function getV2AddLiquidityAppCallFee(mode: V2AddLiquidityType): number;
+/**
+ * @returns the total fee for the add liquidity operation including all transaction (including inner transactions) fees
  */
 export declare function getV2AddLiquidityTotalFee(mode: V2AddLiquidityType): number;
