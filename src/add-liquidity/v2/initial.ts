@@ -47,11 +47,18 @@ export function getQuote({
   const poolTokenAssetAmount = calculateInitialAddLiquidity(asset1, asset2);
 
   return {
-    asset1ID: pool.asset1ID,
-    asset2ID: pool.asset2ID,
-    asset1In: BigInt(asset1.amount),
-    asset2In: BigInt(asset2.amount),
-    poolTokenAssetAmount,
+    asset1In: {
+      id: pool.asset1ID,
+      amount: BigInt(asset1.amount)
+    },
+    asset2In: {
+      id: pool.asset2ID,
+      amount: BigInt(asset2.amount)
+    },
+    poolTokenOut: {
+      id: pool.liquidityTokenID!,
+      amount: poolTokenAssetAmount
+    },
     slippage
   };
 }
@@ -126,10 +133,6 @@ export async function generateTxns({
     asset2InTxn,
     validatorAppCallTxn
   ]);
-
-  txGroup.forEach((txn) => {
-    console.log(txn instanceof algosdk.Transaction);
-  });
 
   return [
     {txn: txGroup[0], signers: [initiatorAddr]},

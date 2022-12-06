@@ -1,22 +1,17 @@
 export interface V2InitialAddLiquidityQuote {
-  asset1ID: number;
-  asset2ID: number;
-  asset1In: bigint;
-  asset2In: bigint;
-  poolTokenAssetAmount: bigint;
+  asset1In: {id: number; amount: bigint};
+  asset2In: {id: number; amount: bigint};
+  poolTokenOut: {id: number; amount: bigint};
   slippage: number;
 }
 
 export interface V2FlexibleAddLiquidityQuote {
-  asset1ID: number;
-  asset2ID: number;
-  asset1In: bigint;
-  asset2In: bigint;
-  liquidityOut: bigint;
-  liquidityID: number;
+  asset1In: {id: number; amount: bigint};
+  asset2In: {id: number; amount: bigint};
+  poolTokenOut: {id: number; amount: bigint};
   share: number;
   slippage: number;
-  swapQuote: V2AddLiquidityInternalSwapQuote;
+  internalSwapQuote: V2AddLiquidityInternalSwapQuote;
   minPoolTokenAssetAmountWithSlippage: bigint;
 }
 

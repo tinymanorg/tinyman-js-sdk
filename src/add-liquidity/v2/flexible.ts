@@ -75,18 +75,24 @@ export function getQuote({
     poolTokenAssetAmount - BigInt(Math.ceil(Number(poolTokenAssetAmount) * slippage));
 
   return {
-    asset1ID: pool.asset1ID,
-    asset2ID: pool.asset2ID,
-    asset1In: BigInt(asset1.amount),
-    asset2In: BigInt(asset2.amount),
-    liquidityOut: poolTokenAssetAmount,
-    liquidityID: pool.liquidityTokenID!,
+    asset1In: {
+      id: pool.asset1ID,
+      amount: BigInt(asset1.amount)
+    },
+    asset2In: {
+      id: pool.asset2ID,
+      amount: BigInt(asset2.amount)
+    },
+    poolTokenOut: {
+      id: pool.liquidityTokenID!,
+      amount: poolTokenAssetAmount
+    },
     share: poolUtils.getPoolShare(
       reserves.issuedLiquidity + poolTokenAssetAmount,
       poolTokenAssetAmount
     ),
     slippage,
-    swapQuote: {
+    internalSwapQuote: {
       amountIn: swapInAmount,
       amountOut: swapOutAmount,
       swapFees: swapTotalFeeAmount,
