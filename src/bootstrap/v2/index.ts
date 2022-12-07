@@ -30,7 +30,7 @@ function getTotalFeeAmount(isAlgoPool: boolean) {
   );
 }
 
-function getMinAlgoAmountNeeded(isAlgoPool: boolean) {
+function getTotalCost(isAlgoPool: boolean) {
   return getTotalFeeAmount(isAlgoPool) + getBootstrapFundingTxnAmount(isAlgoPool);
 }
 
@@ -247,5 +247,5 @@ export const BootstrapV2 = {
   execute,
   getBootstrapFundingTxnAmount,
   getTotalFeeAmount,
-  getMinAlgoAmountNeeded
+  getTotalCost
 };
