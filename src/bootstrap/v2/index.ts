@@ -24,6 +24,16 @@ import {poolUtils} from "../../util/pool";
 import {DECODED_APP_STATE_KEYS} from "../../util/pool/poolConstants";
 import {V2BootstrapTxnGroupIndices, V2_BOOTSTRAP_INNER_TXN_COUNT} from "./constants";
 
+function getTotalFeeAmount(isAlgoPool: boolean) {
+  return (
+    getBootstrapAppCallTxnFee(isAlgoPool) + /* funding txn fee */ ALGORAND_MIN_TX_FEE
+  );
+}
+
+function getMinAlgoAmountNeeded(isAlgoPool: boolean) {
+  return getTotalFeeAmount(isAlgoPool) + getBootstrapFundingTxnAmount(isAlgoPool);
+}
+
 async function generateTxns({
   client,
   network,
@@ -235,5 +245,7 @@ export const BootstrapV2 = {
   generateTxns,
   signTxns,
   execute,
-  getBootstrapFundingTxnAmount
+  getBootstrapFundingTxnAmount,
+  getTotalFeeAmount,
+  getMinAlgoAmountNeeded
 };
