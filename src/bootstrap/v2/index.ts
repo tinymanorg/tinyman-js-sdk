@@ -24,14 +24,10 @@ import {poolUtils} from "../../util/pool";
 import {DECODED_APP_STATE_KEYS} from "../../util/pool/poolConstants";
 import {V2BootstrapTxnGroupIndices, V2_BOOTSTRAP_INNER_TXN_COUNT} from "./constants";
 
-function getTotalFeeAmount(isAlgoPool: boolean) {
-  return (
-    getBootstrapAppCallTxnFee(isAlgoPool) + /* funding txn fee */ ALGORAND_MIN_TX_FEE
-  );
-}
-
 function getTotalCost(isAlgoPool: boolean) {
-  return getTotalFeeAmount(isAlgoPool) + getBootstrapFundingTxnAmount(isAlgoPool);
+  // getBootstrapFundingTxnAmount includes getBootstrapAppCallTxnFee and since app call is signed by the logic sig,
+  // the total cost for the user account is funding txn's amount + funding txn's fee
+  return ALGORAND_MIN_TX_FEE + getBootstrapFundingTxnAmount(isAlgoPool);
 }
 
 async function generateTxns({
@@ -246,6 +242,5 @@ export const BootstrapV2 = {
   signTxns,
   execute,
   getBootstrapFundingTxnAmount,
-  getTotalFeeAmount,
   getTotalCost
 };

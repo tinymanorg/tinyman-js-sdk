@@ -59,7 +59,6 @@ export declare const Bootstrap: {
             txnIDs: string[];
         }) => Promise<import("..").V2PoolInfo>;
         getBootstrapFundingTxnAmount: (isAlgoPool: boolean) => number;
-        getTotalFeeAmount: (isAlgoPool: boolean) => number;
         getTotalCost: (isAlgoPool: boolean) => number;
     };
     generateTxns: typeof generateTxns;
