@@ -31,3 +31,4 @@ export { SwapType } from "./swap/constants";
 export { Swap } from "./swap";
 export { redeemExcessAsset, redeemAllExcessAsset, generateRedeemTxns, REDEEM_PROCESS_TXN_COUNT } from "./redeem";
 export { prepareCommitTransactions, getStakingAppID } from "./stake";
+export { combineAndRegroupSignerTxns } from "./util/transaction/transactionUtils";

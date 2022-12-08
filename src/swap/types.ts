@@ -52,13 +52,15 @@ export interface V1SwapExecution {
 }
 
 export interface V2SwapExecution {
-  assetIn: {assetID: number; amount: number | bigint};
-  assetOut: {assetID: number; amount: number | bigint};
+  /** Can be `undefined` if the execution was successful, but there was an issue while
+   * extracting the input asset data fron the transaction response */
+  assetIn: {assetID: number; amount: number | bigint} | undefined;
+  /** Can be `undefined` if the execution was successful, but there was an issue while
+   * extracting the output asset data fron the transaction response */
+  assetOut: {assetID: number; amount: number | bigint} | undefined;
   pool: V2PoolInfo;
   txnID: string;
   round: number;
-  // TODO: this was added temporarily for debugging and testing
-  appCallTxnResponse: any;
 }
 
 export interface SwapQuoteWithPool {

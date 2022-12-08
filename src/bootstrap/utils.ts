@@ -38,15 +38,15 @@ export function signTxns(params: {
   return BootstrapV2.signTxns(params);
 }
 
-export function execute(params: {
-  client: Algodv2;
-  contractVersion: ContractVersionValue;
-  network: SupportedNetwork;
-  pool: {asset1ID: number; asset2ID: number};
-  signedTxns: Uint8Array[];
-  txnIDs: string[];
-  // TODO: can we solve this better? (return type actually depends on contract version arg)
-}): Promise<V1PoolInfo | V2PoolInfo> {
+export function execute(
+  params:
+    | (Parameters<typeof BootstrapV2.execute>[0] & {
+        contractVersion: typeof CONTRACT_VERSION.V2;
+      })
+    | (Parameters<typeof BootstrapV1_1.execute>[0] & {
+        contractVersion: typeof CONTRACT_VERSION.V1_1;
+      })
+): Promise<V1PoolInfo | V2PoolInfo> {
   if (params.contractVersion === CONTRACT_VERSION.V1_1) {
     return BootstrapV1_1.execute(params);
   }

@@ -15,7 +15,7 @@ import {
 import {MINIMUM_BALANCE_REQUIRED_PER_ASSET} from "../../util/constant";
 import TinymanError from "../../util/error/TinymanError";
 import {PoolStatus, V2PoolInfo} from "../../util/pool/poolTypes";
-import {encodeString, waitForConfirmation} from "../../util/util";
+import {encodeString} from "../../util/util";
 import {getValidatorAppID} from "../../validator";
 import {getPoolAccountMinBalance} from "../common/utils";
 import {isAlgo, prepareAssetPairData, sortAssetIds} from "../../util/asset/assetUtils";
@@ -23,6 +23,7 @@ import {tinymanContract_v2} from "../../contract/v2/contract";
 import {poolUtils} from "../../util/pool";
 import {DECODED_APP_STATE_KEYS} from "../../util/pool/poolConstants";
 import {V2BootstrapTxnGroupIndices, V2_BOOTSTRAP_INNER_TXN_COUNT} from "./constants";
+import {getAppCallTxnResponse} from "../../util/transaction/transactionUtils";
 
 async function generateTxns({
   client,
@@ -168,42 +169,6 @@ async function signTxns({
   return {signedTxns, txnIDs};
 }
 
-async function doBootstrap({
-  client,
-  signedTxns,
-  txnIDs
-}: {
-  client: Algodv2;
-  signedTxns: Uint8Array[];
-  txnIDs: string[];
-}): Promise<{liquidityTokenID: number}> {
-  try {
-    await client.sendRawTransaction(signedTxns).do();
-
-    const assetCreationResult = await waitForConfirmation(
-      client,
-      txnIDs[V2BootstrapTxnGroupIndices.VALIDATOR_APP_CALL]
-    );
-    // TODO: We can maybe improve this part, add some type to `assetCreationResult`
-    const poolTokenAssetId = assetCreationResult["local-state-delta"][0].delta?.find(
-      ({key}) => key === btoa(DECODED_APP_STATE_KEYS.v2.liquidityTokenID)
-    )?.value.uint;
-
-    if (typeof poolTokenAssetId !== "number") {
-      throw new Error(`Generated ID is not valid: got ${poolTokenAssetId}`);
-    }
-
-    return {
-      liquidityTokenID: poolTokenAssetId
-    };
-  } catch (error: any) {
-    throw new TinymanError(
-      error,
-      "We encountered something unexpected while bootstraping the pool. Try again later."
-    );
-  }
-}
-
 /**
  * Create an pool for an asset pair if it does not already exist. The initiator will provide
  * funding to create the pool and pay for the creation transaction fees.
@@ -212,23 +177,38 @@ async function execute({
   client,
   network,
   pool: {asset1ID, asset2ID},
-  signedTxns,
-  txnIDs
+  txGroup,
+  signedTxns
 }: {
   client: Algodv2;
   network: SupportedNetwork;
   pool: {asset1ID: number; asset2ID: number};
+  txGroup: SignerTransaction[];
   signedTxns: Uint8Array[];
-  txnIDs: string[];
 }): Promise<V2PoolInfo> {
-  await doBootstrap({client, signedTxns, txnIDs});
+  try {
+    await client.sendRawTransaction(signedTxns).do();
+    const poolTokenAssetId = (await getAppCallTxnResponse(client, txGroup))?.[
+      "local-state-delta"
+    ][0].delta?.find(({key}) => key === btoa(DECODED_APP_STATE_KEYS.v2.liquidityTokenID))
+      ?.value.uint;
 
-  return poolUtils.v2.getPoolInfo({
-    client,
-    network,
-    asset1ID,
-    asset2ID
-  });
+    if (typeof poolTokenAssetId !== "number") {
+      throw new Error(`Generated ID is not valid: got ${poolTokenAssetId}`);
+    }
+
+    return poolUtils.v2.getPoolInfo({
+      client,
+      network,
+      asset1ID,
+      asset2ID
+    });
+  } catch (error: any) {
+    throw new TinymanError(
+      error,
+      "We encountered something unexpected while bootstraping the pool. Try again later."
+    );
+  }
 }
 
 export const BootstrapV2 = {

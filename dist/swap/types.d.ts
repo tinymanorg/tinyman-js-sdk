@@ -49,18 +49,21 @@ export interface V1SwapExecution {
     groupID: string;
 }
 export interface V2SwapExecution {
+    /** Can be `undefined` if the execution was successful, but there was an issue while
+     * extracting the input asset data fron the transaction response */
     assetIn: {
         assetID: number;
         amount: number | bigint;
-    };
+    } | undefined;
+    /** Can be `undefined` if the execution was successful, but there was an issue while
+     * extracting the output asset data fron the transaction response */
     assetOut: {
         assetID: number;
         amount: number | bigint;
-    };
+    } | undefined;
     pool: V2PoolInfo;
     txnID: string;
     round: number;
-    appCallTxnResponse: any;
 }
 export interface SwapQuoteWithPool {
     quote: SwapQuote;

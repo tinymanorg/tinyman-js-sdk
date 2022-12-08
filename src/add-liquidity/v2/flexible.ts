@@ -3,7 +3,7 @@ import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
 
 import {ADD_LIQUIDITY_APP_CALL_ARGUMENTS} from "../constants";
 import {CONTRACT_VERSION} from "../../contract/constants";
-import {SupportedNetwork} from "../../util/commonTypes";
+import {SignerTransaction, SupportedNetwork} from "../../util/commonTypes";
 import {PoolStatus, V2PoolInfo} from "../../util/pool/poolTypes";
 import {getValidatorAppID} from "../../validator";
 import {calculateSubsequentAddLiquidity, getV2AddLiquidityAppCallFee} from "./util";
@@ -121,7 +121,7 @@ export async function generateTxns({
   liquidityToken: {id: number; amount: number | bigint};
   initiatorAddr: string;
   minPoolTokenAssetAmount: bigint;
-}) {
+}): Promise<SignerTransaction[]> {
   const suggestedParams = await client.getTransactionParams().do();
   const [asset1, asset2] = prepareAssetPairData(asset_1, asset_2);
   const isAlgoPool = isAlgo(asset2.id);
