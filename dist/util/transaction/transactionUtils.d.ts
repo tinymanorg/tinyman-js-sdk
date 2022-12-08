@@ -14,3 +14,9 @@ export declare function getAppCallInnerTxns(client: AlgodClient, txGroup: Signer
         };
     };
 }[] | undefined>;
+/**
+ * Combines the provided signer transaction groups into one signer transaction group, with a new group ID
+ * @param signerTransactions - The signer transaction groups to combine
+ * @returns the combined signer transaction groups, with a new assigned group ID
+ */
+export declare function combineAndRegroupSignerTxns(...signerTransactions: SignerTransaction[][]): SignerTransaction[];

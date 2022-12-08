@@ -119,3 +119,5 @@ export {
 } from "./redeem";
 
 export {prepareCommitTransactions, getStakingAppID} from "./stake";
+
+export {combineAndRegroupSignerTxns} from "./util/transaction/transactionUtils";
