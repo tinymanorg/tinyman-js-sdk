@@ -24,9 +24,11 @@ export async function getAppCallTxnResponse(
  * Tries to find the app call transaction in the group, get the response, and extract the inner txns data.
  * @returns the innter transactions of the app call transaction or `undefined` if no app call transaction was found.
  */
-export function getAppCallInnerTxns(
+export async function getAppCallInnerTxns(
   client: AlgodClient,
   txGroup: SignerTransaction[]
 ): Promise<{txn: {txn: {xaid: number; aamt: number; type: string}}}[] | undefined> {
-  return getAppCallTxnResponse(client, txGroup)?.["inner-txns"];
+  const txResponse = await getAppCallTxnResponse(client, txGroup);
+
+  return txResponse?.["inner-txns"];
 }
