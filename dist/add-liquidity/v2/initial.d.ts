@@ -1,6 +1,5 @@
-import algosdk from "algosdk";
 import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
-import { SupportedNetwork } from "../../util/commonTypes";
+import { SignerTransaction, SupportedNetwork } from "../../util/commonTypes";
 import { V2PoolInfo } from "../../util/pool/poolTypes";
 import { V2InitialAddLiquidityQuote } from "./types";
 export * from "./common";
@@ -34,7 +33,4 @@ export declare function generateTxns({ client, pool, network, poolAddress, asset
         amount: number | bigint;
     };
     initiatorAddr: string;
-}): Promise<{
-    txn: algosdk.Transaction;
-    signers: string[];
-}[]>;
+}): Promise<SignerTransaction[]>;

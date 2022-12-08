@@ -3,7 +3,7 @@ import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
 
 import {CONTRACT_VERSION} from "../../contract/constants";
 import {isAlgo} from "../../util/asset/assetUtils";
-import {SupportedNetwork} from "../../util/commonTypes";
+import {SignerTransaction, SupportedNetwork} from "../../util/commonTypes";
 import {V2_LOCKED_POOL_TOKENS} from "../../util/pool/poolConstants";
 import {V2PoolInfo} from "../../util/pool/poolTypes";
 import {getValidatorAppID} from "../../validator";
@@ -81,7 +81,7 @@ export async function generateTxns({
   asset_2: {id: number; amount: number | bigint};
   liquidityToken: {id: number; amount: number | bigint};
   initiatorAddr: string;
-}) {
+}): Promise<SignerTransaction[]> {
   const isAlgoPool = isAlgo(pool.asset2ID);
   const suggestedParams = await client.getTransactionParams().do();
 
@@ -106,7 +106,6 @@ export async function generateTxns({
         amount: asset_2.amount,
         suggestedParams
       });
-
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
     from: initiatorAddr,
     appIndex: getValidatorAppID(network, CONTRACT_VERSION.V2),
@@ -116,28 +115,9 @@ export async function generateTxns({
     suggestedParams
   });
 
-  //  TODO: remove asset opt-in txn when we can group transactions on the client side
-  const assetOptInTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-    from: initiatorAddr,
-    to: initiatorAddr,
-    assetIndex: liquidityToken.id,
-    amount: 0,
-    suggestedParams
-  });
-
   validatorAppCallTxn.fee = getV2AddLiquidityAppCallFee(V2AddLiquidityType.INITIAL);
 
-  const txGroup = algosdk.assignGroupID([
-    assetOptInTxn,
-    asset1InTxn,
-    asset2InTxn,
-    validatorAppCallTxn
-  ]);
-
-  return [
-    {txn: txGroup[0], signers: [initiatorAddr]},
-    {txn: txGroup[1], signers: [initiatorAddr]},
-    {txn: txGroup[2], signers: [initiatorAddr]},
-    {txn: txGroup[3], signers: [initiatorAddr]}
-  ];
+  return algosdk
+    .assignGroupID([asset1InTxn, asset2InTxn, validatorAppCallTxn])
+    .map((txn) => ({txn, signers: [initiatorAddr]}));
 }

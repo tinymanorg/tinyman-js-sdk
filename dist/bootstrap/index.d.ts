@@ -48,15 +48,15 @@ export declare const Bootstrap: {
             signedTxns: Uint8Array[];
             txnIDs: string[];
         }>;
-        execute: ({ client, network, pool: { asset1ID, asset2ID }, signedTxns, txnIDs }: {
+        execute: ({ client, network, pool: { asset1ID, asset2ID }, txGroup, signedTxns }: {
             client: import("algosdk").Algodv2;
             network: import("..").SupportedNetwork;
             pool: {
                 asset1ID: number;
                 asset2ID: number;
             };
+            txGroup: import("..").SignerTransaction[];
             signedTxns: Uint8Array[];
-            txnIDs: string[];
         }) => Promise<import("..").V2PoolInfo>;
         getBootstrapFundingTxnAmount: (isAlgoPool: boolean) => number;
     };

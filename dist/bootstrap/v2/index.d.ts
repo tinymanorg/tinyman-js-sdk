@@ -24,15 +24,15 @@ declare function signTxns({ txGroup, network, initiatorSigner, asset1ID, asset2I
  * Create an pool for an asset pair if it does not already exist. The initiator will provide
  * funding to create the pool and pay for the creation transaction fees.
  */
-declare function execute({ client, network, pool: { asset1ID, asset2ID }, signedTxns, txnIDs }: {
+declare function execute({ client, network, pool: { asset1ID, asset2ID }, txGroup, signedTxns }: {
     client: Algodv2;
     network: SupportedNetwork;
     pool: {
         asset1ID: number;
         asset2ID: number;
     };
+    txGroup: SignerTransaction[];
     signedTxns: Uint8Array[];
-    txnIDs: string[];
 }): Promise<V2PoolInfo>;
 export declare const BootstrapV2: {
     generateTxns: typeof generateTxns;
