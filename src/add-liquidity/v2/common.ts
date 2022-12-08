@@ -1,8 +1,9 @@
-import {waitForConfirmation} from "algosdk";
+import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
 
 import {InitiatorSigner, SignerTransaction} from "../../util/commonTypes";
 import TinymanError from "../../util/error/TinymanError";
 import {V2PoolInfo} from "../../util/pool/poolTypes";
+import {getAppCallInnerTxns} from "../../util/transaction/transactionUtils";
 import {getTxnGroupID, sendAndWaitRawTransaction, sumUpTxnFees} from "../../util/util";
 import {V2AddLiquidityExecution} from "./types";
 
@@ -29,7 +30,7 @@ export async function execute({
   txGroup,
   signedTxns
 }: {
-  client: any;
+  client: AlgodClient;
   pool: V2PoolInfo;
   txGroup: SignerTransaction[];
   signedTxns: Uint8Array[];
@@ -38,26 +39,19 @@ export async function execute({
     const [{confirmedRound, txnID}] = await sendAndWaitRawTransaction(client, [
       signedTxns
     ]);
-    const appCallTxnId = txGroup[txGroup.length - 1].txn.txID();
-    // TODO: instead of 1000, use the const for wait rounds here
-    const appCallTxnResponse = await waitForConfirmation(client, appCallTxnId, 1000);
-    const assetOutInnerTxn = appCallTxnResponse["inner-txns"].find(
+    const assetOutInnerTxn = (await getAppCallInnerTxns(client, txGroup))?.find(
       (item) => item.txn.txn.type === "axfer"
-    ).txn.txn;
-    const fees = sumUpTxnFees(txGroup);
-    const groupID = getTxnGroupID(txGroup);
+    )?.txn.txn;
 
     return {
       round: confirmedRound,
-      // TODO: make sure returned data is correct
-      assetOut: {
-        amount: assetOutInnerTxn.aamt,
-        assetID: assetOutInnerTxn.xaid
-      },
-      fees,
+      assetOut: assetOutInnerTxn
+        ? {amount: assetOutInnerTxn.aamt, assetID: assetOutInnerTxn.xaid}
+        : undefined,
+      fees: sumUpTxnFees(txGroup),
       liquidityID: pool.liquidityTokenID!,
       txnID,
-      groupID
+      groupID: getTxnGroupID(txGroup)
     };
   } catch (error: any) {
     const parsedError = new TinymanError(

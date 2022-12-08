@@ -1,9 +1,4 @@
-import algosdk, {
-  Algodv2,
-  ALGORAND_MIN_TX_FEE,
-  Transaction,
-  waitForConfirmation
-} from "algosdk";
+import algosdk, {Algodv2, ALGORAND_MIN_TX_FEE, Transaction} from "algosdk";
 
 import {
   applySlippageToAmount,
@@ -28,6 +23,7 @@ import {
 import {poolUtils} from "../../util/pool";
 import {isAlgo} from "../../util/asset/assetUtils";
 import {calculatePriceImpact} from "../common/utils";
+import {getAppCallInnerTxns} from "../../util/transaction/transactionUtils";
 
 async function generateTxns({
   client,
@@ -146,10 +142,7 @@ async function execute({
   assetIn: {assetID: number; amount: number | bigint};
 }): Promise<V2SwapExecution> {
   let [{confirmedRound, txnID}] = await sendAndWaitRawTransaction(client, [signedTxns]);
-  const appCallTxnId = txGroup[V2SwapTxnGroupIndices.APP_CALL_TXN].txn.txID();
-  const appCallTxnResponse = await waitForConfirmation(client, appCallTxnId, 1000);
-  const innerTxns: {txn: {txn: {xaid: number; aamt: number}}}[] =
-    appCallTxnResponse["inner-txns"];
+  const innerTxns = await getAppCallInnerTxns(client, txGroup);
   const assetOutId = [pool.asset1ID, pool.asset2ID].filter(
     (id) => id !== assetIn.assetID
   )[0];
@@ -160,29 +153,23 @@ async function execute({
    * If it is `undefined`, it means that the input amount was exactly the amount used,
    * or the swap type is fixed input.
    */
-  const assetInChangeInnerTxn = innerTxns.find(
+  const assetInChangeInnerTxn = innerTxns?.find(
     (item) => item.txn.txn.xaid === assetIn.assetID
   )?.txn.txn;
-  const assetOutInnerTxn = innerTxns.find((item) => item.txn.txn.xaid === assetOutId)?.txn
-    .txn;
+  const assetOutInnerTxn = innerTxns?.find((item) => item.txn.txn.xaid === assetOutId)
+    ?.txn.txn;
 
   // TODO: Improve error handling here. Check: https://github.com/Hipo/private-tinyman-js-sdk/pull/4#discussion_r1010836979
-  if (!assetOutInnerTxn) {
-    console.log({confirmedRound, txnID});
-    throw new Error(
-      "We successfully swapped your assets and your transactions went through. However, there was an error while reading the output amount from the transaction group."
-    );
-  }
 
   return {
     round: confirmedRound,
-    assetIn: {
+    assetIn: assetInChangeInnerTxn && {
       // The actual spent amount is the input amount minus the change (refunded) amount
-      amount: BigInt(assetIn.amount) - BigInt(assetInChangeInnerTxn?.aamt || 0),
+      amount: BigInt(assetIn.amount) - BigInt(assetInChangeInnerTxn.aamt || 0),
       assetID: assetIn.assetID
     },
-    assetOut: {
-      amount: assetOutInnerTxn?.aamt,
+    assetOut: assetOutInnerTxn && {
+      amount: assetOutInnerTxn.aamt,
       assetID: assetOutId
     },
     pool: await poolUtils.v2.getPoolInfo({
@@ -191,7 +178,6 @@ async function execute({
       asset1ID: pool.asset1ID,
       asset2ID: pool.asset2ID
     }),
-    appCallTxnResponse,
     txnID
   };
 }

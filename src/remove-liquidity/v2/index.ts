@@ -1,15 +1,10 @@
-import algosdk, {
-  Algodv2,
-  ALGORAND_MIN_TX_FEE,
-  Transaction,
-  waitForConfirmation
-} from "algosdk";
+import algosdk, {Algodv2, ALGORAND_MIN_TX_FEE, Transaction} from "algosdk";
 
 import {SwapV2} from "../../swap/v2";
 import {SignerTransaction, InitiatorSigner} from "../../util/commonTypes";
-import {DEFAULT_WAIT_FOR_CONFIRMATION_ROUNDS} from "../../util/constant";
 import {V2_LOCKED_POOL_TOKENS} from "../../util/pool/poolConstants";
 import {PoolReserves, V2PoolInfo} from "../../util/pool/poolTypes";
+import {getAppCallInnerTxns} from "../../util/transaction/transactionUtils";
 import {sendAndWaitRawTransaction} from "../../util/util";
 import {
   V2RemoveLiquidityTxnIndices,
@@ -325,25 +320,14 @@ async function execute({
   signedTxns: Uint8Array[];
 }): Promise<V2RemoveLiquidityExecution> {
   const [{txnID}] = await sendAndWaitRawTransaction(client, [signedTxns]);
-  const appCallTxnId = txGroup[V2RemoveLiquidityTxnIndices.APP_CALL_TXN].txn.txID();
-  const appCallTxnResult = await waitForConfirmation(
-    client,
-    appCallTxnId,
-    DEFAULT_WAIT_FOR_CONFIRMATION_ROUNDS
-  );
-  const outputAssets = appCallTxnResult["inner-txns"].map((data) => ({
+  const outputAssets = (await getAppCallInnerTxns(client, txGroup))?.map((data) => ({
     assetId: data.txn.txn.xaid,
     amount: data.txn.txn.aamt
   }));
 
-  /**
-   * TODO: We will update and type the shape according to the needs of web app
-   */
   return {
-    appCallTxnResult,
     outputAssets,
-    txnID,
-    appCallTxnId
+    txnID
   };
 }
 

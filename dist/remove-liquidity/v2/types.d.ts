@@ -25,12 +25,14 @@ interface V2InternalSwapQuote {
     priceImpact: number;
 }
 export interface V2RemoveLiquidityExecution {
-    appCallTxnResult: Record<string, any>;
+    /**
+     * Can be `undefined` if the execution was successful, but there was an issue while
+     * extracting the output asset data fron the transaction response
+     */
     outputAssets: {
-        assetId: string;
-        amount: string;
-    }[];
+        assetId: number;
+        amount: number;
+    }[] | undefined;
     txnID: string;
-    appCallTxnId: string;
 }
 export {};
