@@ -59,6 +59,7 @@ export declare const Bootstrap: {
             signedTxns: Uint8Array[];
         }) => Promise<import("..").V2PoolInfo>;
         getBootstrapFundingTxnAmount: (isAlgoPool: boolean) => number;
+        getTotalCost: (isAlgoPool: boolean) => number;
     };
     generateTxns: typeof generateTxns;
     signTxns: typeof signTxns;

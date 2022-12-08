@@ -2,6 +2,7 @@ import { Algodv2 } from "algosdk";
 import { TinymanAnalyticsApiAsset } from "../../util/asset/assetModels";
 import { SupportedNetwork, SignerTransaction, InitiatorSigner } from "../../util/commonTypes";
 import { V2PoolInfo } from "../../util/pool/poolTypes";
+declare function getTotalCost(isAlgoPool: boolean): number;
 declare function generateTxns({ client, network, asset_1, asset_2, initiatorAddr }: {
     client: Algodv2;
     network: SupportedNetwork;
@@ -39,5 +40,6 @@ export declare const BootstrapV2: {
     signTxns: typeof signTxns;
     execute: typeof execute;
     getBootstrapFundingTxnAmount: typeof getBootstrapFundingTxnAmount;
+    getTotalCost: typeof getTotalCost;
 };
 export {};
