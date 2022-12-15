@@ -5,7 +5,7 @@ import {SignerTransaction, InitiatorSigner} from "../../util/commonTypes";
 import {V2_LOCKED_POOL_TOKENS} from "../../util/pool/poolConstants";
 import {PoolReserves, V2PoolInfo} from "../../util/pool/poolTypes";
 import {getAppCallInnerTxns} from "../../util/transaction/transactionUtils";
-import {sendAndWaitRawTransaction} from "../../util/util";
+import {applySlippageToAmount, sendAndWaitRawTransaction} from "../../util/util";
 import {
   V2RemoveLiquidityTxnIndices,
   V2_REMOVE_LIQUIDITY_APP_ARGUMENT,
@@ -178,8 +178,8 @@ async function generateTxns({
     appIndex: pool.validatorAppID,
     appArgs: [
       V2_REMOVE_LIQUIDITY_APP_ARGUMENT,
-      algosdk.encodeUint64(getAmountWithSlippage(BigInt(minAsset1Amount), slippage)),
-      algosdk.encodeUint64(getAmountWithSlippage(BigInt(minAsset2Amount), slippage))
+      algosdk.encodeUint64(applySlippageToAmount("negative", slippage, minAsset1Amount)),
+      algosdk.encodeUint64(applySlippageToAmount("negative", slippage, minAsset2Amount))
     ],
     accounts: [poolAddress],
     foreignAssets: [pool.asset1ID, pool.asset2ID],
@@ -241,9 +241,10 @@ async function generateSingleAssetOutTxns({
   let minAsset1Amount = 0 as number | bigint;
   let minAsset2Amount = 0 as number | bigint;
 
-  const minOutputAssetAmountAfterSlippage = getAmountWithSlippage(
-    BigInt(minOutputAssetAmount),
-    slippage
+  const minOutputAssetAmountAfterSlippage = applySlippageToAmount(
+    "negative",
+    slippage,
+    minOutputAssetAmount
   );
 
   if (outputAssetId === asset1ID) {
@@ -331,28 +332,9 @@ async function execute({
   };
 }
 
-/**
- * TODO: There is also a similar function called `applySlippageToAmount`,
- * but it actually converts amount to `Number` inside, so it can cause
- * unexpected results. Check again.
- * */
-function getAmountWithSlippage(amount: bigint, slippage: number): bigint {
-  return amount - multiplyBigIntWithFloat(amount, slippage);
-}
-
-/**
- * TODO: this is a workaround just for testing, probably we can find a better way
- */
-function multiplyBigIntWithFloat(bigIntNumber: bigint, floatNumber: number): bigint {
-  const MULTIPLIER = 1_000_000_000_000_000;
-
-  return (bigIntNumber * BigInt(MULTIPLIER * floatNumber)) / BigInt(MULTIPLIER);
-}
-
 export const RemoveLiquidityV2 = {
   getQuote,
   getSingleAssetRemoveLiquidityQuote,
-  getAmountWithSlippage,
   generateTxns,
   generateSingleAssetOutTxns,
   signTxns,
