@@ -37,14 +37,14 @@ async function generateTxns({
   client: Algodv2;
   pool: V2PoolInfo;
   swapType: SwapType;
-  assetIn: {assetID: number; amount: number | bigint};
-  assetOut: {assetID: number; amount: number | bigint};
+  assetIn: AssetWithIdAndAmount;
+  assetOut: AssetWithIdAndAmount;
   initiatorAddr: string;
   slippage: number;
 }): Promise<SignerTransaction[]> {
   const suggestedParams = await client.getTransactionParams().do();
   const poolAddress = pool.account.address();
-  const isAssetInAlgo = isAlgo(assetIn.assetID);
+  const isAssetInAlgo = isAlgo(assetIn.id);
   const assetInAmount =
     swapType === SwapType.FixedInput
       ? assetIn.amount
@@ -68,7 +68,7 @@ async function generateTxns({
         from: initiatorAddr,
         to: poolAddress,
         amount: assetInAmount,
-        assetIndex: assetIn.assetID,
+        assetIndex: assetIn.id,
         suggestedParams
       });
 
@@ -139,13 +139,11 @@ async function execute({
   network: SupportedNetwork;
   txGroup: SignerTransaction[];
   signedTxns: Uint8Array[];
-  assetIn: {assetID: number; amount: number | bigint};
+  assetIn: AssetWithIdAndAmount;
 }): Promise<V2SwapExecution> {
   let [{confirmedRound, txnID}] = await sendAndWaitRawTransaction(client, [signedTxns]);
   const innerTxns = await getAppCallInnerTxns(client, txGroup);
-  const assetOutId = [pool.asset1ID, pool.asset2ID].filter(
-    (id) => id !== assetIn.assetID
-  )[0];
+  const assetOutId = [pool.asset1ID, pool.asset2ID].filter((id) => id !== assetIn.id)[0];
   /**
    * If the swap type if Fixed Output, usually there will be a difference between
    * input amount and the actual used input amount. The change will be returned to the user
@@ -154,7 +152,7 @@ async function execute({
    * or the swap type is fixed input.
    */
   const assetInChangeInnerTxn = innerTxns?.find(
-    (item) => item.txn.txn.xaid === assetIn.assetID
+    (item) => item.txn.txn.xaid === assetIn.id
   )?.txn.txn;
   const assetOutInnerTxn = innerTxns?.find((item) => item.txn.txn.xaid === assetOutId)
     ?.txn.txn;
@@ -166,11 +164,11 @@ async function execute({
     assetIn: assetInChangeInnerTxn && {
       // The actual spent amount is the input amount minus the change (refunded) amount
       amount: BigInt(assetIn.amount) - BigInt(assetInChangeInnerTxn.aamt || 0),
-      assetID: assetIn.assetID
+      id: assetIn.id
     },
     assetOut: assetOutInnerTxn && {
       amount: assetOutInnerTxn.aamt,
-      assetID: assetOutId
+      id: assetOutId
     },
     pool: await poolUtils.v2.getPoolInfo({
       client,
@@ -194,7 +192,7 @@ async function execute({
 function getQuote(
   type: SwapType,
   pool: V2PoolInfo,
-  asset: {assetID: number; amount: number | bigint},
+  asset: AssetWithIdAndAmount,
   decimals: {assetIn: number; assetOut: number}
 ): SwapQuote {
   let quote: SwapQuote;
@@ -221,7 +219,7 @@ function getFixedInputSwapQuote({
   decimals
 }: {
   pool: V2PoolInfo;
-  assetIn: {assetID: number; amount: number | bigint};
+  assetIn: AssetWithIdAndAmount;
   decimals: {assetIn: number; assetOut: number};
 }): SwapQuote {
   if (pool.status !== PoolStatus.READY) {
@@ -236,7 +234,7 @@ function getFixedInputSwapQuote({
   let inputSupply: bigint;
   let outputSupply: bigint;
 
-  if (assetIn.assetID === pool.asset1ID) {
+  if (assetIn.id === pool.asset1ID) {
     assetOutID = pool.asset2ID;
     inputSupply = pool.asset1Reserves!;
     outputSupply = pool.asset2Reserves!;
@@ -255,7 +253,7 @@ function getFixedInputSwapQuote({
   });
 
   return {
-    assetInID: assetIn.assetID,
+    assetInID: assetIn.id,
     assetInAmount,
     assetOutID,
     assetOutAmount: swapOutputAmount,
@@ -276,7 +274,7 @@ function getFixedOutputSwapQuote({
   decimals
 }: {
   pool: V2PoolInfo;
-  assetOut: {assetID: number; amount: number | bigint};
+  assetOut: AssetWithIdAndAmount;
   decimals: {assetIn: number; assetOut: number};
 }): SwapQuote {
   const assetOutAmount = BigInt(assetOut.amount);
@@ -286,7 +284,7 @@ function getFixedOutputSwapQuote({
   let inputSupply: bigint;
   let outputSupply: bigint;
 
-  if (assetOut.assetID === pool.asset1ID) {
+  if (assetOut.id === pool.asset1ID) {
     assetInID = pool.asset2ID;
     inputSupply = pool.asset2Reserves!;
     outputSupply = pool.asset1Reserves!;
@@ -307,7 +305,7 @@ function getFixedOutputSwapQuote({
   return {
     assetInID,
     assetInAmount: swapInputAmount,
-    assetOutID: assetOut.assetID,
+    assetOutID: assetOut.id,
     assetOutAmount,
     swapFee: Number(totalFeeAmount),
     rate:

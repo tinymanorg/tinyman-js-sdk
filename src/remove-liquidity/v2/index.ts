@@ -40,7 +40,7 @@ function getQuote({
     round: reserves.round,
     asset1Out: {assetId: pool.asset1ID, amount: asset1OutputAmount},
     asset2Out: {assetId: pool.asset2ID, amount: asset2OutputAmount},
-    poolTokenIn: {assetId: pool.liquidityTokenID!, amount: poolTokenIn_bigInt}
+    poolTokenIn: {assetId: pool.poolTokenID!, amount: poolTokenIn_bigInt}
   };
 }
 
@@ -79,7 +79,7 @@ function getSingleAssetRemoveLiquidityQuote({
     quote = {
       round: reserves.round,
       assetOut: {assetId: assetOutID, amount: asset1OutputAmount + swapOutputAmount},
-      poolTokenIn: {assetId: pool.liquidityTokenID!, amount: poolTokenIn_bigInt},
+      poolTokenIn: {assetId: pool.poolTokenID!, amount: poolTokenIn_bigInt},
       internalSwapQuote: {
         amountIn: {assetId: pool.asset2ID, amount: asset2OutputAmount},
         amountOut: {assetId: pool.asset1ID, amount: swapOutputAmount},
@@ -100,7 +100,7 @@ function getSingleAssetRemoveLiquidityQuote({
     quote = {
       round: reserves.round,
       assetOut: {assetId: assetOutID, amount: asset2OutputAmount + swapOutputAmount},
-      poolTokenIn: {assetId: pool.liquidityTokenID!, amount: poolTokenIn_bigInt},
+      poolTokenIn: {assetId: pool.poolTokenID!, amount: poolTokenIn_bigInt},
       internalSwapQuote: {
         amountIn: {assetId: pool.asset2ID, amount: asset2OutputAmount},
         amountOut: {assetId: pool.asset1ID, amount: swapOutputAmount},
@@ -159,7 +159,7 @@ async function generateTxns({
 }): Promise<SignerTransaction[]> {
   const suggestedParams = await client.getTransactionParams().do();
   const poolAddress = pool.account.address();
-  const poolTokenId = pool.liquidityTokenID;
+  const poolTokenId = pool.poolTokenID;
 
   if (!poolTokenId) {
     throw new Error("Pool token asset ID is missing");
@@ -232,7 +232,7 @@ async function generateSingleAssetOutTxns({
   const suggestedParams = await client.getTransactionParams().do();
   const {asset1ID, asset2ID} = pool;
   const poolAddress = pool.account.address();
-  const poolTokenId = pool.liquidityTokenID;
+  const poolTokenId = pool.poolTokenID;
 
   if (!poolTokenId) {
     throw new Error("Pool token asset ID is missing");

@@ -30,14 +30,8 @@ export function getQuote({
   asset2
 }: {
   pool: V2PoolInfo;
-  asset1: {
-    amount: number | bigint;
-    decimals: number;
-  };
-  asset2: {
-    amount: number | bigint;
-    decimals: number;
-  };
+  asset1: AssetWithAmountAndDecimals;
+  asset2: AssetWithAmountAndDecimals;
   slippage?: number;
 }): V2FlexibleAddLiquidityQuote {
   if (pool.issuedPoolTokens === 0n) {
@@ -84,7 +78,7 @@ export function getQuote({
       amount: BigInt(asset2.amount)
     },
     poolTokenOut: {
-      id: pool.liquidityTokenID!,
+      id: pool.poolTokenID!,
       amount: poolTokenAssetAmount
     },
     share: poolUtils.getPoolShare(
@@ -106,24 +100,23 @@ export async function generateTxns({
   client,
   network,
   poolAddress,
-  asset_1,
-  asset_2,
-  liquidityToken,
+  asset1In,
+  asset2In,
+  poolTokenOut,
   initiatorAddr,
   minPoolTokenAssetAmount
 }: {
   client: AlgodClient;
   network: SupportedNetwork;
   poolAddress: string;
-  asset_1: {id: number; amount: number | bigint};
-  asset_2: {id: number; amount: number | bigint};
-  // TODO: convert to liquidityTokenID
-  liquidityToken: {id: number; amount: number | bigint};
+  asset1In: AssetWithIdAndAmount;
+  asset2In: AssetWithIdAndAmount;
+  poolTokenOut: AssetWithIdAndAmount;
   initiatorAddr: string;
   minPoolTokenAssetAmount: bigint;
 }): Promise<SignerTransaction[]> {
   const suggestedParams = await client.getTransactionParams().do();
-  const [asset1, asset2] = prepareAssetPairData(asset_1, asset_2);
+  const [asset1, asset2] = prepareAssetPairData(asset1In, asset2In);
   const isAlgoPool = isAlgo(asset2.id);
   const asset1InTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
     from: initiatorAddr,
@@ -154,7 +147,7 @@ export async function generateTxns({
       encodeUint64(minPoolTokenAssetAmount)
     ],
     accounts: [poolAddress],
-    foreignAssets: [liquidityToken.id],
+    foreignAssets: [poolTokenOut.id],
     suggestedParams
   });
 

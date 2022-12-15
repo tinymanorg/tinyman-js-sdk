@@ -15,8 +15,8 @@ export interface V1PoolInfo {
   validatorAppID: number;
   asset1ID: number;
   asset2ID: number;
-  liquidityTokenID?: number;
   status: PoolStatus;
+  poolTokenID?: number;
 }
 
 export type V2PoolInfo = V1PoolInfo & {
@@ -40,5 +40,5 @@ export interface PoolReserves {
 export interface PoolAssets {
   asset1ID: number;
   asset2ID: number;
-  liquidityTokenID: number;
+  poolTokenID: number;
 }

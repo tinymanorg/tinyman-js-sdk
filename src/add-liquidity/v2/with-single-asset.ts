@@ -20,7 +20,7 @@ export function getQuote({
   decimals
 }: {
   pool: V2PoolInfo;
-  assetIn: {id: number; amount: number | bigint};
+  assetIn: AssetWithIdAndAmount;
   decimals: {asset1: number; asset2: number};
   slippage?: number;
 }): V2SingleAssetInAddLiquidityQuote {
@@ -60,7 +60,7 @@ export function getQuote({
       amount: BigInt(assetIn.amount)
     },
     poolTokenOut: {
-      id: pool.liquidityTokenID!,
+      id: pool.poolTokenID!,
       amount: poolTokenAssetAmount
     },
     share: poolUtils.getPoolShare(
@@ -83,15 +83,15 @@ export async function generateTxns({
   network,
   poolAddress,
   assetIn,
-  liquidityToken,
+  poolTokenId,
   initiatorAddr,
   minPoolTokenAssetAmount
 }: {
   client: AlgodClient;
   network: SupportedNetwork;
   poolAddress: string;
-  assetIn: {id: number; amount: number | bigint};
-  liquidityToken: {id: number; amount: number | bigint};
+  assetIn: AssetWithIdAndAmount;
+  poolTokenId: number;
   initiatorAddr: string;
   minPoolTokenAssetAmount: bigint;
 }): Promise<SignerTransaction[]> {
@@ -119,7 +119,7 @@ export async function generateTxns({
       encodeUint64(minPoolTokenAssetAmount)
     ],
     accounts: [poolAddress],
-    foreignAssets: [liquidityToken.id],
+    foreignAssets: [poolTokenId],
     suggestedParams
   });
 

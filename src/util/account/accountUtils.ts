@@ -148,7 +148,7 @@ export async function getAccountExcessWithinPool({
       joinByteArrays([
         algosdk.decodeAddress(poolAddress).publicKey,
         EXCESS_ENCODED,
-        algosdk.encodeUint64(pool.liquidityTokenID!)
+        algosdk.encodeUint64(pool.poolTokenID!)
       ])
     );
 

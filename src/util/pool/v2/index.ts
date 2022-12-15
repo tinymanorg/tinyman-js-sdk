@@ -62,9 +62,7 @@ export async function getPoolInfo(params: {
       appState[DECODED_APP_STATE_KEYS.v2.protocolFeeRatio]
     );
     result.totalFeeShare = BigInt(appState[DECODED_APP_STATE_KEYS.v2.totalFeeShare]);
-    result.liquidityTokenID = Number(
-      appState[DECODED_APP_STATE_KEYS.v2.liquidityTokenID]
-    );
+    result.poolTokenID = Number(appState[DECODED_APP_STATE_KEYS.v2.liquidityTokenID]);
     result.asset1ID = Number(appState[DECODED_APP_STATE_KEYS.v2.asset1]);
     result.asset2ID = Number(appState[DECODED_APP_STATE_KEYS.v2.asset2]);
   }
@@ -120,7 +118,7 @@ export async function getPoolAssets({
     assets = {
       asset1ID: appState[DECODED_APP_STATE_KEYS[CONTRACT_VERSION.V2].asset1] as number,
       asset2ID: appState[DECODED_APP_STATE_KEYS[CONTRACT_VERSION.V2].asset2] as number,
-      liquidityTokenID: appState[
+      poolTokenID: appState[
         DECODED_APP_STATE_KEYS[CONTRACT_VERSION.V2].liquidityTokenID
       ] as number
     };

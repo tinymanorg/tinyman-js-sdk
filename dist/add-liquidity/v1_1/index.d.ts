@@ -16,22 +16,13 @@ export declare function getQuote({ pool, reserves, asset1In, asset2In }: {
     asset1In: number | bigint;
     asset2In: number | bigint;
 }): V1_1AddLiquidityQuote;
-export declare function generateTxns({ client, network, poolAddress, asset_1, asset_2, liquidityToken, slippage, initiatorAddr }: {
+export declare function generateTxns({ client, network, poolAddress, asset1In, asset2In, poolTokenOut, slippage, initiatorAddr }: {
     client: any;
     network: SupportedNetwork;
     poolAddress: string;
-    asset_1: {
-        id: number;
-        amount: number | bigint;
-    };
-    asset_2: {
-        id: number;
-        amount: number | bigint;
-    };
-    liquidityToken: {
-        id: number;
-        amount: number | bigint;
-    };
+    asset1In: AssetWithIdAndAmount;
+    asset2In: AssetWithIdAndAmount;
+    poolTokenOut: AssetWithIdAndAmount;
     slippage: number;
     initiatorAddr: string;
 }): Promise<SignerTransaction[]>;
@@ -45,14 +36,7 @@ export declare function signTxns({ pool, txGroup, initiatorSigner }: {
  *
  * @param params.client An Algodv2 client.
  * @param params.pool Information for the pool.
- * @param params.asset1In The quantity of the first asset being deposited.
- * @param params.asset2In The quantity of the second asset being deposited.
- * @param params.liquidityOut The quantity of liquidity tokens being withdrawn.
- * @param params.slippage The maximum acceptable slippage rate. Should be a number between 0 and 100
- *   and acts as a percentage of params.liquidityOut.
  * @param params.initiatorAddr The address of the account performing the add liquidity operation.
- * @param params.initiatorSigner A function that will sign transactions from the initiator's
- *   account.
  */
 export declare function execute({ client, pool, txGroup, signedTxns, initiatorAddr }: {
     client: any;

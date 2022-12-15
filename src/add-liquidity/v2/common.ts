@@ -46,10 +46,10 @@ export async function execute({
     return {
       round: confirmedRound,
       assetOut: assetOutInnerTxn
-        ? {amount: assetOutInnerTxn.aamt, assetID: assetOutInnerTxn.xaid}
+        ? {amount: assetOutInnerTxn.aamt, id: assetOutInnerTxn.xaid}
         : undefined,
       fees: sumUpTxnFees(txGroup),
-      liquidityID: pool.liquidityTokenID!,
+      poolTokenID: pool.poolTokenID!,
       txnID,
       groupID: getTxnGroupID(txGroup)
     };

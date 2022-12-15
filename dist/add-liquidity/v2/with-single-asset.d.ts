@@ -5,28 +5,19 @@ import { V2SingleAssetInAddLiquidityQuote } from "./types";
 export * from "./common";
 export declare function getQuote({ pool, assetIn, slippage, decimals }: {
     pool: V2PoolInfo;
-    assetIn: {
-        id: number;
-        amount: number | bigint;
-    };
+    assetIn: AssetWithIdAndAmount;
     decimals: {
         asset1: number;
         asset2: number;
     };
     slippage?: number;
 }): V2SingleAssetInAddLiquidityQuote;
-export declare function generateTxns({ client, network, poolAddress, assetIn, liquidityToken, initiatorAddr, minPoolTokenAssetAmount }: {
+export declare function generateTxns({ client, network, poolAddress, assetIn, poolTokenId, initiatorAddr, minPoolTokenAssetAmount }: {
     client: AlgodClient;
     network: SupportedNetwork;
     poolAddress: string;
-    assetIn: {
-        id: number;
-        amount: number | bigint;
-    };
-    liquidityToken: {
-        id: number;
-        amount: number | bigint;
-    };
+    assetIn: AssetWithIdAndAmount;
+    poolTokenId: number;
     initiatorAddr: string;
     minPoolTokenAssetAmount: bigint;
 }): Promise<SignerTransaction[]>;

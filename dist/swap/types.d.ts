@@ -51,16 +51,10 @@ export interface V1SwapExecution {
 export interface V2SwapExecution {
     /** Can be `undefined` if the execution was successful, but there was an issue while
      * extracting the input asset data fron the transaction response */
-    assetIn: {
-        assetID: number;
-        amount: number | bigint;
-    } | undefined;
+    assetIn: AssetWithIdAndAmount | undefined;
     /** Can be `undefined` if the execution was successful, but there was an issue while
      * extracting the output asset data fron the transaction response */
-    assetOut: {
-        assetID: number;
-        amount: number | bigint;
-    } | undefined;
+    assetOut: AssetWithIdAndAmount | undefined;
     pool: V2PoolInfo;
     txnID: string;
     round: number;

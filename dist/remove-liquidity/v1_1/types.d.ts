@@ -11,9 +11,9 @@ export interface V1_1RemoveLiquidityQuote {
     /** The quantity of the second output asset in this quote. */
     asset2Out: bigint;
     /** The ID of the input liquidity token asset in this quote. */
-    liquidityID: number;
+    poolTokenID: number;
     /** The quantity of the input liquidity token asset in this quote. */
-    liquidityIn: bigint;
+    poolTokenIn: bigint;
 }
 /** An object containing information about a successfully executed  burn transaction. */
 export interface V1_1RemoveLiquidityExecution {
@@ -33,9 +33,9 @@ export interface V1_1RemoveLiquidityExecution {
     /** The quantity of the second output asset. */
     asset2Out: bigint;
     /** The ID of the liquidity token input asset. */
-    liquidityID: number;
+    poolTokenID: number;
     /** The quantity of the liquidity token input asset. */
-    liquidityIn: bigint;
+    poolTokenIn: bigint;
     /** Excess amount details for the pool assets */
     excessAmounts: {
         assetID: number;

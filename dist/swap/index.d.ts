@@ -1,20 +1,14 @@
 import { execute, generateTxns, getQuote, signTxns } from "./utils";
 export declare const Swap: {
     v1_1: {
-        getQuote: (type: import("./constants").SwapType, pool: import("..").V1PoolInfo, reserves: import("..").PoolReserves, asset: {
-            assetID: number;
-            amount: number | bigint;
-        }, decimals: {
+        getQuote: (type: import("./constants").SwapType, pool: import("..").V1PoolInfo, reserves: import("..").PoolReserves, asset: AssetWithIdAndAmount, decimals: {
             assetIn: number;
             assetOut: number;
         }) => import("./types").SwapQuote;
         getFixedInputSwapQuote: ({ pool, reserves, assetIn, decimals }: {
             pool: import("..").V1PoolInfo;
             reserves: import("..").PoolReserves;
-            assetIn: {
-                assetID: number;
-                amount: number | bigint;
-            };
+            assetIn: AssetWithIdAndAmount;
             decimals: {
                 assetIn: number;
                 assetOut: number;
@@ -23,10 +17,7 @@ export declare const Swap: {
         getFixedOutputSwapQuote: ({ pool, reserves, assetOut, decimals }: {
             pool: import("..").V1PoolInfo;
             reserves: import("..").PoolReserves;
-            assetOut: {
-                assetID: number;
-                amount: number | bigint;
-            };
+            assetOut: AssetWithIdAndAmount;
             decimals: {
                 assetIn: number;
                 assetOut: number;
@@ -36,14 +27,8 @@ export declare const Swap: {
             client: import("algosdk").Algodv2;
             pool: import("..").V1PoolInfo;
             swapType: import("./constants").SwapType;
-            assetIn: {
-                assetID: number;
-                amount: number | bigint;
-            };
-            assetOut: {
-                assetID: number;
-                amount: number | bigint;
-            };
+            assetIn: AssetWithIdAndAmount;
+            assetOut: AssetWithIdAndAmount;
             slippage: number;
             initiatorAddr: string;
         }) => Promise<import("..").SignerTransaction[]>;
@@ -64,31 +49,19 @@ export declare const Swap: {
             client: any;
             pool: import("..").V1PoolInfo;
             signedTxns: Uint8Array[];
-            assetIn: {
-                assetID: number;
-                amount: number | bigint;
-            };
-            assetOut: {
-                assetID: number;
-                amount: number | bigint;
-            };
+            assetIn: AssetWithIdAndAmount;
+            assetOut: AssetWithIdAndAmount;
             initiatorAddr: string;
         }) => Promise<Omit<import("./types").V1SwapExecution, "fees" | "groupID">>;
     };
     v2: {
-        getQuote: (type: import("./constants").SwapType, pool: import("..").V2PoolInfo, asset: {
-            assetID: number;
-            amount: number | bigint;
-        }, decimals: {
+        getQuote: (type: import("./constants").SwapType, pool: import("..").V2PoolInfo, asset: AssetWithIdAndAmount, decimals: {
             assetIn: number;
             assetOut: number;
         }) => import("./types").SwapQuote;
         getFixedInputSwapQuote: ({ pool, assetIn, decimals }: {
             pool: import("..").V2PoolInfo;
-            assetIn: {
-                assetID: number;
-                amount: number | bigint;
-            };
+            assetIn: AssetWithIdAndAmount;
             decimals: {
                 assetIn: number;
                 assetOut: number;
@@ -96,10 +69,7 @@ export declare const Swap: {
         }) => import("./types").SwapQuote;
         getFixedOutputSwapQuote: ({ pool, assetOut, decimals }: {
             pool: import("..").V2PoolInfo;
-            assetOut: {
-                assetID: number;
-                amount: number | bigint;
-            };
+            assetOut: AssetWithIdAndAmount;
             decimals: {
                 assetIn: number;
                 assetOut: number;
@@ -109,14 +79,8 @@ export declare const Swap: {
             client: import("algosdk").Algodv2;
             pool: import("..").V2PoolInfo;
             swapType: import("./constants").SwapType;
-            assetIn: {
-                assetID: number;
-                amount: number | bigint;
-            };
-            assetOut: {
-                assetID: number;
-                amount: number | bigint;
-            };
+            assetIn: AssetWithIdAndAmount;
+            assetOut: AssetWithIdAndAmount;
             initiatorAddr: string;
             slippage: number;
         }) => Promise<import("..").SignerTransaction[]>;
@@ -130,10 +94,7 @@ export declare const Swap: {
             network: import("..").SupportedNetwork;
             txGroup: import("..").SignerTransaction[];
             signedTxns: Uint8Array[];
-            assetIn: {
-                assetID: number;
-                amount: number | bigint;
-            };
+            assetIn: AssetWithIdAndAmount;
         }) => Promise<import("./types").V2SwapExecution>;
         calculateFixedInputSwap: ({ inputSupply, outputSupply, swapInputAmount, totalFeeShare, decimals }: {
             inputSupply: bigint;

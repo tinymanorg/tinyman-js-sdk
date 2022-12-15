@@ -1,4 +1,4 @@
-import algosdk from "algosdk";
+import algosdk, {Transaction} from "algosdk";
 
 import {ADD_LIQUIDITY_APP_CALL_ARGUMENTS} from "../constants";
 import {CONTRACT_VERSION} from "../../contract/constants";
@@ -59,15 +59,15 @@ export function getQuote({
       asset1In: BigInt(asset1In),
       asset2ID: pool.asset2ID,
       asset2In: BigInt(asset2In),
-      liquidityID: pool.liquidityTokenID!,
-      liquidityOut: geoMean - BigInt(MINIMUM_ADD_LIQUIDITY_AMOUNT),
+      poolTokenID: pool.poolTokenID!,
+      poolTokenOut: geoMean - BigInt(MINIMUM_ADD_LIQUIDITY_AMOUNT),
       share: 1
     };
   }
 
   const asset1Ratio = (BigInt(asset1In) * reserves.issuedLiquidity) / reserves.asset1;
   const asset2Ratio = (BigInt(asset2In) * reserves.issuedLiquidity) / reserves.asset2;
-  const liquidityOut = asset1Ratio < asset2Ratio ? asset1Ratio : asset2Ratio;
+  const poolTokenOut = asset1Ratio < asset2Ratio ? asset1Ratio : asset2Ratio;
 
   return {
     round: reserves.round,
@@ -75,9 +75,9 @@ export function getQuote({
     asset1In: BigInt(asset1In),
     asset2ID: pool.asset2ID,
     asset2In: BigInt(asset2In),
-    liquidityID: pool.liquidityTokenID!,
-    liquidityOut,
-    share: poolUtils.getPoolShare(reserves.issuedLiquidity + liquidityOut, liquidityOut)
+    poolTokenID: pool.poolTokenID!,
+    poolTokenOut,
+    share: poolUtils.getPoolShare(reserves.issuedLiquidity + poolTokenOut, poolTokenOut)
   };
 }
 
@@ -85,26 +85,25 @@ export async function generateTxns({
   client,
   network,
   poolAddress,
-  asset_1,
-  asset_2,
-  liquidityToken,
+  asset1In,
+  asset2In,
+  poolTokenOut,
   slippage,
   initiatorAddr
 }: {
   client: any;
   network: SupportedNetwork;
   poolAddress: string;
-  asset_1: {id: number; amount: number | bigint};
-  asset_2: {id: number; amount: number | bigint};
-  liquidityToken: {id: number; amount: number | bigint};
+  asset1In: AssetWithIdAndAmount;
+  asset2In: AssetWithIdAndAmount;
+  poolTokenOut: AssetWithIdAndAmount;
   slippage: number;
   initiatorAddr: string;
 }): Promise<SignerTransaction[]> {
-  // apply slippage to liquidity out amount
-  const liquidityOutAmount = applySlippageToAmount(
+  const poolTokenOutAmount = applySlippageToAmount(
     "negative",
     slippage,
-    liquidityToken.amount
+    poolTokenOut.amount
   );
   const suggestedParams = await client.getTransactionParams().do();
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
@@ -113,51 +112,51 @@ export async function generateTxns({
     appArgs: ADD_LIQUIDITY_APP_CALL_ARGUMENTS.v1_1,
     accounts: [initiatorAddr],
     foreignAssets:
-      asset_2.id == ALGO_ASSET_ID
-        ? [asset_1.id, <number>liquidityToken.id]
-        : [asset_1.id, asset_2.id, <number>liquidityToken.id],
+      asset2In.id == ALGO_ASSET_ID
+        ? [asset1In.id, <number>poolTokenOut.id]
+        : [asset1In.id, asset2In.id, <number>poolTokenOut.id],
     suggestedParams
   });
 
   const asset1InTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
     from: initiatorAddr,
     to: poolAddress,
-    assetIndex: asset_1.id,
-    amount: asset_1.amount,
+    assetIndex: asset1In.id,
+    amount: asset1In.amount,
     suggestedParams
   });
 
-  let asset2InTxn;
+  let asset2InTxn: Transaction;
 
-  if (asset_2.id === ALGO_ASSET_ID) {
+  if (asset2In.id === ALGO_ASSET_ID) {
     asset2InTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
       from: initiatorAddr,
       to: poolAddress,
-      amount: asset_2.amount,
+      amount: asset2In.amount,
       suggestedParams
     });
   } else {
     asset2InTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
       from: initiatorAddr,
       to: poolAddress,
-      assetIndex: asset_2.id,
-      amount: asset_2.amount,
+      assetIndex: asset2In.id,
+      amount: asset2In.amount,
       suggestedParams
     });
   }
 
-  const liquidityOutTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
+  const poolTokenOutTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
     from: poolAddress,
     to: initiatorAddr,
-    assetIndex: <number>liquidityToken.id,
-    amount: liquidityOutAmount,
+    assetIndex: <number>poolTokenOut.id,
+    amount: poolTokenOutAmount,
     suggestedParams
   });
 
   const feeTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
     from: initiatorAddr,
     to: poolAddress,
-    amount: validatorAppCallTxn.fee + liquidityOutTxn.fee,
+    amount: validatorAppCallTxn.fee + poolTokenOutTxn.fee,
     note: DEFAULT_FEE_TXN_NOTE, // just here to make this unique from asset1In if necessary
     suggestedParams
   });
@@ -167,7 +166,7 @@ export async function generateTxns({
     validatorAppCallTxn,
     asset1InTxn,
     asset2InTxn,
-    liquidityOutTxn
+    poolTokenOutTxn
   ]);
 
   return [
@@ -231,14 +230,7 @@ export async function signTxns({
  *
  * @param params.client An Algodv2 client.
  * @param params.pool Information for the pool.
- * @param params.asset1In The quantity of the first asset being deposited.
- * @param params.asset2In The quantity of the second asset being deposited.
- * @param params.liquidityOut The quantity of liquidity tokens being withdrawn.
- * @param params.slippage The maximum acceptable slippage rate. Should be a number between 0 and 100
- *   and acts as a percentage of params.liquidityOut.
  * @param params.initiatorAddr The address of the account performing the add liquidity operation.
- * @param params.initiatorSigner A function that will sign transactions from the initiator's
- *   account.
  */
 export async function execute({
   client,
@@ -254,7 +246,7 @@ export async function execute({
   initiatorAddr: string;
 }): Promise<V1_1AddLiquidityExecution> {
   try {
-    const liquidityOutAmount = BigInt(
+    const poolTokenOutAmount = BigInt(
       txGroup[V1_1AddLiquidityTxnIndices.LIQUDITY_OUT_TXN].txn.amount
     );
 
@@ -286,8 +278,8 @@ export async function execute({
     return {
       round: confirmedRound,
       fees,
-      liquidityID: pool.liquidityTokenID!,
-      liquidityOut: liquidityOutAmount + excessAmountDelta,
+      poolTokenID: pool.poolTokenID!,
+      poolTokenOut: poolTokenOutAmount + excessAmountDelta,
       excessAmount: {
         excessAmountForAddingLiquidity: excessAmountDelta,
         totalExcessAmount: excessAssets.excessLiquidityTokens

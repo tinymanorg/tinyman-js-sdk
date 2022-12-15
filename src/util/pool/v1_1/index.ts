@@ -47,7 +47,7 @@ export async function getPoolInfo(params: {
     asset2ID: sortedAssetIDs[1],
     status: appState || liquidityTokenID ? PoolStatus.READY : PoolStatus.NOT_CREATED,
     contractVersion: CONTRACT_VERSION.V1_1,
-    liquidityTokenID
+    poolTokenID: liquidityTokenID
   };
 
   if (appState) {
@@ -93,7 +93,7 @@ export async function getPoolReserves(
       joinByteArrays([OUTSTANDING_ENCODED, algosdk.encodeUint64(pool.asset2ID)])
     );
     const outstandingLiquidityTokenKey = fromByteArray(
-      joinByteArrays([OUTSTANDING_ENCODED, algosdk.encodeUint64(pool.liquidityTokenID!)])
+      joinByteArrays([OUTSTANDING_ENCODED, algosdk.encodeUint64(pool.poolTokenID!)])
     );
 
     const outstandingAsset1Value = state[outstandingAsset1Key];
@@ -125,7 +125,7 @@ export async function getPoolReserves(
       asset1Balance = BigInt(amount);
     } else if (id == pool.asset2ID) {
       asset2Balance = BigInt(amount);
-    } else if (id == pool.liquidityTokenID) {
+    } else if (id == pool.poolTokenID) {
       liquidityTokenBalance = BigInt(amount);
     }
   }
@@ -201,7 +201,7 @@ export async function getPoolAssets(
     assets = {
       asset1ID: appState[DECODED_APP_STATE_KEYS[CONTRACT_VERSION.V1_1].asset1] as number,
       asset2ID: appState[DECODED_APP_STATE_KEYS[CONTRACT_VERSION.V1_1].asset2] as number,
-      liquidityTokenID
+      poolTokenID: liquidityTokenID
     };
 
     cache[address] = assets;

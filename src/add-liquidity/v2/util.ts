@@ -21,10 +21,7 @@ export function calculateSubsequentAddLiquidity({
   totalFeeShare: number | bigint;
   asset1Amount: number | bigint;
   asset2Amount: number | bigint;
-  decimals: {
-    asset1: number;
-    asset2: number;
-  };
+  decimals: {asset1: number; asset2: number};
 }) {
   const oldK = reserves.asset1 * reserves.asset2;
   const newAsset1Reserves = reserves.asset1 + BigInt(asset1Amount);
@@ -102,14 +99,8 @@ export function calculateSubsequentAddLiquidity({
 }
 
 export function calculateInitialAddLiquidity(
-  asset1: {
-    amount: bigint | number;
-    decimals: number;
-  },
-  asset2: {
-    amount: bigint | number;
-    decimals: number;
-  }
+  asset1: AssetWithAmountAndDecimals,
+  asset2: AssetWithAmountAndDecimals
 ) {
   if (!asset1.amount || !asset2.amount) {
     throw new Error("Both assets are required for the initial add liquidity");

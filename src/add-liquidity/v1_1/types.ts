@@ -10,10 +10,10 @@ export interface V1_1AddLiquidityQuote {
   asset2ID: number;
   /** The quantity of the second input asset in this quote. */
   asset2In: bigint;
-  /** The ID of the liquidity token output in this quote. */
-  liquidityID: number;
-  /** The amount of the liquidity token output in this quote. */
-  liquidityOut: bigint;
+  /** The ID of the pool token output in this quote. */
+  poolTokenID: number;
+  /** The amount of the pool token output in this quote. */
+  poolTokenOut: bigint;
   /** The share of the total liquidity in this quote. */
   share: number;
 }
@@ -27,10 +27,10 @@ export interface V1_1AddLiquidityExecution {
    * if applicable, redeem transactions.
    */
   fees: number;
-  /** The ID of the output liquidity token asset. */
-  liquidityID: number;
-  /** The quantity of the output liquidity token asset. */
-  liquidityOut?: bigint;
+  /** The ID of the output pool token asset. */
+  poolTokenID: number;
+  /** The quantity of the output pool token asset. */
+  poolTokenOut?: bigint;
   excessAmount?: {
     /** Excess amount for the current add liquidity */
     excessAmountForAddingLiquidity: bigint;

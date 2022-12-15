@@ -1,9 +1,9 @@
 export declare const RemoveLiquidity: {
     v1_1: {
-        generateTxns: ({ client, pool, liquidityIn, asset1Out, asset2Out, slippage, initiatorAddr }: {
+        generateTxns: ({ client, pool, poolTokenIn, asset1Out, asset2Out, slippage, initiatorAddr }: {
             client: import("algosdk").Algodv2;
             pool: import("..").V1PoolInfo;
-            liquidityIn: number | bigint;
+            poolTokenIn: number | bigint;
             asset1Out: number | bigint;
             asset2Out: number | bigint;
             slippage: number;
@@ -39,7 +39,6 @@ export declare const RemoveLiquidity: {
                 assetOut: number;
             };
         }) => import("..").V2SingleAssetRemoveLiquidityQuote;
-        getAmountWithSlippage: (amount: bigint, slippage: number) => bigint;
         generateTxns: ({ client, pool, poolTokenIn, initiatorAddr, minAsset1Amount, minAsset2Amount, slippage }: {
             client: import("algosdk").Algodv2;
             pool: import("..").V2PoolInfo;

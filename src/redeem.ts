@@ -200,8 +200,8 @@ export async function generateRedeemTxns({
     accounts: [initiatorAddr],
     foreignAssets:
       pool.asset2ID == 0
-        ? [pool.asset1ID, pool.liquidityTokenID as number]
-        : [pool.asset1ID, pool.asset2ID, pool.liquidityTokenID as number],
+        ? [pool.asset1ID, pool.poolTokenID as number]
+        : [pool.asset1ID, pool.asset2ID, pool.poolTokenID as number],
     suggestedParams
   });
 

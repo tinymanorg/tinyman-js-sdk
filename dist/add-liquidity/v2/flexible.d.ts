@@ -15,32 +15,17 @@ export * from "./common";
  */
 export declare function getQuote({ pool, slippage, asset1, asset2 }: {
     pool: V2PoolInfo;
-    asset1: {
-        amount: number | bigint;
-        decimals: number;
-    };
-    asset2: {
-        amount: number | bigint;
-        decimals: number;
-    };
+    asset1: AssetWithAmountAndDecimals;
+    asset2: AssetWithAmountAndDecimals;
     slippage?: number;
 }): V2FlexibleAddLiquidityQuote;
-export declare function generateTxns({ client, network, poolAddress, asset_1, asset_2, liquidityToken, initiatorAddr, minPoolTokenAssetAmount }: {
+export declare function generateTxns({ client, network, poolAddress, asset1In, asset2In, poolTokenOut, initiatorAddr, minPoolTokenAssetAmount }: {
     client: AlgodClient;
     network: SupportedNetwork;
     poolAddress: string;
-    asset_1: {
-        id: number;
-        amount: number | bigint;
-    };
-    asset_2: {
-        id: number;
-        amount: number | bigint;
-    };
-    liquidityToken: {
-        id: number;
-        amount: number | bigint;
-    };
+    asset1In: AssetWithIdAndAmount;
+    asset2In: AssetWithIdAndAmount;
+    poolTokenOut: AssetWithIdAndAmount;
     initiatorAddr: string;
     minPoolTokenAssetAmount: bigint;
 }): Promise<SignerTransaction[]>;
