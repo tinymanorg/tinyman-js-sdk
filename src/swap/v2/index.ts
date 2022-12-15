@@ -157,8 +157,6 @@ async function execute({
   const assetOutInnerTxn = innerTxns?.find((item) => item.txn.txn.xaid === assetOutId)
     ?.txn.txn;
 
-  // TODO: Improve error handling here. Check: https://github.com/Hipo/private-tinyman-js-sdk/pull/4#discussion_r1010836979
-
   return {
     round: confirmedRound,
     assetIn: assetInChangeInnerTxn && {
@@ -227,7 +225,6 @@ function getFixedInputSwapQuote({
   }
 
   const assetInAmount = BigInt(assetIn.amount);
-  // TODO: remove `!` once pool info shape is updated
   const totalFeeShare = pool.totalFeeShare!;
 
   let assetOutID: number;
@@ -278,7 +275,6 @@ function getFixedOutputSwapQuote({
   decimals: {assetIn: number; assetOut: number};
 }): SwapQuote {
   const assetOutAmount = BigInt(assetOut.amount);
-  // TODO: remove `!` once pool info shape is updated
   const totalFeeShare = pool.totalFeeShare!;
   let assetInID: number;
   let inputSupply: bigint;
