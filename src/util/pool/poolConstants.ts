@@ -8,7 +8,7 @@ export const DECODED_APP_STATE_KEYS = {
   [CONTRACT_VERSION.V2]: {
     asset1: "asset_1_id",
     asset2: "asset_2_id",
-    liquidityTokenID: "pool_token_asset_id",
+    poolTokenID: "pool_token_asset_id",
     issuedPoolTokens: "issued_pool_tokens",
     asset1Reserves: "asset_1_reserves",
     asset2Reserves: "asset_2_reserves",

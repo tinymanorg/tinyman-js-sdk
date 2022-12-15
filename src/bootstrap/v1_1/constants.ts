@@ -1,7 +1,7 @@
 export enum V1_1BootstrapTxnGroupIndices {
   FUNDING_TXN = 0,
   VALIDATOR_APP_CALL,
-  LIQUIDITY_TOKEN_CREATE,
+  POOL_TOKEN_CREATE,
   ASSET1_OPT_IN,
   ASSET2_OPT_IN
 }

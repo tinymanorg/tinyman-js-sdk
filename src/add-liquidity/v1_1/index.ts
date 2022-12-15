@@ -269,7 +269,7 @@ export async function execute({
     });
 
     let excessAmountDelta =
-      excessAssets.excessLiquidityTokens - prevExcessAssets.excessLiquidityTokens;
+      excessAssets.excessPoolTokens - prevExcessAssets.excessPoolTokens;
 
     if (excessAmountDelta < 0n) {
       excessAmountDelta = 0n;
@@ -282,7 +282,7 @@ export async function execute({
       poolTokenOut: poolTokenOutAmount + excessAmountDelta,
       excessAmount: {
         excessAmountForAddingLiquidity: excessAmountDelta,
-        totalExcessAmount: excessAssets.excessLiquidityTokens
+        totalExcessAmount: excessAssets.excessPoolTokens
       },
       txnID,
       groupID

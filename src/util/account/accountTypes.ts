@@ -34,7 +34,7 @@ export type AccountInformationData = AccountInformation & {
 export interface AccountExcessWithinPool {
   excessAsset1: bigint;
   excessAsset2: bigint;
-  excessLiquidityTokens: bigint;
+  excessPoolTokens: bigint;
 }
 
 export interface AccountExcess {

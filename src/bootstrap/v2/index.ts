@@ -191,7 +191,7 @@ async function execute({
     await client.sendRawTransaction(signedTxns).do();
     const poolTokenAssetId = (await getAppCallTxnResponse(client, txGroup))?.[
       "local-state-delta"
-    ][0].delta?.find(({key}) => key === btoa(DECODED_APP_STATE_KEYS.v2.liquidityTokenID))
+    ][0].delta?.find(({key}) => key === btoa(DECODED_APP_STATE_KEYS.v2.poolTokenID))
       ?.value.uint;
 
     if (typeof poolTokenAssetId !== "number") {

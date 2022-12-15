@@ -6,7 +6,7 @@ export declare const DECODED_APP_STATE_KEYS: {
     v2: {
         asset1: string;
         asset2: string;
-        liquidityTokenID: string;
+        poolTokenID: string;
         issuedPoolTokens: string;
         asset1Reserves: string;
         asset2Reserves: string;
