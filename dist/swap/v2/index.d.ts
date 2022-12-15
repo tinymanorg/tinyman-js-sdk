@@ -7,14 +7,8 @@ declare function generateTxns({ client, pool, swapType, assetIn, assetOut, initi
     client: Algodv2;
     pool: V2PoolInfo;
     swapType: SwapType;
-    assetIn: {
-        assetID: number;
-        amount: number | bigint;
-    };
-    assetOut: {
-        assetID: number;
-        amount: number | bigint;
-    };
+    assetIn: AssetWithIdAndAmount;
+    assetOut: AssetWithIdAndAmount;
     initiatorAddr: string;
     slippage: number;
 }): Promise<SignerTransaction[]>;
@@ -31,10 +25,7 @@ declare function execute({ client, pool, txGroup, signedTxns, network, assetIn }
     network: SupportedNetwork;
     txGroup: SignerTransaction[];
     signedTxns: Uint8Array[];
-    assetIn: {
-        assetID: number;
-        amount: number | bigint;
-    };
+    assetIn: AssetWithIdAndAmount;
 }): Promise<V2SwapExecution>;
 /**
  * @param type - Type of the swap
@@ -45,10 +36,7 @@ declare function execute({ client, pool, txGroup, signedTxns, network, assetIn }
  * @param decimals.assetOut - Decimals quantity for the output asset
  * @returns A promise for the Swap quote
  */
-declare function getQuote(type: SwapType, pool: V2PoolInfo, asset: {
-    assetID: number;
-    amount: number | bigint;
-}, decimals: {
+declare function getQuote(type: SwapType, pool: V2PoolInfo, asset: AssetWithIdAndAmount, decimals: {
     assetIn: number;
     assetOut: number;
 }): SwapQuote;
@@ -57,10 +45,7 @@ declare function getQuote(type: SwapType, pool: V2PoolInfo, asset: {
  */
 declare function getFixedInputSwapQuote({ pool, assetIn, decimals }: {
     pool: V2PoolInfo;
-    assetIn: {
-        assetID: number;
-        amount: number | bigint;
-    };
+    assetIn: AssetWithIdAndAmount;
     decimals: {
         assetIn: number;
         assetOut: number;
@@ -71,10 +56,7 @@ declare function getFixedInputSwapQuote({ pool, assetIn, decimals }: {
  */
 declare function getFixedOutputSwapQuote({ pool, assetOut, decimals }: {
     pool: V2PoolInfo;
-    assetOut: {
-        assetID: number;
-        amount: number | bigint;
-    };
+    assetOut: AssetWithIdAndAmount;
     decimals: {
         assetIn: number;
         assetOut: number;

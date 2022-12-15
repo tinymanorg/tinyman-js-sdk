@@ -92,11 +92,6 @@ async function generateTxns({
   txns[V2BootstrapTxnGroupIndices.FUNDING_TXN] = fundingTxn;
   txns[V2BootstrapTxnGroupIndices.VALIDATOR_APP_CALL] = appCallTxn;
 
-  /**
-   * TODO: Ideally we need to return txns without grouping them
-   * in order to support txn composition, but that caused
-   * a weird bug: https://hipo.slack.com/archives/C03AE5QEHN1/p1666726549862249
-   */
   const txGroup = algosdk.assignGroupID(txns);
 
   let signerTxns: SignerTransaction[] = [];
@@ -196,7 +191,7 @@ async function execute({
     await client.sendRawTransaction(signedTxns).do();
     const poolTokenAssetId = (await getAppCallTxnResponse(client, txGroup))?.[
       "local-state-delta"
-    ][0].delta?.find(({key}) => key === btoa(DECODED_APP_STATE_KEYS.v2.liquidityTokenID))
+    ][0].delta?.find(({key}) => key === btoa(DECODED_APP_STATE_KEYS.v2.poolTokenID))
       ?.value.uint;
 
     if (typeof poolTokenAssetId !== "number") {

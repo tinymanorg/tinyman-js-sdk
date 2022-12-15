@@ -3,7 +3,7 @@ export enum V1_1RemoveLiquidityTxnIndices {
   VALIDATOR_APP_CALL_TXN,
   ASSET1_OUT_TXN,
   ASSET2_OUT_TXN,
-  LIQUDITY_IN_TXN
+  POOL_TOKEN_IN_TXN
 }
 
 export const V1_1_REMOVE_LIQUIDITY_TXN_COUNT = Object.values(

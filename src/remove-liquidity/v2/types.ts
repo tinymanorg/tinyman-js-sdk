@@ -7,7 +7,6 @@ export interface V2QuoteAssetAmount {
 export interface V2RemoveLiquidityQuote {
   /** The round that this quote is based on. */
   round: number;
-  // TODO: maybe convert to array: outputAssets: QuoteAssetAmount[] because I guess order is not important
   asset1Out: V2QuoteAssetAmount;
   asset2Out: V2QuoteAssetAmount;
   /** input liquidity */

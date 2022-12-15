@@ -16,10 +16,6 @@ import {V1PoolInfo} from "./util/pool/poolTypes";
  *
  * @param params.client An Algodv2 client.
  * @param params.pool Information for the pool.
- * @param params.assetID The ID of the asset being redeemed. Must match one of the pool's
- *   asset1ID, asset2ID, or liquidityTokenID.
- * @param params.assetOut The quantity of the asset being redeemed.
- * @param params.initiatorAddr The address of the account performing the redeem operation.
  * @param params.initiatorSigner A function that will sign transactions from the initiator's
  *   account.
  */
@@ -93,7 +89,7 @@ async function signRedeemTxns({
  * @param params.client An Algodv2 client.
  * @param params.data.pool Information for the pool.
  * @param params.data.assetID The ID of the asset being redeemed. Must match one of the pool's
- *   asset1ID, asset2ID, or liquidityTokenID.
+ *   asset1ID, asset2ID, or poolTokenID.
  * @param params.data.assetOut The quantity of the asset being redeemed.
  * @param params.initiatorAddr The address of the account performing the redeem operation.
  * @param params.initiatorSigner A function that will sign transactions from the initiator's
@@ -200,8 +196,8 @@ export async function generateRedeemTxns({
     accounts: [initiatorAddr],
     foreignAssets:
       pool.asset2ID == 0
-        ? [pool.asset1ID, pool.liquidityTokenID as number]
-        : [pool.asset1ID, pool.asset2ID, pool.liquidityTokenID as number],
+        ? [pool.asset1ID, pool.poolTokenID as number]
+        : [pool.asset1ID, pool.asset2ID, pool.poolTokenID as number],
     suggestedParams
   });
 

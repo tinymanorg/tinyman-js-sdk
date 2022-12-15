@@ -4,8 +4,8 @@ function calculateSwapRate({
   assetIn,
   assetOut
 }: {
-  assetIn: {decimals: number; amount: number | bigint};
-  assetOut: {decimals: number; amount: number | bigint};
+  assetIn: AssetWithAmountAndDecimals;
+  assetOut: AssetWithAmountAndDecimals;
 }) {
   return (
     convertFromBaseUnits(assetOut.decimals, Number(assetOut.amount)) /
@@ -21,8 +21,8 @@ function calculatePriceImpact({
 }: {
   inputSupply: bigint;
   outputSupply: bigint;
-  assetIn: {decimals: number; amount: number | bigint};
-  assetOut: {decimals: number; amount: number | bigint};
+  assetIn: AssetWithAmountAndDecimals;
+  assetOut: AssetWithAmountAndDecimals;
 }): number {
   const swapRate = calculateSwapRate({assetIn, assetOut});
   const poolPrice =

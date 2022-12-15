@@ -54,16 +54,9 @@ declare function execute({ client, txGroup, signedTxns }: {
     txGroup: SignerTransaction[];
     signedTxns: Uint8Array[];
 }): Promise<V2RemoveLiquidityExecution>;
-/**
- * TODO: There is also a similar function called `applySlippageToAmount`,
- * but it actually converts amount to `Number` inside, so it can cause
- * unexpected results. Check again.
- * */
-declare function getAmountWithSlippage(amount: bigint, slippage: number): bigint;
 export declare const RemoveLiquidityV2: {
     getQuote: typeof getQuote;
     getSingleAssetRemoveLiquidityQuote: typeof getSingleAssetRemoveLiquidityQuote;
-    getAmountWithSlippage: typeof getAmountWithSlippage;
     generateTxns: typeof generateTxns;
     generateSingleAssetOutTxns: typeof generateSingleAssetOutTxns;
     signTxns: typeof signTxns;

@@ -3,21 +3,21 @@ import { SignerTransaction, InitiatorSigner } from "../../util/commonTypes";
 import { PoolReserves, V1PoolInfo } from "../../util/pool/poolTypes";
 import { V1_1RemoveLiquidityQuote, V1_1RemoveLiquidityExecution } from "./types";
 /**
- * Get a quote for how many of assets 1 and 2 a deposit of liquidityIn is worth at this moment. This
- * does not execute any transactions.
+ * Get a quote for how many of assets 1 and 2 a deposit of `poolTokenIn` is worth
+ * at this moment. This does not execute any transactions.
  */
-export declare function getQuote({ pool, reserves, liquidityIn }: {
+export declare function getQuote({ pool, reserves, poolTokenIn }: {
     pool: V1PoolInfo;
     reserves: PoolReserves;
     /**
-     * The quantity of the liquidity being deposited.
+     * The amount of the pool token being deposited.
      */
-    liquidityIn: number | bigint;
+    poolTokenIn: number | bigint;
 }): V1_1RemoveLiquidityQuote;
-declare function generateTxns({ client, pool, liquidityIn, asset1Out, asset2Out, slippage, initiatorAddr }: {
+declare function generateTxns({ client, pool, poolTokenIn, asset1Out, asset2Out, slippage, initiatorAddr }: {
     client: Algodv2;
     pool: V1PoolInfo;
-    liquidityIn: number | bigint;
+    poolTokenIn: number | bigint;
     asset1Out: number | bigint;
     asset2Out: number | bigint;
     slippage: number;

@@ -39,15 +39,15 @@ export async function getPoolInfo(params: {
     accountInformation,
     validatorAppID
   );
-  const liquidityTokenID = accountInformation["created-assets"][0]?.index;
+  const poolTokenID = accountInformation["created-assets"][0]?.index;
   let result: V1PoolInfo = {
     account: poolLogicSig,
     validatorAppID,
     asset1ID: sortedAssetIDs[0],
     asset2ID: sortedAssetIDs[1],
-    status: appState || liquidityTokenID ? PoolStatus.READY : PoolStatus.NOT_CREATED,
+    status: appState || poolTokenID ? PoolStatus.READY : PoolStatus.NOT_CREATED,
     contractVersion: CONTRACT_VERSION.V1_1,
-    liquidityTokenID
+    poolTokenID
   };
 
   if (appState) {
@@ -72,7 +72,7 @@ export async function getPoolReserves(
 
   let outstandingAsset1 = 0n;
   let outstandingAsset2 = 0n;
-  let outstandingLiquidityTokens = 0n;
+  let outstandingPoolTokens = 0n;
 
   for (const app of appsLocalState) {
     if (app.id != pool.validatorAppID) {
@@ -92,13 +92,13 @@ export async function getPoolReserves(
     const outstandingAsset2Key = fromByteArray(
       joinByteArrays([OUTSTANDING_ENCODED, algosdk.encodeUint64(pool.asset2ID)])
     );
-    const outstandingLiquidityTokenKey = fromByteArray(
-      joinByteArrays([OUTSTANDING_ENCODED, algosdk.encodeUint64(pool.liquidityTokenID!)])
+    const outstandingPoolTokenKey = fromByteArray(
+      joinByteArrays([OUTSTANDING_ENCODED, algosdk.encodeUint64(pool.poolTokenID!)])
     );
 
     const outstandingAsset1Value = state[outstandingAsset1Key];
     const outstandingAsset2Value = state[outstandingAsset2Key];
-    const outstandingLiquidityTokenValue = state[outstandingLiquidityTokenKey];
+    const outstandingPoolTokenValue = state[outstandingPoolTokenKey];
 
     if (typeof outstandingAsset1Value === "bigint") {
       outstandingAsset1 = outstandingAsset1Value;
@@ -108,14 +108,14 @@ export async function getPoolReserves(
       outstandingAsset2 = outstandingAsset2Value;
     }
 
-    if (typeof outstandingLiquidityTokenValue === "bigint") {
-      outstandingLiquidityTokens = outstandingLiquidityTokenValue;
+    if (typeof outstandingPoolTokenValue === "bigint") {
+      outstandingPoolTokens = outstandingPoolTokenValue;
     }
   }
 
   let asset1Balance = 0n;
   let asset2Balance = 0n;
-  let liquidityTokenBalance = 0n;
+  let poolTokenBalance = 0n;
 
   for (const asset of info.assets) {
     const id = asset["asset-id"];
@@ -125,8 +125,8 @@ export async function getPoolReserves(
       asset1Balance = BigInt(amount);
     } else if (id == pool.asset2ID) {
       asset2Balance = BigInt(amount);
-    } else if (id == pool.liquidityTokenID) {
-      liquidityTokenBalance = BigInt(amount);
+    } else if (id == pool.poolTokenID) {
+      poolTokenBalance = BigInt(amount);
     }
   }
 
@@ -139,7 +139,7 @@ export async function getPoolReserves(
   const reserves: PoolReserves = {
     asset1: asset1Balance - outstandingAsset1,
     asset2: asset2Balance - outstandingAsset2,
-    issuedLiquidity: TOTAL_LIQUIDITY - liquidityTokenBalance + outstandingLiquidityTokens,
+    issuedLiquidity: TOTAL_LIQUIDITY - poolTokenBalance + outstandingPoolTokens,
     round: info.round
   };
 
@@ -191,17 +191,17 @@ export async function getPoolAssets(
   let assets: PoolAssets | null = null;
 
   if (appState) {
-    let liquidityTokenID: number;
+    let poolTokenID: number;
 
-    // The Liquidity Token is the only asset the Pool has created
-    const liquidityTokenAsset = info["created-assets"][0];
+    // The Pool Token is the only asset the Pool has created
+    const poolTokenAsset = info["created-assets"][0];
 
-    liquidityTokenID = liquidityTokenAsset.index;
+    poolTokenID = poolTokenAsset.index;
 
     assets = {
       asset1ID: appState[DECODED_APP_STATE_KEYS[CONTRACT_VERSION.V1_1].asset1] as number,
       asset2ID: appState[DECODED_APP_STATE_KEYS[CONTRACT_VERSION.V1_1].asset2] as number,
-      liquidityTokenID
+      poolTokenID
     };
 
     cache[address] = assets;

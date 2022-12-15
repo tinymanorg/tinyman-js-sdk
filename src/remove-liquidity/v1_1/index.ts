@@ -17,34 +17,34 @@ import {V1_1RemoveLiquidityTxnIndices} from "./constants";
 import {V1_1RemoveLiquidityQuote, V1_1RemoveLiquidityExecution} from "./types";
 
 /**
- * Get a quote for how many of assets 1 and 2 a deposit of liquidityIn is worth at this moment. This
- * does not execute any transactions.
+ * Get a quote for how many of assets 1 and 2 a deposit of `poolTokenIn` is worth
+ * at this moment. This does not execute any transactions.
  */
 export function getQuote({
   pool,
   reserves,
-  liquidityIn
+  poolTokenIn
 }: {
   pool: V1PoolInfo;
   reserves: PoolReserves;
   /**
-   * The quantity of the liquidity being deposited.
+   * The amount of the pool token being deposited.
    */
-  liquidityIn: number | bigint;
+  poolTokenIn: number | bigint;
 }): V1_1RemoveLiquidityQuote {
-  const liquidityIn_bigInt = BigInt(liquidityIn);
+  const poolTokenIn_bigInt = BigInt(poolTokenIn);
 
   const asset1Out =
     reserves.issuedLiquidity &&
-    (liquidityIn_bigInt * reserves.asset1) / reserves.issuedLiquidity;
+    (poolTokenIn_bigInt * reserves.asset1) / reserves.issuedLiquidity;
   const asset2Out =
     reserves.issuedLiquidity &&
-    (liquidityIn_bigInt * reserves.asset2) / reserves.issuedLiquidity;
+    (poolTokenIn_bigInt * reserves.asset2) / reserves.issuedLiquidity;
 
   return {
     round: reserves.round,
-    liquidityID: pool.liquidityTokenID!,
-    liquidityIn: liquidityIn_bigInt,
+    poolTokenID: pool.poolTokenID!,
+    poolTokenIn: poolTokenIn_bigInt,
     asset1ID: pool.asset1ID,
     asset1Out,
     asset2ID: pool.asset2ID,
@@ -55,7 +55,7 @@ export function getQuote({
 async function generateTxns({
   client,
   pool,
-  liquidityIn,
+  poolTokenIn,
   asset1Out,
   asset2Out,
   slippage,
@@ -63,7 +63,7 @@ async function generateTxns({
 }: {
   client: Algodv2;
   pool: V1PoolInfo;
-  liquidityIn: number | bigint;
+  poolTokenIn: number | bigint;
   asset1Out: number | bigint;
   asset2Out: number | bigint;
   slippage: number;
@@ -79,8 +79,8 @@ async function generateTxns({
     appArgs: [encodeString("burn")],
     accounts: [initiatorAddr],
     foreignAssets: isAlgoPool
-      ? [pool.asset1ID, pool.liquidityTokenID as number]
-      : [pool.asset1ID, pool.asset2ID, pool.liquidityTokenID as number],
+      ? [pool.asset1ID, pool.poolTokenID as number]
+      : [pool.asset1ID, pool.asset2ID, pool.poolTokenID as number],
     suggestedParams
   });
 
@@ -109,11 +109,11 @@ async function generateTxns({
         suggestedParams
       });
 
-  const liquidityInTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
+  const poolTokenInTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
     from: initiatorAddr,
     to: poolAddress,
-    assetIndex: pool.liquidityTokenID as number,
-    amount: liquidityIn,
+    assetIndex: pool.poolTokenID as number,
+    amount: poolTokenIn,
     suggestedParams
   });
 
@@ -133,7 +133,7 @@ async function generateTxns({
   txns[V1_1RemoveLiquidityTxnIndices.VALIDATOR_APP_CALL_TXN] = validatorAppCallTxn;
   txns[V1_1RemoveLiquidityTxnIndices.ASSET1_OUT_TXN] = asset1OutTxn;
   txns[V1_1RemoveLiquidityTxnIndices.ASSET2_OUT_TXN] = asset2OutTxn;
-  txns[V1_1RemoveLiquidityTxnIndices.LIQUDITY_IN_TXN] = liquidityInTxn;
+  txns[V1_1RemoveLiquidityTxnIndices.POOL_TOKEN_IN_TXN] = poolTokenInTxn;
 
   const txGroup = algosdk.assignGroupID(txns);
 
@@ -155,7 +155,7 @@ async function generateTxns({
       signers: [poolAddress]
     },
     {
-      txn: txGroup[V1_1RemoveLiquidityTxnIndices.LIQUDITY_IN_TXN],
+      txn: txGroup[V1_1RemoveLiquidityTxnIndices.POOL_TOKEN_IN_TXN],
       signers: [initiatorAddr]
     }
   ];
@@ -170,15 +170,15 @@ async function signTxns({
   txGroup: SignerTransaction[];
   initiatorSigner: InitiatorSigner;
 }): Promise<Uint8Array[]> {
-  const [signedFeeTxn, signedLiquidityInTxn] = await initiatorSigner([txGroup]);
+  const [signedFeeTxn, signedPoolTokenInTxn] = await initiatorSigner([txGroup]);
   const lsig = pool.account;
 
   const signedTxns = txGroup.map((txDetail, index) => {
     if (index === V1_1RemoveLiquidityTxnIndices.FEE_TXN) {
       return signedFeeTxn;
     }
-    if (index === V1_1RemoveLiquidityTxnIndices.LIQUDITY_IN_TXN) {
-      return signedLiquidityInTxn;
+    if (index === V1_1RemoveLiquidityTxnIndices.POOL_TOKEN_IN_TXN) {
+      return signedPoolTokenInTxn;
     }
     const {blob} = algosdk.signLogicSigTransactionObject(txDetail.txn, lsig);
 
@@ -207,7 +207,8 @@ async function execute({
   try {
     const asset1Out = txGroup[V1_1RemoveLiquidityTxnIndices.ASSET1_OUT_TXN].txn.amount;
     const asset2Out = txGroup[V1_1RemoveLiquidityTxnIndices.ASSET2_OUT_TXN].txn.amount;
-    const liquidityIn = txGroup[V1_1RemoveLiquidityTxnIndices.LIQUDITY_IN_TXN].txn.amount;
+    const poolTokenIn =
+      txGroup[V1_1RemoveLiquidityTxnIndices.POOL_TOKEN_IN_TXN].txn.amount;
 
     const prevExcessAssets = await getAccountExcessWithinPool({
       client,
@@ -246,8 +247,8 @@ async function execute({
       asset1Out: BigInt(asset1Out) + excessAmountDeltaAsset1,
       asset2ID: pool.asset2ID,
       asset2Out: BigInt(asset2Out) + excessAmountDeltaAsset2,
-      liquidityID: pool.liquidityTokenID!,
-      liquidityIn: BigInt(liquidityIn),
+      poolTokenID: pool.poolTokenID!,
+      poolTokenIn: BigInt(poolTokenIn),
       excessAmounts: [
         {
           assetID: pool.asset1ID,

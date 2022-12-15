@@ -50,14 +50,8 @@ export declare function generateTxns(params: {
     pool: V1PoolInfo | V2PoolInfo;
     poolAddress: string;
     swapType: SwapType;
-    assetIn: {
-        assetID: number;
-        amount: number | bigint;
-    };
-    assetOut: {
-        assetID: number;
-        amount: number | bigint;
-    };
+    assetIn: AssetWithIdAndAmount;
+    assetOut: AssetWithIdAndAmount;
     slippage: number;
     initiatorAddr: string;
 }): Promise<SignerTransaction[]>;
@@ -73,10 +67,7 @@ interface ExecuteCommonParams {
     network: SupportedNetwork;
     txGroup: SignerTransaction[];
     signedTxns: Uint8Array[];
-    assetIn: {
-        assetID: number;
-        amount: number | bigint;
-    };
+    assetIn: AssetWithIdAndAmount;
 }
 export declare function execute(params: ({
     contractVersion: typeof CONTRACT_VERSION.V1_1;

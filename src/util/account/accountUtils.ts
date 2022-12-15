@@ -113,7 +113,7 @@ export async function getAccountExcessWithinPool({
 
   let excessAsset1 = 0n;
   let excessAsset2 = 0n;
-  let excessLiquidityTokens = 0n;
+  let excessPoolTokens = 0n;
 
   const poolAddress = pool.account.address();
 
@@ -144,17 +144,17 @@ export async function getAccountExcessWithinPool({
         algosdk.encodeUint64(pool.asset2ID)
       ])
     );
-    const excessLiquidityTokenKey = fromByteArray(
+    const excessPoolTokenKey = fromByteArray(
       joinByteArrays([
         algosdk.decodeAddress(poolAddress).publicKey,
         EXCESS_ENCODED,
-        algosdk.encodeUint64(pool.liquidityTokenID!)
+        algosdk.encodeUint64(pool.poolTokenID!)
       ])
     );
 
     const excessAsset1Value = state[excessAsset1Key];
     const excessAsset2Value = state[excessAsset2Key];
-    const excessLiquidityTokenValue = state[excessLiquidityTokenKey];
+    const excessPoolTokenValue = state[excessPoolTokenKey];
 
     if (typeof excessAsset1Value === "bigint") {
       excessAsset1 = excessAsset1Value;
@@ -164,21 +164,21 @@ export async function getAccountExcessWithinPool({
       excessAsset2 = excessAsset2Value;
     }
 
-    if (typeof excessLiquidityTokenValue === "bigint") {
-      excessLiquidityTokens = excessLiquidityTokenValue;
+    if (typeof excessPoolTokenValue === "bigint") {
+      excessPoolTokens = excessPoolTokenValue;
     }
   }
 
   const excessAssets = {
     excessAsset1,
     excessAsset2,
-    excessLiquidityTokens
+    excessPoolTokens
   };
 
   if (
     excessAssets.excessAsset1 < 0n ||
     excessAssets.excessAsset2 < 0n ||
-    excessAssets.excessLiquidityTokens < 0n
+    excessAssets.excessPoolTokens < 0n
   ) {
     throw new Error(`Invalid account excess: ${excessAssets}`);
   }

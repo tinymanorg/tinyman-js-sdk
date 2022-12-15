@@ -46,7 +46,7 @@ export function getFixedInputSwapQuote({
     let quote: SwapQuote;
     const quoteGetterArgs = {
       pool: pool.info,
-      assetIn: {amount, assetID: Number(assetIn.id)},
+      assetIn: {amount, id: Number(assetIn.id)},
       decimals: {assetIn: assetIn.decimals, assetOut: assetOut.decimals},
       reserves: pool.reserves
     };
@@ -82,7 +82,7 @@ export function getFixedOutputSwapQuote({
     let quote: SwapQuote;
     const quoteGetterArgs = {
       pool: pool.info,
-      assetOut: {amount, assetID: Number(assetOut.id)},
+      assetOut: {amount, id: Number(assetOut.id)},
       decimals: {assetIn: assetIn.decimals, assetOut: assetOut.decimals},
       reserves: pool.reserves
     };
@@ -113,8 +113,8 @@ export function generateTxns(params: {
   pool: V1PoolInfo | V2PoolInfo;
   poolAddress: string;
   swapType: SwapType;
-  assetIn: {assetID: number; amount: number | bigint};
-  assetOut: {assetID: number; amount: number | bigint};
+  assetIn: AssetWithIdAndAmount;
+  assetOut: AssetWithIdAndAmount;
   slippage: number;
   initiatorAddr: string;
 }): Promise<SignerTransaction[]> {
@@ -144,7 +144,7 @@ interface ExecuteCommonParams {
   network: SupportedNetwork;
   txGroup: SignerTransaction[];
   signedTxns: Uint8Array[];
-  assetIn: {assetID: number; amount: number | bigint};
+  assetIn: AssetWithIdAndAmount;
 }
 
 export function execute(

@@ -12,14 +12,8 @@ declare function generateTxns({ client, pool, swapType, assetIn, assetOut, slipp
     client: Algodv2;
     pool: V1PoolInfo;
     swapType: SwapType;
-    assetIn: {
-        assetID: number;
-        amount: number | bigint;
-    };
-    assetOut: {
-        assetID: number;
-        amount: number | bigint;
-    };
+    assetIn: AssetWithIdAndAmount;
+    assetOut: AssetWithIdAndAmount;
     slippage: number;
     initiatorAddr: string;
 }): Promise<SignerTransaction[]>;
@@ -34,10 +28,7 @@ declare function generateTxns({ client, pool, swapType, assetIn, assetOut, slipp
  * @param decimals.assetOut - Decimals quantity for the output asset
  * @returns A promise for the Swap quote
  */
-declare function getQuote(type: SwapType, pool: V1PoolInfo, reserves: PoolReserves, asset: {
-    assetID: number;
-    amount: number | bigint;
-}, decimals: {
+declare function getQuote(type: SwapType, pool: V1PoolInfo, reserves: PoolReserves, asset: AssetWithIdAndAmount, decimals: {
     assetIn: number;
     assetOut: number;
 }): SwapQuote;
@@ -53,10 +44,7 @@ declare function getQuote(type: SwapType, pool: V1PoolInfo, reserves: PoolReserv
 declare function getFixedInputSwapQuote({ pool, reserves, assetIn, decimals }: {
     pool: V1PoolInfo;
     reserves: PoolReserves;
-    assetIn: {
-        assetID: number;
-        amount: number | bigint;
-    };
+    assetIn: AssetWithIdAndAmount;
     decimals: {
         assetIn: number;
         assetOut: number;
@@ -74,10 +62,7 @@ declare function getFixedInputSwapQuote({ pool, reserves, assetIn, decimals }: {
 declare function getFixedOutputSwapQuote({ pool, reserves, assetOut, decimals }: {
     pool: V1PoolInfo;
     reserves: PoolReserves;
-    assetOut: {
-        assetID: number;
-        amount: number | bigint;
-    };
+    assetOut: AssetWithIdAndAmount;
     decimals: {
         assetIn: number;
         assetOut: number;
@@ -104,14 +89,8 @@ declare function executeFixedOutputSwap({ client, pool, signedTxns, assetIn, ass
     client: any;
     pool: V1PoolInfo;
     signedTxns: Uint8Array[];
-    assetIn: {
-        assetID: number;
-        amount: number | bigint;
-    };
-    assetOut: {
-        assetID: number;
-        amount: number | bigint;
-    };
+    assetIn: AssetWithIdAndAmount;
+    assetOut: AssetWithIdAndAmount;
     initiatorAddr: string;
 }): Promise<Omit<V1SwapExecution, "fees" | "groupID">>;
 /**

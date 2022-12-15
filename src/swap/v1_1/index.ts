@@ -68,8 +68,8 @@ async function generateTxns({
   client: Algodv2;
   pool: V1PoolInfo;
   swapType: SwapType;
-  assetIn: {assetID: number; amount: number | bigint};
-  assetOut: {assetID: number; amount: number | bigint};
+  assetIn: AssetWithIdAndAmount;
+  assetOut: AssetWithIdAndAmount;
   slippage: number;
   initiatorAddr: string;
 }): Promise<SignerTransaction[]> {
@@ -87,8 +87,8 @@ async function generateTxns({
     accounts: [initiatorAddr],
     foreignAssets:
       pool.asset2ID == ALGO_ASSET_ID
-        ? [pool.asset1ID, pool.liquidityTokenID as number]
-        : [pool.asset1ID, pool.asset2ID, pool.liquidityTokenID as number],
+        ? [pool.asset1ID, pool.poolTokenID as number]
+        : [pool.asset1ID, pool.asset2ID, pool.poolTokenID as number],
     suggestedParams
   });
 
@@ -98,7 +98,7 @@ async function generateTxns({
       : assetIn.amount;
   let assetInTxn: algosdk.Transaction;
 
-  if (assetIn.assetID === ALGO_ASSET_ID) {
+  if (assetIn.id === ALGO_ASSET_ID) {
     assetInTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
       from: initiatorAddr,
       to: poolAddress,
@@ -109,7 +109,7 @@ async function generateTxns({
     assetInTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
       from: initiatorAddr,
       to: poolAddress,
-      assetIndex: assetIn.assetID,
+      assetIndex: assetIn.id,
       amount: assetInAmount,
       suggestedParams
     });
@@ -121,7 +121,7 @@ async function generateTxns({
       : assetOut.amount;
   let assetOutTxn: algosdk.Transaction;
 
-  if (assetOut.assetID === ALGO_ASSET_ID) {
+  if (assetOut.id === ALGO_ASSET_ID) {
     assetOutTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
       from: poolAddress,
       to: initiatorAddr,
@@ -132,7 +132,7 @@ async function generateTxns({
     assetOutTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
       from: poolAddress,
       to: initiatorAddr,
-      assetIndex: assetOut.assetID,
+      assetIndex: assetOut.id,
       amount: assetOutAmount,
       suggestedParams
     });
@@ -176,7 +176,7 @@ function getQuote(
   type: SwapType,
   pool: V1PoolInfo,
   reserves: PoolReserves,
-  asset: {assetID: number; amount: number | bigint},
+  asset: AssetWithIdAndAmount,
   decimals: {assetIn: number; assetOut: number}
 ): SwapQuote {
   let quote;
@@ -211,7 +211,7 @@ function getFixedInputSwapQuote({
 }: {
   pool: V1PoolInfo;
   reserves: PoolReserves;
-  assetIn: {assetID: number; amount: number | bigint};
+  assetIn: AssetWithIdAndAmount;
   decimals: {assetIn: number; assetOut: number};
 }): SwapQuote {
   const assetInAmount = BigInt(assetIn.amount);
@@ -220,7 +220,7 @@ function getFixedInputSwapQuote({
   let inputSupply: bigint;
   let outputSupply: bigint;
 
-  if (assetIn.assetID === pool.asset1ID) {
+  if (assetIn.id === pool.asset1ID) {
     assetOutID = pool.asset2ID;
     inputSupply = reserves.asset1;
     outputSupply = reserves.asset2;
@@ -247,7 +247,7 @@ function getFixedInputSwapQuote({
 
   return {
     round: reserves.round,
-    assetInID: assetIn.assetID,
+    assetInID: assetIn.id,
     assetInAmount,
     assetOutID,
     assetOutAmount,
@@ -287,8 +287,8 @@ async function executeFixedInputSwap({
   client: any;
   pool: V1PoolInfo;
   signedTxns: Uint8Array[];
-  assetIn: {assetID: number; amount: number | bigint};
-  assetOut: {assetID: number; amount: number | bigint};
+  assetIn: AssetWithIdAndAmount;
+  assetOut: AssetWithIdAndAmount;
   initiatorAddr: string;
 }): Promise<Omit<V1SwapExecution, "fees" | "groupID">> {
   const prevExcessAssets = await getAccountExcessWithinPool({
@@ -308,7 +308,7 @@ async function executeFixedInputSwap({
   let prevExcessAmount: bigint;
   let excessAmount: bigint;
 
-  if (assetOut.assetID === pool.asset1ID) {
+  if (assetOut.id === pool.asset1ID) {
     prevExcessAmount = prevExcessAssets.excessAsset1;
     excessAmount = excessAssets.excessAsset1;
   } else {
@@ -324,12 +324,12 @@ async function executeFixedInputSwap({
 
   return {
     round: confirmedRound,
-    assetInID: assetIn.assetID,
+    assetInID: assetIn.id,
     assetInAmount: BigInt(assetIn.amount),
-    assetOutID: assetOut.assetID,
+    assetOutID: assetOut.id,
     assetOutAmount: BigInt(assetOut.amount) + excessAmountDelta,
     excessAmount: {
-      assetID: assetOut.assetID,
+      assetID: assetOut.id,
       excessAmountForSwap: excessAmountDelta,
       totalExcessAmount: excessAmount
     },
@@ -353,7 +353,7 @@ function getFixedOutputSwapQuote({
 }: {
   pool: V1PoolInfo;
   reserves: PoolReserves;
-  assetOut: {assetID: number; amount: number | bigint};
+  assetOut: AssetWithIdAndAmount;
   decimals: {assetIn: number; assetOut: number};
 }): SwapQuote {
   const assetOutAmount = BigInt(assetOut.amount);
@@ -362,7 +362,7 @@ function getFixedOutputSwapQuote({
   let inputSupply: bigint;
   let outputSupply: bigint;
 
-  if (assetOut.assetID === pool.asset1ID) {
+  if (assetOut.id === pool.asset1ID) {
     assetInID = pool.asset2ID;
     inputSupply = reserves.asset2;
     outputSupply = reserves.asset1;
@@ -397,7 +397,7 @@ function getFixedOutputSwapQuote({
     round: reserves.round,
     assetInID,
     assetInAmount,
-    assetOutID: assetOut.assetID,
+    assetOutID: assetOut.id,
     assetOutAmount,
     swapFee: Number(swapFee),
     rate,
@@ -433,8 +433,8 @@ async function executeFixedOutputSwap({
   client: any;
   pool: V1PoolInfo;
   signedTxns: Uint8Array[];
-  assetIn: {assetID: number; amount: number | bigint};
-  assetOut: {assetID: number; amount: number | bigint};
+  assetIn: AssetWithIdAndAmount;
+  assetOut: AssetWithIdAndAmount;
   initiatorAddr: string;
 }): Promise<Omit<V1SwapExecution, "fees" | "groupID">> {
   const prevExcessAssets = await getAccountExcessWithinPool({
@@ -454,7 +454,7 @@ async function executeFixedOutputSwap({
   let prevExcessAmount: bigint;
   let excessAmount: bigint;
 
-  if (assetIn.assetID === pool.asset1ID) {
+  if (assetIn.id === pool.asset1ID) {
     prevExcessAmount = prevExcessAssets.excessAsset1;
     excessAmount = excessAssets.excessAsset1;
   } else {
@@ -470,12 +470,12 @@ async function executeFixedOutputSwap({
 
   return {
     round: confirmedRound,
-    assetInID: assetIn.assetID,
+    assetInID: assetIn.id,
     assetInAmount: BigInt(assetIn.amount) - excessAmountDelta,
-    assetOutID: assetOut.assetID,
+    assetOutID: assetOut.id,
     assetOutAmount: BigInt(assetOut.amount),
     excessAmount: {
-      assetID: assetIn.assetID,
+      assetID: assetIn.id,
       excessAmountForSwap: excessAmountDelta,
       totalExcessAmount: excessAmount
     },
@@ -521,13 +521,12 @@ async function execute({
   }
 
   try {
-    const assetIn = {
-      assetID:
-        txGroup[SwapTxnGroupIndices.ASSET_IN_TXN_INDEX].txn.assetIndex || ALGO_ASSET_ID,
+    const assetIn: AssetWithIdAndAmount = {
+      id: txGroup[SwapTxnGroupIndices.ASSET_IN_TXN_INDEX].txn.assetIndex || ALGO_ASSET_ID,
       amount: txGroup[SwapTxnGroupIndices.ASSET_IN_TXN_INDEX].txn.amount
     };
-    const assetOut = {
-      assetID:
+    const assetOut: AssetWithIdAndAmount = {
+      id:
         txGroup[SwapTxnGroupIndices.ASSET_OUT_TXN_INDEX].txn.assetIndex || ALGO_ASSET_ID,
       amount: txGroup[SwapTxnGroupIndices.ASSET_OUT_TXN_INDEX].txn.amount
     };

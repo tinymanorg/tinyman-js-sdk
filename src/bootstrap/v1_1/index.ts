@@ -60,18 +60,16 @@ async function generateTxns({
     suggestedParams
   });
 
-  const liquidityTokenCreateTxn = algosdk.makeAssetCreateTxnWithSuggestedParamsFromObject(
-    {
-      from: poolAddress,
-      total: 0xffffffffffffffffn,
-      decimals: 6,
-      defaultFrozen: false,
-      unitName: POOL_TOKEN_UNIT_NAME.V1_1,
-      assetName: `TinymanPool1.1 ${asset1UnitName}-${asset2UnitName}`,
-      assetURL: "https://tinyman.org",
-      suggestedParams
-    }
-  );
+  const poolTokenCreateTxn = algosdk.makeAssetCreateTxnWithSuggestedParamsFromObject({
+    from: poolAddress,
+    total: 0xffffffffffffffffn,
+    decimals: 6,
+    defaultFrozen: false,
+    unitName: POOL_TOKEN_UNIT_NAME.V1_1,
+    assetName: `TinymanPool1.1 ${asset1UnitName}-${asset2UnitName}`,
+    assetURL: "https://tinyman.org",
+    suggestedParams
+  });
 
   const asset1Optin = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
     from: poolAddress,
@@ -92,7 +90,7 @@ async function generateTxns({
 
   txns[V1_1BootstrapTxnGroupIndices.FUNDING_TXN] = fundingTxn;
   txns[V1_1BootstrapTxnGroupIndices.VALIDATOR_APP_CALL] = validatorAppCallTxn;
-  txns[V1_1BootstrapTxnGroupIndices.LIQUIDITY_TOKEN_CREATE] = liquidityTokenCreateTxn;
+  txns[V1_1BootstrapTxnGroupIndices.POOL_TOKEN_CREATE] = poolTokenCreateTxn;
   txns[V1_1BootstrapTxnGroupIndices.ASSET1_OPT_IN] = asset1Optin;
 
   if (!isAlgoPool) {
@@ -118,7 +116,7 @@ async function generateTxns({
       signers: [poolAddress]
     },
     {
-      txn: txGroup[V1_1BootstrapTxnGroupIndices.LIQUIDITY_TOKEN_CREATE],
+      txn: txGroup[V1_1BootstrapTxnGroupIndices.POOL_TOKEN_CREATE],
       signers: [poolAddress]
     },
     {
@@ -198,23 +196,23 @@ async function doBootstrap({
   client: Algodv2;
   signedTxns: Uint8Array[];
   txnIDs: string[];
-}): Promise<{liquidityTokenID: number}> {
+}): Promise<{poolTokenID: number}> {
   try {
     await client.sendRawTransaction(signedTxns).do();
 
     const assetCreationResult = await waitForConfirmation(
       client,
-      txnIDs[V1_1BootstrapTxnGroupIndices.LIQUIDITY_TOKEN_CREATE]
+      txnIDs[V1_1BootstrapTxnGroupIndices.POOL_TOKEN_CREATE]
     );
 
-    const liquidityTokenID = assetCreationResult["asset-index"];
+    const poolTokenID = assetCreationResult["asset-index"];
 
-    if (typeof liquidityTokenID !== "number") {
-      throw new Error(`Generated ID is not valid: got ${liquidityTokenID}`);
+    if (typeof poolTokenID !== "number") {
+      throw new Error(`Generated ID is not valid: got ${poolTokenID}`);
     }
 
     return {
-      liquidityTokenID
+      poolTokenID
     };
   } catch (error: any) {
     throw new TinymanError(

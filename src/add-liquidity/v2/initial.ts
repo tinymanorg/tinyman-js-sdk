@@ -20,14 +20,8 @@ export function getQuote({
   slippage = 0.05
 }: {
   pool: V2PoolInfo;
-  asset1: {
-    amount: number | bigint;
-    decimals: number;
-  };
-  asset2: {
-    amount: number | bigint;
-    decimals: number;
-  };
+  asset1: AssetWithAmountAndDecimals;
+  asset2: AssetWithAmountAndDecimals;
   slippage?: number;
 }): V2InitialAddLiquidityQuote {
   if (pool.issuedPoolTokens !== 0n) {
@@ -40,25 +34,16 @@ export function getQuote({
 
   if (geoMean <= BigInt(V2_LOCKED_POOL_TOKENS)) {
     throw new Error(
-      `Initial liquidity mint too small. Liquidity minting amount must be greater than ${V2_LOCKED_POOL_TOKENS}, this quote is for ${geoMean}.`
+      `Initial liquidity amount is too small. Liquidity amount must be greater than ${V2_LOCKED_POOL_TOKENS}, this quote is for ${geoMean}.`
     );
   }
 
   const poolTokenAssetAmount = calculateInitialAddLiquidity(asset1, asset2);
 
   return {
-    asset1In: {
-      id: pool.asset1ID,
-      amount: BigInt(asset1.amount)
-    },
-    asset2In: {
-      id: pool.asset2ID,
-      amount: BigInt(asset2.amount)
-    },
-    poolTokenOut: {
-      id: pool.liquidityTokenID!,
-      amount: poolTokenAssetAmount
-    },
+    asset1In: {id: pool.asset1ID, amount: BigInt(asset1.amount)},
+    asset2In: {id: pool.asset2ID, amount: BigInt(asset2.amount)},
+    poolTokenOut: {id: pool.poolTokenID!, amount: poolTokenAssetAmount},
     slippage
   };
 }
@@ -68,42 +53,41 @@ export async function generateTxns({
   pool,
   network,
   poolAddress,
-  asset_1,
-  asset_2,
-  liquidityToken,
+  asset1In,
+  asset2In,
+  poolTokenId,
   initiatorAddr
 }: {
   client: AlgodClient;
   pool: V2PoolInfo;
   network: SupportedNetwork;
   poolAddress: string;
-  asset_1: {id: number; amount: number | bigint};
-  asset_2: {id: number; amount: number | bigint};
-  liquidityToken: {id: number; amount: number | bigint};
+  asset1In: AssetWithIdAndAmount;
+  asset2In: AssetWithIdAndAmount;
+  poolTokenId: number;
   initiatorAddr: string;
 }): Promise<SignerTransaction[]> {
   const isAlgoPool = isAlgo(pool.asset2ID);
   const suggestedParams = await client.getTransactionParams().do();
-
   const asset1InTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
     from: initiatorAddr,
     to: poolAddress,
     assetIndex: pool.asset1ID,
-    amount: asset_1.amount,
+    amount: asset1In.amount,
     suggestedParams
   });
   const asset2InTxn = isAlgoPool
     ? algosdk.makePaymentTxnWithSuggestedParamsFromObject({
         from: initiatorAddr,
         to: poolAddress,
-        amount: asset_2.amount,
+        amount: asset2In.amount,
         suggestedParams
       })
     : algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
         from: initiatorAddr,
         to: poolAddress,
         assetIndex: pool.asset2ID,
-        amount: asset_2.amount,
+        amount: asset2In.amount,
         suggestedParams
       });
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
@@ -111,7 +95,7 @@ export async function generateTxns({
     appIndex: getValidatorAppID(network, CONTRACT_VERSION.V2),
     appArgs: ADD_LIQUIDITY_APP_CALL_ARGUMENTS.v2.INITIAL_LIQUIDITY,
     accounts: [poolAddress],
-    foreignAssets: [liquidityToken.id],
+    foreignAssets: [poolTokenId],
     suggestedParams
   });
 
