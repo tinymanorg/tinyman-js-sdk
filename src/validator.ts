@@ -13,7 +13,7 @@ const VALIDATOR_APP_ID: Record<ContractVersionValue, Record<SupportedNetwork, nu
   },
   [CONTRACT_VERSION.V2]: {
     //  TODO: update the values when new validator app is deployed
-    testnet: 113134165,
+    testnet: 148607000,
     mainnet: 552635992
   }
 };
