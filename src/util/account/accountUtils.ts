@@ -251,19 +251,37 @@ export function isAccountOptedIntoApp({
   return accountAppsLocalState.some((appState) => appState.id === appID);
 }
 
-export function minRequiredBalanceToOptIn(
-  type: "asset-opt-in" | "app-opt-in",
-  currentMinumumBalanceForAccount: number,
-  contractVersion: ContractVersionValue,
-  suggestedTransactionFee?: number
+/**
+ * @returns the minimum balance required to opt in to an app or asset (decided by `type`)
+ */
+export function getMinRequiredBalanceToOptIn(
+  params: (
+    | {
+        type: "app-opt-in";
+        contractVersion: ContractVersionValue;
+      }
+    | {
+        type: "asset-opt-in";
+      }
+  ) & {
+    currentMinumumBalanceForAccount: number;
+    suggestedTransactionFee?: number;
+  }
 ) {
-  const contract = getContract(contractVersion);
-  const minBalanceRequirementPerOptIn =
-    type === "asset-opt-in"
-      ? MINIMUM_BALANCE_REQUIRED_PER_ASSET
-      : MINIMUM_BALANCE_REQUIRED_PER_APP +
-        contract.schema.numLocalByteSlices * MINIMUM_BALANCE_REQUIRED_PER_BYTE_SCHEMA +
-        contract.schema.numLocalInts * MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE;
+  const {currentMinumumBalanceForAccount, suggestedTransactionFee} = params;
+
+  let minBalanceRequirementPerOptIn: number;
+
+  if (params.type === "app-opt-in") {
+    const contract = getContract(params.contractVersion);
+
+    minBalanceRequirementPerOptIn =
+      MINIMUM_BALANCE_REQUIRED_PER_APP +
+      contract.schema.numLocalByteSlices * MINIMUM_BALANCE_REQUIRED_PER_BYTE_SCHEMA +
+      contract.schema.numLocalInts * MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE;
+  } else {
+    minBalanceRequirementPerOptIn = MINIMUM_BALANCE_REQUIRED_PER_ASSET;
+  }
 
   return (
     minBalanceRequirementPerOptIn +

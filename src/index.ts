@@ -43,7 +43,8 @@ export {
   hasSufficientMinimumBalance,
   isAccountOptedIntoApp,
   getAccountExcessWithinPool,
-  getAccountExcess
+  getAccountExcess,
+  getMinRequiredBalanceToOptIn
 } from "./util/account/accountUtils";
 
 export type {AccountInformationData} from "./util/account/accountTypes";
@@ -108,6 +109,7 @@ export type {
   V1SwapExecution,
   V2SwapExecution
 } from "./swap/types";
+export {getSwapTotalFee} from "./swap/utils";
 export {SwapType} from "./swap/constants";
 export {Swap} from "./swap";
 

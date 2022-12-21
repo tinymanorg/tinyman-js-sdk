@@ -14,6 +14,11 @@ export const V2_SWAP_APP_CALL_INNER_TXN_COUNT = {
   [SwapType.FixedOutput]: 2
 } as const;
 
+/**
+ * Number of transactions in the swap transaction group (excluding inner transactions)
+ */
+export const V2_SWAP_TXN_COUNT = 2;
+
 export const V2_SWAP_APP_CALL_ARG_ENCODED = encodeString("swap");
 
 export const V2_SWAP_APP_CALL_SWAP_TYPE_ARGS_ENCODED = {
