@@ -208,12 +208,22 @@ export function roundNumber({decimalPlaces = 0}, x: number): number {
     const [decimal, decimalExponentialPart] = getExponentialNumberComponents(x);
 
     const [rounded, roundedExponentialPart] = getExponentialNumberComponents(
-      // eslint-disable-next-line prefer-template
-      Math.round(Number(decimal + `e+${decimalExponentialPart + decimalPlaces}`))
+      Math.round(
+        Number(
+          generateExponentialNumberFromComponents(
+            decimal,
+            decimalExponentialPart + decimalPlaces
+          )
+        )
+      )
     );
 
-    // eslint-disable-next-line prefer-template
-    return Number(rounded + `e-${roundedExponentialPart + decimalPlaces}`);
+    return Number(
+      generateExponentialNumberFromComponents(
+        rounded,
+        roundedExponentialPart - decimalPlaces
+      )
+    );
   }
 
   return Math.round(x);
@@ -221,8 +231,20 @@ export function roundNumber({decimalPlaces = 0}, x: number): number {
 
 /**
  * @example
+ * generateExponentialNumberFromComponents(1023, 0); // "1023e+0"
+ * generateExponentialNumberFromComponents(1.023, 21); // "1.023e+21"
+ * generateExponentialNumberFromComponents(1.023, -21); // "1.023e-21"
+ */
+function generateExponentialNumberFromComponents(decimalPart: number, exponent: number) {
+  return decimalPart + (exponent < 0 ? `e${exponent}` : `e+${exponent}`);
+}
+
+/**
+ * @example
  * getExponentialNumberComponents(1023);  // [1023, 0]
- * getExponentialNumberComponents(1.023e21);  // [1.023, 21]
+ * getExponentialNumberComponents(1023e+0);  // [1023, 0]
+ * getExponentialNumberComponents(1.023e+21);  // [1.023, 21]
+ * getExponentialNumberComponents(1.023e-21);  // [1.023, -21]
  */
 function getExponentialNumberComponents(x: number): [number, number] {
   if (x.toString().includes("e")) {
