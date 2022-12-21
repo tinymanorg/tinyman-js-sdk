@@ -204,8 +204,34 @@ export function convertToBaseUnits(
  * @returns {number} Rounded number
  */
 export function roundNumber({decimalPlaces = 0}, x: number): number {
-  // eslint-disable-next-line prefer-template
-  return Number(Math.round(Number(x + `e+${decimalPlaces}`)) + `e-${decimalPlaces}`);
+  if (decimalPlaces > 0) {
+    const [decimal, decimalExponentialPart] = getExponentialNumberComponents(x);
+
+    const [rounded, roundedExponentialPart] = getExponentialNumberComponents(
+      // eslint-disable-next-line prefer-template
+      Math.round(Number(decimal + `e+${decimalExponentialPart + decimalPlaces}`))
+    );
+
+    // eslint-disable-next-line prefer-template
+    return Number(rounded + `e-${roundedExponentialPart + decimalPlaces}`);
+  }
+
+  return Math.round(x);
+}
+
+/**
+ * @example
+ * getExponentialNumberComponents(1023);  // [1023, 0]
+ * getExponentialNumberComponents(1.023e21);  // [1.023, 21]
+ */
+function getExponentialNumberComponents(x: number): [number, number] {
+  if (x.toString().includes("e")) {
+    const parts = x.toString().split("e");
+
+    return [parseFloat(parts[0]), parseFloat(parts[1])];
+  }
+
+  return [x, 0];
 }
 
 /**
