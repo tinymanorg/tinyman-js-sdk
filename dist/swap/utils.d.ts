@@ -75,4 +75,14 @@ export declare function execute(params: ({
 } | {
     contractVersion: typeof CONTRACT_VERSION.V2;
 }) & ExecuteCommonParams): Promise<import("./types").V2SwapExecution> | Promise<import("./types").V1SwapExecution>;
+/**
+ * @returns the total fee that will be paid by the user
+ * for the swap transaction with given parameters
+ */
+export declare function getSwapTotalFee(params: {
+    version: typeof CONTRACT_VERSION.V1_1;
+} | {
+    version: typeof CONTRACT_VERSION.V2;
+    type: SwapType;
+}): number;
 export {};

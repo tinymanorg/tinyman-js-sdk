@@ -4,7 +4,7 @@ export { applySlippageToAmount, ASSET_OPT_IN_PROCESS_TXN_COUNT, convertFromBaseU
 export { generateOptIntoAssetTxns } from "./util/asset/assetUtils";
 export type { AccountAsset, TinymanAnalyticsApiAsset, IndexerAssetInformation } from "./util/asset/assetModels";
 export { ALGO_ASSET, ALGO_ASSET_ID, POOL_TOKEN_UNIT_NAME } from "./util/asset/assetConstants";
-export { getAccountInformation, calculateAccountMinimumRequiredBalance, hasSufficientMinimumBalance, isAccountOptedIntoApp, getAccountExcessWithinPool, getAccountExcess } from "./util/account/accountUtils";
+export { getAccountInformation, calculateAccountMinimumRequiredBalance, hasSufficientMinimumBalance, isAccountOptedIntoApp, getAccountExcessWithinPool, getAccountExcess, getMinRequiredBalanceToOptIn } from "./util/account/accountUtils";
 export type { AccountInformationData } from "./util/account/accountTypes";
 export type { ContractVersionValue } from "./contract/types";
 export { CONTRACT_VERSION } from "./contract/constants";
@@ -27,6 +27,7 @@ export { V1_1_REMOVE_LIQUIDITY_TXN_COUNT } from "./remove-liquidity/v1_1/constan
 export { V2_REMOVE_LIQUIDITY_APP_CALL_INNER_TXN_COUNT } from "./remove-liquidity/v2/constants";
 export { RemoveLiquidity } from "./remove-liquidity";
 export type { SwapQuote, SwapQuoteWithPool, V1SwapExecution, V2SwapExecution } from "./swap/types";
+export { getSwapTotalFee } from "./swap/utils";
 export { SwapType } from "./swap/constants";
 export { Swap } from "./swap";
 export { redeemExcessAsset, redeemAllExcessAsset, generateRedeemTxns, REDEEM_PROCESS_TXN_COUNT } from "./redeem";

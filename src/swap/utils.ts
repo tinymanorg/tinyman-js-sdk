@@ -8,6 +8,8 @@ import {SwapQuoteWithPool, SwapQuote} from "./types";
 import {SwapType} from "./constants";
 import {SwapV1_1} from "./v1_1";
 import {SwapV2} from "./v2";
+import {V1_1_SWAP_TOTAL_FEE} from "./v1_1/constants";
+import {getV2SwapTotalFee} from "./v2/util";
 
 /**
  * Gets quotes for swap from each pool passed as an argument,
@@ -159,4 +161,30 @@ export function execute(
   }
 
   return SwapV2.execute(params);
+}
+
+/**
+ * @returns the total fee that will be paid by the user
+ * for the swap transaction with given parameters
+ */
+export function getSwapTotalFee(
+  params:
+    | {
+        version: typeof CONTRACT_VERSION.V1_1;
+      }
+    | {
+        version: typeof CONTRACT_VERSION.V2;
+        type: SwapType;
+      }
+) {
+  switch (params.version) {
+    case CONTRACT_VERSION.V1_1:
+      return V1_1_SWAP_TOTAL_FEE;
+
+    case CONTRACT_VERSION.V2:
+      return getV2SwapTotalFee(params.type);
+
+    default:
+      throw new Error("Provided contract version was not valid.");
+  }
 }

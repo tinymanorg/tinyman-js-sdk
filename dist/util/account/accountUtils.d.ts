@@ -44,4 +44,15 @@ export declare function isAccountOptedIntoApp({ appID, accountAppsLocalState }: 
     appID: number;
     accountAppsLocalState: AccountInformation["apps-local-state"];
 }): boolean;
-export declare function minRequiredBalanceToOptIn(type: "asset-opt-in" | "app-opt-in", currentMinumumBalanceForAccount: number, contractVersion: ContractVersionValue, suggestedTransactionFee?: number): number;
+/**
+ * @returns the minimum balance required to opt in to an app or asset (decided by `type`)
+ */
+export declare function getMinRequiredBalanceToOptIn(params: ({
+    type: "app-opt-in";
+    contractVersion: ContractVersionValue;
+} | {
+    type: "asset-opt-in";
+}) & {
+    currentMinumumBalanceForAccount: number;
+    suggestedTransactionFee?: number;
+}): number;
