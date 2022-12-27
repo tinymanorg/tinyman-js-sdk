@@ -204,8 +204,56 @@ export function convertToBaseUnits(
  * @returns {number} Rounded number
  */
 export function roundNumber({decimalPlaces = 0}, x: number): number {
-  // eslint-disable-next-line prefer-template
-  return Number(Math.round(Number(x + `e+${decimalPlaces}`)) + `e-${decimalPlaces}`);
+  if (decimalPlaces > 0) {
+    const [decimal, decimalExponentialPart] = getExponentialNumberComponents(x);
+
+    const [rounded, roundedExponentialPart] = getExponentialNumberComponents(
+      Math.round(
+        Number(
+          generateExponentialNumberFromComponents(
+            decimal,
+            decimalExponentialPart + decimalPlaces
+          )
+        )
+      )
+    );
+
+    return Number(
+      generateExponentialNumberFromComponents(
+        rounded,
+        roundedExponentialPart - decimalPlaces
+      )
+    );
+  }
+
+  return Math.round(x);
+}
+
+/**
+ * @example
+ * generateExponentialNumberFromComponents(1023, 0); // "1023e+0"
+ * generateExponentialNumberFromComponents(1.023, 21); // "1.023e+21"
+ * generateExponentialNumberFromComponents(1.023, -21); // "1.023e-21"
+ */
+function generateExponentialNumberFromComponents(decimalPart: number, exponent: number) {
+  return decimalPart + (exponent < 0 ? `e${exponent}` : `e+${exponent}`);
+}
+
+/**
+ * @example
+ * getExponentialNumberComponents(1023);  // [1023, 0]
+ * getExponentialNumberComponents(1023e+0);  // [1023, 0]
+ * getExponentialNumberComponents(1.023e+21);  // [1.023, 21]
+ * getExponentialNumberComponents(1.023e-21);  // [1.023, -21]
+ */
+function getExponentialNumberComponents(x: number): [number, number] {
+  if (x.toString().includes("e")) {
+    const parts = x.toString().split("e");
+
+    return [parseFloat(parts[0]), parseFloat(parts[1])];
+  }
+
+  return [x, 0];
 }
 
 /**
