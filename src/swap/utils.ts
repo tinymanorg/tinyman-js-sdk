@@ -23,6 +23,10 @@ export function getQuote(params: {
   assetOut: Pick<TinymanAnalyticsApiAsset, "id" | "decimals">;
   amount: number | bigint;
 }): SwapQuoteWithPool {
+  if (params.pools.every((pool) => isPoolEmpty(pool.reserves))) {
+    throw new Error("No pools available for swap");
+  }
+
   if (params.type === SwapType.FixedInput) {
     return getFixedInputSwapQuote(params);
   }
@@ -109,10 +113,6 @@ function getBestQuote(quotes: SwapQuoteWithPool[]): SwapQuoteWithPool {
   const quotesByDescendingRate = quotes
     .filter((quote) => !isPoolEmpty(quote.pool.reserves))
     .sort((a, b) => b.quote.rate - a.quote.rate);
-
-  if (quotesByDescendingRate.length === 0) {
-    throw new Error("No pools available for swap");
-  }
 
   return quotesByDescendingRate[0];
 }
