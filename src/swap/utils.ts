@@ -106,9 +106,13 @@ export function getFixedOutputSwapQuote({
  * Compares the given quotes and returns the best one (with the highest rate).
  */
 function getBestQuote(quotes: SwapQuoteWithPool[]): SwapQuoteWithPool {
-  const quotesByDescendingRate = [...quotes]
-    .sort((a, b) => b.quote.rate - a.quote.rate)
-    .filter((quote) => !isPoolEmpty(quote.pool.reserves));
+  const quotesByDescendingRate = quotes
+    .filter((quote) => !isPoolEmpty(quote.pool.reserves))
+    .sort((a, b) => b.quote.rate - a.quote.rate);
+
+  if (quotesByDescendingRate.length === 0) {
+    throw new Error("No pools available for swap");
+  }
 
   return quotesByDescendingRate[0];
 }
