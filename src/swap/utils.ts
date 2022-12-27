@@ -10,6 +10,7 @@ import {SwapV1_1} from "./v1_1";
 import {SwapV2} from "./v2";
 import {V1_1_SWAP_TOTAL_FEE} from "./v1_1/constants";
 import {getV2SwapTotalFee} from "./v2/util";
+import {isPoolEmpty} from "../util/pool/common";
 
 /**
  * Gets quotes for swap from each pool passed as an argument,
@@ -22,6 +23,10 @@ export function getQuote(params: {
   assetOut: Pick<TinymanAnalyticsApiAsset, "id" | "decimals">;
   amount: number | bigint;
 }): SwapQuoteWithPool {
+  if (params.pools.every((pool) => isPoolEmpty(pool.reserves))) {
+    throw new Error("No pools available for swap");
+  }
+
   if (params.type === SwapType.FixedInput) {
     return getFixedInputSwapQuote(params);
   }
@@ -105,7 +110,9 @@ export function getFixedOutputSwapQuote({
  * Compares the given quotes and returns the best one (with the highest rate).
  */
 function getBestQuote(quotes: SwapQuoteWithPool[]): SwapQuoteWithPool {
-  const quotesByDescendingRate = [...quotes].sort((a, b) => b.quote.rate - a.quote.rate);
+  const quotesByDescendingRate = quotes
+    .filter((quote) => !isPoolEmpty(quote.pool.reserves))
+    .sort((a, b) => b.quote.rate - a.quote.rate);
 
   return quotesByDescendingRate[0];
 }
