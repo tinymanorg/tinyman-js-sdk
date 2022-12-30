@@ -1,4 +1,8 @@
-export type {InitiatorSigner, SignerTransaction} from "./util/commonTypes";
+export type {
+  InitiatorSigner,
+  SignerTransaction,
+  SupportedNetwork
+} from "./util/commonTypes";
 
 export {
   BASE_MINIMUM_BALANCE,
@@ -6,7 +10,7 @@ export {
   MINIMUM_BALANCE_REQUIRED_PER_APP,
   MINIMUM_BALANCE_REQUIRED_PER_BYTE_SCHEMA,
   MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE,
-  MINIMUM_LIQUIDITY_MINTING_AMOUNT
+  MINIMUM_ADD_LIQUIDITY_AMOUNT
 } from "./util/constant";
 
 export {
@@ -30,7 +34,7 @@ export type {
 export {
   ALGO_ASSET,
   ALGO_ASSET_ID,
-  LIQUIDITY_TOKEN_UNIT_NAME
+  POOL_TOKEN_UNIT_NAME
 } from "./util/asset/assetConstants";
 
 export {
@@ -39,12 +43,16 @@ export {
   hasSufficientMinimumBalance,
   isAccountOptedIntoApp,
   getAccountExcessWithinPool,
-  getAccountExcess
+  getAccountExcess,
+  getMinRequiredBalanceToOptIn
 } from "./util/account/accountUtils";
 
 export type {AccountInformationData} from "./util/account/accountTypes";
 
-export {validatorAppSchema} from "./contract/contract";
+export type {ContractVersionValue} from "./contract/types";
+export {CONTRACT_VERSION} from "./contract/constants";
+export {tinymanContract_v2} from "./contract/v2/contract";
+export {tinymanContract_v1_1} from "./contract/v1_1/contract";
 
 export {
   getValidatorAppID,
@@ -54,60 +62,56 @@ export {
   OPT_OUT_VALIDATOR_APP_PROCESS_TXN_COUNT
 } from "./validator";
 
-export type {PoolStatus, PoolInfo, PoolReserves} from "./util/pool/poolTypes";
-
-export {
-  getPoolInfo,
-  getPoolReserves,
-  getPoolShare,
-  getPoolPairRatio,
-  isPoolEmpty,
-  isPoolNotCreated,
-  isPoolReady,
-  getPoolAssets
-} from "./util/pool/poolUtils";
-
-export {
-  generateBootstrapTransactions,
-  signBootstrapTransactions,
-  getBootstrapProcessTxnCount,
-  calculatePoolBootstrapFundingTxnAmount,
-  createPool
-} from "./bootstrap";
-
-export type {MintQuote, MintExecution} from "./mint";
-
+export type {V1PoolInfo, V2PoolInfo, PoolReserves} from "./util/pool/poolTypes";
 // eslint-disable-next-line no-duplicate-imports
+export {PoolStatus} from "./util/pool/poolTypes";
+
+export {poolUtils} from "./util/pool";
+
+export {Bootstrap} from "./bootstrap";
+
+export type {
+  V1_1AddLiquidityQuote,
+  V1_1AddLiquidityExecution
+} from "./add-liquidity/v1_1/types";
 export {
-  getMintLiquidityQuote,
-  mintLiquidity,
-  generateMintTxns,
-  signMintTxns,
-  MINT_PROCESS_TXN_COUNT
-} from "./mint";
+  V1_1AddLiquidityTxnIndices,
+  V1_1_ADD_LIQUIDITY_PROCESS_TXN_COUNT
+} from "./add-liquidity/v1_1/constants";
+export type {
+  V2InitialAddLiquidityQuote,
+  V2AddLiquidityInternalSwapQuote,
+  V2FlexibleAddLiquidityQuote,
+  V2SingleAssetInAddLiquidityQuote,
+  V2AddLiquidityExecution
+} from "./add-liquidity/v2/types";
+export {V2AddLiquidityType, V2AddLiquidityTxnIndices} from "./add-liquidity/v2/constants";
+export {getAddLiquidityTotalFee} from "./add-liquidity/util";
+export {AddLiquidity} from "./add-liquidity";
 
-export type {BurnQuote, BurnExecution} from "./burn";
+export type {
+  V1_1RemoveLiquidityExecution,
+  V1_1RemoveLiquidityQuote
+} from "./remove-liquidity/v1_1/types";
+export type {
+  V2RemoveLiquidityQuote,
+  V2SingleAssetRemoveLiquidityQuote,
+  V2RemoveLiquidityExecution
+} from "./remove-liquidity/v2/types";
 
-// eslint-disable-next-line no-duplicate-imports
-export {
-  getBurnLiquidityQuote,
-  burnLiquidity,
-  generateBurnTxns,
-  signBurnTxns,
-  BURN_PROCESS_TXN_COUNT
-} from "./burn";
+export {V1_1_REMOVE_LIQUIDITY_TXN_COUNT} from "./remove-liquidity/v1_1/constants";
+export {V2_REMOVE_LIQUIDITY_APP_CALL_INNER_TXN_COUNT} from "./remove-liquidity/v2/constants";
+export {RemoveLiquidity} from "./remove-liquidity";
 
-export type {SwapQuote, SwapExecution} from "./swap";
-
-// eslint-disable-next-line no-duplicate-imports
-export {
-  SwapType,
-  getSwapQuote,
-  issueSwap,
-  generateSwapTransactions,
-  signSwapTransactions,
-  SWAP_PROCESS_TXN_COUNT
-} from "./swap";
+export type {
+  SwapQuote,
+  SwapQuoteWithPool,
+  V1SwapExecution,
+  V2SwapExecution
+} from "./swap/types";
+export {getSwapTotalFee} from "./swap/utils";
+export {SwapType} from "./swap/constants";
+export {Swap} from "./swap";
 
 export {
   redeemExcessAsset,
@@ -117,3 +121,5 @@ export {
 } from "./redeem";
 
 export {prepareCommitTransactions, getStakingAppID} from "./stake";
+
+export {combineAndRegroupSignerTxns} from "./util/transaction/transactionUtils";

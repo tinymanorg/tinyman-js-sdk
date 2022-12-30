@@ -2,7 +2,13 @@
 import { Algodv2 } from "algosdk";
 import { SignerTransaction } from "./commonTypes";
 import { AccountInformation } from "./account/accountTypes";
-export declare function decodeState(stateArray?: AccountInformation["apps-local-state"][0]["key-value"]): Record<string, number | string>;
+export declare function decodeState({ stateArray, shouldDecodeKeys }: {
+    stateArray: AccountInformation["apps-local-state"][0]["key-value"];
+    /**
+     * If `true`, the returned object will have decoded keys instead of base64 encoded keys.
+     */
+    shouldDecodeKeys?: boolean;
+}): Record<string, number | string>;
 export declare function joinByteArrays(arrays: Uint8Array[]): Uint8Array;
 export declare function getMinBalanceForAccount(accountInfo: any): bigint;
 /**
@@ -45,6 +51,7 @@ export declare function sendAndWaitRawTransaction(client: Algodv2, signedTxnGrou
 }[]>;
 export declare function sumUpTxnFees(txns: SignerTransaction[]): number;
 export declare function getTxnGroupID(txns: SignerTransaction[]): string;
+export declare function encodeInteger(number: any): number[];
 /**
  * Converts a text into bytes
  */

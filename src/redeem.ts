@@ -1,4 +1,4 @@
-import algosdk, {Algodv2, LogicSigAccount} from "algosdk";
+import algosdk, {Algodv2} from "algosdk";
 
 import {
   encodeString,
@@ -9,17 +9,13 @@ import {
 import {InitiatorSigner, SignerTransaction} from "./util/commonTypes";
 import {DEFAULT_FEE_TXN_NOTE} from "./util/constant";
 import TinymanError from "./util/error/TinymanError";
-import {PoolInfo} from "./util/pool/poolTypes";
+import {V1PoolInfo} from "./util/pool/poolTypes";
 
 /**
  * Execute a redeem operation to collect excess assets from previous operations.
  *
  * @param params.client An Algodv2 client.
  * @param params.pool Information for the pool.
- * @param params.assetID The ID of the asset being redeemed. Must match one of the pool's
- *   asset1ID, asset2ID, or liquidityTokenID.
- * @param params.assetOut The quantity of the asset being redeemed.
- * @param params.initiatorAddr The address of the account performing the redeem operation.
  * @param params.initiatorSigner A function that will sign transactions from the initiator's
  *   account.
  */
@@ -29,8 +25,8 @@ export async function redeemExcessAsset({
   txGroup,
   initiatorSigner
 }: {
-  client: any;
-  pool: PoolInfo;
+  client: Algodv2;
+  pool: V1PoolInfo;
   txGroup: SignerTransaction[];
   initiatorSigner: InitiatorSigner;
 }): Promise<{
@@ -69,11 +65,11 @@ async function signRedeemTxns({
   initiatorSigner
 }: {
   txGroup: SignerTransaction[];
-  pool: PoolInfo;
+  pool: V1PoolInfo;
   initiatorSigner: InitiatorSigner;
 }): Promise<Uint8Array[]> {
   const [signedFeeTxn] = await initiatorSigner([txGroup]);
-  const lsig = new LogicSigAccount(pool.program);
+  const {lsig} = pool.account;
 
   const signedTxns = txGroup.map((txDetail, index) => {
     if (index === 0) {
@@ -93,7 +89,7 @@ async function signRedeemTxns({
  * @param params.client An Algodv2 client.
  * @param params.data.pool Information for the pool.
  * @param params.data.assetID The ID of the asset being redeemed. Must match one of the pool's
- *   asset1ID, asset2ID, or liquidityTokenID.
+ *   asset1ID, asset2ID, or poolTokenID.
  * @param params.data.assetOut The quantity of the asset being redeemed.
  * @param params.initiatorAddr The address of the account performing the redeem operation.
  * @param params.initiatorSigner A function that will sign transactions from the initiator's
@@ -105,7 +101,7 @@ export async function redeemAllExcessAsset({
   initiatorSigner
 }: {
   client: any;
-  data: {pool: PoolInfo; txGroup: SignerTransaction[]}[];
+  data: {pool: V1PoolInfo; txGroup: SignerTransaction[]}[];
   initiatorSigner: InitiatorSigner;
 }): Promise<
   {
@@ -121,7 +117,7 @@ export async function redeemAllExcessAsset({
         txns: txGroup,
         txnFees: sumUpTxnFees(txGroup),
         groupID: getTxnGroupID(txGroup),
-        lsig: new LogicSigAccount(pool.program)
+        lsig: pool.account.lsig
       };
     });
 
@@ -186,22 +182,22 @@ export async function generateRedeemTxns({
   initiatorAddr
 }: {
   client: Algodv2;
-  pool: PoolInfo;
+  pool: V1PoolInfo;
   assetID: number;
   assetOut: number | bigint;
   initiatorAddr: string;
 }): Promise<SignerTransaction[]> {
   const suggestedParams = await client.getTransactionParams().do();
-
+  const poolAddress = pool.account.address();
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
-    from: pool.addr,
+    from: poolAddress,
     appIndex: pool.validatorAppID,
     appArgs: [encodeString("redeem")],
     accounts: [initiatorAddr],
     foreignAssets:
       pool.asset2ID == 0
-        ? [pool.asset1ID, pool.liquidityTokenID as number]
-        : [pool.asset1ID, pool.asset2ID, pool.liquidityTokenID as number],
+        ? [pool.asset1ID, pool.poolTokenID as number]
+        : [pool.asset1ID, pool.asset2ID, pool.poolTokenID as number],
     suggestedParams
   });
 
@@ -209,14 +205,14 @@ export async function generateRedeemTxns({
 
   if (assetID === 0) {
     assetOutTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-      from: pool.addr,
+      from: poolAddress,
       to: initiatorAddr,
       amount: BigInt(assetOut),
       suggestedParams
     });
   } else {
     assetOutTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-      from: pool.addr,
+      from: poolAddress,
       to: initiatorAddr,
       assetIndex: assetID,
       amount: BigInt(assetOut),
@@ -226,7 +222,7 @@ export async function generateRedeemTxns({
 
   const feeTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
     from: initiatorAddr,
-    to: pool.addr,
+    to: poolAddress,
     amount: validatorAppCallTxn.fee + assetOutTxn.fee,
     note: DEFAULT_FEE_TXN_NOTE,
     suggestedParams
@@ -241,11 +237,11 @@ export async function generateRedeemTxns({
     },
     {
       txn: txGroup[1],
-      signers: [pool.addr]
+      signers: [poolAddress]
     },
     {
       txn: txGroup[2],
-      signers: [pool.addr]
+      signers: [poolAddress]
     }
   ];
 }

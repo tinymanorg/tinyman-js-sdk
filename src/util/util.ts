@@ -4,9 +4,16 @@ import {SignerTransaction} from "./commonTypes";
 import {AccountInformation} from "./account/accountTypes";
 import TinymanError from "./error/TinymanError";
 
-export function decodeState(
-  stateArray: AccountInformation["apps-local-state"][0]["key-value"] = []
-): Record<string, number | string> {
+export function decodeState({
+  stateArray = [],
+  shouldDecodeKeys = false
+}: {
+  stateArray: AccountInformation["apps-local-state"][0]["key-value"];
+  /**
+   * If `true`, the returned object will have decoded keys instead of base64 encoded keys.
+   */
+  shouldDecodeKeys?: boolean;
+}): Record<string, number | string> {
   const state: Record<string, number | string> = {};
 
   for (const pair of stateArray) {
@@ -24,7 +31,9 @@ export function decodeState(
       throw new Error(`Unexpected state type: ${pair.value.type}`);
     }
 
-    state[key] = value;
+    let finalKey = shouldDecodeKeys ? atob(key) : key;
+
+    state[finalKey] = value;
   }
 
   return state;
@@ -195,8 +204,56 @@ export function convertToBaseUnits(
  * @returns {number} Rounded number
  */
 export function roundNumber({decimalPlaces = 0}, x: number): number {
-  // eslint-disable-next-line prefer-template
-  return Number(Math.round(Number(x + `e+${decimalPlaces}`)) + `e-${decimalPlaces}`);
+  if (decimalPlaces > 0) {
+    const [decimal, decimalExponentialPart] = getExponentialNumberComponents(x);
+
+    const [rounded, roundedExponentialPart] = getExponentialNumberComponents(
+      Math.round(
+        Number(
+          generateExponentialNumberFromComponents(
+            decimal,
+            decimalExponentialPart + decimalPlaces
+          )
+        )
+      )
+    );
+
+    return Number(
+      generateExponentialNumberFromComponents(
+        rounded,
+        roundedExponentialPart - decimalPlaces
+      )
+    );
+  }
+
+  return Math.round(x);
+}
+
+/**
+ * @example
+ * generateExponentialNumberFromComponents(1023, 0); // "1023e+0"
+ * generateExponentialNumberFromComponents(1.023, 21); // "1.023e+21"
+ * generateExponentialNumberFromComponents(1.023, -21); // "1.023e-21"
+ */
+function generateExponentialNumberFromComponents(decimalPart: number, exponent: number) {
+  return decimalPart + (exponent < 0 ? `e${exponent}` : `e+${exponent}`);
+}
+
+/**
+ * @example
+ * getExponentialNumberComponents(1023);  // [1023, 0]
+ * getExponentialNumberComponents(1023e+0);  // [1023, 0]
+ * getExponentialNumberComponents(1.023e+21);  // [1.023, 21]
+ * getExponentialNumberComponents(1.023e-21);  // [1.023, -21]
+ */
+function getExponentialNumberComponents(x: number): [number, number] {
+  if (x.toString().includes("e")) {
+    const parts = x.toString().split("e");
+
+    return [parseFloat(parts[0]), parseFloat(parts[1])];
+  }
+
+  return [x, 0];
 }
 
 /**
@@ -243,6 +300,29 @@ export function sumUpTxnFees(txns: SignerTransaction[]): number {
 
 export function getTxnGroupID(txns: SignerTransaction[]) {
   return bufferToBase64(txns[0].txn.group);
+}
+
+export function encodeInteger(number) {
+  let buf: number[] = [];
+
+  /* eslint-disable no-bitwise */
+  /* eslint-disable no-constant-condition */
+  /* eslint-disable no-param-reassign */
+  while (true) {
+    let towrite = number & 0x7f;
+
+    number >>= 7;
+
+    if (number) {
+      buf.push(towrite | 0x80);
+    } else {
+      buf.push(towrite);
+      break;
+    }
+  }
+  /* eslint-enable */
+
+  return buf;
 }
 
 /**

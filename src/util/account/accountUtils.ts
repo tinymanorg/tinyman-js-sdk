@@ -1,7 +1,7 @@
 import algosdk, {Algodv2, IntDecoding} from "algosdk";
 import {fromByteArray, toByteArray} from "base64-js";
 
-import {PoolInfo} from "../pool/poolTypes";
+import {V1PoolInfo} from "../pool/poolTypes";
 import {
   BASE_MINIMUM_BALANCE,
   MINIMUM_BALANCE_REQUIRED_PER_APP,
@@ -18,12 +18,19 @@ import {
   AccountInformationData,
   AccountExcess
 } from "./accountTypes";
+import {ContractVersionValue} from "../../contract/types";
+import {getContract} from "../../contract";
 
-export function getAccountInformation(client: Algodv2, address: string) {
+export function getAccountInformation(
+  client: Algodv2,
+  address: string,
+  intDecoding: IntDecoding = IntDecoding.DEFAULT
+) {
   return new Promise<AccountInformationData>(async (resolve, reject) => {
     try {
       const accountInfo = await (client
         .accountInformation(address)
+        .setIntDecoding(intDecoding)
         .do() as Promise<AccountInformation>);
 
       resolve({
@@ -34,6 +41,27 @@ export function getAccountInformation(client: Algodv2, address: string) {
       reject(new Error(error.message || "Failed to fetch account information"));
     }
   });
+}
+
+/**
+ * @returns the decoded application local state object (both keys and values are decoded)
+ */
+export function getDecodedAccountApplicationLocalState(
+  accountInfo: AccountInformationData,
+  validatorAppID: number
+) {
+  const appState = accountInfo["apps-local-state"].find(
+    (app) => app.id === validatorAppID
+  );
+
+  if (!appState) {
+    return null;
+  }
+
+  const keyValue = appState["key-value"];
+  const decodedState = decodeState({stateArray: keyValue, shouldDecodeKeys: true});
+
+  return decodedState;
 }
 
 export function calculateAccountMinimumRequiredBalance(
@@ -47,9 +75,9 @@ export function calculateAccountMinimumRequiredBalance(
     MINIMUM_BALANCE_REQUIRED_PER_CREATED_APP * (account["created-apps"] || []).length +
     MINIMUM_BALANCE_REQUIRED_PER_APP * (account["apps-local-state"] || []).length +
     MINIMUM_BALANCE_REQUIRED_PER_BYTE_SCHEMA *
-      ((totalSchema && totalSchema["num-byte-slice"]) || 0) +
+      Number((totalSchema && totalSchema["num-byte-slice"]) || 0) +
     MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE *
-      ((totalSchema && totalSchema["num-uint"]) || 0) +
+      Number((totalSchema && totalSchema["num-uint"]) || 0) +
     MINIMUM_BALANCE_REQUIRED_PER_EXTRA_APP_PAGE * (account["apps-total-extra-pages"] || 0)
   );
 }
@@ -73,7 +101,7 @@ export async function getAccountExcessWithinPool({
   accountAddr
 }: {
   client: Algodv2;
-  pool: PoolInfo;
+  pool: V1PoolInfo;
   accountAddr: string;
 }): Promise<AccountExcessWithinPool> {
   const info = (await client
@@ -85,7 +113,9 @@ export async function getAccountExcessWithinPool({
 
   let excessAsset1 = 0n;
   let excessAsset2 = 0n;
-  let excessLiquidityTokens = 0n;
+  let excessPoolTokens = 0n;
+
+  const poolAddress = pool.account.address();
 
   for (const app of appsLocalState) {
     if (app.id != pool.validatorAppID) {
@@ -98,33 +128,33 @@ export async function getAccountExcessWithinPool({
       break;
     }
 
-    const state = decodeState(keyValue);
+    const state = decodeState({stateArray: keyValue});
 
     const excessAsset1Key = fromByteArray(
       joinByteArrays([
-        algosdk.decodeAddress(pool.addr).publicKey,
+        algosdk.decodeAddress(poolAddress).publicKey,
         EXCESS_ENCODED,
         algosdk.encodeUint64(pool.asset1ID)
       ])
     );
     const excessAsset2Key = fromByteArray(
       joinByteArrays([
-        algosdk.decodeAddress(pool.addr).publicKey,
+        algosdk.decodeAddress(poolAddress).publicKey,
         EXCESS_ENCODED,
         algosdk.encodeUint64(pool.asset2ID)
       ])
     );
-    const excessLiquidityTokenKey = fromByteArray(
+    const excessPoolTokenKey = fromByteArray(
       joinByteArrays([
-        algosdk.decodeAddress(pool.addr).publicKey,
+        algosdk.decodeAddress(poolAddress).publicKey,
         EXCESS_ENCODED,
-        algosdk.encodeUint64(pool.liquidityTokenID!)
+        algosdk.encodeUint64(pool.poolTokenID!)
       ])
     );
 
     const excessAsset1Value = state[excessAsset1Key];
     const excessAsset2Value = state[excessAsset2Key];
-    const excessLiquidityTokenValue = state[excessLiquidityTokenKey];
+    const excessPoolTokenValue = state[excessPoolTokenKey];
 
     if (typeof excessAsset1Value === "bigint") {
       excessAsset1 = excessAsset1Value;
@@ -134,21 +164,21 @@ export async function getAccountExcessWithinPool({
       excessAsset2 = excessAsset2Value;
     }
 
-    if (typeof excessLiquidityTokenValue === "bigint") {
-      excessLiquidityTokens = excessLiquidityTokenValue;
+    if (typeof excessPoolTokenValue === "bigint") {
+      excessPoolTokens = excessPoolTokenValue;
     }
   }
 
   const excessAssets = {
     excessAsset1,
     excessAsset2,
-    excessLiquidityTokens
+    excessPoolTokens
   };
 
   if (
     excessAssets.excessAsset1 < 0n ||
     excessAssets.excessAsset2 < 0n ||
-    excessAssets.excessLiquidityTokens < 0n
+    excessAssets.excessPoolTokens < 0n
   ) {
     throw new Error(`Invalid account excess: ${excessAssets}`);
   }
@@ -185,7 +215,7 @@ export async function getAccountExcess({
   let excessData: AccountExcess[] = [];
 
   if (appState && appState["key-value"]) {
-    const state = decodeState(appState["key-value"]);
+    const state = decodeState({stateArray: appState["key-value"]});
 
     for (let entry of Object.entries(state)) {
       const [key, value] = entry;
@@ -219,4 +249,43 @@ export function isAccountOptedIntoApp({
   accountAppsLocalState: AccountInformation["apps-local-state"];
 }): boolean {
   return accountAppsLocalState.some((appState) => appState.id === appID);
+}
+
+/**
+ * @returns the minimum balance required to opt in to an app or asset (decided by `type`)
+ */
+export function getMinRequiredBalanceToOptIn(
+  params: (
+    | {
+        type: "app-opt-in";
+        contractVersion: ContractVersionValue;
+      }
+    | {
+        type: "asset-opt-in";
+      }
+  ) & {
+    currentMinumumBalanceForAccount: number;
+    suggestedTransactionFee?: number;
+  }
+) {
+  const {currentMinumumBalanceForAccount, suggestedTransactionFee} = params;
+
+  let minBalanceRequirementPerOptIn: number;
+
+  if (params.type === "app-opt-in") {
+    const contract = getContract(params.contractVersion);
+
+    minBalanceRequirementPerOptIn =
+      MINIMUM_BALANCE_REQUIRED_PER_APP +
+      contract.schema.numLocalByteSlices * MINIMUM_BALANCE_REQUIRED_PER_BYTE_SCHEMA +
+      contract.schema.numLocalInts * MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE;
+  } else {
+    minBalanceRequirementPerOptIn = MINIMUM_BALANCE_REQUIRED_PER_ASSET;
+  }
+
+  return (
+    minBalanceRequirementPerOptIn +
+    (currentMinumumBalanceForAccount || 0) +
+    (suggestedTransactionFee || 0)
+  );
 }
