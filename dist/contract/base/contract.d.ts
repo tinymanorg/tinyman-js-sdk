@@ -9,8 +9,6 @@ export interface ValidatorAppSchema {
     numGlobalByteSlices: number;
 }
 export declare abstract class BaseTinymanContract<ValidatorApp extends V1_1ValidatorApp | V2ValidatorApp> {
-    validatorApprovalContract: Uint8Array;
-    validatorClearStateContract: Uint8Array;
     schema: ValidatorAppSchema;
     constructor(validatorApp: ValidatorApp);
     abstract generateLogicSigAccountForPool(params: {

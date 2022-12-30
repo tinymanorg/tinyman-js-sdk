@@ -37,8 +37,3 @@ export declare function calculateBootstrapFundingTxnAmount({ contractVersion, is
     contractVersion: ContractVersionValue;
     isAlgoPool: boolean;
 }): number;
-/**
- * TODO: `function getMinBalanceRequiredToCreatePool({`
- *  * Calculates the minimum Algo balance an account should have to be able to create a pool
- *  Implementation will be similar to Web Client's `minRequiredBalanceToCreatePool`. So, the amount will be: currentMinBalanceForAccount + fundingTxnAmount + totalFees
- */

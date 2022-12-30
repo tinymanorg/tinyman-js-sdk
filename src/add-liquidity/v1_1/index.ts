@@ -44,7 +44,6 @@ export function getQuote({
   asset2In: number | bigint;
 }): V1_1AddLiquidityQuote {
   if (reserves.issuedLiquidity === 0n) {
-    // TODO: compute sqrt on bigints
     const geoMean = BigInt(Math.floor(Math.sqrt(Number(asset1In) * Number(asset2In))));
 
     if (geoMean <= BigInt(MINIMUM_ADD_LIQUIDITY_AMOUNT)) {
