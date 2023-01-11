@@ -14,8 +14,7 @@ const VALIDATOR_APP_ID: Record<ContractVersionValue, Record<SupportedNetwork, nu
   },
   [CONTRACT_VERSION.V2]: {
     testnet: 148607000,
-    //  TODO: Update v2 mainnet app id after the launch
-    mainnet: 552635992
+    mainnet: 1002541853
   }
 };
 
