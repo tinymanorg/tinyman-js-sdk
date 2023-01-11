@@ -1,0 +1,24 @@
+{
+  "repo": "https://github.com/tinymanorg/tinyman-contracts-v2",
+  "contracts": {
+    "pool_logicsig": {
+      "type": "logicsig",
+      "logic": {
+        "bytecode": "BoAYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgQBbNQA0ADEYEkQxGYEBEkSBAUM="
+      },
+      "name": "pool_logicsig"
+    },
+    "validator_app": {
+      "type": "app",
+      "global_state_schema": {
+        "num_uints": 0,
+        "num_byte_slices": 3
+      },
+      "local_state_schema": {
+        "num_uints": 12,
+        "num_byte_slices": 2
+      },
+      "name": "validator_app"
+    }
+  }
+}
