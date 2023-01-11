@@ -24,6 +24,8 @@ import {poolUtils} from "../../util/pool";
 import {isAlgo} from "../../util/asset/assetUtils";
 import {calculatePriceImpact} from "../common/utils";
 import {getAppCallInnerTxns} from "../../util/transaction/transactionUtils";
+import {tinymanJSSDKConfig} from "../../config";
+import {CONTRACT_VERSION} from "../../contract/constants";
 
 async function generateTxns({
   client,
@@ -80,6 +82,7 @@ async function generateTxns({
       V2_SWAP_APP_CALL_SWAP_TYPE_ARGS_ENCODED[swapType],
       algosdk.encodeUint64(assetOutAmount)
     ],
+    note: tinymanJSSDKConfig.getAppCallTxnNoteWithClientName(CONTRACT_VERSION.V2),
     accounts: [poolAddress],
     foreignAssets: [pool.asset1ID, pool.asset2ID],
     suggestedParams

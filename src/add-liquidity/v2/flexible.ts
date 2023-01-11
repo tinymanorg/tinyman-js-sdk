@@ -11,6 +11,7 @@ import {poolUtils} from "../../util/pool";
 import {isAlgo, prepareAssetPairData} from "../../util/asset/assetUtils";
 import {V2FlexibleAddLiquidityQuote} from "./types";
 import {V2AddLiquidityType} from "./constants";
+import {tinymanJSSDKConfig} from "../../config";
 export * from "./common";
 
 /**
@@ -142,6 +143,7 @@ export async function generateTxns({
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
     from: initiatorAddr,
     appIndex: getValidatorAppID(network, CONTRACT_VERSION.V2),
+    note: tinymanJSSDKConfig.getAppCallTxnNoteWithClientName(CONTRACT_VERSION.V2),
     appArgs: [
       ...ADD_LIQUIDITY_APP_CALL_ARGUMENTS.v2.FLEXIBLE_MODE,
       encodeUint64(minPoolTokenAssetAmount)
