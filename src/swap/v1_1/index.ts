@@ -18,6 +18,7 @@ import {getAccountExcessWithinPool} from "../../util/account/accountUtils";
 import {SwapQuote, V1SwapExecution} from "../types";
 import {SwapType} from "../constants";
 import {calculatePriceImpact, calculateSwapRate} from "../common/utils";
+import {AssetWithIdAndAmount} from "../../util/asset/assetModels";
 
 // FEE = %0.3 or 3/1000
 const FEE_NUMERATOR = 3n;
@@ -284,7 +285,7 @@ async function executeFixedInputSwap({
   assetOut,
   initiatorAddr
 }: {
-  client: any;
+  client: Algodv2;
   pool: V1PoolInfo;
   signedTxns: Uint8Array[];
   assetIn: AssetWithIdAndAmount;
@@ -430,7 +431,7 @@ async function executeFixedOutputSwap({
   assetOut,
   initiatorAddr
 }: {
-  client: any;
+  client: Algodv2;
   pool: V1PoolInfo;
   signedTxns: Uint8Array[];
   assetIn: AssetWithIdAndAmount;

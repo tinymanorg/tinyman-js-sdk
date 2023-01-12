@@ -1,3 +1,4 @@
+import {AssetWithIdAndAmount} from "../util/asset/assetModels";
 import {PoolReserves, V1PoolInfo, V2PoolInfo} from "../util/pool/poolTypes";
 
 /** An object containing information about a swap quote. */
