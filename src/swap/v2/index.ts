@@ -24,6 +24,7 @@ import {poolUtils} from "../../util/pool";
 import {isAlgo} from "../../util/asset/assetUtils";
 import {calculatePriceImpact} from "../common/utils";
 import {getAppCallInnerTxns} from "../../util/transaction/transactionUtils";
+import SwapQuoteError, {SwapQuoteErrorType} from "../quote/error/SwapQuoteError";
 
 async function generateTxns({
   client,
@@ -249,6 +250,20 @@ function getFixedInputSwapQuote({
     decimals
   });
 
+  if (swapOutputAmount > outputSupply) {
+    throw new SwapQuoteError(
+      "Output amount exceeds available liquidity.",
+      SwapQuoteErrorType.OutputAmountExceedsAvailableLiquidity
+    );
+  }
+
+  if (assetInAmount > inputSupply) {
+    throw new SwapQuoteError(
+      "Input amount exceeds available liquidity.",
+      SwapQuoteErrorType.InputAmountExceedsAvailableLiquidity
+    );
+  }
+
   return {
     assetInID: assetIn.id,
     assetInAmount,
@@ -297,6 +312,20 @@ function getFixedOutputSwapQuote({
     totalFeeShare,
     decimals
   });
+
+  if (assetOutAmount > outputSupply) {
+    throw new SwapQuoteError(
+      "Output amount exceeds available liquidity.",
+      SwapQuoteErrorType.OutputAmountExceedsAvailableLiquidity
+    );
+  }
+
+  if (swapInputAmount < 0) {
+    throw new SwapQuoteError(
+      "Input amount exceeds available liquidity.",
+      SwapQuoteErrorType.InputAmountExceedsAvailableLiquidity
+    );
+  }
 
   return {
     assetInID,

@@ -11,6 +11,7 @@ import {SwapV2} from "./v2";
 import {V1_1_SWAP_TOTAL_FEE} from "./v1_1/constants";
 import {getV2SwapTotalFee} from "./v2/util";
 import {isPoolEmpty} from "../util/pool/common";
+import SwapQuoteError, {SwapQuoteErrorType} from "./quote/error/SwapQuoteError";
 
 /**
  * Gets quotes for swap from each pool passed as an argument,
@@ -22,7 +23,7 @@ export function getQuote(params: {
   assetIn: Pick<TinymanAnalyticsApiAsset, "id" | "decimals">;
   assetOut: Pick<TinymanAnalyticsApiAsset, "id" | "decimals">;
   amount: number | bigint;
-}): SwapQuoteWithPool {
+}): Promise<SwapQuoteWithPool> {
   if (params.pools.every((pool) => isPoolEmpty(pool.reserves))) {
     throw new Error("No pools available for swap");
   }
@@ -32,6 +33,30 @@ export function getQuote(params: {
   }
 
   return getFixedOutputSwapQuote(params);
+}
+
+function getQuotePromiseWrapper(promises: Promise<SwapQuoteWithPool>[]) {
+  return Promise.allSettled(promises).then((results) => {
+    if (
+      results.every(
+        (result) =>
+          result.status === "rejected" && result.reason instanceof SwapQuoteError
+      )
+    ) {
+      throw new SwapQuoteError(
+        "Insuffucient liquidity",
+        SwapQuoteErrorType.InsuffucientLiquidity
+      );
+    }
+
+    const quotes = (
+      results.filter(
+        (result) => result.status === "fulfilled" && result.value.quote !== undefined
+      ) as PromiseFulfilledResult<SwapQuoteWithPool>[]
+    ).map((result) => result.value);
+
+    return getBestQuote(quotes);
+  });
 }
 
 /**
@@ -48,26 +73,33 @@ export function getFixedInputSwapQuote({
   assetIn: Pick<TinymanAnalyticsApiAsset, "id" | "decimals">;
   assetOut: Pick<TinymanAnalyticsApiAsset, "id" | "decimals">;
   amount: number | bigint;
-}): SwapQuoteWithPool {
-  const quotes = pools.map<SwapQuoteWithPool>((pool) => {
-    let quote: SwapQuote;
-    const quoteGetterArgs = {
-      pool: pool.info,
-      assetIn: {amount, id: Number(assetIn.id)},
-      decimals: {assetIn: assetIn.decimals, assetOut: assetOut.decimals},
-      reserves: pool.reserves
-    };
+}): Promise<SwapQuoteWithPool> {
+  const quotePromises = pools.map<Promise<SwapQuoteWithPool>>((pool) => {
+    return new Promise((resolve, reject) => {
+      let quote: SwapQuote | undefined;
 
-    if (pool.info.contractVersion === CONTRACT_VERSION.V1_1) {
-      quote = SwapV1_1.getFixedInputSwapQuote(quoteGetterArgs);
-    } else {
-      quote = SwapV2.getFixedInputSwapQuote(quoteGetterArgs);
-    }
+      const quoteGetterArgs = {
+        pool: pool.info,
+        assetIn: {amount, id: Number(assetIn.id)},
+        decimals: {assetIn: assetIn.decimals, assetOut: assetOut.decimals},
+        reserves: pool.reserves
+      };
 
-    return {pool, quote};
+      try {
+        if (pool.info.contractVersion === CONTRACT_VERSION.V1_1) {
+          quote = SwapV1_1.getFixedInputSwapQuote(quoteGetterArgs);
+        } else {
+          quote = SwapV2.getFixedInputSwapQuote(quoteGetterArgs);
+        }
+
+        resolve({pool, quote});
+      } catch (error) {
+        reject(error);
+      }
+    });
   });
 
-  return getBestQuote(quotes);
+  return getQuotePromiseWrapper(quotePromises);
 }
 
 /**
@@ -84,26 +116,33 @@ export function getFixedOutputSwapQuote({
   assetIn: Pick<TinymanAnalyticsApiAsset, "id" | "decimals">;
   assetOut: Pick<TinymanAnalyticsApiAsset, "id" | "decimals">;
   amount: number | bigint;
-}): SwapQuoteWithPool {
-  const quotes = pools.map<SwapQuoteWithPool>((pool) => {
-    let quote: SwapQuote;
-    const quoteGetterArgs = {
-      pool: pool.info,
-      assetOut: {amount, id: Number(assetOut.id)},
-      decimals: {assetIn: assetIn.decimals, assetOut: assetOut.decimals},
-      reserves: pool.reserves
-    };
+}): Promise<SwapQuoteWithPool> {
+  const quotePromises = pools.map<Promise<SwapQuoteWithPool>>((pool) => {
+    return new Promise((resolve, reject) => {
+      let quote: SwapQuote | undefined;
 
-    if (pool.info.contractVersion === CONTRACT_VERSION.V1_1) {
-      quote = SwapV1_1.getFixedOutputSwapQuote(quoteGetterArgs);
-    } else {
-      quote = SwapV2.getFixedOutputSwapQuote(quoteGetterArgs);
-    }
+      const quoteGetterArgs = {
+        pool: pool.info,
+        assetOut: {amount, id: Number(assetOut.id)},
+        decimals: {assetIn: assetIn.decimals, assetOut: assetOut.decimals},
+        reserves: pool.reserves
+      };
 
-    return {pool, quote};
+      try {
+        if (pool.info.contractVersion === CONTRACT_VERSION.V1_1) {
+          quote = SwapV1_1.getFixedOutputSwapQuote(quoteGetterArgs);
+        } else {
+          quote = SwapV2.getFixedOutputSwapQuote(quoteGetterArgs);
+        }
+
+        resolve({pool, quote});
+      } catch (error) {
+        reject(error);
+      }
+    });
   });
 
-  return getBestQuote(quotes);
+  return getQuotePromiseWrapper(quotePromises);
 }
 
 /**

@@ -18,6 +18,7 @@ import {getAccountExcessWithinPool} from "../../util/account/accountUtils";
 import {SwapQuote, V1SwapExecution} from "../types";
 import {SwapType} from "../constants";
 import {calculatePriceImpact, calculateSwapRate} from "../common/utils";
+import SwapQuoteError, {SwapQuoteErrorType} from "../quote/error/SwapQuoteError";
 
 // FEE = %0.3 or 3/1000
 const FEE_NUMERATOR = 3n;
@@ -237,7 +238,17 @@ function getFixedInputSwapQuote({
   const assetOutAmount = outputSupply - k / (inputSupply + assetInAmountMinusFee);
 
   if (assetOutAmount > outputSupply) {
-    throw new Error("Output amount exceeds available liquidity.");
+    throw new SwapQuoteError(
+      "Output amount exceeds available liquidity.",
+      SwapQuoteErrorType.OutputAmountExceedsAvailableLiquidity
+    );
+  }
+
+  if (assetInAmount > inputSupply) {
+    throw new SwapQuoteError(
+      "Input amount exceeds available liquidity.",
+      SwapQuoteErrorType.InputAmountExceedsAvailableLiquidity
+    );
   }
 
   const assetDataForSwapUtils = {
@@ -373,7 +384,10 @@ function getFixedOutputSwapQuote({
   }
 
   if (assetOutAmount > outputSupply) {
-    throw new Error("Output amount exceeds available liquidity.");
+    throw new SwapQuoteError(
+      "Output amount exceeds available liquidity.",
+      SwapQuoteErrorType.OutputAmountExceedsAvailableLiquidity
+    );
   }
 
   const k = inputSupply * outputSupply;
@@ -382,6 +396,13 @@ function getFixedOutputSwapQuote({
   const assetInAmount =
     (assetInAmountMinusFee * FEE_DENOMINATOR) / (FEE_DENOMINATOR - FEE_NUMERATOR);
   const swapFee = assetInAmount - assetInAmountMinusFee;
+
+  if (assetInAmount > inputSupply) {
+    throw new SwapQuoteError(
+      "Input amount exceeds available liquidity.",
+      SwapQuoteErrorType.InputAmountExceedsAvailableLiquidity
+    );
+  }
 
   const rate =
     convertFromBaseUnits(decimals.assetOut, Number(assetOutAmount)) /
