@@ -18,7 +18,9 @@ import {getAccountExcessWithinPool} from "../../util/account/accountUtils";
 import {SwapQuote, V1SwapExecution} from "../types";
 import {SwapType} from "../constants";
 import {calculatePriceImpact, calculateSwapRate} from "../common/utils";
-import SwapQuoteError, {SwapQuoteErrorType} from "../quote/error/SwapQuoteError";
+import InsuffucientLiquidityError, {
+  InsuffucientLiquidityErrorType
+} from "../../util/error/InsuffucientLiquidityError";
 
 // FEE = %0.3 or 3/1000
 const FEE_NUMERATOR = 3n;
@@ -238,16 +240,16 @@ function getFixedInputSwapQuote({
   const assetOutAmount = outputSupply - k / (inputSupply + assetInAmountMinusFee);
 
   if (assetOutAmount > outputSupply) {
-    throw new SwapQuoteError(
+    throw new InsuffucientLiquidityError(
       "Output amount exceeds available liquidity.",
-      SwapQuoteErrorType.OutputAmountExceedsAvailableLiquidity
+      InsuffucientLiquidityErrorType.OutputAmountExceedsAvailableLiquidity
     );
   }
 
   if (assetInAmount > inputSupply) {
-    throw new SwapQuoteError(
+    throw new InsuffucientLiquidityError(
       "Input amount exceeds available liquidity.",
-      SwapQuoteErrorType.InputAmountExceedsAvailableLiquidity
+      InsuffucientLiquidityErrorType.InputAmountExceedsAvailableLiquidity
     );
   }
 
@@ -384,9 +386,9 @@ function getFixedOutputSwapQuote({
   }
 
   if (assetOutAmount > outputSupply) {
-    throw new SwapQuoteError(
+    throw new InsuffucientLiquidityError(
       "Output amount exceeds available liquidity.",
-      SwapQuoteErrorType.OutputAmountExceedsAvailableLiquidity
+      InsuffucientLiquidityErrorType.OutputAmountExceedsAvailableLiquidity
     );
   }
 
@@ -398,9 +400,9 @@ function getFixedOutputSwapQuote({
   const swapFee = assetInAmount - assetInAmountMinusFee;
 
   if (assetInAmount > inputSupply) {
-    throw new SwapQuoteError(
+    throw new InsuffucientLiquidityError(
       "Input amount exceeds available liquidity.",
-      SwapQuoteErrorType.InputAmountExceedsAvailableLiquidity
+      InsuffucientLiquidityErrorType.InputAmountExceedsAvailableLiquidity
     );
   }
 

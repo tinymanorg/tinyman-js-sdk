@@ -1,16 +1,16 @@
-export enum SwapQuoteErrorType {
+export enum InsuffucientLiquidityErrorType {
   OutputAmountExceedsAvailableLiquidity = "OutputAmountExceedsAvailableLiquidity",
   InputAmountExceedsAvailableLiquidity = "InputAmountExceedsAvailableLiquidity",
   InsuffucientLiquidity = "InsuffucientLiquidity"
 }
 
-class SwapQuoteError extends Error {
-  public type: SwapQuoteErrorType;
+class InsuffucientLiquidityError extends Error {
+  public type: InsuffucientLiquidityErrorType;
 
-  constructor(message: string, type: SwapQuoteErrorType) {
+  constructor(message: string, type: InsuffucientLiquidityErrorType) {
     super(message);
     this.type = type;
   }
 }
 
-export default SwapQuoteError;
+export default InsuffucientLiquidityError;

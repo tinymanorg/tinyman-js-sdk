@@ -11,7 +11,9 @@ import {SwapV2} from "./v2";
 import {V1_1_SWAP_TOTAL_FEE} from "./v1_1/constants";
 import {getV2SwapTotalFee} from "./v2/util";
 import {isPoolEmpty} from "../util/pool/common";
-import SwapQuoteError, {SwapQuoteErrorType} from "./quote/error/SwapQuoteError";
+import InsuffucientLiquidityError, {
+  InsuffucientLiquidityErrorType
+} from "../util/error/InsuffucientLiquidityError";
 
 /**
  * Gets quotes for swap from each pool passed as an argument,
@@ -40,12 +42,13 @@ function getQuotePromiseWrapper(promises: Promise<SwapQuoteWithPool>[]) {
     if (
       results.every(
         (result) =>
-          result.status === "rejected" && result.reason instanceof SwapQuoteError
+          result.status === "rejected" &&
+          result.reason instanceof InsuffucientLiquidityError
       )
     ) {
-      throw new SwapQuoteError(
+      throw new InsuffucientLiquidityError(
         "Insuffucient liquidity",
-        SwapQuoteErrorType.InsuffucientLiquidity
+        InsuffucientLiquidityErrorType.InsuffucientLiquidity
       );
     }
 
