@@ -12,22 +12,9 @@ npm i -S @tinymanorg/tinyman-js-sdk
 
 ## Usage
 
-First, we need to instantiate the Algod client and get the Tinyman Validator App ID for the network:
+🆕 **AMM v2 Examples**: Example scripts for v2 contracts can be found in [examples folder](./examples/).
 
-```typescript
-const algodClient = new algosdk.Algodv2(
-  /** Enter token here */,
-  /** Enter server here */,
-  /** Enter port here */
-)
-const validatorAppID = getValidatorAppID(
-  "mainnet",
-  // You can also use `CONTRACT_VERSION.V1_1` to interact with V1.1 app
-  CONTRACT_VERSION.V2
-)
-```
-
-Then, we can use the module methods provided by SDK to interact with the contracts. See [this section](#module-methods) for more details about the modules and functions.
+For more details about the modules and functions, see ["Module methods" section](#module-methods).
 
 <details>
   <summary><strong>Opt into V1 Validator App</strong></summary>
