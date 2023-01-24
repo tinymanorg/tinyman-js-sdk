@@ -87,6 +87,6 @@ export async function getIsAccountOptedIntoAsset(
   }
 
   return (
-    await getAccountInformation(algodClient as any, accountAddress)
+    await getAccountInformation(algodClient, accountAddress)
   ).assets.some((asset) => asset["asset-id"] === assetId);
 }

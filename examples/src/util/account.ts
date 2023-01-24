@@ -56,7 +56,7 @@ export async function getOwnedAssetAmount(
   assetId: number
 ) {
   const { assets } = await getAccountInformation(
-    algodClient as any,
+    algodClient,
     accountAddress
   );
 
