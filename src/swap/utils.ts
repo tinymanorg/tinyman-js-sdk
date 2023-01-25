@@ -37,7 +37,7 @@ export function getQuote(params: {
   return getFixedOutputSwapQuote(params);
 }
 
-function getQuotePromiseWrapper(promises: Promise<SwapQuoteWithPool>[]) {
+function validateQuotes(promises: Promise<SwapQuoteWithPool>[]) {
   return Promise.allSettled(promises).then((results) => {
     if (
       results.every(
@@ -52,13 +52,11 @@ function getQuotePromiseWrapper(promises: Promise<SwapQuoteWithPool>[]) {
       );
     }
 
-    const quotes = (
+    return (
       results.filter(
         (result) => result.status === "fulfilled" && result.value.quote !== undefined
       ) as PromiseFulfilledResult<SwapQuoteWithPool>[]
     ).map((result) => result.value);
-
-    return getBestQuote(quotes);
   });
 }
 
@@ -66,7 +64,7 @@ function getQuotePromiseWrapper(promises: Promise<SwapQuoteWithPool>[]) {
  * Gets quotes for fixed input swap from each pool passed as an argument,
  * and returns the best quote (with the highest rate).
  */
-export function getFixedInputSwapQuote({
+export async function getFixedInputSwapQuote({
   pools,
   assetIn,
   assetOut,
@@ -102,14 +100,16 @@ export function getFixedInputSwapQuote({
     });
   });
 
-  return getQuotePromiseWrapper(quotePromises);
+  const validQuotes = await validateQuotes(quotePromises);
+
+  return getBestQuote(validQuotes);
 }
 
 /**
  * Gets quotes for fixed output swap from each pool passed as an argument,
  * and returns the best quote (with the highest rate).
  */
-export function getFixedOutputSwapQuote({
+export async function getFixedOutputSwapQuote({
   pools,
   assetIn,
   assetOut,
@@ -145,7 +145,9 @@ export function getFixedOutputSwapQuote({
     });
   });
 
-  return getQuotePromiseWrapper(quotePromises);
+  const validQuotes = await validateQuotes(quotePromises);
+
+  return getBestQuote(validQuotes);
 }
 
 /**
