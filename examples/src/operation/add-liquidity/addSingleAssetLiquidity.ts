@@ -3,25 +3,33 @@ import {
   combineAndRegroupSignerTxns,
   generateOptIntoAssetTxns,
   poolUtils,
+  SupportedNetwork,
 } from "@tinymanorg/tinyman-js-sdk";
-import { getAccount } from "../../util/account";
+import { Account } from "algosdk";
 import { getAssets, getIsAccountOptedIntoAsset } from "../../util/asset";
 import { algodClient } from "../../util/client";
 import signerWithSecretKey from "../../util/initiatorSigner";
-import { SDK_TEST_ARGS } from "../../util/other";
 
 /**
  * Adds liquidity to an existent pool using only a single asset
  */
-export async function addSingleAssetLiquidity() {
-  const account = await getAccount();
+export async function addSingleAssetLiquidity({
+  account,
+  asset_1,
+  asset_2,
+}: {
+  account: Account;
+  asset_1: { id: string; unit_name: string };
+  asset_2: { id: string; unit_name: string };
+}) {
   const initiatorAddr = account.addr;
   const { ids: assetIds } = await getAssets();
   const [asset1ID, asset2ID] = assetIds;
   const poolInfo = await poolUtils.v2.getPoolInfo({
-    ...SDK_TEST_ARGS,
-    asset1ID,
-    asset2ID,
+    network: "testnet" as SupportedNetwork,
+    client: algodClient,
+    asset1ID: Number(asset_1.id),
+    asset2ID: Number(asset_2.id),
   });
   const poolReserves = await poolUtils.v2.getPoolReserves(
     algodClient,
@@ -29,8 +37,9 @@ export async function addSingleAssetLiquidity() {
   );
 
   if (poolUtils.isPoolEmpty(poolReserves)) {
-    console.log("⚠️ Pool is EMPTY, you should add initial liquidity first.");
-    return;
+    throw new Error(
+      "⚠️ Pool is EMPTY, you should add initial liquidity first."
+    );
   }
 
   // Get a quote for the desired add amount
@@ -48,7 +57,8 @@ export async function addSingleAssetLiquidity() {
   });
 
   let addLiqTxns = await AddLiquidity.v2.withSingleAsset.generateTxns({
-    ...SDK_TEST_ARGS,
+    network: "testnet" as SupportedNetwork,
+    client: algodClient,
     initiatorAddr,
     poolAddress: poolInfo.account.address(),
     assetIn: quote.assetIn,
@@ -61,10 +71,9 @@ export async function addSingleAssetLiquidity() {
      * Insert opt-in transaction to the txn group
      * if the account is not opted-in to the pool token
      */
-    console.log("adding opt-in txn to the txn group");
     addLiqTxns = combineAndRegroupSignerTxns(
       await generateOptIntoAssetTxns({
-        ...SDK_TEST_ARGS,
+        client: algodClient,
         assetID: poolInfo.poolTokenID!,
         initiatorAddr,
       }),
@@ -73,18 +82,17 @@ export async function addSingleAssetLiquidity() {
   }
 
   const signedTxns = await AddLiquidity.v2.withSingleAsset.signTxns({
-    ...SDK_TEST_ARGS,
     txGroup: addLiqTxns,
-    initiatorSigner: signerWithSecretKey(account.sk),
+    initiatorSigner: signerWithSecretKey(account),
   });
 
   const executionResponse = await AddLiquidity.v2.withSingleAsset.execute({
-    ...SDK_TEST_ARGS,
+    client: algodClient,
     txGroup: addLiqTxns,
     signedTxns,
     pool: poolInfo,
   });
 
   console.log("✅ Add Liquidity with Single Asset executed successfully!");
-  console.log({ response: executionResponse });
+  console.log({ txnID: executionResponse.txnID });
 }

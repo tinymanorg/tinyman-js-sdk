@@ -3,25 +3,30 @@ import {
   combineAndRegroupSignerTxns,
   generateOptIntoAssetTxns,
   poolUtils,
+  SupportedNetwork,
 } from "@tinymanorg/tinyman-js-sdk";
-import { getAccount } from "../../util/account";
-import { getAssets } from "../../util/asset";
+import { Account } from "algosdk";
 import { algodClient } from "../../util/client";
 import signerWithSecretKey from "../../util/initiatorSigner";
-import { SDK_TEST_ARGS } from "../../util/other";
 
 /**
  * Adds initial liquidity to a pool
  */
-export async function addInitialLiquidity() {
-  const account = await getAccount();
+export async function addInitialLiquidity({
+  account,
+  asset_1,
+  asset_2,
+}: {
+  account: Account;
+  asset_1: { id: string; unit_name: string };
+  asset_2: { id: string; unit_name: string };
+}) {
   const initiatorAddr = account.addr;
-  const { ids: assetIds } = await getAssets();
-  const [asset1ID, asset2ID] = assetIds;
   const poolInfo = await poolUtils.v2.getPoolInfo({
-    ...SDK_TEST_ARGS,
-    asset1ID,
-    asset2ID,
+    network: "testnet" as SupportedNetwork,
+    client: algodClient,
+    asset1ID: Number(asset_1.id),
+    asset2ID: Number(asset_2.id),
   });
   const poolReserves = await poolUtils.v2.getPoolReserves(
     algodClient,
@@ -29,10 +34,9 @@ export async function addInitialLiquidity() {
   );
 
   if (!poolUtils.isPoolEmpty(poolReserves)) {
-    console.log(
+    throw new Error(
       "⚠️ Pool is not empty, cannot add initial liquidity, skipping."
     );
-    return;
   }
 
   // Get a quote for the desired add amount
@@ -49,7 +53,8 @@ export async function addInitialLiquidity() {
   });
 
   let addInitialLiqTxns = await AddLiquidity.v2.initial.generateTxns({
-    ...SDK_TEST_ARGS,
+    network: "testnet" as SupportedNetwork,
+    client: algodClient,
     pool: poolInfo,
     initiatorAddr,
     asset1In: quote.asset1In,
@@ -64,7 +69,7 @@ export async function addInitialLiquidity() {
    */
   addInitialLiqTxns = combineAndRegroupSignerTxns(
     await generateOptIntoAssetTxns({
-      ...SDK_TEST_ARGS,
+      client: algodClient,
       assetID: poolInfo.poolTokenID!,
       initiatorAddr,
     }),
@@ -72,18 +77,17 @@ export async function addInitialLiquidity() {
   );
 
   const signedTxns = await AddLiquidity.v2.initial.signTxns({
-    ...SDK_TEST_ARGS,
     txGroup: addInitialLiqTxns,
-    initiatorSigner: signerWithSecretKey(account.sk),
+    initiatorSigner: signerWithSecretKey(account),
   });
 
   const executionResponse = await AddLiquidity.v2.initial.execute({
-    ...SDK_TEST_ARGS,
+    client: algodClient,
     txGroup: addInitialLiqTxns,
     signedTxns,
     pool: poolInfo,
   });
 
   console.log("✅ Add Initial Liquidity executed successfully!");
-  console.log({ response: executionResponse });
+  console.log({ txnID: executionResponse.txnID });
 }

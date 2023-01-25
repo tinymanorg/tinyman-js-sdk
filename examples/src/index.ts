@@ -7,7 +7,7 @@ import { removeLiquidityWithSingleAssetOut } from "./operation/remove-liquidity/
 import { fixedInputSwap } from "./operation/swap/fixedInputSwap";
 import { fixedOutputSwap } from "./operation/swap/fixedOutputSwap";
 import { getAccount } from "./util/account";
-import { getAssets } from "./util/asset";
+import { getAssetParams } from "./util/asset";
 
 /**
  * Will run all the operations in the order they are defined
@@ -15,45 +15,35 @@ import { getAssets } from "./util/asset";
  * - You can simply comment out the operations you don't want to run
  */
 async function main() {
-  // Initialize account data
-  await getAccount();
-
-  // Initialize assets for the pool
-  await getAssets();
+  // Initialize account and asset data
+  const account = await getAccount();
+  const { asset_1, asset_2 } = await getAssetParams();
 
   // Create the pool with the owned assets
-  await bootstrapPool();
+  await bootstrapPool({ account, asset_1, asset_2 });
 
   // Add some initial liquidity to the pool
-  await addInitialLiquidity();
+  await addInitialLiquidity({ account, asset_1, asset_2 });
 
   // Add subsequent liquidity to the pool using the flexible mode
-  await addFlexibleLiquidity();
+  await addFlexibleLiquidity({ account, asset_1, asset_2 });
 
   // Add subsequent liquidity to the pool using the single asset mode
-  await addSingleAssetLiquidity();
+  await addSingleAssetLiquidity({ account, asset_1, asset_2 });
 
   // Remove some of the owned liquidity from the pool
-  await removeLiquidity();
+  await removeLiquidity({ account, asset_1, asset_2 });
 
   // Remove some of the owned liquidity from the pool, but only one asset
-  await removeLiquidityWithSingleAssetOut();
+  await removeLiquidityWithSingleAssetOut({ account, asset_1, asset_2 });
 
   // Swap assets with fixed input
-  await fixedInputSwap();
+  await fixedInputSwap({ account, asset_1, asset_2 });
 
   // Swap assets with fixed output
-  await fixedOutputSwap();
+  await fixedOutputSwap({ account, asset_1, asset_2 });
 
   console.log("✅ All operations completed successfully");
 }
-
-/**
- * Patch BigInt.toJSON to return a string, and not cause an error
- * ⚠️ This is for testing purposes ONLY ! SHOULD NOT BE USED IN PRODUCTION !
- */
-(BigInt.prototype as any).toJSON = function () {
-  return this.toString();
-};
 
 main();

@@ -55,10 +55,7 @@ export async function getOwnedAssetAmount(
   accountAddress: string,
   assetId: number
 ) {
-  const { assets } = await getAccountInformation(
-    algodClient,
-    accountAddress
-  );
+  const { assets } = await getAccountInformation(algodClient, accountAddress);
 
   return assets.find((asset) => asset["asset-id"] === assetId)?.amount || 0;
 }

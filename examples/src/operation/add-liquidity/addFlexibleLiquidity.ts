@@ -3,25 +3,31 @@ import {
   combineAndRegroupSignerTxns,
   generateOptIntoAssetTxns,
   poolUtils,
+  SupportedNetwork,
 } from "@tinymanorg/tinyman-js-sdk";
-import { getAccount } from "../../util/account";
-import { getAssets, getIsAccountOptedIntoAsset } from "../../util/asset";
+import { Account } from "algosdk";
+import { getIsAccountOptedIntoAsset } from "../../util/asset";
 import { algodClient } from "../../util/client";
 import signerWithSecretKey from "../../util/initiatorSigner";
-import { SDK_TEST_ARGS } from "../../util/other";
 
 /**
  * Adds liquidity to an existent pool using the flexible mode
  */
-export async function addFlexibleLiquidity() {
-  const account = await getAccount();
+export async function addFlexibleLiquidity({
+  account,
+  asset_1,
+  asset_2,
+}: {
+  account: Account;
+  asset_1: { id: string; unit_name: string };
+  asset_2: { id: string; unit_name: string };
+}) {
   const initiatorAddr = account.addr;
-  const { ids: assetIds } = await getAssets();
-  const [asset1ID, asset2ID] = assetIds;
   const poolInfo = await poolUtils.v2.getPoolInfo({
-    ...SDK_TEST_ARGS,
-    asset1ID,
-    asset2ID,
+    network: "testnet" as SupportedNetwork,
+    client: algodClient,
+    asset1ID: Number(asset_1.id),
+    asset2ID: Number(asset_2.id),
   });
   const poolReserves = await poolUtils.v2.getPoolReserves(
     algodClient,
@@ -47,7 +53,8 @@ export async function addFlexibleLiquidity() {
   });
 
   let addFlexibleLiqTxns = await AddLiquidity.v2.flexible.generateTxns({
-    ...SDK_TEST_ARGS,
+    network: "testnet" as SupportedNetwork,
+    client: algodClient,
     initiatorAddr,
     poolAddress: poolInfo.account.address(),
     asset1In: quote.asset1In,
@@ -64,7 +71,7 @@ export async function addFlexibleLiquidity() {
     console.log("adding opt-in txn to the txn group");
     addFlexibleLiqTxns = combineAndRegroupSignerTxns(
       await generateOptIntoAssetTxns({
-        ...SDK_TEST_ARGS,
+        client: algodClient,
         assetID: poolInfo.poolTokenID!,
         initiatorAddr,
       }),
@@ -73,18 +80,17 @@ export async function addFlexibleLiquidity() {
   }
 
   const signedTxns = await AddLiquidity.v2.flexible.signTxns({
-    ...SDK_TEST_ARGS,
     txGroup: addFlexibleLiqTxns,
-    initiatorSigner: signerWithSecretKey(account.sk),
+    initiatorSigner: signerWithSecretKey(account),
   });
 
   const executionResponse = await AddLiquidity.v2.flexible.execute({
-    ...SDK_TEST_ARGS,
+    client: algodClient,
     txGroup: addFlexibleLiqTxns,
     signedTxns,
     pool: poolInfo,
   });
 
   console.log("✅ Add Flexible Liquidity executed successfully!");
-  console.log({ response: executionResponse });
+  console.log({ txnID: executionResponse.txnID });
 }

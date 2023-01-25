@@ -1,53 +1,55 @@
-import { Bootstrap, poolUtils } from "@tinymanorg/tinyman-js-sdk";
-import { getAccount } from "../../util/account";
-import { getAssets } from "../../util/asset";
+import {
+  Bootstrap,
+  poolUtils,
+  SupportedNetwork,
+} from "@tinymanorg/tinyman-js-sdk";
+import { Account } from "algosdk";
 import { algodClient } from "../../util/client";
 import signerWithSecretKey from "../../util/initiatorSigner";
-import { SDK_TEST_ARGS } from "../../util/other";
 
 /**
  * Creates (i.e. "Bootstraps") a pool with an owned asset pair
  */
-export async function bootstrapPool() {
-  const account = await getAccount();
+export async function bootstrapPool({
+  account,
+  asset_1,
+  asset_2,
+}: {
+  account: Account;
+  asset_1: { id: string; unit_name: string };
+  asset_2: { id: string; unit_name: string };
+}) {
   const initiatorAddr = account.addr;
-  const { ids: assetIds } = await getAssets();
-  const [asset1ID, asset2ID] = assetIds;
-  const assetA = await algodClient.getAssetByID(asset1ID).do();
-  const assetB = await algodClient.getAssetByID(asset2ID).do();
-  const [asset_1, asset_2] = [assetA, assetB].map((asset) => ({
-    id: String(asset.index),
-    unit_name: asset.params["unit-name"],
-  }));
-
   const poolInfo = await poolUtils.v2.getPoolInfo({
-    ...SDK_TEST_ARGS,
-    asset1ID,
-    asset2ID,
+    network: "testnet" as SupportedNetwork,
+    client: algodClient,
+    asset1ID: Number(asset_1.id),
+    asset2ID: Number(asset_2.id),
   });
 
   if (!poolUtils.isPoolNotCreated(poolInfo)) {
-    console.log("⚠️ Pool already exists, skipping bootstrap.");
-    return;
+    throw new Error("⚠️ Pool already exists");
   }
 
   const bootstrapTxns = await Bootstrap.v2.generateTxns({
-    ...SDK_TEST_ARGS,
+    network: "testnet" as SupportedNetwork,
+    client: algodClient,
     asset_1,
     asset_2,
     initiatorAddr,
   });
 
   const signedTxns = await Bootstrap.v2.signTxns({
-    ...SDK_TEST_ARGS,
+    network: "testnet" as SupportedNetwork,
     txGroup: bootstrapTxns,
-    initiatorSigner: signerWithSecretKey(account.sk),
-    asset1ID,
-    asset2ID,
+    initiatorSigner: signerWithSecretKey(account),
+    asset1ID: Number(asset_1.id),
+    asset2ID: Number(asset_2.id),
   });
 
   const bootstrapExecutionResponse = await Bootstrap.v2.execute({
-    ...SDK_TEST_ARGS,
+    network: "testnet" as SupportedNetwork,
+    client: algodClient,
     pool: poolInfo,
     txGroup: bootstrapTxns,
     ...signedTxns,

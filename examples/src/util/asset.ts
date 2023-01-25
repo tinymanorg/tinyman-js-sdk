@@ -2,7 +2,6 @@ import {
   ALGO_ASSET_ID,
   getAccountInformation,
 } from "@tinymanorg/tinyman-js-sdk";
-import { AccountInformation } from "@tinymanorg/tinyman-js-sdk/dist/util/account/accountTypes";
 import {
   Account,
   makeAssetCreateTxnWithSuggestedParamsFromObject,
@@ -16,6 +15,19 @@ import { assertAccountHasBalance } from "./other";
 export const ASSETS_FILENAME = "assets.json";
 
 type Assets = { ids: [number, number] };
+
+export async function getAssetParams() {
+  const { ids: assetIds } = await getAssets();
+  const [asset1ID, asset2ID] = assetIds;
+  const assetA = await algodClient.getAssetByID(asset1ID).do();
+  const assetB = await algodClient.getAssetByID(asset2ID).do();
+  const [asset_1, asset_2] = [assetA, assetB].map((asset) => ({
+    id: String(asset.index),
+    unit_name: asset.params["unit-name"],
+  }));
+
+  return { asset_1, asset_2 };
+}
 
 /**
  * @returns existing assets if exists, otherwise creates new asset pair
@@ -86,7 +98,7 @@ export async function getIsAccountOptedIntoAsset(
     return true;
   }
 
-  return (
-    await getAccountInformation(algodClient, accountAddress)
-  ).assets.some((asset) => asset["asset-id"] === assetId);
+  return (await getAccountInformation(algodClient, accountAddress)).assets.some(
+    (asset) => asset["asset-id"] === assetId
+  );
 }

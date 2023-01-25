@@ -1,22 +1,32 @@
-import { poolUtils, Swap, SwapType } from "@tinymanorg/tinyman-js-sdk";
-import { getAccount } from "../../util/account";
-import { getAssets } from "../../util/asset";
+import {
+  poolUtils,
+  SupportedNetwork,
+  Swap,
+  SwapType,
+} from "@tinymanorg/tinyman-js-sdk";
+import { Account } from "algosdk";
+import { algodClient } from "../../util/client";
 import signerWithSecretKey from "../../util/initiatorSigner";
-import { SDK_TEST_ARGS } from "../../util/other";
 
 /**
  * Executes a swap with a fixed input amount
  * (Input amount is entered by the user, output amount is to be calculated by the SDK)
  */
-export async function fixedInputSwap() {
-  const account = await getAccount();
+export async function fixedInputSwap({
+  account,
+  asset_1,
+  asset_2,
+}: {
+  account: Account;
+  asset_1: { id: string; unit_name: string };
+  asset_2: { id: string; unit_name: string };
+}) {
   const initiatorAddr = account.addr;
-  const { ids: assetIds } = await getAssets();
-  const [asset1ID, asset2ID] = assetIds;
   const pool = await poolUtils.v2.getPoolInfo({
-    ...SDK_TEST_ARGS,
-    asset1ID,
-    asset2ID,
+    network: "testnet" as SupportedNetwork,
+    client: algodClient,
+    asset1ID: Number(asset_1.id),
+    asset2ID: Number(asset_2.id),
   });
   const fixedInputSwapQuote = Swap.v2.getQuote(
     SwapType.FixedInput,
@@ -39,7 +49,7 @@ export async function fixedInputSwap() {
   };
 
   const fixedInputSwapTxns = await Swap.v2.generateTxns({
-    ...SDK_TEST_ARGS,
+    client: algodClient,
     swapType: SwapType.FixedInput,
     pool,
     initiatorAddr,
@@ -50,11 +60,12 @@ export async function fixedInputSwap() {
 
   const signedTxns = await Swap.v2.signTxns({
     txGroup: fixedInputSwapTxns,
-    initiatorSigner: signerWithSecretKey(account.sk),
+    initiatorSigner: signerWithSecretKey(account),
   });
 
   const swapExecutionResponse = await Swap.v2.execute({
-    ...SDK_TEST_ARGS,
+    network: "testnet" as SupportedNetwork,
+    client: algodClient,
     signedTxns,
     pool,
     txGroup: fixedInputSwapTxns,
@@ -62,5 +73,5 @@ export async function fixedInputSwap() {
   });
 
   console.log("✅ Fixed Input Swap executed successfully!");
-  console.log({ swapExecutionResponse });
+  console.log({ txnID: swapExecutionResponse.txnID });
 }

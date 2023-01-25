@@ -1,22 +1,31 @@
-import { poolUtils, RemoveLiquidity } from "@tinymanorg/tinyman-js-sdk";
-import { getAccount, getOwnedAssetAmount } from "../../util/account";
-import { getAssets } from "../../util/asset";
+import {
+  poolUtils,
+  RemoveLiquidity,
+  SupportedNetwork,
+} from "@tinymanorg/tinyman-js-sdk";
+import { Account } from "algosdk";
+import { getOwnedAssetAmount } from "../../util/account";
 import { algodClient } from "../../util/client";
 import signerWithSecretKey from "../../util/initiatorSigner";
-import { SDK_TEST_ARGS } from "../../util/other";
 
 /**
  * Removes a portion of owned liquidity from a pool
  */
-export async function removeLiquidity() {
-  const account = await getAccount();
+export async function removeLiquidity({
+  account,
+  asset_1,
+  asset_2,
+}: {
+  account: Account;
+  asset_1: { id: string; unit_name: string };
+  asset_2: { id: string; unit_name: string };
+}) {
   const initiatorAddr = account.addr;
-  const { ids: assetIds } = await getAssets();
-  const [asset1ID, asset2ID] = assetIds;
   const poolInfo = await poolUtils.v2.getPoolInfo({
-    ...SDK_TEST_ARGS,
-    asset1ID,
-    asset2ID,
+    network: "testnet" as SupportedNetwork,
+    client: algodClient,
+    asset1ID: Number(asset_1.id),
+    asset2ID: Number(asset_2.id),
   });
   const poolReserves = await poolUtils.v2.getPoolReserves(
     algodClient,
@@ -43,7 +52,7 @@ export async function removeLiquidity() {
   });
 
   const removeLiquidityTxns = await RemoveLiquidity.v2.generateTxns({
-    ...SDK_TEST_ARGS,
+    client: algodClient,
     pool: poolInfo,
     initiatorAddr,
     poolTokenIn: quote.poolTokenIn.amount,
@@ -53,13 +62,12 @@ export async function removeLiquidity() {
   });
 
   const signedTxns = await RemoveLiquidity.v2.signTxns({
-    ...SDK_TEST_ARGS,
     txGroup: removeLiquidityTxns,
-    initiatorSigner: signerWithSecretKey(account.sk),
+    initiatorSigner: signerWithSecretKey(account),
   });
 
   const executionResponse = await RemoveLiquidity.v2.execute({
-    ...SDK_TEST_ARGS,
+    client: algodClient,
     txGroup: removeLiquidityTxns,
     signedTxns,
   });
@@ -67,6 +75,6 @@ export async function removeLiquidity() {
   console.log("✅ Remove Liquidity executed successfully!");
   console.log({
     outputAssets: JSON.stringify(executionResponse.outputAssets),
-    response: executionResponse,
+    txnID: executionResponse.txnID,
   });
 }
