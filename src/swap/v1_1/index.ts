@@ -18,9 +18,7 @@ import {getAccountExcessWithinPool} from "../../util/account/accountUtils";
 import {SwapQuote, V1SwapExecution} from "../types";
 import {SwapType} from "../constants";
 import {calculatePriceImpact, calculateSwapRate} from "../common/utils";
-import InsuffucientLiquidityError, {
-  InsuffucientLiquidityErrorType
-} from "../../util/error/InsuffucientLiquidityError";
+import OutputAmountExceedsAvailableLiquidityError from "../../util/error/OutputAmountExceedsAvailableLiquidityError";
 
 // FEE = %0.3 or 3/1000
 const FEE_NUMERATOR = 3n;
@@ -240,17 +238,7 @@ function getFixedInputSwapQuote({
   const assetOutAmount = outputSupply - k / (inputSupply + assetInAmountMinusFee);
 
   if (assetOutAmount > outputSupply) {
-    throw new InsuffucientLiquidityError(
-      "Output amount exceeds available liquidity.",
-      InsuffucientLiquidityErrorType.OutputAmountExceedsAvailableLiquidity
-    );
-  }
-
-  if (assetInAmount > inputSupply) {
-    throw new InsuffucientLiquidityError(
-      "Input amount exceeds available liquidity.",
-      InsuffucientLiquidityErrorType.InputAmountExceedsAvailableLiquidity
-    );
+    throw new OutputAmountExceedsAvailableLiquidityError();
   }
 
   const assetDataForSwapUtils = {
@@ -386,10 +374,7 @@ function getFixedOutputSwapQuote({
   }
 
   if (assetOutAmount > outputSupply) {
-    throw new InsuffucientLiquidityError(
-      "Output amount exceeds available liquidity.",
-      InsuffucientLiquidityErrorType.OutputAmountExceedsAvailableLiquidity
-    );
+    throw new OutputAmountExceedsAvailableLiquidityError();
   }
 
   const k = inputSupply * outputSupply;
@@ -398,13 +383,6 @@ function getFixedOutputSwapQuote({
   const assetInAmount =
     (assetInAmountMinusFee * FEE_DENOMINATOR) / (FEE_DENOMINATOR - FEE_NUMERATOR);
   const swapFee = assetInAmount - assetInAmountMinusFee;
-
-  if (assetInAmount > inputSupply) {
-    throw new InsuffucientLiquidityError(
-      "Input amount exceeds available liquidity.",
-      InsuffucientLiquidityErrorType.InputAmountExceedsAvailableLiquidity
-    );
-  }
 
   const rate =
     convertFromBaseUnits(decimals.assetOut, Number(assetOutAmount)) /
