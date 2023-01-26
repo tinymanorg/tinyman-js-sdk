@@ -1,5 +1,7 @@
 import algosdk, {Algodv2, ALGORAND_MIN_TX_FEE, Transaction} from "algosdk";
 
+import {tinymanJSSDKConfig} from "../../config";
+import {CONTRACT_VERSION} from "../../contract/constants";
 import {SwapV2} from "../../swap/v2";
 import {SignerTransaction, InitiatorSigner} from "../../util/commonTypes";
 import {V2_LOCKED_POOL_TOKENS} from "../../util/pool/poolConstants";
@@ -176,6 +178,7 @@ async function generateTxns({
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
     from: initiatorAddr,
     appIndex: pool.validatorAppID,
+    note: tinymanJSSDKConfig.getAppCallTxnNoteWithClientName(CONTRACT_VERSION.V2),
     appArgs: [
       V2_REMOVE_LIQUIDITY_APP_ARGUMENT,
       algosdk.encodeUint64(applySlippageToAmount("negative", slippage, minAsset1Amount)),
@@ -268,6 +271,7 @@ async function generateSingleAssetOutTxns({
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
     from: initiatorAddr,
     appIndex: pool.validatorAppID,
+    note: tinymanJSSDKConfig.getAppCallTxnNoteWithClientName(CONTRACT_VERSION.V2),
     appArgs: [
       V2_REMOVE_LIQUIDITY_APP_ARGUMENT,
       algosdk.encodeUint64(minAsset1Amount),

@@ -1,6 +1,7 @@
 import algosdk from "algosdk";
 import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
 
+import {tinymanJSSDKConfig} from "../../config";
 import {CONTRACT_VERSION} from "../../contract/constants";
 import {isAlgo} from "../../util/asset/assetUtils";
 import {SignerTransaction, SupportedNetwork} from "../../util/commonTypes";
@@ -94,6 +95,7 @@ export async function generateTxns({
     from: initiatorAddr,
     appIndex: getValidatorAppID(network, CONTRACT_VERSION.V2),
     appArgs: ADD_LIQUIDITY_APP_CALL_ARGUMENTS.v2.INITIAL_LIQUIDITY,
+    note: tinymanJSSDKConfig.getAppCallTxnNoteWithClientName(CONTRACT_VERSION.V2),
     accounts: [poolAddress],
     foreignAssets: [poolTokenId],
     suggestedParams
