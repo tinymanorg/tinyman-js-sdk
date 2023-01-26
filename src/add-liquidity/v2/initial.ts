@@ -1,5 +1,6 @@
 import algosdk, {Algodv2} from "algosdk";
 
+import {tinymanJSSDKConfig} from "../../config";
 import {CONTRACT_VERSION} from "../../contract/constants";
 import {
   AssetWithAmountAndDecimals,
@@ -97,6 +98,7 @@ export async function generateTxns({
     from: initiatorAddr,
     appIndex: getValidatorAppID(network, CONTRACT_VERSION.V2),
     appArgs: ADD_LIQUIDITY_APP_CALL_ARGUMENTS.v2.INITIAL_LIQUIDITY,
+    note: tinymanJSSDKConfig.getAppCallTxnNoteWithClientName(CONTRACT_VERSION.V2),
     accounts: [poolAddress],
     foreignAssets: [poolTokenId],
     suggestedParams

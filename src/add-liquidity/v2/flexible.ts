@@ -14,6 +14,7 @@ import {
   AssetWithAmountAndDecimals,
   AssetWithIdAndAmount
 } from "../../util/asset/assetModels";
+import {tinymanJSSDKConfig} from "../../config";
 export * from "./common";
 
 /**
@@ -145,6 +146,7 @@ export async function generateTxns({
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
     from: initiatorAddr,
     appIndex: getValidatorAppID(network, CONTRACT_VERSION.V2),
+    note: tinymanJSSDKConfig.getAppCallTxnNoteWithClientName(CONTRACT_VERSION.V2),
     appArgs: [
       ...ADD_LIQUIDITY_APP_CALL_ARGUMENTS.v2.FLEXIBLE_MODE,
       encodeUint64(minPoolTokenAssetAmount)

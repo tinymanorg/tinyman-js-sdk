@@ -10,6 +10,7 @@ import {InitiatorSigner, SignerTransaction} from "./util/commonTypes";
 import {DEFAULT_FEE_TXN_NOTE} from "./util/constant";
 import TinymanError from "./util/error/TinymanError";
 import {V1PoolInfo} from "./util/pool/poolTypes";
+import {tinymanJSSDKConfig} from "./config";
 
 /**
  * Execute a redeem operation to collect excess assets from previous operations.
@@ -193,6 +194,7 @@ export async function generateRedeemTxns({
     from: poolAddress,
     appIndex: pool.validatorAppID,
     appArgs: [encodeString("redeem")],
+    note: tinymanJSSDKConfig.getAppCallTxnNoteWithClientName(pool.contractVersion),
     accounts: [initiatorAddr],
     foreignAssets:
       pool.asset2ID == 0

@@ -1,5 +1,7 @@
 import algosdk, {Algodv2, Transaction} from "algosdk";
 
+import {tinymanJSSDKConfig} from "../../config";
+import {CONTRACT_VERSION} from "../../contract/constants";
 import {getAccountExcessWithinPool} from "../../util/account/accountUtils";
 import {isAlgo} from "../../util/asset/assetUtils";
 import {SignerTransaction, InitiatorSigner} from "../../util/commonTypes";
@@ -77,6 +79,7 @@ async function generateTxns({
     from: poolAddress,
     appIndex: pool.validatorAppID,
     appArgs: [encodeString("burn")],
+    note: tinymanJSSDKConfig.getAppCallTxnNoteWithClientName(CONTRACT_VERSION.V1_1),
     accounts: [initiatorAddr],
     foreignAssets: isAlgoPool
       ? [pool.asset1ID, pool.poolTokenID as number]

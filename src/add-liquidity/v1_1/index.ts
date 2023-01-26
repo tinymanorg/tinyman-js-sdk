@@ -23,6 +23,7 @@ import {V1_1AddLiquidityQuote, V1_1AddLiquidityExecution} from "./types";
 import {V1_1AddLiquidityTxnIndices} from "./constants";
 import {poolUtils} from "../../util/pool";
 import {AssetWithIdAndAmount} from "../../util/asset/assetModels";
+import {tinymanJSSDKConfig} from "../../config";
 
 /**
  * Get a quote for how many liquidity tokens a deposit of asset1In and asset2In is worth at this
@@ -111,6 +112,7 @@ export async function generateTxns({
     appIndex: getValidatorAppID(network, CONTRACT_VERSION.V1_1),
     appArgs: ADD_LIQUIDITY_APP_CALL_ARGUMENTS.v1_1,
     accounts: [initiatorAddr],
+    note: tinymanJSSDKConfig.getAppCallTxnNoteWithClientName(CONTRACT_VERSION.V1_1),
     foreignAssets:
       asset2In.id == ALGO_ASSET_ID
         ? [asset1In.id, <number>poolTokenOut.id]

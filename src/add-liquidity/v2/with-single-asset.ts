@@ -11,6 +11,7 @@ import {poolUtils} from "../../util/pool";
 import {V2SingleAssetInAddLiquidityQuote} from "./types";
 import {V2AddLiquidityType} from "./constants";
 import {AssetWithIdAndAmount} from "../../util/asset/assetModels";
+import {tinymanJSSDKConfig} from "../../config";
 export * from "./common";
 
 export function getQuote({
@@ -114,6 +115,7 @@ export async function generateTxns({
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
     from: initiatorAddr,
     appIndex: getValidatorAppID(network, CONTRACT_VERSION.V2),
+    note: tinymanJSSDKConfig.getAppCallTxnNoteWithClientName(CONTRACT_VERSION.V2),
     appArgs: [
       ...ADD_LIQUIDITY_APP_CALL_ARGUMENTS.v2.SINGLE_ASSET_MODE,
       encodeUint64(minPoolTokenAssetAmount)

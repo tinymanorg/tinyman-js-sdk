@@ -24,6 +24,7 @@ import {poolUtils} from "../../util/pool";
 import {DECODED_APP_STATE_KEYS} from "../../util/pool/poolConstants";
 import {V2BootstrapTxnGroupIndices, V2_BOOTSTRAP_INNER_TXN_COUNT} from "./constants";
 import {getAppCallTxnResponse} from "../../util/transaction/transactionUtils";
+import {tinymanJSSDKConfig} from "../../config";
 
 function getTotalCost(isAlgoPool: boolean) {
   // getBootstrapFundingTxnAmount includes getBootstrapAppCallTxnFee and since app call is signed by the logic sig,
@@ -73,6 +74,7 @@ async function generateTxns({
     from: poolLogicSigAddress,
     appIndex: validatorAppID,
     appArgs: [encodeString("bootstrap")],
+    note: tinymanJSSDKConfig.getAppCallTxnNoteWithClientName(CONTRACT_VERSION.V2),
     foreignAssets: [asset1ID, asset2ID],
     rekeyTo: appAddress,
     suggestedParams
