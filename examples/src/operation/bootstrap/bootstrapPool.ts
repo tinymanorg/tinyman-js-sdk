@@ -1,10 +1,7 @@
-import {
-  Bootstrap,
-  poolUtils,
-  SupportedNetwork,
-} from "@tinymanorg/tinyman-js-sdk";
-import { Account } from "algosdk";
-import { algodClient } from "../../util/client";
+import {Bootstrap, poolUtils, SupportedNetwork} from "@tinymanorg/tinyman-js-sdk";
+import {Account} from "algosdk";
+
+import {algodClient} from "../../util/client";
 import signerWithSecretKey from "../../util/initiatorSigner";
 
 /**
@@ -13,30 +10,26 @@ import signerWithSecretKey from "../../util/initiatorSigner";
 export async function bootstrapPool({
   account,
   asset_1,
-  asset_2,
+  asset_2
 }: {
   account: Account;
-  asset_1: { id: string; unit_name: string };
-  asset_2: { id: string; unit_name: string };
+  asset_1: {id: string; unit_name: string};
+  asset_2: {id: string; unit_name: string};
 }) {
   const initiatorAddr = account.addr;
   const poolInfo = await poolUtils.v2.getPoolInfo({
     network: "testnet" as SupportedNetwork,
     client: algodClient,
     asset1ID: Number(asset_1.id),
-    asset2ID: Number(asset_2.id),
+    asset2ID: Number(asset_2.id)
   });
-
-  if (!poolUtils.isPoolNotCreated(poolInfo)) {
-    throw new Error("⚠️ Pool already exists");
-  }
 
   const bootstrapTxns = await Bootstrap.v2.generateTxns({
     network: "testnet" as SupportedNetwork,
     client: algodClient,
     asset_1,
     asset_2,
-    initiatorAddr,
+    initiatorAddr
   });
 
   const signedTxns = await Bootstrap.v2.signTxns({
@@ -44,7 +37,7 @@ export async function bootstrapPool({
     txGroup: bootstrapTxns,
     initiatorSigner: signerWithSecretKey(account),
     asset1ID: Number(asset_1.id),
-    asset2ID: Number(asset_2.id),
+    asset2ID: Number(asset_2.id)
   });
 
   const bootstrapExecutionResponse = await Bootstrap.v2.execute({
@@ -52,13 +45,14 @@ export async function bootstrapPool({
     client: algodClient,
     pool: poolInfo,
     txGroup: bootstrapTxns,
-    ...signedTxns,
+    ...signedTxns
   });
 
   const poolAddress = bootstrapExecutionResponse.account.address();
+
   console.log("✅ Pool bootstrapped!");
-  console.log("✅ Pool address: " + poolAddress);
-  console.log("✅ Pool token ID: " + bootstrapExecutionResponse.poolTokenID);
+  console.log(`✅ Pool address: ${poolAddress}`);
+  console.log(`✅ Pool token ID: ${bootstrapExecutionResponse.poolTokenID}`);
   console.log(
     "✅ See pool account on AlgoExplorer: " +
       `https://testnet.algoexplorer.io/address/${poolAddress}`

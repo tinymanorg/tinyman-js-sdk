@@ -1,11 +1,8 @@
-import {
-  poolUtils,
-  RemoveLiquidity,
-  SupportedNetwork,
-} from "@tinymanorg/tinyman-js-sdk";
-import { Account } from "algosdk";
-import { getOwnedAssetAmount } from "../../util/account";
-import { algodClient } from "../../util/client";
+import {poolUtils, RemoveLiquidity, SupportedNetwork} from "@tinymanorg/tinyman-js-sdk";
+import {Account} from "algosdk";
+
+import {getOwnedAssetAmount} from "../../util/account";
+import {algodClient} from "../../util/client";
 import signerWithSecretKey from "../../util/initiatorSigner";
 
 /**
@@ -14,23 +11,20 @@ import signerWithSecretKey from "../../util/initiatorSigner";
 export async function removeLiquidity({
   account,
   asset_1,
-  asset_2,
+  asset_2
 }: {
   account: Account;
-  asset_1: { id: string; unit_name: string };
-  asset_2: { id: string; unit_name: string };
+  asset_1: {id: string; unit_name: string};
+  asset_2: {id: string; unit_name: string};
 }) {
   const initiatorAddr = account.addr;
   const poolInfo = await poolUtils.v2.getPoolInfo({
     network: "testnet" as SupportedNetwork,
     client: algodClient,
     asset1ID: Number(asset_1.id),
-    asset2ID: Number(asset_2.id),
+    asset2ID: Number(asset_2.id)
   });
-  const poolReserves = await poolUtils.v2.getPoolReserves(
-    algodClient,
-    poolInfo
-  );
+  const poolReserves = await poolUtils.v2.getPoolReserves(algodClient, poolInfo);
 
   // Get the owned pool token amount, so we can decide how much to remove
   const ownedPoolTokenAssetAmount = await getOwnedAssetAmount(
@@ -48,7 +42,7 @@ export async function removeLiquidity({
   const quote = RemoveLiquidity.v2.getQuote({
     pool: poolInfo,
     reserves: poolReserves,
-    poolTokenIn: poolTokenAmountToBeRemoved,
+    poolTokenIn: poolTokenAmountToBeRemoved
   });
 
   const removeLiquidityTxns = await RemoveLiquidity.v2.generateTxns({
@@ -58,23 +52,23 @@ export async function removeLiquidity({
     poolTokenIn: quote.poolTokenIn.amount,
     minAsset1Amount: quote.asset1Out.amount,
     minAsset2Amount: quote.asset2Out.amount,
-    slippage: 0.05,
+    slippage: 0.05
   });
 
   const signedTxns = await RemoveLiquidity.v2.signTxns({
     txGroup: removeLiquidityTxns,
-    initiatorSigner: signerWithSecretKey(account),
+    initiatorSigner: signerWithSecretKey(account)
   });
 
   const executionResponse = await RemoveLiquidity.v2.execute({
     client: algodClient,
     txGroup: removeLiquidityTxns,
-    signedTxns,
+    signedTxns
   });
 
   console.log("✅ Remove Liquidity executed successfully!");
   console.log({
     outputAssets: JSON.stringify(executionResponse.outputAssets),
-    txnID: executionResponse.txnID,
+    txnID: executionResponse.txnID
   });
 }

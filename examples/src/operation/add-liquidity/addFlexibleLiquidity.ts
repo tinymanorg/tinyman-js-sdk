@@ -3,11 +3,12 @@ import {
   combineAndRegroupSignerTxns,
   generateOptIntoAssetTxns,
   poolUtils,
-  SupportedNetwork,
+  SupportedNetwork
 } from "@tinymanorg/tinyman-js-sdk";
-import { Account } from "algosdk";
-import { getIsAccountOptedIntoAsset } from "../../util/asset";
-import { algodClient } from "../../util/client";
+import {Account} from "algosdk";
+
+import {getIsAccountOptedIntoAsset} from "../../util/asset";
+import {algodClient} from "../../util/client";
 import signerWithSecretKey from "../../util/initiatorSigner";
 
 /**
@@ -16,40 +17,31 @@ import signerWithSecretKey from "../../util/initiatorSigner";
 export async function addFlexibleLiquidity({
   account,
   asset_1,
-  asset_2,
+  asset_2
 }: {
   account: Account;
-  asset_1: { id: string; unit_name: string };
-  asset_2: { id: string; unit_name: string };
+  asset_1: {id: string; unit_name: string};
+  asset_2: {id: string; unit_name: string};
 }) {
   const initiatorAddr = account.addr;
   const poolInfo = await poolUtils.v2.getPoolInfo({
     network: "testnet" as SupportedNetwork,
     client: algodClient,
     asset1ID: Number(asset_1.id),
-    asset2ID: Number(asset_2.id),
+    asset2ID: Number(asset_2.id)
   });
-  const poolReserves = await poolUtils.v2.getPoolReserves(
-    algodClient,
-    poolInfo
-  );
-
-  if (poolUtils.isPoolEmpty(poolReserves)) {
-    console.log("⚠️ Pool is EMPTY, you should add initial liquidity first.");
-    return;
-  }
 
   // Get a quote for the desired add amount
   const quote = AddLiquidity.v2.flexible.getQuote({
     pool: poolInfo,
     asset1: {
       amount: 25_000_000,
-      decimals: 6,
+      decimals: 6
     },
     asset2: {
       amount: 75_000_000,
-      decimals: 6,
-    },
+      decimals: 6
+    }
   });
 
   let addFlexibleLiqTxns = await AddLiquidity.v2.flexible.generateTxns({
@@ -60,7 +52,7 @@ export async function addFlexibleLiquidity({
     asset1In: quote.asset1In,
     asset2In: quote.asset2In,
     poolTokenOut: quote.poolTokenOut,
-    minPoolTokenAssetAmount: quote.minPoolTokenAssetAmountWithSlippage,
+    minPoolTokenAssetAmount: quote.minPoolTokenAssetAmountWithSlippage
   });
 
   if (!getIsAccountOptedIntoAsset(initiatorAddr, poolInfo.poolTokenID!)) {
@@ -68,12 +60,11 @@ export async function addFlexibleLiquidity({
      * Insert opt-in transaction to the txn group
      * if the account is not opted-in to the pool token
      */
-    console.log("adding opt-in txn to the txn group");
     addFlexibleLiqTxns = combineAndRegroupSignerTxns(
       await generateOptIntoAssetTxns({
         client: algodClient,
         assetID: poolInfo.poolTokenID!,
-        initiatorAddr,
+        initiatorAddr
       }),
       addFlexibleLiqTxns
     );
@@ -81,16 +72,16 @@ export async function addFlexibleLiquidity({
 
   const signedTxns = await AddLiquidity.v2.flexible.signTxns({
     txGroup: addFlexibleLiqTxns,
-    initiatorSigner: signerWithSecretKey(account),
+    initiatorSigner: signerWithSecretKey(account)
   });
 
   const executionResponse = await AddLiquidity.v2.flexible.execute({
     client: algodClient,
     txGroup: addFlexibleLiqTxns,
     signedTxns,
-    pool: poolInfo,
+    pool: poolInfo
   });
 
   console.log("✅ Add Flexible Liquidity executed successfully!");
-  console.log({ txnID: executionResponse.txnID });
+  console.log({txnID: executionResponse.txnID});
 }
