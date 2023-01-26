@@ -9,6 +9,7 @@ import {
   V2_ADD_LIQUIDITY_INNER_TXN_COUNT,
   V2_ADD_LIQUIDITY_TXN_COUNT
 } from "./constants";
+import {AssetWithAmountAndDecimals} from "../../util/asset/assetModels";
 
 export function calculateSubsequentAddLiquidity({
   reserves,

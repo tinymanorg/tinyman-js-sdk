@@ -101,7 +101,7 @@ export async function redeemAllExcessAsset({
   data,
   initiatorSigner
 }: {
-  client: any;
+  client: Algodv2;
   data: {pool: V1PoolInfo; txGroup: SignerTransaction[]}[];
   initiatorSigner: InitiatorSigner;
 }): Promise<

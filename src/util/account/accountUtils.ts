@@ -198,13 +198,13 @@ export async function getAccountExcess({
   accountAddr,
   validatorAppID
 }: {
-  client: any;
+  client: Algodv2;
   accountAddr: string;
   validatorAppID: number;
 }) {
   const info = (await client
     .accountInformation(accountAddr)
-    .setIntDecoding("bigint")
+    .setIntDecoding(IntDecoding.BIGINT)
     .do()) as AccountInformation;
 
   const appsLocalState = info["apps-local-state"] || [];

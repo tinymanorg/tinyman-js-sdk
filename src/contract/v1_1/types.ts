@@ -1,5 +1,28 @@
-import * as ascJson_v1_1 from "./asc.json";
+export interface V1_1ValidatorApp {
+  type: string;
+  global_state_schema: V1_1ValidatorAppStateSchema;
+  local_state_schema: V1_1ValidatorAppStateSchema;
+  name: string;
+}
 
-export type V1_1ValidatorApp = typeof ascJson_v1_1.contracts.validator_app;
-export type V1_1PoolLogicSig = typeof ascJson_v1_1.contracts.pool_logicsig;
-export type PoolLogicSigVariables = V1_1PoolLogicSig["logic"]["variables"];
+interface V1_1ValidatorAppStateSchema {
+  num_uints: number;
+  num_byte_slices: number;
+}
+
+export interface V1_1PoolLogicSig {
+  type: string;
+  logic: {
+    bytecode: string;
+    address: string;
+    size: number;
+    variables: {
+      name: string;
+      type: string;
+      index: number;
+      length: number;
+    }[];
+    source: string;
+  };
+  name: string;
+}

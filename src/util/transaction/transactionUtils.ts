@@ -1,16 +1,16 @@
 import {
+  Algodv2,
   assignGroupID,
   decodeUnsignedTransaction,
   encodeUnsignedTransaction,
   waitForConfirmation
 } from "algosdk";
-import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
 
 import {SignerTransaction} from "../commonTypes";
 import {DEFAULT_WAIT_FOR_CONFIRMATION_ROUNDS} from "../constant";
 
 export async function getAppCallTxnResponse(
-  client: AlgodClient,
+  client: Algodv2,
   txGroup: SignerTransaction[]
 ) {
   const appCallTxnId = txGroup.find(({txn}) => txn.type === "appl")?.txn.txID();
@@ -30,7 +30,7 @@ export async function getAppCallTxnResponse(
  * @returns the innter transactions of the app call transaction or `undefined` if no app call transaction was found.
  */
 export async function getAppCallInnerTxns(
-  client: AlgodClient,
+  client: Algodv2,
   txGroup: SignerTransaction[]
 ): Promise<{txn: {txn: {xaid: number; aamt: number; type: string}}}[] | undefined> {
   const txResponse = await getAppCallTxnResponse(client, txGroup);

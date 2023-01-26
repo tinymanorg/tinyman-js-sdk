@@ -1,4 +1,4 @@
-import algosdk, {Transaction} from "algosdk";
+import algosdk, {Algodv2, Transaction} from "algosdk";
 
 import {ADD_LIQUIDITY_APP_CALL_ARGUMENTS} from "../constants";
 import {CONTRACT_VERSION} from "../../contract/constants";
@@ -22,6 +22,7 @@ import {getValidatorAppID} from "../../validator";
 import {V1_1AddLiquidityQuote, V1_1AddLiquidityExecution} from "./types";
 import {V1_1AddLiquidityTxnIndices} from "./constants";
 import {poolUtils} from "../../util/pool";
+import {AssetWithIdAndAmount} from "../../util/asset/assetModels";
 import {tinymanJSSDKConfig} from "../../config";
 
 /**
@@ -91,7 +92,7 @@ export async function generateTxns({
   slippage,
   initiatorAddr
 }: {
-  client: any;
+  client: Algodv2;
   network: SupportedNetwork;
   poolAddress: string;
   asset1In: AssetWithIdAndAmount;
@@ -240,7 +241,7 @@ export async function execute({
   signedTxns,
   initiatorAddr
 }: {
-  client: any;
+  client: Algodv2;
   pool: V1PoolInfo;
   txGroup: SignerTransaction[];
   signedTxns: Uint8Array[];

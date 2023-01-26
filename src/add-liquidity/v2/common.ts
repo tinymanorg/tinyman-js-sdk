@@ -1,4 +1,4 @@
-import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
+import {Algodv2} from "algosdk";
 
 import {InitiatorSigner, SignerTransaction} from "../../util/commonTypes";
 import TinymanError from "../../util/error/TinymanError";
@@ -30,7 +30,7 @@ export async function execute({
   txGroup,
   signedTxns
 }: {
-  client: AlgodClient;
+  client: Algodv2;
   pool: V2PoolInfo;
   txGroup: SignerTransaction[];
   signedTxns: Uint8Array[];
