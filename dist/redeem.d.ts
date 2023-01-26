@@ -33,7 +33,7 @@ export declare function redeemExcessAsset({ client, pool, txGroup, initiatorSign
  *   account.
  */
 export declare function redeemAllExcessAsset({ client, data, initiatorSigner }: {
-    client: any;
+    client: Algodv2;
     data: {
         pool: V1PoolInfo;
         txGroup: SignerTransaction[];

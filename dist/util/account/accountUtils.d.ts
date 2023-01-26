@@ -29,7 +29,7 @@ export declare function getAccountExcessWithinPool({ client, pool, accountAddr }
  * @returns List of excess amounts
  */
 export declare function getAccountExcess({ client, accountAddr, validatorAppID }: {
-    client: any;
+    client: Algodv2;
     accountAddr: string;
     validatorAppID: number;
 }): Promise<AccountExcess[]>;

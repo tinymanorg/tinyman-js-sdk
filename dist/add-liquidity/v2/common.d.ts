@@ -1,4 +1,4 @@
-import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
+import { Algodv2 } from "algosdk";
 import { InitiatorSigner, SignerTransaction } from "../../util/commonTypes";
 import { V2PoolInfo } from "../../util/pool/poolTypes";
 import { V2AddLiquidityExecution } from "./types";
@@ -14,7 +14,7 @@ export declare function signTxns({ txGroup, initiatorSigner }: {
  * @param params.txGroup The transaction group to execute.
  */
 export declare function execute({ client, pool, txGroup, signedTxns }: {
-    client: AlgodClient;
+    client: Algodv2;
     pool: V2PoolInfo;
     txGroup: SignerTransaction[];
     signedTxns: Uint8Array[];

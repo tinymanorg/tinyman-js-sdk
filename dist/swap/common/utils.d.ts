@@ -1,3 +1,4 @@
+import { AssetWithAmountAndDecimals } from "../../util/asset/assetModels";
 declare function calculateSwapRate({ assetIn, assetOut }: {
     assetIn: AssetWithAmountAndDecimals;
     assetOut: AssetWithAmountAndDecimals;

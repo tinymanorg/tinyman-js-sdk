@@ -3,6 +3,7 @@ import { InitiatorSigner, SignerTransaction, SupportedNetwork } from "../../util
 import { V2PoolInfo } from "../../util/pool/poolTypes";
 import { SwapQuote, V2SwapExecution } from "../types";
 import { SwapType } from "../constants";
+import { AssetWithIdAndAmount } from "../../util/asset/assetModels";
 declare function generateTxns({ client, pool, swapType, assetIn, assetOut, initiatorAddr, slippage }: {
     client: Algodv2;
     pool: V2PoolInfo;

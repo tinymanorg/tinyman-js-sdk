@@ -1,5 +1,6 @@
 import { PoolReserves } from "../../util/pool/poolTypes";
 import { V2AddLiquidityType } from "./constants";
+import { AssetWithAmountAndDecimals } from "../../util/asset/assetModels";
 export declare function calculateSubsequentAddLiquidity({ reserves, totalFeeShare, asset1Amount, asset2Amount, decimals }: {
     reserves: Omit<PoolReserves, "round">;
     totalFeeShare: number | bigint;

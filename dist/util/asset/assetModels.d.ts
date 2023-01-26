@@ -45,4 +45,12 @@ interface IndexerAssetParams {
     url: string;
     verified: boolean;
 }
+export interface AssetWithIdAndAmount {
+    id: number;
+    amount: number | bigint;
+}
+export interface AssetWithAmountAndDecimals {
+    amount: number | bigint;
+    decimals: number;
+}
 export {};
