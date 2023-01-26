@@ -1,4 +1,4 @@
-import algosdk from "algosdk";
+import algosdk, {Algodv2} from "algosdk";
 
 import {SignerTransaction} from "../commonTypes";
 import TinymanError from "../error/TinymanError";
@@ -8,6 +8,10 @@ export async function generateOptIntoAssetTxns({
   client,
   assetID,
   initiatorAddr
+}: {
+  client: Algodv2;
+  assetID: number;
+  initiatorAddr: string;
 }): Promise<SignerTransaction[]> {
   try {
     const suggestedParams = await client.getTransactionParams().do();

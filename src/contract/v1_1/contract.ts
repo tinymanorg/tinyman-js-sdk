@@ -8,12 +8,12 @@ import {encodeInteger} from "../../util/util";
 import {getValidatorAppID} from "../../validator";
 import {BaseTinymanContract} from "../base/contract";
 import {CONTRACT_VERSION} from "../constants";
-import {PoolLogicSigVariables, V1_1PoolLogicSig, V1_1ValidatorApp} from "./types";
+import {V1_1PoolLogicSig, V1_1ValidatorApp} from "./types";
 import {sortAssetIds} from "../../util/asset/assetUtils";
 
 export class TinymanContractV1_1 extends BaseTinymanContract<V1_1ValidatorApp> {
   private poolLogicSigContractTemplate: string;
-  private templateVariables: PoolLogicSigVariables;
+  private templateVariables: V1_1PoolLogicSig["logic"]["variables"];
 
   constructor(validatorApp: V1_1ValidatorApp, poolLogicSig: V1_1PoolLogicSig) {
     super(validatorApp);

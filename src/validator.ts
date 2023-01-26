@@ -1,5 +1,6 @@
 import algosdk, {Algodv2} from "algosdk";
 
+import {tinymanJSSDKConfig} from "./config";
 import {CONTRACT_VERSION} from "./contract/constants";
 import {ContractVersionValue} from "./contract/types";
 import {SignerTransaction, SupportedNetwork} from "./util/commonTypes";
@@ -55,6 +56,7 @@ export async function generateOptIntoValidatorTxns({
   const appOptInTxn = algosdk.makeApplicationOptInTxnFromObject({
     from: initiatorAddr,
     appIndex: getValidatorAppID(network, contractVersion),
+    note: tinymanJSSDKConfig.getAppCallTxnNoteWithClientName(contractVersion),
     suggestedParams
   });
 
@@ -79,6 +81,7 @@ export async function generateOptOutOfValidatorTxns({
   const appClearStateTxn = algosdk.makeApplicationClearStateTxnFromObject({
     from: initiatorAddr,
     appIndex: getValidatorAppID(network, contractVersion),
+    note: tinymanJSSDKConfig.getAppCallTxnNoteWithClientName(contractVersion),
     suggestedParams
   });
 

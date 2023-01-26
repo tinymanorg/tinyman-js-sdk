@@ -1,3 +1,4 @@
+import {AssetWithAmountAndDecimals} from "../../util/asset/assetModels";
 import {convertFromBaseUnits, roundNumber} from "../../util/util";
 
 function calculateSwapRate({

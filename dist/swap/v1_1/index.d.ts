@@ -3,6 +3,7 @@ import { InitiatorSigner, SignerTransaction } from "../../util/commonTypes";
 import { PoolReserves, V1PoolInfo } from "../../util/pool/poolTypes";
 import { SwapQuote, V1SwapExecution } from "../types";
 import { SwapType } from "../constants";
+import { AssetWithIdAndAmount } from "../../util/asset/assetModels";
 declare function signTxns({ pool, txGroup, initiatorSigner }: {
     pool: V1PoolInfo;
     txGroup: SignerTransaction[];
@@ -86,7 +87,7 @@ declare function getFixedOutputSwapQuote({ pool, reserves, assetOut, decimals }:
  * @param params.initiatorAddr The address of the account performing the swap operation.
  */
 declare function executeFixedOutputSwap({ client, pool, signedTxns, assetIn, assetOut, initiatorAddr }: {
-    client: any;
+    client: Algodv2;
     pool: V1PoolInfo;
     signedTxns: Uint8Array[];
     assetIn: AssetWithIdAndAmount;

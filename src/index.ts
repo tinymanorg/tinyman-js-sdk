@@ -121,5 +121,5 @@ export {
 } from "./redeem";
 
 export {prepareCommitTransactions, getStakingAppID} from "./stake";
-
+export {tinymanJSSDKConfig} from "./config";
 export {combineAndRegroupSignerTxns} from "./util/transaction/transactionUtils";

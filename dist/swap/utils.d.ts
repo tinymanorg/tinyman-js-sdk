@@ -1,6 +1,6 @@
 import { Algodv2 } from "algosdk";
 import { CONTRACT_VERSION } from "../contract/constants";
-import { TinymanAnalyticsApiAsset } from "../util/asset/assetModels";
+import { AssetWithIdAndAmount, TinymanAnalyticsApiAsset } from "../util/asset/assetModels";
 import { InitiatorSigner, SignerTransaction, SupportedNetwork } from "../util/commonTypes";
 import { PoolReserves, V1PoolInfo, V2PoolInfo } from "../util/pool/poolTypes";
 import { SwapQuoteWithPool } from "./types";
