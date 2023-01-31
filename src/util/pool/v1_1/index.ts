@@ -58,7 +58,6 @@ export async function getPoolInfo(params: {
   return result;
 }
 
-/* eslint-disable complexity */
 export async function getPoolReserves(
   client: Algodv2,
   pool: V1PoolInfo
@@ -143,25 +142,24 @@ export async function getPoolReserves(
     round: info.round
   };
 
-  if (
-    reserves.asset1 < 0n ||
-    reserves.asset2 < 0n ||
-    reserves.issuedLiquidity < 0n ||
-    reserves.issuedLiquidity > TOTAL_LIQUIDITY
-  ) {
-    // @ts-ignore: Type 'number' is not assignable to type 'bigint'
-    reserves.asset1 = Number(reserves.asset1);
-    // @ts-ignore: Type 'number' is not assignable to type 'bigint'
-    reserves.asset2 = Number(reserves.asset2);
-    // @ts-ignore: Type 'number' is not assignable to type 'bigint'
-    reserves.issuedLiquidity = Number(reserves.issuedLiquidity);
+  /**
+   * Although unlikely, it is possible that the pool reserves are below zero.
+   * The reserves can only be negative if assets were withdrawn from the pool using clawback. It shouldn't happen any other way.
+   */
+  if (reserves.asset1 < 0n || reserves.asset2 < 0n) {
+    throw new Error(
+      "The pool reserves are below zero. The manager of one of the assets has used clawback to remove assets from this pool. Do not interact with the pool."
+    );
+  }
 
-    throw new Error(`Invalid pool reserves: ${JSON.stringify(reserves)}`);
+  if (reserves.issuedLiquidity < 0n || reserves.issuedLiquidity > TOTAL_LIQUIDITY) {
+    throw new Error(
+      `Issued liquidity value is out of the expected range ([0n, ${TOTAL_LIQUIDITY}]): ${reserves.issuedLiquidity}`
+    );
   }
 
   return reserves;
 }
-/* eslint-enable complexity */
 
 /**
  * Find out the ids of a pool's liquidity token and assets
