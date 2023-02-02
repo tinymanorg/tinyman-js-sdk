@@ -18,7 +18,10 @@ export declare function calculateSubsequentAddLiquidity({ reserves, totalFeeShar
     swapTotalFeeAmount: bigint;
     swapPriceImpact: number;
 };
-export declare function calculateInitialAddLiquidity(asset1: AssetWithAmountAndDecimals, asset2: AssetWithAmountAndDecimals): bigint;
+/**
+ * @returns the amount of pool tokens that should be issued for the initial add liquidity operation
+ */
+export declare function calculateV2InitialLiquidityAmount(asset1: AssetWithAmountAndDecimals, asset2: AssetWithAmountAndDecimals): bigint;
 /**
  * @returns the fee that should be assigned to the app call transaction
  */
