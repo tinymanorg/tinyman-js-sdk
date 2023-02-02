@@ -19,6 +19,7 @@ import {
 } from "./constants";
 import {tinymanContract_v1_1} from "../../contract/v1_1/contract";
 import {poolUtils} from "../../util/pool";
+import {tinymanJSSDKConfig} from "../../config";
 
 async function generateTxns({
   client,
@@ -51,6 +52,7 @@ async function generateTxns({
   const validatorAppCallTxn = algosdk.makeApplicationOptInTxnFromObject({
     from: poolAddress,
     appIndex: validatorAppID,
+    note: tinymanJSSDKConfig.getAppCallTxnNoteWithClientName(CONTRACT_VERSION.V1_1),
     appArgs: [
       encodeString("bootstrap"),
       algosdk.encodeUint64(asset1ID),

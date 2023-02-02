@@ -1,8 +1,9 @@
+import { Algodv2 } from "algosdk";
 import { SignerTransaction } from "../commonTypes";
 export declare function generateOptIntoAssetTxns({ client, assetID, initiatorAddr }: {
-    client: any;
-    assetID: any;
-    initiatorAddr: any;
+    client: Algodv2;
+    assetID: number;
+    initiatorAddr: string;
 }): Promise<SignerTransaction[]>;
 /**
  * @param asset_1 - Asset 1 of the pool

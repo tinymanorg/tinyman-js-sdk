@@ -1,4 +1,4 @@
-import algosdk, {Transaction} from "algosdk";
+import algosdk, {Algodv2, Transaction} from "algosdk";
 
 import {ADD_LIQUIDITY_APP_CALL_ARGUMENTS} from "../constants";
 import {CONTRACT_VERSION} from "../../contract/constants";
@@ -22,6 +22,8 @@ import {getValidatorAppID} from "../../validator";
 import {V1_1AddLiquidityQuote, V1_1AddLiquidityExecution} from "./types";
 import {V1_1AddLiquidityTxnIndices} from "./constants";
 import {poolUtils} from "../../util/pool";
+import {AssetWithIdAndAmount} from "../../util/asset/assetModels";
+import {tinymanJSSDKConfig} from "../../config";
 
 /**
  * Get a quote for how many liquidity tokens a deposit of asset1In and asset2In is worth at this
@@ -90,7 +92,7 @@ export async function generateTxns({
   slippage,
   initiatorAddr
 }: {
-  client: any;
+  client: Algodv2;
   network: SupportedNetwork;
   poolAddress: string;
   asset1In: AssetWithIdAndAmount;
@@ -110,6 +112,7 @@ export async function generateTxns({
     appIndex: getValidatorAppID(network, CONTRACT_VERSION.V1_1),
     appArgs: ADD_LIQUIDITY_APP_CALL_ARGUMENTS.v1_1,
     accounts: [initiatorAddr],
+    note: tinymanJSSDKConfig.getAppCallTxnNoteWithClientName(CONTRACT_VERSION.V1_1),
     foreignAssets:
       asset2In.id == ALGO_ASSET_ID
         ? [asset1In.id, <number>poolTokenOut.id]
@@ -238,7 +241,7 @@ export async function execute({
   signedTxns,
   initiatorAddr
 }: {
-  client: any;
+  client: Algodv2;
   pool: V1PoolInfo;
   txGroup: SignerTransaction[];
   signedTxns: Uint8Array[];

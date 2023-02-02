@@ -1,3 +1,4 @@
+import { AssetWithIdAndAmount } from "../../util/asset/assetModels";
 export interface V2InitialAddLiquidityQuote {
     asset1In: {
         id: number;

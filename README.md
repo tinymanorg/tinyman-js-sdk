@@ -9,6 +9,15 @@ npm i -S @tinymanorg/tinyman-js-sdk
 ```
 
 <hr>
+_(Optional)_ If you are integrating your project into Tinyman, you can provide `clientName` to SDK's `tinymanJSSDKConfig` instance.
+The client name will be added to the application call transaction's note field. It is recommended, but completely optional.
+
+```tsx
+import {tinymanJSSDKConfig} from "@tinymanorg/tinyman-js-sdk";
+tinymanJSSDKConfig.setClientName("my-project");
+```
+
+<hr>
 
 ## Usage
 

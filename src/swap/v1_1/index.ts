@@ -19,6 +19,9 @@ import {SwapQuote, V1SwapExecution} from "../types";
 import {SwapType} from "../constants";
 import {calculatePriceImpact, calculateSwapRate} from "../common/utils";
 import OutputAmountExceedsAvailableLiquidityError from "../../util/error/OutputAmountExceedsAvailableLiquidityError";
+import {AssetWithIdAndAmount} from "../../util/asset/assetModels";
+import {tinymanJSSDKConfig} from "../../config";
+import {CONTRACT_VERSION} from "../../contract/constants";
 
 // FEE = %0.3 or 3/1000
 const FEE_NUMERATOR = 3n;
@@ -86,6 +89,7 @@ async function generateTxns({
     appIndex: pool.validatorAppID!,
     appArgs: validatorAppCallArgs,
     accounts: [initiatorAddr],
+    note: tinymanJSSDKConfig.getAppCallTxnNoteWithClientName(CONTRACT_VERSION.V1_1),
     foreignAssets:
       pool.asset2ID == ALGO_ASSET_ID
         ? [pool.asset1ID, pool.poolTokenID as number]
@@ -285,7 +289,7 @@ async function executeFixedInputSwap({
   assetOut,
   initiatorAddr
 }: {
-  client: any;
+  client: Algodv2;
   pool: V1PoolInfo;
   signedTxns: Uint8Array[];
   assetIn: AssetWithIdAndAmount;
@@ -431,7 +435,7 @@ async function executeFixedOutputSwap({
   assetOut,
   initiatorAddr
 }: {
-  client: any;
+  client: Algodv2;
   pool: V1PoolInfo;
   signedTxns: Uint8Array[];
   assetIn: AssetWithIdAndAmount;

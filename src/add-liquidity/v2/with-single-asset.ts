@@ -1,5 +1,4 @@
-import algosdk, {encodeUint64} from "algosdk";
-import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
+import algosdk, {Algodv2, encodeUint64} from "algosdk";
 
 import {ADD_LIQUIDITY_APP_CALL_ARGUMENTS} from "../constants";
 import {CONTRACT_VERSION} from "../../contract/constants";
@@ -11,6 +10,8 @@ import {calculateSubsequentAddLiquidity, getV2AddLiquidityAppCallFee} from "./ut
 import {poolUtils} from "../../util/pool";
 import {V2SingleAssetInAddLiquidityQuote} from "./types";
 import {V2AddLiquidityType} from "./constants";
+import {AssetWithIdAndAmount} from "../../util/asset/assetModels";
+import {tinymanJSSDKConfig} from "../../config";
 export * from "./common";
 
 export function getQuote({
@@ -87,7 +88,7 @@ export async function generateTxns({
   initiatorAddr,
   minPoolTokenAssetAmount
 }: {
-  client: AlgodClient;
+  client: Algodv2;
   network: SupportedNetwork;
   poolAddress: string;
   assetIn: AssetWithIdAndAmount;
@@ -114,6 +115,7 @@ export async function generateTxns({
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
     from: initiatorAddr,
     appIndex: getValidatorAppID(network, CONTRACT_VERSION.V2),
+    note: tinymanJSSDKConfig.getAppCallTxnNoteWithClientName(CONTRACT_VERSION.V2),
     appArgs: [
       ...ADD_LIQUIDITY_APP_CALL_ARGUMENTS.v2.SINGLE_ASSET_MODE,
       encodeUint64(minPoolTokenAssetAmount)

@@ -1,4 +1,5 @@
-import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
+import { Algodv2 } from "algosdk";
+import { AssetWithAmountAndDecimals, AssetWithIdAndAmount } from "../../util/asset/assetModels";
 import { SignerTransaction, SupportedNetwork } from "../../util/commonTypes";
 import { V2PoolInfo } from "../../util/pool/poolTypes";
 import { V2InitialAddLiquidityQuote } from "./types";
@@ -10,7 +11,7 @@ export declare function getQuote({ pool, asset1, asset2, slippage }: {
     slippage?: number;
 }): V2InitialAddLiquidityQuote;
 export declare function generateTxns({ client, pool, network, poolAddress, asset1In, asset2In, poolTokenId, initiatorAddr }: {
-    client: AlgodClient;
+    client: Algodv2;
     pool: V2PoolInfo;
     network: SupportedNetwork;
     poolAddress: string;
