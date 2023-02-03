@@ -69,8 +69,6 @@ export async function getPoolReserves(
   );
   const appsLocalState = info["apps-local-state"] || [];
 
-  console.log(info);
-
   let outstandingAsset1 = 0n;
   let outstandingAsset2 = 0n;
   let outstandingPoolTokens = 0n;
