@@ -45,8 +45,21 @@ async function generateTxns({
   initiatorAddr: string;
   slippage: number;
 }): Promise<SignerTransaction[]> {
-  const suggestedParams = await client.getTransactionParams().do();
   const poolAddress = pool.account.address();
+  const poolAssets = [pool.asset1ID, pool.asset2ID];
+
+  if (
+    !poolAssets.includes(assetIn.id) ||
+    !poolAssets.includes(assetOut.id) ||
+    assetIn.id === assetOut.id
+  ) {
+    throw new TinymanError(
+      {pool, assetIn, assetOut},
+      `Input asset (#${assetIn.id}) and output asset (#${assetOut.id}) provided to generate transactions do not belong to the pool ${poolAddress}.`
+    );
+  }
+
+  const suggestedParams = await client.getTransactionParams().do();
   const isAssetInAlgo = isAlgo(assetIn.id);
   const assetInAmount =
     swapType === SwapType.FixedInput
@@ -199,10 +212,6 @@ function getQuote(
 ): SwapQuote {
   let quote: SwapQuote;
 
-  if (pool.status !== PoolStatus.READY) {
-    throw new TinymanError({pool, asset}, "Trying to swap on a non-existent pool");
-  }
-
   if (type === SwapType.FixedInput) {
     quote = getFixedInputSwapQuote({pool, assetIn: asset, decimals});
   } else {
@@ -239,10 +248,15 @@ function getFixedInputSwapQuote({
     assetOutID = pool.asset2ID;
     inputSupply = pool.asset1Reserves!;
     outputSupply = pool.asset2Reserves!;
-  } else {
+  } else if (assetIn.id === pool.asset2ID) {
     assetOutID = pool.asset1ID;
     inputSupply = pool.asset2Reserves!;
     outputSupply = pool.asset1Reserves!;
+  } else {
+    throw new TinymanError(
+      {pool, assetIn},
+      `Input asset (#${assetIn.id}) doesn't belong to the pool ${pool.account.address()}.`
+    );
   }
 
   const {swapOutputAmount, totalFeeAmount, priceImpact} = calculateFixedInputSwap({
@@ -278,6 +292,10 @@ function getFixedOutputSwapQuote({
   assetOut: AssetWithIdAndAmount;
   decimals: {assetIn: number; assetOut: number};
 }): SwapQuote {
+  if (pool.status !== PoolStatus.READY) {
+    throw new TinymanError({pool, assetOut}, "Trying to swap on a non-existent pool");
+  }
+
   const assetOutAmount = BigInt(assetOut.amount);
   const totalFeeShare = pool.totalFeeShare!;
   let assetInID: number;
@@ -288,10 +306,17 @@ function getFixedOutputSwapQuote({
     assetInID = pool.asset2ID;
     inputSupply = pool.asset2Reserves!;
     outputSupply = pool.asset1Reserves!;
-  } else {
+  } else if (assetOut.id === pool.asset2ID) {
     assetInID = pool.asset1ID;
     inputSupply = pool.asset1Reserves!;
     outputSupply = pool.asset2Reserves!;
+  } else {
+    throw new TinymanError(
+      {pool, assetOut},
+      `Output asset (#${
+        assetOut.id
+      }) doesn't belong to the pool ${pool.account.address()}.`
+    );
   }
 
   const {swapInputAmount, totalFeeAmount, priceImpact} = calculateFixedOutputSwap({
