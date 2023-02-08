@@ -18,7 +18,7 @@ export declare function getQuote(params: {
     assetIn: Pick<TinymanAnalyticsApiAsset, "id" | "decimals">;
     assetOut: Pick<TinymanAnalyticsApiAsset, "id" | "decimals">;
     amount: number | bigint;
-}): SwapQuoteWithPool;
+}): Promise<SwapQuoteWithPool>;
 /**
  * Gets quotes for fixed input swap from each pool passed as an argument,
  * and returns the best quote (with the highest rate).
@@ -31,7 +31,7 @@ export declare function getFixedInputSwapQuote({ pools, assetIn, assetOut, amoun
     assetIn: Pick<TinymanAnalyticsApiAsset, "id" | "decimals">;
     assetOut: Pick<TinymanAnalyticsApiAsset, "id" | "decimals">;
     amount: number | bigint;
-}): SwapQuoteWithPool;
+}): Promise<SwapQuoteWithPool>;
 /**
  * Gets quotes for fixed output swap from each pool passed as an argument,
  * and returns the best quote (with the highest rate).
@@ -44,7 +44,7 @@ export declare function getFixedOutputSwapQuote({ pools, assetIn, assetOut, amou
     assetIn: Pick<TinymanAnalyticsApiAsset, "id" | "decimals">;
     assetOut: Pick<TinymanAnalyticsApiAsset, "id" | "decimals">;
     amount: number | bigint;
-}): SwapQuoteWithPool;
+}): Promise<SwapQuoteWithPool>;
 export declare function generateTxns(params: {
     client: Algodv2;
     pool: V1PoolInfo | V2PoolInfo;
