@@ -35,7 +35,14 @@ export function getQuote(params: {
   return getFixedOutputSwapQuote(params);
 }
 
-function validateQuotes(promises: Promise<SwapQuoteWithPool>[]) {
+/**
+ * Given a list of swap quotes, it filters out the invalid quotes.
+ * Validity of the quote is checked by if the promise was successfully resolved
+ * and an actual quote object is available on the response
+ */
+function validateQuotes(
+  promises: Promise<SwapQuoteWithPool>[]
+): Promise<SwapQuoteWithPool[]> {
   return Promise.allSettled(promises).then((results) => {
     if (
       results.every(
