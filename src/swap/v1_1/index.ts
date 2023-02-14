@@ -18,6 +18,7 @@ import {getAccountExcessWithinPool} from "../../util/account/accountUtils";
 import {SwapQuote, V1SwapExecution} from "../types";
 import {SwapType} from "../constants";
 import {calculatePriceImpact, calculateSwapRate} from "../common/utils";
+import OutputAmountExceedsAvailableLiquidityError from "../../util/error/OutputAmountExceedsAvailableLiquidityError";
 import {AssetWithIdAndAmount} from "../../util/asset/assetModels";
 import {tinymanJSSDKConfig} from "../../config";
 import {CONTRACT_VERSION} from "../../contract/constants";
@@ -76,8 +77,21 @@ async function generateTxns({
   slippage: number;
   initiatorAddr: string;
 }): Promise<SignerTransaction[]> {
-  const suggestedParams = await client.getTransactionParams().do();
   const poolAddress = pool.account.address();
+  const poolAssets = [pool.asset1ID, pool.asset2ID];
+
+  if (
+    !poolAssets.includes(assetIn.id) ||
+    !poolAssets.includes(assetOut.id) ||
+    assetIn.id === assetOut.id
+  ) {
+    throw new TinymanError(
+      {pool, assetIn, assetOut},
+      `Input asset (#${assetIn.id}) and output asset (#${assetOut.id}) provided to generate transactions do not belong to the pool ${poolAddress}.`
+    );
+  }
+
+  const suggestedParams = await client.getTransactionParams().do();
   const validatorAppCallArgs = [
     encodeString("swap"),
     swapType === SwapType.FixedInput ? encodeString("fi") : encodeString("fo")
@@ -185,10 +199,6 @@ function getQuote(
 ): SwapQuote {
   let quote;
 
-  if (pool.status !== PoolStatus.READY) {
-    throw new TinymanError({pool, asset}, "Trying to swap on a non-existent pool");
-  }
-
   if (type === SwapType.FixedInput) {
     quote = getFixedInputSwapQuote({pool, reserves, assetIn: asset, decimals});
   } else {
@@ -218,6 +228,10 @@ function getFixedInputSwapQuote({
   assetIn: AssetWithIdAndAmount;
   decimals: {assetIn: number; assetOut: number};
 }): SwapQuote {
+  if (pool.status !== PoolStatus.READY) {
+    throw new TinymanError({pool, assetIn}, "Trying to swap on a non-existent pool");
+  }
+
   const assetInAmount = BigInt(assetIn.amount);
 
   let assetOutID: number;
@@ -228,10 +242,15 @@ function getFixedInputSwapQuote({
     assetOutID = pool.asset2ID;
     inputSupply = reserves.asset1;
     outputSupply = reserves.asset2;
-  } else {
+  } else if (assetIn.id === pool.asset2ID) {
     assetOutID = pool.asset1ID;
     inputSupply = reserves.asset2;
     outputSupply = reserves.asset1;
+  } else {
+    throw new TinymanError(
+      {pool, assetIn},
+      `Input asset (#${assetIn.id}) doesn't belong to the pool ${pool.account.address()}.`
+    );
   }
 
   const swapFee = (assetInAmount * FEE_NUMERATOR) / FEE_DENOMINATOR;
@@ -241,7 +260,7 @@ function getFixedInputSwapQuote({
   const assetOutAmount = outputSupply - k / (inputSupply + assetInAmountMinusFee);
 
   if (assetOutAmount > outputSupply) {
-    throw new Error("Output amount exceeds available liquidity.");
+    throw new OutputAmountExceedsAvailableLiquidityError();
   }
 
   const assetDataForSwapUtils = {
@@ -360,6 +379,10 @@ function getFixedOutputSwapQuote({
   assetOut: AssetWithIdAndAmount;
   decimals: {assetIn: number; assetOut: number};
 }): SwapQuote {
+  if (pool.status !== PoolStatus.READY) {
+    throw new TinymanError({pool, assetOut}, "Trying to swap on a non-existent pool");
+  }
+
   const assetOutAmount = BigInt(assetOut.amount);
 
   let assetInID: number;
@@ -370,14 +393,21 @@ function getFixedOutputSwapQuote({
     assetInID = pool.asset2ID;
     inputSupply = reserves.asset2;
     outputSupply = reserves.asset1;
-  } else {
+  } else if (assetOut.id === pool.asset2ID) {
     assetInID = pool.asset1ID;
     inputSupply = reserves.asset1;
     outputSupply = reserves.asset2;
+  } else {
+    throw new TinymanError(
+      {pool, assetOut},
+      `Output asset (#${
+        assetOut.id
+      }) doesn't belong to the pool ${pool.account.address()}.`
+    );
   }
 
   if (assetOutAmount > outputSupply) {
-    throw new Error("Output amount exceeds available liquidity.");
+    throw new OutputAmountExceedsAvailableLiquidityError();
   }
 
   const k = inputSupply * outputSupply;
