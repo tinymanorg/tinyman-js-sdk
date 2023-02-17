@@ -42,35 +42,21 @@ export function getQuote({
 
   const isAsset1In = assetIn.id === pool.asset1ID;
   const isAsset2In = assetIn.id === pool.asset2ID;
-  let asset1: AssetWithIdAndAmountAndDecimals;
-  let asset2: AssetWithIdAndAmountAndDecimals;
 
-  if (isAsset1In) {
-    asset1 = {
-      id: pool.asset1ID,
-      amount: assetIn.amount,
-      decimals: decimals.asset1
-    };
-    asset2 = {
-      id: pool.asset2ID,
-      amount: 0n,
-      decimals: decimals.asset2
-    };
-  } else if (isAsset2In) {
-    asset1 = {
-      id: pool.asset2ID,
-      amount: 0n,
-      decimals: decimals.asset2
-    };
-    asset2 = {
-      id: pool.asset1ID,
-      amount: assetIn.amount,
-      decimals: decimals.asset1
-    };
-  } else {
+  if (!isAsset1In && !isAsset2In) {
     throw new Error("Provided input asset id didn't match any asset of the pool");
   }
 
+  const asset1: AssetWithIdAndAmountAndDecimals = {
+    id: pool.asset1ID,
+    amount: isAsset1In ? assetIn.amount : 0,
+    decimals: decimals.asset1
+  };
+  const asset2: AssetWithIdAndAmountAndDecimals = {
+    id: pool.asset2ID,
+    amount: isAsset2In ? assetIn.amount : 0,
+    decimals: decimals.asset2
+  };
   const reserves = {
     asset1: pool.asset1Reserves || 0n,
     asset2: pool.asset2Reserves || 0n,
