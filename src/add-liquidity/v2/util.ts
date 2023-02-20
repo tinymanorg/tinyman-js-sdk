@@ -63,7 +63,8 @@ export function calculateSubsequentAddLiquidity({
   let swapFee: bigint;
 
   if (asset1SwapAmount > asset2SwapAmount) {
-    // Swap from Asset 1 to Asset 2
+    // Swap will be from Asset 1 to Asset 2
+
     const swapInAmountWithoutFee = asset1SwapAmount;
 
     swapFee = calculateInternalSwapFeeAmount(swapInAmountWithoutFee, totalFeeShare);
@@ -86,7 +87,7 @@ export function calculateSubsequentAddLiquidity({
 
     poolTokenAmount -= feeAsPoolTokens;
   } else {
-    // Swap from Asset 2 to Asset 1
+    // Swap will be from Asset 2 to Asset 1
 
     const swapInAmountWithoutFee = asset2SwapAmount;
 
