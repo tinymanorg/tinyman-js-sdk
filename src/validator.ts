@@ -7,7 +7,10 @@ import {SignerTransaction, SupportedNetwork} from "./util/commonTypes";
 
 export const OPT_IN_VALIDATOR_APP_PROCESS_TXN_COUNT = 1;
 
-const VALIDATOR_APP_ID: Record<ContractVersionValue, Record<SupportedNetwork, number>> = {
+export const VALIDATOR_APP_ID: Record<
+  ContractVersionValue,
+  Record<SupportedNetwork, number>
+> = {
   [CONTRACT_VERSION.V1_1]: {
     testnet: 62368684,
     mainnet: 552635992
