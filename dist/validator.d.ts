@@ -2,6 +2,7 @@ import { Algodv2 } from "algosdk";
 import { ContractVersionValue } from "./contract/types";
 import { SignerTransaction, SupportedNetwork } from "./util/commonTypes";
 export declare const OPT_IN_VALIDATOR_APP_PROCESS_TXN_COUNT = 1;
+export declare const VALIDATOR_APP_ID: Record<ContractVersionValue, Record<SupportedNetwork, number>>;
 /**
  * Get the Validator App ID for a network.
  *
