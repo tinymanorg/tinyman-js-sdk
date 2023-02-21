@@ -51,18 +51,26 @@ Tinyman JS SDK does not provide an implementation for signTransactions as each a
 Example implementation that uses only account's secret key:
 
 ```ts
-function signTransactions(txGroups: SignerTransaction[][], accountAddress: string) {
-  const toBeSigned = txGroups.flatMap((txGroup) =>
-    txGroup.filter((item) => item.signers.includes(accountAddress))
-  );
-  let signed: Uint8Array[] = [];
+/**
+ * @param account account data that will sign the transactions
+ * @returns a function that will sign the transactions, can be used as `initiatorSigner`
+ */
+export default function signerWithSecretKey(account: Account) {
+  return function (txGroups: SignerTransaction[][]): Promise<Uint8Array[]> {
+    // Filter out transactions that don't need to be signed by the account
+    const txnsToBeSigned = txGroups.flatMap((txGroup) =>
+      txGroup.filter((item) => item.signers?.includes(account.addr))
+    );
+    // Sign all transactions that need to be signed by the account
+    const signedTxns: Uint8Array[] = txnsToBeSigned.map(({txn}) =>
+      txn.signTxn(account.sk)
+    );
 
-  for (let item of toBeSigned) {
-    const {blob} = await algosdk.signTransaction(item.txn, accountSecretKey);
-    signed.push(blob);
-  }
-
-  return signed;
+    // We wrap this with a Promise since SDK's initiatorSigner expects a Promise
+    return new Promise((resolve) => {
+      resolve(signedTxns);
+    });
+  };
 }
 ```
 
