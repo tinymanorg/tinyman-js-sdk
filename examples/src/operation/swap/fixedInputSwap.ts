@@ -36,11 +36,6 @@ export async function fixedInputSwap({
     {id: pool.asset1ID, amount: 1_000_000},
     {assetIn: 6, assetOut: 6}
   );
-
-  console.log({
-    fixedInputSwapQuote
-  });
-
   const assetIn = {
     id: fixedInputSwapQuote.assetInID,
     amount: fixedInputSwapQuote.assetInAmount

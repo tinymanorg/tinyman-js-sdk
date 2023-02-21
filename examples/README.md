@@ -6,7 +6,7 @@ This is a collection of node scripts that uses tinyman-js-sdk v2 operations.
 
 ### File/Folder Structure
 
-- `operation` folder includes scripts that perform operations on the pool
+- `operation` folder includes scripts that perform operations on the pool. **If you only want to see a specific operation example, you can check the files in this folder.**
 - `util` folder includes helper functions or constant variables that are used in the test scripts
 - `index.ts` includes a `main` function that runs all of the operations in order;
   1. Create an account and two assets (for testing purposes)
@@ -21,21 +21,11 @@ For easier testing, on the first run, `main` function creates an account and two
 
 1. First, install the dependencies
 
-    ```sh
-    npm install
-    ```
+   ```sh
+   npm install
+   ```
 
-2. Update [client.ts](./src/util/client.ts), and set `ALGOD_TOKEN` to your own value. So that algod client can be created.
-    ```diff
-    - const ALGOD_TOKEN:string|undefined = undefined;
-    + const ALGOD_TOKEN = "YOUR_API_TOKEN";
-    ```
-    _(See the official algosdk get started document for more info: https://algorand.github.io/js-algorand-sdk/#quick-start.)_
-
-3. Then run the script:
-
-    ```sh
-    npm run start:dev
-    ```
-
-    This will run the `main` function in `index.ts` file, in a hot-reload mode. Any changes to the code will be reflected immediately (`main` will be called again).
+2. Then run the script:
+   ```sh
+   npm run start
+   ```
