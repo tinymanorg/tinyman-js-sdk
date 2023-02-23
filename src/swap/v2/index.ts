@@ -172,18 +172,21 @@ async function execute({
   const assetInChangeInnerTxn = innerTxns?.find(
     (item) => item.txn.txn.xaid === assetIn.id
   )?.txn.txn;
-  const assetOutInnerTxn = innerTxns?.find((item) => item.txn.txn.xaid === assetOutId)
-    ?.txn.txn;
+  const assetOutInnerTxn = innerTxns?.find((item) =>
+    Boolean(item.txn.txn.xaid === assetOutId && item.txn.txn.xaid)
+  )?.txn.txn;
 
   return {
     round: confirmedRound,
-    assetIn: assetInChangeInnerTxn && {
-      // The actual spent amount is the input amount minus the change (refunded) amount
-      amount: BigInt(assetIn.amount) - BigInt(assetInChangeInnerTxn.aamt || 0),
+    assetIn: {
+      // The actual spent amount is the input amount minus the change (refunded) amount, if any
+      amount:
+        BigInt(assetIn.amount) -
+        (assetInChangeInnerTxn?.aamt ? BigInt(assetInChangeInnerTxn.aamt) : 0n),
       id: assetIn.id
     },
     assetOut: assetOutInnerTxn && {
-      amount: assetOutInnerTxn.aamt,
+      amount: assetOutInnerTxn.aamt || 0,
       id: assetOutId
     },
     pool: await poolUtils.v2.getPoolInfo({

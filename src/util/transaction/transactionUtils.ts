@@ -3,6 +3,7 @@ import {
   assignGroupID,
   decodeUnsignedTransaction,
   encodeUnsignedTransaction,
+  TransactionType,
   waitForConfirmation
 } from "algosdk";
 
@@ -32,7 +33,9 @@ export async function getAppCallTxnResponse(
 export async function getAppCallInnerTxns(
   client: Algodv2,
   txGroup: SignerTransaction[]
-): Promise<{txn: {txn: {xaid: number; aamt: number; type: string}}}[] | undefined> {
+): Promise<
+  {txn: {txn: {xaid?: number; aamt?: number; type: TransactionType}}}[] | undefined
+> {
   const txResponse = await getAppCallTxnResponse(client, txGroup);
 
   return txResponse?.["inner-txns"];

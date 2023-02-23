@@ -1,4 +1,9 @@
-import algosdk, {Algodv2, ALGORAND_MIN_TX_FEE, Transaction} from "algosdk";
+import algosdk, {
+  Algodv2,
+  ALGORAND_MIN_TX_FEE,
+  Transaction,
+  TransactionType
+} from "algosdk";
 
 import {tinymanJSSDKConfig} from "../../config";
 import {CONTRACT_VERSION} from "../../contract/constants";
@@ -325,10 +330,24 @@ async function execute({
   signedTxns: Uint8Array[];
 }): Promise<V2RemoveLiquidityExecution> {
   const [{txnID}] = await sendAndWaitRawTransaction(client, [signedTxns]);
-  const outputAssets = (await getAppCallInnerTxns(client, txGroup))?.map((data) => ({
-    assetId: data.txn.txn.xaid,
-    amount: data.txn.txn.aamt
-  }));
+  const appCallInnerTxns = await getAppCallInnerTxns(client, txGroup);
+
+  console.log({appCallInnerTxns});
+
+  const txns = appCallInnerTxns?.map((data) => data.txn.txn);
+
+  console.log(JSON.stringify(txns, null, 2));
+  const outputAssets = appCallInnerTxns
+    ?.filter(
+      (data) =>
+        data.txn.txn.type === TransactionType.axfer &&
+        data.txn.txn.xaid &&
+        data.txn.txn.aamt
+    )
+    .map((data) => ({
+      assetId: data.txn.txn.xaid!,
+      amount: data.txn.txn.aamt!
+    }));
 
   return {
     outputAssets,

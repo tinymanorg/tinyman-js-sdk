@@ -1,4 +1,4 @@
-import { Algodv2 } from "algosdk";
+import { Algodv2, TransactionType } from "algosdk";
 import { SignerTransaction } from "../commonTypes";
 export declare function getAppCallTxnResponse(client: Algodv2, txGroup: SignerTransaction[]): Promise<Record<string, any> | undefined>;
 /**
@@ -8,9 +8,9 @@ export declare function getAppCallTxnResponse(client: Algodv2, txGroup: SignerTr
 export declare function getAppCallInnerTxns(client: Algodv2, txGroup: SignerTransaction[]): Promise<{
     txn: {
         txn: {
-            xaid: number;
-            aamt: number;
-            type: string;
+            xaid?: number;
+            aamt?: number;
+            type: TransactionType;
         };
     };
 }[] | undefined>;
