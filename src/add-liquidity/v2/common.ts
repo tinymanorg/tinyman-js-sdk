@@ -40,15 +40,17 @@ export async function execute({
       signedTxns
     ]);
     const assetOutInnerTxn = (await getAppCallInnerTxns(client, txGroup))?.find(
-      (item) => item.txn.txn.type === "axfer"
+      (item) =>
+        item.txn.txn.type === "axfer" &&
+        item.txn.txn.xaid !== undefined &&
+        item.txn.txn.aamt !== undefined
     )?.txn.txn;
 
     return {
       round: confirmedRound,
-      assetOut:
-        assetOutInnerTxn?.aamt && assetOutInnerTxn?.xaid
-          ? {amount: assetOutInnerTxn.aamt, id: assetOutInnerTxn.xaid}
-          : undefined,
+      assetOut: assetOutInnerTxn
+        ? {amount: assetOutInnerTxn.aamt!, id: assetOutInnerTxn.xaid!}
+        : undefined,
       fees: sumUpTxnFees(txGroup),
       poolTokenID: pool.poolTokenID!,
       txnID,

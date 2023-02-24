@@ -331,18 +331,12 @@ async function execute({
 }): Promise<V2RemoveLiquidityExecution> {
   const [{txnID}] = await sendAndWaitRawTransaction(client, [signedTxns]);
   const appCallInnerTxns = await getAppCallInnerTxns(client, txGroup);
-
-  console.log({appCallInnerTxns});
-
-  const txns = appCallInnerTxns?.map((data) => data.txn.txn);
-
-  console.log(JSON.stringify(txns, null, 2));
   const outputAssets = appCallInnerTxns
     ?.filter(
       (data) =>
         data.txn.txn.type === TransactionType.axfer &&
-        data.txn.txn.xaid &&
-        data.txn.txn.aamt
+        data.txn.txn.xaid !== undefined &&
+        data.txn.txn.aamt !== undefined
     )
     .map((data) => ({
       assetId: data.txn.txn.xaid!,

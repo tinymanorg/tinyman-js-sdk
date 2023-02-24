@@ -173,16 +173,14 @@ async function execute({
     (item) => item.txn.txn.xaid === assetIn.id
   )?.txn.txn;
   const assetOutInnerTxn = innerTxns?.find((item) =>
-    Boolean(item.txn.txn.xaid === assetOutId && item.txn.txn.xaid)
+    Boolean(item.txn.txn.xaid === assetOutId)
   )?.txn.txn;
 
   return {
     round: confirmedRound,
     assetIn: {
       // The actual spent amount is the input amount minus the change (refunded) amount, if any
-      amount:
-        BigInt(assetIn.amount) -
-        (assetInChangeInnerTxn?.aamt ? BigInt(assetInChangeInnerTxn.aamt) : 0n),
+      amount: BigInt(assetIn.amount) - BigInt(assetInChangeInnerTxn?.aamt || 0),
       id: assetIn.id
     },
     assetOut: assetOutInnerTxn && {
