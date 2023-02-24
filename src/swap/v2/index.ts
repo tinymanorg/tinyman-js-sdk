@@ -172,9 +172,8 @@ async function execute({
   const assetInChangeInnerTxn = innerTxns?.find(
     (item) => item.txn.txn.xaid === assetIn.id
   )?.txn.txn;
-  const assetOutInnerTxn = innerTxns?.find((item) =>
-    Boolean(item.txn.txn.xaid === assetOutId)
-  )?.txn.txn;
+  const assetOutInnerTxn = innerTxns?.find((item) => item.txn.txn.xaid === assetOutId)
+    ?.txn.txn;
 
   return {
     round: confirmedRound,
