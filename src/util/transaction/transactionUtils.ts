@@ -7,7 +7,9 @@ import {
   waitForConfirmation
 } from "algosdk";
 
-import {SignerTransaction} from "../commonTypes";
+import {ALGO_ASSET_ID} from "../asset/assetConstants";
+import {AssetWithIdAndAmount} from "../asset/assetModels";
+import {SignerTransaction, TxnResponseInnerTxns} from "../commonTypes";
 import {DEFAULT_WAIT_FOR_CONFIRMATION_ROUNDS} from "../constant";
 
 export async function getAppCallTxnResponse(
@@ -33,12 +35,42 @@ export async function getAppCallTxnResponse(
 export async function getAppCallInnerTxns(
   client: Algodv2,
   txGroup: SignerTransaction[]
-): Promise<
-  {txn: {txn: {xaid?: number; aamt?: number; type: TransactionType}}}[] | undefined
-> {
+): Promise<TxnResponseInnerTxns | undefined> {
   const txResponse = await getAppCallTxnResponse(client, txGroup);
 
   return txResponse?.["inner-txns"];
+}
+
+/**
+ * Tries to find the asset related (asset transfer / payment (i.e. ALGO transfer))
+ * inner transactions in the app call, and return the extracted asset data.
+ * Useful for getting the asset data after an "execute" operation.
+ */
+export async function getAppCallInnerAssetData(
+  client: Algodv2,
+  txGroup: SignerTransaction[]
+): Promise<AssetWithIdAndAmount[] | undefined> {
+  const innerTxns = await getAppCallInnerTxns(client, txGroup);
+
+  return innerTxns?.reduce<AssetWithIdAndAmount[]>((assets, {txn}) => {
+    let updatedAssets = assets;
+    const {txn: innerTxn} = txn;
+
+    if (innerTxn.type === TransactionType.axfer) {
+      updatedAssets.push({
+        id: innerTxn.xaid,
+        amount: innerTxn.aamt
+      });
+    } else if (innerTxn.type === TransactionType.pay) {
+      updatedAssets.push({
+        // Payment transactions are always in ALGO
+        id: ALGO_ASSET_ID,
+        amount: innerTxn.amt
+      });
+    }
+
+    return updatedAssets;
+  }, []);
 }
 
 /**

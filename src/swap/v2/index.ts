@@ -23,7 +23,7 @@ import {
 import {poolUtils} from "../../util/pool";
 import {isAlgo} from "../../util/asset/assetUtils";
 import {calculatePriceImpact} from "../common/utils";
-import {getAppCallInnerTxns} from "../../util/transaction/transactionUtils";
+import {getAppCallInnerAssetData} from "../../util/transaction/transactionUtils";
 import OutputAmountExceedsAvailableLiquidityError from "../../util/error/OutputAmountExceedsAvailableLiquidityError";
 import {AssetWithIdAndAmount} from "../../util/asset/assetModels";
 import {tinymanJSSDKConfig} from "../../config";
@@ -160,8 +160,8 @@ async function execute({
   assetIn: AssetWithIdAndAmount;
 }): Promise<V2SwapExecution> {
   let [{confirmedRound, txnID}] = await sendAndWaitRawTransaction(client, [signedTxns]);
-  const innerTxns = await getAppCallInnerTxns(client, txGroup);
   const assetOutId = [pool.asset1ID, pool.asset2ID].filter((id) => id !== assetIn.id)[0];
+  const innerTxnAssetData = await getAppCallInnerAssetData(client, txGroup);
   /**
    * If the swap type if Fixed Output, usually there will be a difference between
    * input amount and the actual used input amount. The change will be returned to the user
@@ -169,23 +169,19 @@ async function execute({
    * If it is `undefined`, it means that the input amount was exactly the amount used,
    * or the swap type is fixed input.
    */
-  const assetInChangeInnerTxn = innerTxns?.find(
-    (item) => item.txn.txn.xaid === assetIn.id
-  )?.txn.txn;
-  const assetOutInnerTxn = innerTxns?.find((item) => item.txn.txn.xaid === assetOutId)
-    ?.txn.txn;
+  const assetInChangeAmount = innerTxnAssetData?.find(
+    ({id}) => id === assetIn.id
+  )?.amount;
+  const assetOut = innerTxnAssetData?.find(({id}) => id === assetOutId);
 
   return {
     round: confirmedRound,
     assetIn: {
       // The actual spent amount is the input amount minus the change (refunded) amount, if any
-      amount: BigInt(assetIn.amount) - BigInt(assetInChangeInnerTxn?.aamt || 0),
+      amount: BigInt(assetIn.amount) - BigInt(assetInChangeAmount || 0),
       id: assetIn.id
     },
-    assetOut: assetOutInnerTxn && {
-      amount: assetOutInnerTxn.aamt || 0,
-      id: assetOutId
-    },
+    assetOut,
     pool: await poolUtils.v2.getPoolInfo({
       client,
       network,
