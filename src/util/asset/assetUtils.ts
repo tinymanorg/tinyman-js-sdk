@@ -73,3 +73,10 @@ export function sortAssetIds(asset1ID: number, asset2ID: number): number[] {
 export function isAlgo(id: number | string) {
   return Number(id) === ALGO_ASSET_ID;
 }
+
+/**
+ * Returns asset.asset_id
+ */
+export function getAssetId(asset: {id: string | number}): number {
+  return Number(asset.id);
+}

@@ -13,6 +13,8 @@ export {
   MINIMUM_ADD_LIQUIDITY_AMOUNT
 } from "./util/constant";
 
+export * from "./swap/v2/router";
+
 export {
   applySlippageToAmount,
   ASSET_OPT_IN_PROCESS_TXN_COUNT,
@@ -105,13 +107,17 @@ export {RemoveLiquidity} from "./remove-liquidity";
 
 export type {
   SwapQuote,
-  SwapQuoteWithPool,
   V1SwapExecution,
-  V2SwapExecution
+  V2SwapExecution,
+  DirectSwapQuote,
+  SwapRoute,
+  GenerateSwapTxnsParams
 } from "./swap/types";
 export {getSwapTotalFee} from "./swap/utils";
 export {SwapType} from "./swap/constants";
 export {Swap} from "./swap";
+// eslint-disable-next-line no-duplicate-imports
+export {SwapQuoteType} from "./swap/types";
 
 export {
   redeemExcessAsset,
