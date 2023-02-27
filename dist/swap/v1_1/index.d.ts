@@ -1,7 +1,7 @@
 import { Algodv2 } from "algosdk";
 import { InitiatorSigner, SignerTransaction } from "../../util/commonTypes";
 import { PoolReserves, V1PoolInfo } from "../../util/pool/poolTypes";
-import { SwapQuote, V1SwapExecution } from "../types";
+import { DirectSwapQuote, GenerateSwapTxnsWithoutRouterParams, V1SwapExecution } from "../types";
 import { SwapType } from "../constants";
 import { AssetWithIdAndAmount } from "../../util/asset/assetModels";
 declare function signTxns({ pool, txGroup, initiatorSigner }: {
@@ -9,15 +9,7 @@ declare function signTxns({ pool, txGroup, initiatorSigner }: {
     txGroup: SignerTransaction[];
     initiatorSigner: InitiatorSigner;
 }): Promise<Uint8Array[]>;
-declare function generateTxns({ client, pool, swapType, assetIn, assetOut, slippage, initiatorAddr }: {
-    client: Algodv2;
-    pool: V1PoolInfo;
-    swapType: SwapType;
-    assetIn: AssetWithIdAndAmount;
-    assetOut: AssetWithIdAndAmount;
-    slippage: number;
-    initiatorAddr: string;
-}): Promise<SignerTransaction[]>;
+declare function generateTxns({ client, pool, swapType, assetIn, assetOut, slippage, initiatorAddr }: GenerateSwapTxnsWithoutRouterParams): Promise<SignerTransaction[]>;
 /**
  *
  * @param type - Type of the swap
@@ -32,7 +24,7 @@ declare function generateTxns({ client, pool, swapType, assetIn, assetOut, slipp
 declare function getQuote(type: SwapType, pool: V1PoolInfo, reserves: PoolReserves, asset: AssetWithIdAndAmount, decimals: {
     assetIn: number;
     assetOut: number;
-}): SwapQuote;
+}): DirectSwapQuote;
 /**
  * Get a quote for a fixed input swap This does not execute any transactions.
  *
@@ -50,7 +42,7 @@ declare function getFixedInputSwapQuote({ pool, reserves, assetIn, decimals }: {
         assetIn: number;
         assetOut: number;
     };
-}): SwapQuote;
+}): DirectSwapQuote;
 /**
  * Get a quote for a fixed output swap This does not execute any transactions.
  *
@@ -68,7 +60,7 @@ declare function getFixedOutputSwapQuote({ pool, reserves, assetOut, decimals }:
         assetIn: number;
         assetOut: number;
     };
-}): SwapQuote;
+}): DirectSwapQuote;
 /**
  * Execute a fixed output swap with the desired quantities.
  *

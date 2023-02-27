@@ -4,7 +4,7 @@ export declare const Swap: {
         getQuote: (type: import("./constants").SwapType, pool: import("..").V1PoolInfo, reserves: import("..").PoolReserves, asset: import("../util/asset/assetModels").AssetWithIdAndAmount, decimals: {
             assetIn: number;
             assetOut: number;
-        }) => import("./types").SwapQuote;
+        }) => import("./types").DirectSwapQuote;
         getFixedInputSwapQuote: ({ pool, reserves, assetIn, decimals }: {
             pool: import("..").V1PoolInfo;
             reserves: import("..").PoolReserves;
@@ -13,7 +13,7 @@ export declare const Swap: {
                 assetIn: number;
                 assetOut: number;
             };
-        }) => import("./types").SwapQuote;
+        }) => import("./types").DirectSwapQuote;
         getFixedOutputSwapQuote: ({ pool, reserves, assetOut, decimals }: {
             pool: import("..").V1PoolInfo;
             reserves: import("..").PoolReserves;
@@ -22,16 +22,8 @@ export declare const Swap: {
                 assetIn: number;
                 assetOut: number;
             };
-        }) => import("./types").SwapQuote;
-        generateTxns: ({ client, pool, swapType, assetIn, assetOut, slippage, initiatorAddr }: {
-            client: import("algosdk").Algodv2;
-            pool: import("..").V1PoolInfo;
-            swapType: import("./constants").SwapType;
-            assetIn: import("../util/asset/assetModels").AssetWithIdAndAmount;
-            assetOut: import("../util/asset/assetModels").AssetWithIdAndAmount;
-            slippage: number;
-            initiatorAddr: string;
-        }) => Promise<import("..").SignerTransaction[]>;
+        }) => import("./types").DirectSwapQuote;
+        generateTxns: ({ client, pool, swapType, assetIn, assetOut, slippage, initiatorAddr }: import("./types").GenerateSwapTxnsWithoutRouterParams) => Promise<import("..").SignerTransaction[]>;
         signTxns: ({ pool, txGroup, initiatorSigner }: {
             pool: import("..").V1PoolInfo;
             txGroup: import("..").SignerTransaction[];
@@ -55,43 +47,17 @@ export declare const Swap: {
         }) => Promise<Omit<import("./types").V1SwapExecution, "fees" | "groupID">>;
     };
     v2: {
-        getQuote: (type: import("./constants").SwapType, pool: import("..").V2PoolInfo, asset: import("../util/asset/assetModels").AssetWithIdAndAmount, decimals: {
-            assetIn: number;
-            assetOut: number;
-        }) => import("./types").SwapQuote;
-        getFixedInputSwapQuote: ({ pool, assetIn, decimals }: {
-            pool: import("..").V2PoolInfo;
-            assetIn: import("../util/asset/assetModels").AssetWithIdAndAmount;
-            decimals: {
-                assetIn: number;
-                assetOut: number;
-            };
-        }) => import("./types").SwapQuote;
-        getFixedOutputSwapQuote: ({ pool, assetOut, decimals }: {
-            pool: import("..").V2PoolInfo;
-            assetOut: import("../util/asset/assetModels").AssetWithIdAndAmount;
-            decimals: {
-                assetIn: number;
-                assetOut: number;
-            };
-        }) => import("./types").SwapQuote;
-        generateTxns: ({ client, pool, swapType, assetIn, assetOut, initiatorAddr, slippage }: {
-            client: import("algosdk").Algodv2;
-            pool: import("..").V2PoolInfo;
-            swapType: import("./constants").SwapType;
-            assetIn: import("../util/asset/assetModels").AssetWithIdAndAmount;
-            assetOut: import("../util/asset/assetModels").AssetWithIdAndAmount;
-            initiatorAddr: string;
-            slippage: number;
-        }) => Promise<import("..").SignerTransaction[]>;
+        getQuote: (params: import("./types").GetSwapQuoteWithContractVersionParams) => Promise<import("./types").SwapQuote>;
+        getFixedInputSwapQuote: ({ pool, assetIn, decimals, isSwapRouterEnabled }: import("./types").GetFixedInputSwapQuoteByContractVersionParams) => Promise<import("./types").SwapQuote>;
+        getFixedOutputSwapQuote: ({ pool, assetOut, decimals, isSwapRouterEnabled }: import("./types").GetFixedOutputSwapQuoteByContractVersionParams) => Promise<import("./types").SwapQuote>;
+        generateTxns: (params: import("./types").GenerateSwapTxnsParams) => Promise<import("..").SignerTransaction[]>;
         signTxns: ({ txGroup, initiatorSigner }: {
             txGroup: import("..").SignerTransaction[];
             initiatorSigner: import("..").InitiatorSigner;
         }) => Promise<Uint8Array[]>;
-        execute: ({ client, pool, txGroup, signedTxns, network, assetIn }: {
+        execute: ({ client, quote, txGroup, signedTxns, assetIn }: {
             client: import("algosdk").Algodv2;
-            pool: import("..").V2PoolInfo;
-            network: import("..").SupportedNetwork;
+            quote: import("./types").SwapQuote;
             txGroup: import("..").SignerTransaction[];
             signedTxns: Uint8Array[];
             assetIn: import("../util/asset/assetModels").AssetWithIdAndAmount;

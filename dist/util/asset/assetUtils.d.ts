@@ -25,3 +25,9 @@ export declare function sortAssetIds(asset1ID: number, asset2ID: number): number
  * @returns `true` if the given asset id is the ALGO asset id
  */
 export declare function isAlgo(id: number | string): boolean;
+/**
+ * Returns asset.asset_id
+ */
+export declare function getAssetId(asset: {
+    id: string | number;
+}): number;

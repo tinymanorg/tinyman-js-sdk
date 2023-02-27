@@ -1,18 +1,8 @@
 import { Algodv2 } from "algosdk";
-import { InitiatorSigner, SignerTransaction, SupportedNetwork } from "../../util/commonTypes";
-import { V2PoolInfo } from "../../util/pool/poolTypes";
-import { SwapQuote, V2SwapExecution } from "../types";
-import { SwapType } from "../constants";
+import { InitiatorSigner, SignerTransaction } from "../../util/commonTypes";
+import { GenerateSwapTxnsParams, GetFixedInputSwapQuoteByContractVersionParams, GetFixedOutputSwapQuoteByContractVersionParams, GetSwapQuoteWithContractVersionParams, SwapQuote, V2SwapExecution } from "../types";
 import { AssetWithIdAndAmount } from "../../util/asset/assetModels";
-declare function generateTxns({ client, pool, swapType, assetIn, assetOut, initiatorAddr, slippage }: {
-    client: Algodv2;
-    pool: V2PoolInfo;
-    swapType: SwapType;
-    assetIn: AssetWithIdAndAmount;
-    assetOut: AssetWithIdAndAmount;
-    initiatorAddr: string;
-    slippage: number;
-}): Promise<SignerTransaction[]>;
+declare function generateTxns(params: GenerateSwapTxnsParams): Promise<SignerTransaction[]>;
 declare function signTxns({ txGroup, initiatorSigner }: {
     txGroup: SignerTransaction[];
     initiatorSigner: InitiatorSigner;
@@ -20,10 +10,9 @@ declare function signTxns({ txGroup, initiatorSigner }: {
 /**
  * Executes a swap with the desired quantities.
  */
-declare function execute({ client, pool, txGroup, signedTxns, network, assetIn }: {
+declare function execute({ client, quote, txGroup, signedTxns, assetIn }: {
     client: Algodv2;
-    pool: V2PoolInfo;
-    network: SupportedNetwork;
+    quote: SwapQuote;
     txGroup: SignerTransaction[];
     signedTxns: Uint8Array[];
     assetIn: AssetWithIdAndAmount;
@@ -37,32 +26,15 @@ declare function execute({ client, pool, txGroup, signedTxns, network, assetIn }
  * @param decimals.assetOut - Decimals quantity for the output asset
  * @returns A promise for the Swap quote
  */
-declare function getQuote(type: SwapType, pool: V2PoolInfo, asset: AssetWithIdAndAmount, decimals: {
-    assetIn: number;
-    assetOut: number;
-}): SwapQuote;
+declare function getQuote(params: GetSwapQuoteWithContractVersionParams): Promise<SwapQuote>;
 /**
  * @returns A quote for a fixed input swap. Does NOT execute any transactions.
  */
-declare function getFixedInputSwapQuote({ pool, assetIn, decimals }: {
-    pool: V2PoolInfo;
-    assetIn: AssetWithIdAndAmount;
-    decimals: {
-        assetIn: number;
-        assetOut: number;
-    };
-}): SwapQuote;
+declare function getFixedInputSwapQuote({ pool, assetIn, decimals, isSwapRouterEnabled }: GetFixedInputSwapQuoteByContractVersionParams): Promise<SwapQuote>;
 /**
  * @returns A quote for a fixed output swap. Does NOT execute any transactions.
  */
-declare function getFixedOutputSwapQuote({ pool, assetOut, decimals }: {
-    pool: V2PoolInfo;
-    assetOut: AssetWithIdAndAmount;
-    decimals: {
-        assetIn: number;
-        assetOut: number;
-    };
-}): SwapQuote;
+declare function getFixedOutputSwapQuote({ pool, assetOut, decimals, isSwapRouterEnabled }: GetFixedOutputSwapQuoteByContractVersionParams): Promise<SwapQuote>;
 declare function calculateFixedInputSwap({ inputSupply, outputSupply, swapInputAmount, totalFeeShare, decimals }: {
     inputSupply: bigint;
     outputSupply: bigint;
