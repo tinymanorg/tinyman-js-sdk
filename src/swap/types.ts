@@ -88,10 +88,9 @@ export type SwapQuote =
       quoteWithPool: SwapQuoteWithPool;
       type: SwapQuoteType.Direct;
     }
-  | {
-      route: SwapRoute;
+  | (FetchSwapRouteQuotesResponse & {
       type: SwapQuoteType.Router;
-    };
+    });
 
 export type GetSwapQuoteBySwapTypeParams = Omit<GetSwapQuoteParams, "type">;
 
@@ -201,6 +200,7 @@ export interface SwapRouterQuote {
 
 export type FetchSwapRouteQuotesResponse = FetchSwapRouteQuotesPayload & {
   route: SwapRoute;
+  price_impact: string;
   status: {
     round_number: string;
     round_datetime: string;

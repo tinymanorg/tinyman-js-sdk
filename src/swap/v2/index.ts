@@ -291,12 +291,12 @@ async function getFixedInputSwapQuote({
     });
 
     if (
-      swapRoute.length > 1 &&
-      BigInt(swapRoute[swapRoute.length - 1].quote.amount_out.amount) >
+      swapRoute.route.length > 1 &&
+      BigInt(swapRoute.route[swapRoute.route.length - 1].quote.amount_out.amount) >
         directSwapQuote.assetOutAmount
     ) {
       return {
-        route: swapRoute,
+        ...swapRoute,
         type: SwapQuoteType.Router
       };
     }
@@ -380,12 +380,12 @@ async function getFixedOutputSwapQuote({
     });
 
     if (
-      swapRoute.length > 1 &&
-      BigInt(swapRoute[swapRoute.length - 1].quote.amount_in.amount) <
+      swapRoute.route.length > 1 &&
+      BigInt(swapRoute.route[swapRoute.route.length - 1].quote.amount_in.amount) <
         directSwapQuote.assetInAmount
     ) {
       return {
-        route: swapRoute,
+        ...swapRoute,
         type: SwapQuoteType.Router
       };
     }

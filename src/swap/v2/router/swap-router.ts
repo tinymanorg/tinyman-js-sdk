@@ -10,8 +10,7 @@ import {SwapType} from "../../constants";
 import {
   FetchSwapRouteQuotesPayload,
   FetchSwapRouteQuotesResponse,
-  GenerateSwapRouterTxnsParams,
-  SwapRoute
+  GenerateSwapRouterTxnsParams
 } from "../../types";
 import {
   V2SwapTxnGroupIndices,
@@ -46,8 +45,6 @@ export async function generateSwapRouterAssetOptInTransaction({
   // The fee for the transaction is the fee for the outer transaction (which is a NoOp)
   // multiplied by the number of inner transactions
   assetOptInTxn.fee = ALGORAND_MIN_TX_FEE * (innerTransactionCount + 1);
-
-  console.log(assetOptInTxn.fee, "router app opt-in fee");
 
   const txGroup = algosdk.assignGroupID([assetOptInTxn]);
 
@@ -159,7 +156,7 @@ export async function getSwapRoute({
   assetOutID: number;
   swapType: SwapType;
   amount: number | bigint;
-}): Promise<SwapRoute> {
+}): Promise<FetchSwapRouteQuotesResponse> {
   const payload: FetchSwapRouteQuotesPayload = {
     asset_in_id: String(assetInID),
     asset_out_id: String(assetOutID),
@@ -167,23 +164,23 @@ export async function getSwapRoute({
     amount: String(amount)
   };
 
-  const response = await fetch(
-    "https://testnet.analytics.tinyman.org/api/v1/swap-router/quotes/",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(payload)
-    }
-  );
+  try {
+    const response = await fetch(
+      "https://testnet.analytics.tinyman.org/api/v1/swap-router/quotes/",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      }
+    );
 
-  //    TODO: Handle all errors properly
-  if (response.status !== 200) {
-    throw new Error("Failed to fetch swap route quotes");
+    return response.json();
+    // TODO: Handle all errors properly
+  } catch (error) {
+    console.error(error);
+
+    throw error;
   }
-
-  const {route}: FetchSwapRouteQuotesResponse = await response.json();
-
-  return route;
 }
