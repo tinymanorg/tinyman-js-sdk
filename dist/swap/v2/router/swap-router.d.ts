@@ -1,4 +1,3 @@
-import algosdk from "algosdk";
 import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
 import { SignerTransaction } from "../../../util/commonTypes";
 import { SwapType } from "../../constants";
@@ -9,10 +8,7 @@ export declare function generateSwapRouterAssetOptInTransaction({ client, router
     assetIDs: number[];
     accountAddress: string;
 }): Promise<SignerTransaction[]>;
-export declare function generateSwapRouterTxns({ initiatorAddr, client, network, swapType, route }: GenerateSwapRouterTxnsParams): Promise<{
-    txn: algosdk.Transaction;
-    signers: string[];
-}[]>;
+export declare function generateSwapRouterTxns({ initiatorAddr, client, network, swapType, route }: GenerateSwapRouterTxnsParams): Promise<SignerTransaction[]>;
 export declare function getSwapRouterAppOptInRequiredAssetIDs({ client, routerAppID, assetIDs }: {
     client: AlgodClient;
     routerAppID: number;

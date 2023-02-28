@@ -4,6 +4,7 @@ import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
 import {CONTRACT_VERSION} from "../../../contract/constants";
 import {getAssetId, isAlgo} from "../../../util/asset/assetUtils";
 import {SignerTransaction} from "../../../util/commonTypes";
+import {combineAndRegroupSignerTxns} from "../../../util/transaction/transactionUtils";
 import {getValidatorAppID} from "../../../validator";
 import {SwapType} from "../../constants";
 import {
@@ -110,7 +111,7 @@ export async function generateSwapRouterTxns({
 
   const txGroup = algosdk.assignGroupID([inputTxn, routerAppCallTxn]);
 
-  return [
+  let txns: SignerTransaction[] = [
     {
       txn: txGroup[V2SwapTxnGroupIndices.INPUT_TXN],
       signers: [initiatorAddr]
@@ -120,6 +121,26 @@ export async function generateSwapRouterTxns({
       signers: [initiatorAddr]
     }
   ];
+
+  const swapRouterAppOptInRequiredAssetIDs = await getSwapRouterAppOptInRequiredAssetIDs({
+    client,
+    routerAppID,
+    assetIDs: [assetInID, intermediaryAssetID, assetOutID]
+  });
+
+  if (swapRouterAppOptInRequiredAssetIDs.length > 0) {
+    txns = combineAndRegroupSignerTxns(
+      await generateSwapRouterAssetOptInTransaction({
+        client,
+        accountAddress: initiatorAddr,
+        assetIDs: [assetInID, intermediaryAssetID, assetOutID],
+        routerAppID
+      }),
+      txns
+    );
+  }
+
+  return txns;
 }
 
 export async function getSwapRouterAppOptInRequiredAssetIDs({
