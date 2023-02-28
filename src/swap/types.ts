@@ -159,12 +159,9 @@ export interface GenerateSwapTxnsWithoutRouterParams {
 
 export interface GenerateSwapRouterTxnsParams {
   client: Algodv2;
-  routerAppID: number;
   initiatorAddr: string;
-  assetIn: AssetWithIdAndAmount;
-  assetOut: AssetWithIdAndAmount;
-  intermediaryAssetID: number;
   swapType: SwapType;
+  route: SwapRoute;
   network: SupportedNetwork;
 }
 

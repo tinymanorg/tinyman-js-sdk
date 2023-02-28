@@ -2,8 +2,7 @@ import algosdk, {ALGORAND_MIN_TX_FEE, getApplicationAddress} from "algosdk";
 import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
 
 import {CONTRACT_VERSION} from "../../../contract/constants";
-import {tinymanContract_v2} from "../../../contract/v2/contract";
-import {isAlgo} from "../../../util/asset/assetUtils";
+import {getAssetId, isAlgo} from "../../../util/asset/assetUtils";
 import {SignerTransaction} from "../../../util/commonTypes";
 import {getValidatorAppID} from "../../../validator";
 import {SwapType} from "../../constants";
@@ -18,6 +17,7 @@ import {
   V2_SWAP_APP_CALL_SWAP_TYPE_ARGS_ENCODED,
   V2_SWAP_ROUTER_APP_ARGS_ENCODED
 } from "../constants";
+import {getSwapRouterAppID} from "./util";
 
 export async function generateSwapRouterAssetOptInTransaction({
   client,
@@ -53,43 +53,40 @@ export async function generateSwapRouterAssetOptInTransaction({
 
 export async function generateSwapRouterTxns({
   initiatorAddr,
-  assetIn,
-  assetOut,
   client,
-  intermediaryAssetID,
-  routerAppID,
   network,
-  swapType
+  swapType,
+  route
 }: GenerateSwapRouterTxnsParams) {
   const suggestedParams = await client.getTransactionParams().do();
 
-  const pool1LogicSig = tinymanContract_v2.generateLogicSigAccountForPool({
-    asset1ID: assetIn.id,
-    asset2ID: intermediaryAssetID,
-    network
-  });
-  const pool1Address = pool1LogicSig.address();
-  const pool2LogicSig = tinymanContract_v2.generateLogicSigAccountForPool({
-    asset1ID: intermediaryAssetID,
-    asset2ID: assetOut.id,
-    network
-  });
-  const pool2Address = pool2LogicSig.address();
+  const [assetInID, intermediaryAssetID, assetOutID] = [
+    getAssetId(route[0].quote.amount_in.asset),
+    getAssetId(route[0].quote.amount_out.asset),
+    getAssetId(route[1].quote.amount_out.asset)
+  ];
+  const [assetInAmount, assetOutAmount] = [
+    Number(route[0].quote.amount_in.amount),
+    Number(route[route.length - 1].quote.amount_out.amount)
+  ];
+  const [pool1Address, pool2Address] = [route[0].pool.address, route[1].pool.address];
 
-  const isAssetInAlgo = isAlgo(assetIn.id);
+  const isAssetInAlgo = isAlgo(assetInID);
+
+  const routerAppID = getSwapRouterAppID(network);
 
   const inputTxn = isAssetInAlgo
     ? algosdk.makePaymentTxnWithSuggestedParamsFromObject({
         from: initiatorAddr,
         to: getApplicationAddress(routerAppID),
-        amount: assetIn.amount,
+        amount: assetInAmount,
         suggestedParams
       })
     : algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
         from: initiatorAddr,
         to: getApplicationAddress(routerAppID),
-        amount: assetIn.amount,
-        assetIndex: assetIn.id,
+        amount: assetInAmount,
+        assetIndex: assetInID,
         suggestedParams
       });
 
@@ -99,10 +96,10 @@ export async function generateSwapRouterTxns({
     appArgs: [
       V2_SWAP_APP_CALL_ARG_ENCODED,
       V2_SWAP_APP_CALL_SWAP_TYPE_ARGS_ENCODED[swapType],
-      algosdk.encodeUint64(assetOut.amount)
+      algosdk.encodeUint64(assetOutAmount)
     ],
     foreignApps: [getValidatorAppID(network, CONTRACT_VERSION.V2)],
-    foreignAssets: [assetIn.id, intermediaryAssetID, assetOut.id],
+    foreignAssets: [assetInID, intermediaryAssetID, assetOutID],
     accounts: [pool1Address, pool2Address],
     suggestedParams
   });

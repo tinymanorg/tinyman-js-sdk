@@ -9,7 +9,7 @@ export declare function generateSwapRouterAssetOptInTransaction({ client, router
     assetIDs: number[];
     accountAddress: string;
 }): Promise<SignerTransaction[]>;
-export declare function generateSwapRouterTxns({ initiatorAddr, assetIn, assetOut, client, intermediaryAssetID, routerAppID, network, swapType }: GenerateSwapRouterTxnsParams): Promise<{
+export declare function generateSwapRouterTxns({ initiatorAddr, client, network, swapType, route }: GenerateSwapRouterTxnsParams): Promise<{
     txn: algosdk.Transaction;
     signers: string[];
 }[]>;
