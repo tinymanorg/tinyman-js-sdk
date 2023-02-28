@@ -25,7 +25,6 @@ export declare function signTxns(params: {
     quote: SwapQuote;
     txGroup: SignerTransaction[];
     initiatorSigner: InitiatorSigner;
-    network: SupportedNetwork;
 }): Promise<Uint8Array[]>;
 interface ExecuteCommonParams {
     swapType: SwapType;
