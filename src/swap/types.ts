@@ -189,7 +189,7 @@ export interface SwapRouterQuote {
   };
   swap_fees: {
     amount: string;
-    asset_id: string;
+    asset: SwapRouteAsset;
   };
   price: number;
   price_impact: number;
