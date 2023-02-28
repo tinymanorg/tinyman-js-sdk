@@ -21,22 +21,9 @@ tinymanJSSDKConfig.setClientName("my-project");
 
 ## Usage
 
-First, we need to instantiate the Algod client and get the Tinyman Validator App ID for the network:
+🆕 **AMM v2 Examples**: Example scripts for v2 contracts can be found in [examples folder](./examples/).
 
-```typescript
-const algodClient = new algosdk.Algodv2(
-  /** Enter token here */,
-  /** Enter server here */,
-  /** Enter port here */
-)
-const validatorAppID = getValidatorAppID(
-  "mainnet",
-  // You can also use `CONTRACT_VERSION.V1_1` to interact with V1.1 app
-  CONTRACT_VERSION.V2
-)
-```
-
-Then, we can use the module methods provided by SDK to interact with the contracts. See [this section](#module-methods) for more details about the modules and functions.
+For more details about the modules and functions, see ["Module methods" section](#module-methods).
 
 <details>
   <summary><strong>Opt into V1 Validator App</strong></summary>
@@ -73,18 +60,26 @@ Tinyman JS SDK does not provide an implementation for signTransactions as each a
 Example implementation that uses only account's secret key:
 
 ```ts
-function signTransactions(txGroups: SignerTransaction[][], accountAddress: string) {
-  const toBeSigned = txGroups.flatMap((txGroup) =>
-    txGroup.filter((item) => item.signers.includes(accountAddress))
-  );
-  let signed: Uint8Array[] = [];
+/**
+ * @param account account data that will sign the transactions
+ * @returns a function that will sign the transactions, can be used as `initiatorSigner`
+ */
+export default function signerWithSecretKey(account: Account) {
+  return function (txGroups: SignerTransaction[][]): Promise<Uint8Array[]> {
+    // Filter out transactions that don't need to be signed by the account
+    const txnsToBeSigned = txGroups.flatMap((txGroup) =>
+      txGroup.filter((item) => item.signers?.includes(account.addr))
+    );
+    // Sign all transactions that need to be signed by the account
+    const signedTxns: Uint8Array[] = txnsToBeSigned.map(({txn}) =>
+      txn.signTxn(account.sk)
+    );
 
-  for (let item of toBeSigned) {
-    const {blob} = await algosdk.signTransaction(item.txn, accountSecretKey);
-    signed.push(blob);
-  }
-
-  return signed;
+    // We wrap this with a Promise since SDK's initiatorSigner expects a Promise
+    return new Promise((resolve) => {
+      resolve(signedTxns);
+    });
+  };
 }
 ```
 
