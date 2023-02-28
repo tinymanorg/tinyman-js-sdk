@@ -72,7 +72,7 @@ function validateQuotes(promises: Promise<SwapQuote>[]): Promise<SwapQuote[]> {
 export async function getFixedInputSwapQuote(
   params: GetSwapQuoteBySwapTypeParams
 ): Promise<SwapQuote> {
-  const {amount, assetIn, assetOut, pools} = params;
+  const {amount, assetIn, assetOut, pools, isSwapRouterEnabled} = params;
 
   const quotePromises = pools.map<Promise<SwapQuote>>((pool) => {
     return new Promise(async (resolve, reject) => {
@@ -82,7 +82,8 @@ export async function getFixedInputSwapQuote(
         pool: pool.info,
         assetIn: {amount, id: Number(assetIn.id)},
         decimals: {assetIn: assetIn.decimals, assetOut: assetOut.decimals},
-        reserves: pool.reserves
+        reserves: pool.reserves,
+        isSwapRouterEnabled
       };
 
       try {
@@ -117,7 +118,7 @@ export async function getFixedInputSwapQuote(
 export async function getFixedOutputSwapQuote(
   params: GetSwapQuoteBySwapTypeParams
 ): Promise<SwapQuote> {
-  const {amount, assetIn, assetOut, pools} = params;
+  const {amount, assetIn, assetOut, pools, isSwapRouterEnabled} = params;
 
   const quotePromises = pools.map<Promise<SwapQuote>>((pool) => {
     return new Promise(async (resolve, reject) => {
@@ -126,7 +127,8 @@ export async function getFixedOutputSwapQuote(
         pool: pool.info,
         assetOut: {amount, id: Number(assetOut.id)},
         decimals: {assetIn: assetIn.decimals, assetOut: assetOut.decimals},
-        reserves: pool.reserves
+        reserves: pool.reserves,
+        isSwapRouterEnabled
       };
 
       try {
