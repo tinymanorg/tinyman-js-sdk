@@ -159,9 +159,16 @@ async function execute({
   signedTxns: Uint8Array[];
   assetIn: AssetWithIdAndAmount;
 }): Promise<V2SwapExecution> {
-  let [{confirmedRound, txnID}] = await sendAndWaitRawTransaction(client, [signedTxns]);
+  const [{confirmedRound, txnID}] = await sendAndWaitRawTransaction(client, [signedTxns]);
   const assetOutId = [pool.asset1ID, pool.asset2ID].filter((id) => id !== assetIn.id)[0];
-  const innerTxnAssetData = await getAppCallInnerAssetData(client, txGroup);
+  let innerTxnAssetData: AssetWithIdAndAmount[] | undefined;
+
+  try {
+    innerTxnAssetData = await getAppCallInnerAssetData(client, txGroup);
+  } catch (_error) {
+    // We can ignore this error since the main execution was successful
+  }
+
   /**
    * If the swap type if Fixed Output, usually there will be a difference between
    * input amount and the actual used input amount. The change will be returned to the user

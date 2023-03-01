@@ -1,5 +1,6 @@
 import {Algodv2} from "algosdk";
 
+import {AssetWithIdAndAmount} from "../../util/asset/assetModels";
 import {InitiatorSigner, SignerTransaction} from "../../util/commonTypes";
 import TinymanError from "../../util/error/TinymanError";
 import {V2PoolInfo} from "../../util/pool/poolTypes";
@@ -39,10 +40,17 @@ export async function execute({
     const [{confirmedRound, txnID}] = await sendAndWaitRawTransaction(client, [
       signedTxns
     ]);
-    const assetOut = (await getAppCallInnerAssetData(client, txGroup))?.find(
-      // Output asset is the pool token for add liquidity
-      ({id}) => id === pool.poolTokenID
-    );
+
+    let assetOut: AssetWithIdAndAmount | undefined;
+
+    try {
+      assetOut = (await getAppCallInnerAssetData(client, txGroup))?.find(
+        // Output asset is the pool token for add liquidity
+        ({id}) => id === pool.poolTokenID
+      );
+    } catch (_error) {
+      // We can ignore this error since the main execution was successful
+    }
 
     return {
       round: confirmedRound,
