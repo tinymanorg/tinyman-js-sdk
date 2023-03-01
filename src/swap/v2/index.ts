@@ -7,13 +7,10 @@ import {
 } from "../../util/util";
 import {InitiatorSigner, SignerTransaction} from "../../util/commonTypes";
 import TinymanError from "../../util/error/TinymanError";
-import {PoolStatus} from "../../util/pool/poolTypes";
+import {PoolStatus, V2PoolInfo} from "../../util/pool/poolTypes";
 import {
   DirectSwapQuote,
   GenerateSwapTxnsParams,
-  GetFixedInputSwapQuoteByContractVersionParams,
-  GetFixedOutputSwapQuoteByContractVersionParams,
-  GetSwapQuoteWithContractVersionParams,
   SwapQuote,
   SwapQuoteType,
   V2SwapExecution
@@ -199,9 +196,12 @@ async function execute({
  * @returns A promise for the Swap quote
  */
 async function getQuote(
-  params: GetSwapQuoteWithContractVersionParams
+  type: SwapType,
+  pool: V2PoolInfo,
+  asset: AssetWithIdAndAmount,
+  decimals: {assetIn: number; assetOut: number},
+  isSwapRouterEnabled?: boolean
 ): Promise<SwapQuote> {
-  const {asset, decimals, pool, type, isSwapRouterEnabled} = params;
   let quote: SwapQuote;
 
   if (type === SwapType.FixedInput) {
@@ -227,11 +227,16 @@ async function getQuote(
  * @returns A quote for a fixed input swap. Does NOT execute any transactions.
  */
 async function getFixedInputSwapQuote({
-  pool,
   assetIn,
   decimals,
+  pool,
   isSwapRouterEnabled
-}: GetFixedInputSwapQuoteByContractVersionParams): Promise<SwapQuote> {
+}: {
+  pool: V2PoolInfo;
+  assetIn: AssetWithIdAndAmount;
+  decimals: {assetIn: number; assetOut: number};
+  isSwapRouterEnabled?: boolean;
+}): Promise<SwapQuote> {
   if (pool.status !== PoolStatus.READY) {
     throw new TinymanError({pool, assetIn}, "Trying to swap on a non-existent pool");
   }
@@ -315,11 +320,16 @@ async function getFixedInputSwapQuote({
  * @returns A quote for a fixed output swap. Does NOT execute any transactions.
  */
 async function getFixedOutputSwapQuote({
-  pool,
   assetOut,
   decimals,
+  pool,
   isSwapRouterEnabled
-}: GetFixedOutputSwapQuoteByContractVersionParams): Promise<SwapQuote> {
+}: {
+  pool: V2PoolInfo;
+  assetOut: AssetWithIdAndAmount;
+  decimals: {assetIn: number; assetOut: number};
+  isSwapRouterEnabled?: boolean;
+}): Promise<SwapQuote> {
   if (pool.status !== PoolStatus.READY) {
     throw new TinymanError({pool, assetOut}, "Trying to swap on a non-existent pool");
   }

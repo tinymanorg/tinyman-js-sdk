@@ -47,9 +47,28 @@ export declare const Swap: {
         }) => Promise<Omit<import("./types").V1SwapExecution, "fees" | "groupID">>;
     };
     v2: {
-        getQuote: (params: import("./types").GetSwapQuoteWithContractVersionParams) => Promise<import("./types").SwapQuote>;
-        getFixedInputSwapQuote: ({ pool, assetIn, decimals, isSwapRouterEnabled }: import("./types").GetFixedInputSwapQuoteByContractVersionParams) => Promise<import("./types").SwapQuote>;
-        getFixedOutputSwapQuote: ({ pool, assetOut, decimals, isSwapRouterEnabled }: import("./types").GetFixedOutputSwapQuoteByContractVersionParams) => Promise<import("./types").SwapQuote>;
+        getQuote: (type: import("./constants").SwapType, pool: import("..").V2PoolInfo, asset: import("../util/asset/assetModels").AssetWithIdAndAmount, decimals: {
+            assetIn: number;
+            assetOut: number;
+        }, isSwapRouterEnabled?: boolean | undefined) => Promise<import("./types").SwapQuote>;
+        getFixedInputSwapQuote: ({ assetIn, decimals, pool, isSwapRouterEnabled }: {
+            pool: import("..").V2PoolInfo;
+            assetIn: import("../util/asset/assetModels").AssetWithIdAndAmount;
+            decimals: {
+                assetIn: number;
+                assetOut: number;
+            };
+            isSwapRouterEnabled?: boolean | undefined;
+        }) => Promise<import("./types").SwapQuote>;
+        getFixedOutputSwapQuote: ({ assetOut, decimals, pool, isSwapRouterEnabled }: {
+            pool: import("..").V2PoolInfo;
+            assetOut: import("../util/asset/assetModels").AssetWithIdAndAmount;
+            decimals: {
+                assetIn: number;
+                assetOut: number;
+            };
+            isSwapRouterEnabled?: boolean | undefined;
+        }) => Promise<import("./types").SwapQuote>;
         generateTxns: (params: import("./types").GenerateSwapTxnsParams) => Promise<import("..").SignerTransaction[]>;
         signTxns: ({ txGroup, initiatorSigner }: {
             txGroup: import("..").SignerTransaction[];

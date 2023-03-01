@@ -22,7 +22,6 @@ export interface DirectSwapQuote {
   priceImpact: number;
   /** The round that this quote is based on. */
   round?: number;
-  price?: number;
 }
 
 /** An object containing information about a successfully executed swap. */
@@ -93,28 +92,6 @@ export type SwapQuote =
     });
 
 export type GetSwapQuoteBySwapTypeParams = Omit<GetSwapQuoteParams, "type">;
-
-export type GetSwapQuoteWithContractVersionParams = {
-  type: SwapType;
-  pool: V2PoolInfo;
-  asset: AssetWithIdAndAmount;
-  decimals: {assetIn: number; assetOut: number};
-  isSwapRouterEnabled?: boolean;
-};
-
-export type GetFixedInputSwapQuoteByContractVersionParams = Omit<
-  GetSwapQuoteWithContractVersionParams,
-  "type" | "asset"
-> & {
-  assetIn: AssetWithIdAndAmount;
-};
-
-export type GetFixedOutputSwapQuoteByContractVersionParams = Omit<
-  GetSwapQuoteWithContractVersionParams,
-  "type" | "asset"
-> & {
-  assetOut: AssetWithIdAndAmount;
-};
 
 export interface FetchSwapRouteQuotesPayload {
   asset_in_id: string;
