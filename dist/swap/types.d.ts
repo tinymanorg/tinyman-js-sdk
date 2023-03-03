@@ -126,7 +126,7 @@ export interface GenerateSwapRouterTxnsParams {
     route: SwapRoute;
     network: SupportedNetwork;
 }
-export declare type GenerateV1_1SwapTxnsParams = Omit<GenerateSwapTxnsParams, "quote"> & {
+export declare type GenerateV1_1SwapTxnsParams = Omit<GenerateSwapTxnsParams, "quote" | "network"> & {
     quote: SwapQuoteWithPool;
 };
 export interface SwapRouterQuote {

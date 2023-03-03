@@ -141,7 +141,10 @@ export interface GenerateSwapRouterTxnsParams {
   network: SupportedNetwork;
 }
 
-export type GenerateV1_1SwapTxnsParams = Omit<GenerateSwapTxnsParams, "quote"> & {
+export type GenerateV1_1SwapTxnsParams = Omit<
+  GenerateSwapTxnsParams,
+  "quote" | "network"
+> & {
   quote: SwapQuoteWithPool;
 };
 
