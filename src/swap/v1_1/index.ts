@@ -15,11 +15,7 @@ import {DEFAULT_FEE_TXN_NOTE} from "../../util/constant";
 import {ALGO_ASSET_ID} from "../../util/asset/assetConstants";
 import {PoolReserves, PoolStatus, V1PoolInfo} from "../../util/pool/poolTypes";
 import {getAccountExcessWithinPool} from "../../util/account/accountUtils";
-import {
-  DirectSwapQuote,
-  GenerateSwapTxnsWithoutRouterParams,
-  V1SwapExecution
-} from "../types";
+import {DirectSwapQuote, GenerateV1_1SwapTxnsParams, V1SwapExecution} from "../types";
 import {SwapType} from "../constants";
 import {calculatePriceImpact, calculateSwapRate} from "../common/utils";
 import OutputAmountExceedsAvailableLiquidityError from "../../util/error/OutputAmountExceedsAvailableLiquidityError";
@@ -66,24 +62,26 @@ async function signTxns({
 
 async function generateTxns({
   client,
-  pool,
+  quote,
   swapType,
-  assetIn,
-  assetOut,
   slippage,
   initiatorAddr
-}: GenerateSwapTxnsWithoutRouterParams): Promise<SignerTransaction[]> {
+}: GenerateV1_1SwapTxnsParams): Promise<SignerTransaction[]> {
+  const {pool, quote: swapQuote} = quote;
+
+  const {assetInID, assetOutID} = swapQuote;
+
   const poolAddress = pool.account.address();
   const poolAssets = [pool.asset1ID, pool.asset2ID];
 
   if (
-    !poolAssets.includes(assetIn.id) ||
-    !poolAssets.includes(assetOut.id) ||
-    assetIn.id === assetOut.id
+    !poolAssets.includes(assetInID) ||
+    !poolAssets.includes(assetOutID) ||
+    assetInID === assetOutID
   ) {
     throw new TinymanError(
-      {pool, assetIn, assetOut},
-      `Input asset (#${assetIn.id}) and output asset (#${assetOut.id}) provided to generate transactions do not belong to the pool ${poolAddress}.`
+      {pool, quote},
+      `Input asset (#${assetInID}) and output asset (#${assetOutID}) provided to generate transactions do not belong to the pool ${poolAddress}.`
     );
   }
 
@@ -108,11 +106,11 @@ async function generateTxns({
 
   const assetInAmount =
     swapType === SwapType.FixedOutput
-      ? applySlippageToAmount("positive", slippage, assetIn.amount)
-      : assetIn.amount;
+      ? applySlippageToAmount("positive", slippage, swapQuote.assetInAmount)
+      : swapQuote.assetInAmount;
   let assetInTxn: algosdk.Transaction;
 
-  if (assetIn.id === ALGO_ASSET_ID) {
+  if (assetInID === ALGO_ASSET_ID) {
     assetInTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
       from: initiatorAddr,
       to: poolAddress,
@@ -123,7 +121,7 @@ async function generateTxns({
     assetInTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
       from: initiatorAddr,
       to: poolAddress,
-      assetIndex: assetIn.id,
+      assetIndex: assetInID,
       amount: assetInAmount,
       suggestedParams
     });
@@ -131,11 +129,11 @@ async function generateTxns({
 
   const assetOutAmount =
     swapType === SwapType.FixedInput
-      ? applySlippageToAmount("negative", slippage, assetOut.amount)
-      : assetOut.amount;
+      ? applySlippageToAmount("negative", slippage, swapQuote.assetOutAmount)
+      : swapQuote.assetOutAmount;
   let assetOutTxn: algosdk.Transaction;
 
-  if (assetOut.id === ALGO_ASSET_ID) {
+  if (assetOutID === ALGO_ASSET_ID) {
     assetOutTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
       from: poolAddress,
       to: initiatorAddr,
@@ -146,7 +144,7 @@ async function generateTxns({
     assetOutTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
       from: poolAddress,
       to: initiatorAddr,
-      assetIndex: assetOut.id,
+      assetIndex: assetOutID,
       amount: assetOutAmount,
       suggestedParams
     });

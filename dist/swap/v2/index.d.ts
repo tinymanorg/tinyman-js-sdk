@@ -12,12 +12,11 @@ declare function signTxns({ txGroup, initiatorSigner }: {
 /**
  * Executes a swap with the desired quantities.
  */
-declare function execute({ client, quote, txGroup, signedTxns, assetIn }: {
+declare function execute({ client, quote, txGroup, signedTxns }: {
     client: Algodv2;
     quote: SwapQuote;
     txGroup: SignerTransaction[];
     signedTxns: Uint8Array[];
-    assetIn: AssetWithIdAndAmount;
 }): Promise<V2SwapExecution>;
 /**
  * @param type - Type of the swap

@@ -1,10 +1,9 @@
-import algosdk, {ALGORAND_MIN_TX_FEE, getApplicationAddress} from "algosdk";
+import algosdk, {ALGORAND_MIN_TX_FEE, getApplicationAddress, Transaction} from "algosdk";
 import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
 
 import {CONTRACT_VERSION} from "../../../contract/constants";
+import {ALGO_ASSET_ID} from "../../../util/asset/assetConstants";
 import {getAssetId, isAlgo} from "../../../util/asset/assetUtils";
-import {SignerTransaction} from "../../../util/commonTypes";
-import {combineAndRegroupSignerTxns} from "../../../util/transaction/transactionUtils";
 import {getValidatorAppID} from "../../../validator";
 import {SwapType} from "../../constants";
 import {
@@ -13,7 +12,6 @@ import {
   GenerateSwapRouterTxnsParams
 } from "../../types";
 import {
-  V2SwapTxnGroupIndices,
   V2_SWAP_APP_CALL_ARG_ENCODED,
   V2_SWAP_APP_CALL_SWAP_TYPE_ARGS_ENCODED,
   V2_SWAP_ROUTER_APP_ARGS_ENCODED
@@ -30,7 +28,7 @@ export async function generateSwapRouterAssetOptInTransaction({
   routerAppID: number;
   assetIDs: number[];
   accountAddress: string;
-}): Promise<SignerTransaction[]> {
+}): Promise<Transaction> {
   const suggestedParams = await client.getTransactionParams().do();
   // We need to create a NoOp transaction for each asset we want to opt-in to
   const assetOptInTxn = algosdk.makeApplicationNoOpTxnFromObject({
@@ -47,9 +45,7 @@ export async function generateSwapRouterAssetOptInTransaction({
   // multiplied by the number of inner transactions
   assetOptInTxn.fee = ALGORAND_MIN_TX_FEE * (innerTransactionCount + 1);
 
-  const txGroup = algosdk.assignGroupID([assetOptInTxn]);
-
-  return [{txn: txGroup[0], signers: [accountAddress]}];
+  return assetOptInTxn;
 }
 
 export async function generateSwapRouterTxns({
@@ -109,18 +105,7 @@ export async function generateSwapRouterTxns({
 
   routerAppCallTxn.fee = ALGORAND_MIN_TX_FEE * (innerTransactionCount + 1);
 
-  const txGroup = algosdk.assignGroupID([inputTxn, routerAppCallTxn]);
-
-  let txns: SignerTransaction[] = [
-    {
-      txn: txGroup[V2SwapTxnGroupIndices.INPUT_TXN],
-      signers: [initiatorAddr]
-    },
-    {
-      txn: txGroup[V2SwapTxnGroupIndices.APP_CALL_TXN],
-      signers: [initiatorAddr]
-    }
-  ];
+  const txnList = [inputTxn, routerAppCallTxn];
 
   const swapRouterAppOptInRequiredAssetIDs = await getSwapRouterAppOptInRequiredAssetIDs({
     client,
@@ -129,18 +114,22 @@ export async function generateSwapRouterTxns({
   });
 
   if (swapRouterAppOptInRequiredAssetIDs.length > 0) {
-    txns = combineAndRegroupSignerTxns(
-      await generateSwapRouterAssetOptInTransaction({
-        client,
-        accountAddress: initiatorAddr,
-        assetIDs: [assetInID, intermediaryAssetID, assetOutID],
-        routerAppID
-      }),
-      txns
-    );
+    const routerAppOptInTxn = await generateSwapRouterAssetOptInTransaction({
+      client,
+      accountAddress: initiatorAddr,
+      assetIDs: swapRouterAppOptInRequiredAssetIDs,
+      routerAppID
+    });
+
+    txnList.unshift(routerAppOptInTxn);
   }
 
-  return txns;
+  const txGroup = algosdk.assignGroupID(txnList);
+
+  return txGroup.map((txn: Transaction) => ({
+    txn,
+    signers: [initiatorAddr]
+  }));
 }
 
 export async function getSwapRouterAppOptInRequiredAssetIDs({
@@ -158,7 +147,8 @@ export async function getSwapRouterAppOptInRequiredAssetIDs({
     (asset: {"asset-id": number}) => asset["asset-id"]
   );
   const requiredAssetIDs = assetIDs.filter(
-    (assetID: number) => !appOptedInAssetIDs.includes(assetID)
+    (assetID: number) =>
+      assetID !== ALGO_ASSET_ID && !appOptedInAssetIDs.includes(assetID)
   );
 
   return requiredAssetIDs;

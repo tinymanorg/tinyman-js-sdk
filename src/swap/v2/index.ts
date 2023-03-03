@@ -34,36 +34,41 @@ import {generateSwapRouterTxns, getSwapRoute} from "./router/swap-router";
 async function generateTxns(
   params: GenerateSwapTxnsParams
 ): Promise<SignerTransaction[]> {
-  if (params.isUsingSwapRouter) {
-    return generateSwapRouterTxns(params);
+  if (params.quote.type === SwapQuoteType.Router) {
+    return generateSwapRouterTxns({...params, route: params.quote.route});
   }
 
-  const {assetIn, assetOut, client, initiatorAddr, pool, slippage, swapType} = params;
+  const {client, initiatorAddr, slippage, swapType, quote} = params;
+
+  const {
+    quoteWithPool: {pool, quote: swapQuote}
+  } = quote;
+  const {assetInID, assetOutID} = swapQuote;
 
   const poolAddress = pool.account.address();
   const poolAssets = [pool.asset1ID, pool.asset2ID];
 
   if (
-    !poolAssets.includes(assetIn.id) ||
-    !poolAssets.includes(assetOut.id) ||
-    assetIn.id === assetOut.id
+    !poolAssets.includes(assetInID) ||
+    !poolAssets.includes(assetOutID) ||
+    assetInID === assetOutID
   ) {
     throw new TinymanError(
-      {pool, assetIn, assetOut},
-      `Input asset (#${assetIn.id}) and output asset (#${assetOut.id}) provided to generate transactions do not belong to the pool ${poolAddress}.`
+      {pool, quote},
+      `Input asset (#${assetInID}) and output asset (#${assetOutID}) provided to generate transactions do not belong to the pool ${poolAddress}.`
     );
   }
 
   const suggestedParams = await client.getTransactionParams().do();
-  const isAssetInAlgo = isAlgo(assetIn.id);
+  const isAssetInAlgo = isAlgo(assetInID);
   const assetInAmount =
     swapType === SwapType.FixedInput
-      ? assetIn.amount
-      : applySlippageToAmount("positive", slippage, assetIn.amount);
+      ? swapQuote.assetInAmount
+      : applySlippageToAmount("positive", slippage, swapQuote.assetInAmount);
   const assetOutAmount =
     swapType === SwapType.FixedOutput
-      ? assetOut.amount
-      : applySlippageToAmount("negative", slippage, assetOut.amount);
+      ? swapQuote.assetOutAmount
+      : applySlippageToAmount("negative", slippage, swapQuote.assetOutAmount);
 
   /**
    * If the input asset is Algo, a payment txn, otherwise an asset transfer txn is required
@@ -79,7 +84,7 @@ async function generateTxns(
         from: initiatorAddr,
         to: poolAddress,
         amount: assetInAmount,
-        assetIndex: assetIn.id,
+        assetIndex: assetInID,
         suggestedParams
       });
 
@@ -142,21 +147,29 @@ async function execute({
   client,
   quote,
   txGroup,
-  signedTxns,
-  assetIn
+  signedTxns
 }: {
   client: Algodv2;
   quote: SwapQuote;
   txGroup: SignerTransaction[];
   signedTxns: Uint8Array[];
-  assetIn: AssetWithIdAndAmount;
 }): Promise<V2SwapExecution> {
   let [{confirmedRound, txnID}] = await sendAndWaitRawTransaction(client, [signedTxns]);
   const innerTxns = await getAppCallInnerTxns(client, txGroup);
+  const assetIn: AssetWithIdAndAmount =
+    quote.type === SwapQuoteType.Direct
+      ? {
+          id: quote.quoteWithPool.quote.assetInID,
+          amount: quote.quoteWithPool.quote.assetInAmount
+        }
+      : {
+          id: Number(quote.asset_in_id),
+          amount: Number(quote.route[0].quote.amount_in.amount)
+        };
   const assetOutId =
     quote.type === SwapQuoteType.Direct
       ? quote.quoteWithPool.quote.assetOutID
-      : Number(quote.route[quote.route.length - 1].quote.amount_out.asset.id);
+      : Number(quote.asset_out_id);
   /**
    * If the swap type if Fixed Output, usually there will be a difference between
    * input amount and the actual used input amount. The change will be returned to the user

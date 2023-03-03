@@ -193,10 +193,10 @@ export function generateTxns(
   params: GenerateSwapTxnsParams
 ): Promise<SignerTransaction[]> {
   if (
-    !params.isUsingSwapRouter &&
-    params.pool.contractVersion === CONTRACT_VERSION.V1_1
+    params.quote.type === SwapQuoteType.Direct &&
+    getContractVersionFromSwapQuote(params.quote) === CONTRACT_VERSION.V1_1
   ) {
-    return SwapV1_1.generateTxns(params);
+    return SwapV1_1.generateTxns({...params, quote: params.quote.quoteWithPool});
   }
 
   return SwapV2.generateTxns(params);

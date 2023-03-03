@@ -23,7 +23,7 @@ export declare const Swap: {
                 assetOut: number;
             };
         }) => import("./types").DirectSwapQuote;
-        generateTxns: ({ client, pool, swapType, assetIn, assetOut, slippage, initiatorAddr }: import("./types").GenerateSwapTxnsWithoutRouterParams) => Promise<import("..").SignerTransaction[]>;
+        generateTxns: ({ client, quote, swapType, slippage, initiatorAddr }: import("./types").GenerateV1_1SwapTxnsParams) => Promise<import("..").SignerTransaction[]>;
         signTxns: ({ pool, txGroup, initiatorSigner }: {
             pool: import("..").V1PoolInfo;
             txGroup: import("..").SignerTransaction[];
@@ -74,12 +74,11 @@ export declare const Swap: {
             txGroup: import("..").SignerTransaction[];
             initiatorSigner: import("..").InitiatorSigner;
         }) => Promise<Uint8Array[]>;
-        execute: ({ client, quote, txGroup, signedTxns, assetIn }: {
+        execute: ({ client, quote, txGroup, signedTxns }: {
             client: import("algosdk").Algodv2;
             quote: import("./types").SwapQuote;
             txGroup: import("..").SignerTransaction[];
             signedTxns: Uint8Array[];
-            assetIn: import("../util/asset/assetModels").AssetWithIdAndAmount;
         }) => Promise<import("./types").V2SwapExecution>;
         calculateFixedInputSwap: ({ inputSupply, outputSupply, swapInputAmount, totalFeeShare, decimals }: {
             inputSupply: bigint;

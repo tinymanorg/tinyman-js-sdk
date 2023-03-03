@@ -111,12 +111,11 @@ export declare enum SwapQuoteType {
     Direct = "direct",
     Router = "router"
 }
-export interface GenerateSwapTxnsWithoutRouterParams {
+export interface GenerateSwapTxnsParams {
     client: Algodv2;
-    pool: V1PoolInfo | V2PoolInfo;
+    network: SupportedNetwork;
+    quote: SwapQuote;
     swapType: SwapType;
-    assetIn: AssetWithIdAndAmount;
-    assetOut: AssetWithIdAndAmount;
     slippage: number;
     initiatorAddr: string;
 }
@@ -127,13 +126,8 @@ export interface GenerateSwapRouterTxnsParams {
     route: SwapRoute;
     network: SupportedNetwork;
 }
-export declare type GenerateSwapTxnsParams = (GenerateSwapTxnsWithoutRouterParams & {
-    isUsingSwapRouter: false;
-}) | (GenerateSwapRouterTxnsParams & {
-    isUsingSwapRouter: true;
-});
 export declare type GenerateV1_1SwapTxnsParams = Omit<GenerateSwapTxnsParams, "quote"> & {
-    quote: DirectSwapQuote;
+    quote: SwapQuoteWithPool;
 };
 export interface SwapRouterQuote {
     swap_type: SwapType;
