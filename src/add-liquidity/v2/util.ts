@@ -9,26 +9,36 @@ import {
   V2_ADD_LIQUIDITY_INNER_TXN_COUNT,
   V2_ADD_LIQUIDITY_TXN_COUNT
 } from "./constants";
-import {AssetWithAmountAndDecimals} from "../../util/asset/assetModels";
+import {
+  AssetWithAmountAndDecimals,
+  AssetWithIdAndAmountAndDecimals
+} from "../../util/asset/assetModels";
+import {V2AddLiquidityInternalSwapQuote} from "./types";
 
 export function calculateSubsequentAddLiquidity({
   reserves,
   totalFeeShare,
-  asset1Amount,
-  asset2Amount,
-  decimals
+  asset1,
+  asset2
 }: {
-  reserves: Omit<PoolReserves, "round">;
   totalFeeShare: number | bigint;
-  asset1Amount: number | bigint;
-  asset2Amount: number | bigint;
-  decimals: {asset1: number; asset2: number};
-}) {
+  reserves: Omit<PoolReserves, "round">;
+  asset1: AssetWithIdAndAmountAndDecimals;
+  asset2: AssetWithIdAndAmountAndDecimals;
+}): {
+  /** Amount of the pool tokens that will be out with the operation */
+  poolTokenOutAmount: bigint;
+  /**
+   * Data about the internal swap, which will be made by the contract,
+   * in case the given asset values doesn't satisfy the pool ratio.
+   */
+  internalSwapQuote: V2AddLiquidityInternalSwapQuote;
+} {
   const oldK = reserves.asset1 * reserves.asset2;
-  const newAsset1Reserves = reserves.asset1 + BigInt(asset1Amount);
-  const newAsset2Reserves = reserves.asset2 + BigInt(asset2Amount);
+  const newAsset1Reserves = reserves.asset1 + BigInt(asset1.amount);
+  const newAsset2Reserves = reserves.asset2 + BigInt(asset2.amount);
   const newK = newAsset1Reserves * newAsset2Reserves;
-  const newIssuedPoolTokens = BigInt(
+  const newIssuedPoolTokenAmount = BigInt(
     parseInt(
       String(
         Math.sqrt(
@@ -38,64 +48,84 @@ export function calculateSubsequentAddLiquidity({
     )
   );
 
-  let poolTokenAssetAmount = newIssuedPoolTokens - reserves.issuedLiquidity;
+  let poolTokenAmount = newIssuedPoolTokenAmount - reserves.issuedLiquidity;
+
   const calculatedAsset1Amount =
-    (poolTokenAssetAmount * newAsset1Reserves) / newIssuedPoolTokens;
+    (poolTokenAmount * newAsset1Reserves) / newIssuedPoolTokenAmount;
   const calculatedAsset2Amount =
-    (poolTokenAssetAmount * newAsset2Reserves) / newIssuedPoolTokens;
-  const asset1SwapAmount = BigInt(asset1Amount) - calculatedAsset1Amount;
-  const asset2SwapAmount = BigInt(asset2Amount) - calculatedAsset2Amount;
-  let swapFromAsset1ToAsset2;
-  let swapInAmount: bigint;
-  let swapOutAmount: bigint;
-  let swapTotalFeeAmount: bigint;
+    (poolTokenAmount * newAsset2Reserves) / newIssuedPoolTokenAmount;
+
+  const asset1SwapAmount = BigInt(asset1.amount) - calculatedAsset1Amount;
+  const asset2SwapAmount = BigInt(asset2.amount) - calculatedAsset2Amount;
+
+  let swapAssetIn: AssetWithIdAndAmountAndDecimals & {reserves: bigint};
+  let swapAssetOut: AssetWithIdAndAmountAndDecimals & {reserves: bigint};
+  let swapFee: bigint;
 
   if (asset1SwapAmount > asset2SwapAmount) {
+    // Swap will be from Asset 1 to Asset 2
+
     const swapInAmountWithoutFee = asset1SwapAmount;
 
-    swapOutAmount = BigInt(Math.abs(Math.min(Number(asset2SwapAmount), 0)));
-    swapFromAsset1ToAsset2 = true;
-    swapTotalFeeAmount = calculateInternalSwapFeeAmount(
-      swapInAmountWithoutFee,
-      totalFeeShare
-    );
+    swapFee = calculateInternalSwapFeeAmount(swapInAmountWithoutFee, totalFeeShare);
+
+    swapAssetIn = {
+      id: asset1.id,
+      amount: swapInAmountWithoutFee + swapFee,
+      decimals: asset1.decimals,
+      reserves: reserves.asset1
+    };
+    swapAssetOut = {
+      id: asset2.id,
+      amount: BigInt(Math.abs(Math.min(Number(asset2SwapAmount), 0))),
+      decimals: asset2.decimals,
+      reserves: reserves.asset2
+    };
+
     const feeAsPoolTokens =
-      (swapTotalFeeAmount * newIssuedPoolTokens) / (newAsset1Reserves * BigInt(2));
+      (swapFee * newIssuedPoolTokenAmount) / (newAsset1Reserves * BigInt(2));
 
-    swapInAmount = swapInAmountWithoutFee + swapTotalFeeAmount;
-
-    poolTokenAssetAmount -= feeAsPoolTokens;
+    poolTokenAmount -= feeAsPoolTokens;
   } else {
+    // Swap will be from Asset 2 to Asset 1
+
     const swapInAmountWithoutFee = asset2SwapAmount;
 
-    swapOutAmount = BigInt(Math.abs(Math.min(Number(asset1SwapAmount), 0)));
-    swapFromAsset1ToAsset2 = false;
-    swapTotalFeeAmount = calculateInternalSwapFeeAmount(
-      swapInAmountWithoutFee,
-      totalFeeShare
-    );
+    swapFee = calculateInternalSwapFeeAmount(swapInAmountWithoutFee, totalFeeShare);
+    swapAssetIn = {
+      id: asset2.id,
+      amount: swapInAmountWithoutFee + swapFee,
+      decimals: asset2.decimals,
+      reserves: reserves.asset2
+    };
+    swapAssetOut = {
+      id: asset1.id,
+      amount: BigInt(Math.abs(Math.min(Number(asset1SwapAmount), 0))),
+      decimals: asset1.decimals,
+      reserves: reserves.asset1
+    };
+
     const feeAsPoolTokens =
-      (swapTotalFeeAmount * newIssuedPoolTokens) / (newAsset2Reserves * BigInt(2));
+      (swapFee * newIssuedPoolTokenAmount) / (newAsset2Reserves * BigInt(2));
 
-    swapInAmount = swapInAmountWithoutFee + swapTotalFeeAmount;
-
-    poolTokenAssetAmount -= feeAsPoolTokens;
+    poolTokenAmount -= feeAsPoolTokens;
   }
 
   const swapPriceImpact = calculatePriceImpact({
-    inputSupply: swapFromAsset1ToAsset2 ? reserves.asset1 : reserves.asset2,
-    outputSupply: swapFromAsset1ToAsset2 ? reserves.asset2 : reserves.asset1,
-    assetIn: {amount: swapInAmount, decimals: decimals.asset1},
-    assetOut: {amount: swapOutAmount, decimals: decimals.asset2}
+    inputSupply: swapAssetIn.reserves,
+    outputSupply: swapAssetOut.reserves,
+    assetIn: swapAssetIn,
+    assetOut: swapAssetOut
   });
 
   return {
-    poolTokenAssetAmount,
-    swapFromAsset1ToAsset2,
-    swapInAmount,
-    swapOutAmount,
-    swapTotalFeeAmount,
-    swapPriceImpact
+    poolTokenOutAmount: poolTokenAmount,
+    internalSwapQuote: {
+      assetIn: swapAssetIn,
+      assetOut: swapAssetOut,
+      swapFees: swapFee,
+      priceImpact: swapPriceImpact
+    }
   };
 }
 

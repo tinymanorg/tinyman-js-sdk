@@ -1,4 +1,4 @@
-import { AssetWithIdAndAmount } from "../../util/asset/assetModels";
+import { AssetWithIdAndAmount, AssetWithIdAndAmountAndDecimals } from "../../util/asset/assetModels";
 export interface V2InitialAddLiquidityQuote {
     asset1In: {
         id: number;
@@ -47,8 +47,8 @@ export interface V2SingleAssetInAddLiquidityQuote {
     minPoolTokenAssetAmountWithSlippage: bigint;
 }
 export interface V2AddLiquidityInternalSwapQuote {
-    amountIn: bigint;
-    amountOut: bigint;
+    assetIn: AssetWithIdAndAmountAndDecimals;
+    assetOut: AssetWithIdAndAmountAndDecimals;
     swapFees: bigint;
     priceImpact: number;
 }

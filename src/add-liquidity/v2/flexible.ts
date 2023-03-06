@@ -18,14 +18,8 @@ import {tinymanJSSDKConfig} from "../../config";
 export * from "./common";
 
 /**
- * Get a quote for how many liquidity tokens a deposit of asset1In and asset2In is worth at this
- * moment. This does not execute any transactions.
- *
- * @param params.pool Information for the pool.
- * @param params.reserves Pool reserves.
- * @param params.asset1In The quantity of the first asset being deposited.
- * @param params.asset2In The quantity of the second asset being deposited.
- * @param params.slippage The maximum slippage allowed for the swap.
+ * @returns A quote for the given asset 1 and asset 2 values.
+ * This does not execute any transactions.
  */
 export function getQuote({
   pool,
@@ -48,29 +42,31 @@ export function getQuote({
     throw new Error("Pool is not ready");
   }
 
+  if (!pool.poolTokenID) {
+    throw new Error("Pool token ID is not available");
+  }
+
   const reserves = {
     asset1: pool.asset1Reserves || 0n,
     asset2: pool.asset2Reserves || 0n,
     issuedLiquidity: pool.issuedPoolTokens || 0n
   };
-  const {
-    poolTokenAssetAmount,
-    swapInAmount,
-    swapOutAmount,
-    swapPriceImpact,
-    swapTotalFeeAmount
-  } = calculateSubsequentAddLiquidity({
+  const {poolTokenOutAmount, internalSwapQuote} = calculateSubsequentAddLiquidity({
     reserves,
     totalFeeShare: pool.totalFeeShare!,
-    asset1Amount: asset1.amount,
-    asset2Amount: asset2.amount,
-    decimals: {
-      asset1: asset1.decimals,
-      asset2: asset2.decimals
+    asset1: {
+      id: pool.asset1ID,
+      amount: asset1.amount,
+      decimals: asset1.decimals
+    },
+    asset2: {
+      id: pool.asset2ID,
+      amount: asset2.amount,
+      decimals: asset2.decimals
     }
   });
   const minPoolTokenAssetAmountWithSlippage =
-    poolTokenAssetAmount - BigInt(Math.ceil(Number(poolTokenAssetAmount) * slippage));
+    poolTokenOutAmount - BigInt(Math.ceil(Number(poolTokenOutAmount) * slippage));
 
   return {
     asset1In: {
@@ -82,20 +78,15 @@ export function getQuote({
       amount: BigInt(asset2.amount)
     },
     poolTokenOut: {
-      id: pool.poolTokenID!,
-      amount: poolTokenAssetAmount
+      id: pool.poolTokenID,
+      amount: poolTokenOutAmount
     },
     share: poolUtils.getPoolShare(
-      reserves.issuedLiquidity + poolTokenAssetAmount,
-      poolTokenAssetAmount
+      reserves.issuedLiquidity + poolTokenOutAmount,
+      poolTokenOutAmount
     ),
     slippage,
-    internalSwapQuote: {
-      amountIn: swapInAmount,
-      amountOut: swapOutAmount,
-      swapFees: swapTotalFeeAmount,
-      priceImpact: swapPriceImpact
-    },
+    internalSwapQuote,
     minPoolTokenAssetAmountWithSlippage
   };
 }
