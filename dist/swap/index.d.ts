@@ -50,23 +50,25 @@ export declare const Swap: {
         getQuote: (type: import("./constants").SwapType, pool: import("..").V2PoolInfo, asset: import("../util/asset/assetModels").AssetWithIdAndAmount, decimals: {
             assetIn: number;
             assetOut: number;
-        }, isSwapRouterEnabled?: boolean | undefined) => Promise<import("./types").SwapQuote>;
-        getFixedInputSwapQuote: ({ assetIn, decimals, pool, isSwapRouterEnabled }: {
+        }, network: import("..").SupportedNetwork, isSwapRouterEnabled?: boolean | undefined) => Promise<import("./types").SwapQuote>;
+        getFixedInputSwapQuote: ({ assetIn, decimals, pool, isSwapRouterEnabled, network }: {
             pool: import("..").V2PoolInfo;
             assetIn: import("../util/asset/assetModels").AssetWithIdAndAmount;
             decimals: {
                 assetIn: number;
                 assetOut: number;
             };
+            network: import("..").SupportedNetwork;
             isSwapRouterEnabled?: boolean | undefined;
         }) => Promise<import("./types").SwapQuote>;
-        getFixedOutputSwapQuote: ({ assetOut, decimals, pool, isSwapRouterEnabled }: {
+        getFixedOutputSwapQuote: ({ assetOut, decimals, pool, isSwapRouterEnabled, network }: {
             pool: import("..").V2PoolInfo;
             assetOut: import("../util/asset/assetModels").AssetWithIdAndAmount;
             decimals: {
                 assetIn: number;
                 assetOut: number;
             };
+            network: import("..").SupportedNetwork;
             isSwapRouterEnabled?: boolean | undefined;
         }) => Promise<import("./types").SwapQuote>;
         generateTxns: (params: import("./types").GenerateSwapTxnsParams) => Promise<import("..").SignerTransaction[]>;

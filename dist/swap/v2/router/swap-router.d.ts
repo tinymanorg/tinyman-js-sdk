@@ -1,5 +1,6 @@
 import algosdk, { Transaction } from "algosdk";
 import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
+import { SupportedNetwork } from "../../../util/commonTypes";
 import { SwapType } from "../../constants";
 import { FetchSwapRouteQuotesResponse, GenerateSwapRouterTxnsParams } from "../../types";
 export declare function generateSwapRouterAssetOptInTransaction({ client, routerAppID, assetIDs, accountAddress }: {
@@ -17,9 +18,10 @@ export declare function getSwapRouterAppOptInRequiredAssetIDs({ client, routerAp
     routerAppID: number;
     assetIDs: number[];
 }): Promise<number[]>;
-export declare function getSwapRoute({ amount, assetInID, assetOutID, swapType }: {
+export declare function getSwapRoute({ amount, assetInID, assetOutID, swapType, network }: {
     assetInID: number;
     assetOutID: number;
     swapType: SwapType;
     amount: number | bigint;
+    network: SupportedNetwork;
 }): Promise<FetchSwapRouteQuotesResponse>;

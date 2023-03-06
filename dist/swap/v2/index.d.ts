@@ -1,5 +1,5 @@
 import { Algodv2 } from "algosdk";
-import { InitiatorSigner, SignerTransaction } from "../../util/commonTypes";
+import { InitiatorSigner, SignerTransaction, SupportedNetwork } from "../../util/commonTypes";
 import { V2PoolInfo } from "../../util/pool/poolTypes";
 import { GenerateSwapTxnsParams, SwapQuote, V2SwapExecution } from "../types";
 import { SwapType } from "../constants";
@@ -30,29 +30,31 @@ declare function execute({ client, quote, txGroup, signedTxns }: {
 declare function getQuote(type: SwapType, pool: V2PoolInfo, asset: AssetWithIdAndAmount, decimals: {
     assetIn: number;
     assetOut: number;
-}, isSwapRouterEnabled?: boolean): Promise<SwapQuote>;
+}, network: SupportedNetwork, isSwapRouterEnabled?: boolean): Promise<SwapQuote>;
 /**
  * @returns A quote for a fixed input swap. Does NOT execute any transactions.
  */
-declare function getFixedInputSwapQuote({ assetIn, decimals, pool, isSwapRouterEnabled }: {
+declare function getFixedInputSwapQuote({ assetIn, decimals, pool, isSwapRouterEnabled, network }: {
     pool: V2PoolInfo;
     assetIn: AssetWithIdAndAmount;
     decimals: {
         assetIn: number;
         assetOut: number;
     };
+    network: SupportedNetwork;
     isSwapRouterEnabled?: boolean;
 }): Promise<SwapQuote>;
 /**
  * @returns A quote for a fixed output swap. Does NOT execute any transactions.
  */
-declare function getFixedOutputSwapQuote({ assetOut, decimals, pool, isSwapRouterEnabled }: {
+declare function getFixedOutputSwapQuote({ assetOut, decimals, pool, isSwapRouterEnabled, network }: {
     pool: V2PoolInfo;
     assetOut: AssetWithIdAndAmount;
     decimals: {
         assetIn: number;
         assetOut: number;
     };
+    network: SupportedNetwork;
     isSwapRouterEnabled?: boolean;
 }): Promise<SwapQuote>;
 declare function calculateFixedInputSwap({ inputSupply, outputSupply, swapInputAmount, totalFeeShare, decimals }: {

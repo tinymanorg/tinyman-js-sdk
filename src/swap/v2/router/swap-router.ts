@@ -4,6 +4,7 @@ import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
 import {CONTRACT_VERSION} from "../../../contract/constants";
 import {ALGO_ASSET_ID} from "../../../util/asset/assetConstants";
 import {getAssetId, isAlgo} from "../../../util/asset/assetUtils";
+import {SupportedNetwork} from "../../../util/commonTypes";
 import {getValidatorAppID} from "../../../validator";
 import {SwapType} from "../../constants";
 import {
@@ -16,6 +17,7 @@ import {
   V2_SWAP_APP_CALL_SWAP_TYPE_ARGS_ENCODED,
   V2_SWAP_ROUTER_APP_ARGS_ENCODED
 } from "../constants";
+import {TINYMAN_ANALYTICS_API_BASE_URLS} from "./constants";
 import {getSwapRouterAppID} from "./util";
 
 export async function generateSwapRouterAssetOptInTransaction({
@@ -158,12 +160,14 @@ export async function getSwapRoute({
   amount,
   assetInID,
   assetOutID,
-  swapType
+  swapType,
+  network
 }: {
   assetInID: number;
   assetOutID: number;
   swapType: SwapType;
   amount: number | bigint;
+  network: SupportedNetwork;
 }): Promise<FetchSwapRouteQuotesResponse> {
   const payload: FetchSwapRouteQuotesPayload = {
     asset_in_id: String(assetInID),
@@ -174,7 +178,7 @@ export async function getSwapRoute({
 
   try {
     const response = await fetch(
-      "https://testnet.analytics.tinyman.org/api/v1/swap-router/quotes/",
+      `${TINYMAN_ANALYTICS_API_BASE_URLS[network]}/swap-router/quotes/`,
       {
         method: "POST",
         headers: {

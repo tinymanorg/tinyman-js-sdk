@@ -83,7 +83,8 @@ export async function getFixedInputSwapQuote(
         assetIn: {amount, id: Number(assetIn.id)},
         decimals: {assetIn: assetIn.decimals, assetOut: assetOut.decimals},
         reserves: pool.reserves,
-        isSwapRouterEnabled
+        isSwapRouterEnabled,
+        network: params.network
       };
 
       try {
@@ -128,7 +129,8 @@ export async function getFixedOutputSwapQuote(
         assetOut: {amount, id: Number(assetOut.id)},
         decimals: {assetIn: assetIn.decimals, assetOut: assetOut.decimals},
         reserves: pool.reserves,
-        isSwapRouterEnabled
+        isSwapRouterEnabled,
+        network: params.network
       };
 
       try {
