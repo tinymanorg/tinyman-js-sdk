@@ -178,7 +178,7 @@ export async function getSwapRoute({
 
   try {
     const response = await fetch(
-      `${TINYMAN_ANALYTICS_API_BASE_URLS[network]}/swap-router/quotes/`,
+      `${TINYMAN_ANALYTICS_API_BASE_URLS[network].v1}/swap-router/quotes/`,
       {
         method: "POST",
         headers: {
