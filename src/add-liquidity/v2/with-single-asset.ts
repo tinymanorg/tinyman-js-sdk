@@ -10,7 +10,10 @@ import {calculateSubsequentAddLiquidity, getV2AddLiquidityAppCallFee} from "./ut
 import {poolUtils} from "../../util/pool";
 import {V2SingleAssetInAddLiquidityQuote} from "./types";
 import {V2AddLiquidityType} from "./constants";
-import {AssetWithIdAndAmount} from "../../util/asset/assetModels";
+import {
+  AssetWithIdAndAmount,
+  AssetWithIdAndAmountAndDecimals
+} from "../../util/asset/assetModels";
 import {tinymanJSSDKConfig} from "../../config";
 export * from "./common";
 
@@ -33,27 +36,41 @@ export function getQuote({
     throw new Error("Pool is not ready");
   }
 
+  if (!pool.poolTokenID) {
+    throw new Error("Pool token ID is not available");
+  }
+
   const isAsset1In = assetIn.id === pool.asset1ID;
+  const isAsset2In = assetIn.id === pool.asset2ID;
+
+  if (!isAsset1In && !isAsset2In) {
+    throw new Error("Provided input asset id didn't match any asset of the pool");
+  }
+
+  const asset1: AssetWithIdAndAmountAndDecimals = {
+    id: pool.asset1ID,
+    amount: isAsset1In ? assetIn.amount : 0,
+    decimals: decimals.asset1
+  };
+  const asset2: AssetWithIdAndAmountAndDecimals = {
+    id: pool.asset2ID,
+    amount: isAsset2In ? assetIn.amount : 0,
+    decimals: decimals.asset2
+  };
   const reserves = {
     asset1: pool.asset1Reserves || 0n,
     asset2: pool.asset2Reserves || 0n,
     issuedLiquidity: pool.issuedPoolTokens || 0n
   };
-  const {
-    poolTokenAssetAmount,
-    swapInAmount,
-    swapOutAmount,
-    swapPriceImpact,
-    swapTotalFeeAmount
-  } = calculateSubsequentAddLiquidity({
-    reserves,
-    totalFeeShare: pool.totalFeeShare!,
-    asset1Amount: isAsset1In ? assetIn.amount : 0,
-    asset2Amount: isAsset1In ? 0 : assetIn.amount,
-    decimals
-  });
+  const {poolTokenOutAmount: poolTokenAmount, internalSwapQuote} =
+    calculateSubsequentAddLiquidity({
+      reserves,
+      totalFeeShare: pool.totalFeeShare || 0,
+      asset1,
+      asset2
+    });
   const minPoolTokenAssetAmountWithSlippage =
-    poolTokenAssetAmount - BigInt(Math.ceil(Number(poolTokenAssetAmount) * slippage));
+    poolTokenAmount - BigInt(Math.ceil(Number(poolTokenAmount) * slippage));
 
   return {
     assetIn: {
@@ -61,20 +78,15 @@ export function getQuote({
       amount: BigInt(assetIn.amount)
     },
     poolTokenOut: {
-      id: pool.poolTokenID!,
-      amount: poolTokenAssetAmount
+      id: pool.poolTokenID,
+      amount: poolTokenAmount
     },
     share: poolUtils.getPoolShare(
-      reserves.issuedLiquidity + poolTokenAssetAmount,
-      poolTokenAssetAmount
+      reserves.issuedLiquidity + poolTokenAmount,
+      poolTokenAmount
     ),
     slippage,
-    internalSwapQuote: {
-      amountIn: swapInAmount,
-      amountOut: swapOutAmount,
-      swapFees: swapTotalFeeAmount,
-      priceImpact: swapPriceImpact
-    },
+    internalSwapQuote,
     minPoolTokenAssetAmountWithSlippage
   };
 }

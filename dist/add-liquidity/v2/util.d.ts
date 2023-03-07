@@ -1,22 +1,20 @@
 import { PoolReserves } from "../../util/pool/poolTypes";
 import { V2AddLiquidityType } from "./constants";
-import { AssetWithAmountAndDecimals } from "../../util/asset/assetModels";
-export declare function calculateSubsequentAddLiquidity({ reserves, totalFeeShare, asset1Amount, asset2Amount, decimals }: {
-    reserves: Omit<PoolReserves, "round">;
+import { AssetWithAmountAndDecimals, AssetWithIdAndAmountAndDecimals } from "../../util/asset/assetModels";
+import { V2AddLiquidityInternalSwapQuote } from "./types";
+export declare function calculateSubsequentAddLiquidity({ reserves, totalFeeShare, asset1, asset2 }: {
     totalFeeShare: number | bigint;
-    asset1Amount: number | bigint;
-    asset2Amount: number | bigint;
-    decimals: {
-        asset1: number;
-        asset2: number;
-    };
+    reserves: Omit<PoolReserves, "round">;
+    asset1: AssetWithIdAndAmountAndDecimals;
+    asset2: AssetWithIdAndAmountAndDecimals;
 }): {
-    poolTokenAssetAmount: bigint;
-    swapFromAsset1ToAsset2: any;
-    swapInAmount: bigint;
-    swapOutAmount: bigint;
-    swapTotalFeeAmount: bigint;
-    swapPriceImpact: number;
+    /** Amount of the pool tokens that will be out with the operation */
+    poolTokenOutAmount: bigint;
+    /**
+     * Data about the internal swap, which will be made by the contract,
+     * in case the given asset values doesn't satisfy the pool ratio.
+     */
+    internalSwapQuote: V2AddLiquidityInternalSwapQuote;
 };
 export declare function calculateInitialAddLiquidity(asset1: AssetWithAmountAndDecimals, asset2: AssetWithAmountAndDecimals): bigint;
 /**
