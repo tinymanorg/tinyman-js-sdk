@@ -68,7 +68,6 @@ async function generateTxns({
   initiatorAddr
 }: GenerateV1_1SwapTxnsParams): Promise<SignerTransaction[]> {
   const {pool, quote: swapQuote} = quote;
-
   const {assetInID, assetOutID} = swapQuote;
 
   const poolAddress = pool.account.address();

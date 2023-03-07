@@ -19,5 +19,5 @@ export declare const V2_SWAP_APP_CALL_SWAP_TYPE_ARGS_ENCODED: {
     readonly "fixed-output": Uint8Array;
 };
 export declare const V2_SWAP_ROUTER_APP_ARGS_ENCODED: {
-    ASSET_OPT_IN: Uint8Array;
+    readonly ASSET_OPT_IN: Uint8Array;
 };

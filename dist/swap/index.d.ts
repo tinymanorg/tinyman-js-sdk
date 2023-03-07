@@ -47,10 +47,17 @@ export declare const Swap: {
         }) => Promise<Omit<import("./types").V1SwapExecution, "fees" | "groupID">>;
     };
     v2: {
-        getQuote: (type: import("./constants").SwapType, pool: import("..").V2PoolInfo, asset: import("../util/asset/assetModels").AssetWithIdAndAmount, decimals: {
-            assetIn: number;
-            assetOut: number;
-        }, network: import("..").SupportedNetwork, isSwapRouterEnabled?: boolean | undefined) => Promise<import("./types").SwapQuote>;
+        getQuote: ({ type, pool, asset, decimals, network, isSwapRouterEnabled }: {
+            type: import("./constants").SwapType;
+            pool: import("..").V2PoolInfo;
+            asset: import("../util/asset/assetModels").AssetWithIdAndAmount;
+            decimals: {
+                assetIn: number;
+                assetOut: number;
+            };
+            network: import("..").SupportedNetwork;
+            isSwapRouterEnabled?: boolean | undefined;
+        }) => Promise<import("./types").SwapQuote>;
         getFixedInputSwapQuote: ({ assetIn, decimals, pool, isSwapRouterEnabled, network }: {
             pool: import("..").V2PoolInfo;
             assetIn: import("../util/asset/assetModels").AssetWithIdAndAmount;

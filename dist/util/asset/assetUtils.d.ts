@@ -26,7 +26,7 @@ export declare function sortAssetIds(asset1ID: number, asset2ID: number): number
  */
 export declare function isAlgo(id: number | string): boolean;
 /**
- * Returns asset.asset_id
+ * @returns Asset id as a number
  */
 export declare function getAssetId(asset: {
     id: string | number;

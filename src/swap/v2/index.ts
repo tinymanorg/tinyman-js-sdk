@@ -34,6 +34,7 @@ import {AssetWithIdAndAmount} from "../../util/asset/assetModels";
 import {tinymanJSSDKConfig} from "../../config";
 import {CONTRACT_VERSION} from "../../contract/constants";
 import {generateSwapRouterTxns, getSwapRoute} from "./router/swap-router";
+import {getAssetOutFromSwapRoute} from "./router/util";
 
 async function generateTxns(
   params: GenerateSwapTxnsParams
@@ -212,15 +213,21 @@ async function execute({
  * @param decimals.assetOut - Decimals quantity for the output asset
  * @returns A promise for the Swap quote
  */
-// eslint-disable-next-line max-params
-async function getQuote(
-  type: SwapType,
-  pool: V2PoolInfo,
-  asset: AssetWithIdAndAmount,
-  decimals: {assetIn: number; assetOut: number},
-  network: SupportedNetwork,
-  isSwapRouterEnabled?: boolean
-): Promise<SwapQuote> {
+async function getQuote({
+  type,
+  pool,
+  asset,
+  decimals,
+  network,
+  isSwapRouterEnabled
+}: {
+  type: SwapType;
+  pool: V2PoolInfo;
+  asset: AssetWithIdAndAmount;
+  decimals: {assetIn: number; assetOut: number};
+  network: SupportedNetwork;
+  isSwapRouterEnabled?: boolean;
+}): Promise<SwapQuote> {
   let quote: SwapQuote;
 
   if (type === SwapType.FixedInput) {
@@ -321,7 +328,7 @@ async function getFixedInputSwapQuote({
 
     if (
       swapRoute.route.length > 1 &&
-      BigInt(swapRoute.route[swapRoute.route.length - 1].quote.amount_out.amount) >
+      BigInt(getAssetOutFromSwapRoute(swapRoute.route).amount) >
         directSwapQuote.assetOutAmount
     ) {
       return {
@@ -418,7 +425,7 @@ async function getFixedOutputSwapQuote({
 
     if (
       swapRoute.route.length > 1 &&
-      BigInt(swapRoute.route[swapRoute.route.length - 1].quote.amount_in.amount) <
+      BigInt(getAssetOutFromSwapRoute(swapRoute.route).amount) <
         directSwapQuote.assetInAmount
     ) {
       return {

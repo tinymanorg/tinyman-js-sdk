@@ -1,11 +1,7 @@
 import {SupportedNetwork} from "../../../util/commonTypes";
 import {convertFromBaseUnits} from "../../../util/util";
-import {SwapRoute, SwapRouterQuote} from "../../types";
+import {SwapRoute} from "../../types";
 import {SWAP_ROUTER_APP_ID} from "./constants";
-
-export function getSwapFeesFromSwapRoute(route: SwapRouterQuote[]): number {
-  return route.reduce((acc, quote) => acc + Number(quote.swap_fees.amount), 0);
-}
 
 export function getSwapRouteRate(route: SwapRoute) {
   const [assetIn, assetOut] = [
@@ -27,4 +23,12 @@ export function getSwapRouterAppID(network: SupportedNetwork) {
   }
 
   return SWAP_ROUTER_APP_ID[network];
+}
+
+export function getAssetOutFromSwapRoute(route: SwapRoute) {
+  return route[route.length - 1].quote.amount_out;
+}
+
+export function getAssetInFromSwapRoute(route: SwapRoute) {
+  return route[0].quote.amount_in;
 }

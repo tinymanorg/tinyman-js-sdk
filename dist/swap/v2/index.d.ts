@@ -27,10 +27,17 @@ declare function execute({ client, quote, txGroup, signedTxns }: {
  * @param decimals.assetOut - Decimals quantity for the output asset
  * @returns A promise for the Swap quote
  */
-declare function getQuote(type: SwapType, pool: V2PoolInfo, asset: AssetWithIdAndAmount, decimals: {
-    assetIn: number;
-    assetOut: number;
-}, network: SupportedNetwork, isSwapRouterEnabled?: boolean): Promise<SwapQuote>;
+declare function getQuote({ type, pool, asset, decimals, network, isSwapRouterEnabled }: {
+    type: SwapType;
+    pool: V2PoolInfo;
+    asset: AssetWithIdAndAmount;
+    decimals: {
+        assetIn: number;
+        assetOut: number;
+    };
+    network: SupportedNetwork;
+    isSwapRouterEnabled?: boolean;
+}): Promise<SwapQuote>;
 /**
  * @returns A quote for a fixed input swap. Does NOT execute any transactions.
  */

@@ -75,7 +75,7 @@ export function isAlgo(id: number | string) {
 }
 
 /**
- * Returns asset.asset_id
+ * @returns Asset id as a number
  */
 export function getAssetId(asset: {id: string | number}): number {
   return Number(asset.id);

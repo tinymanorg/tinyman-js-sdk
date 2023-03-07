@@ -159,10 +159,7 @@ export async function getFixedOutputSwapQuote(
 }
 
 /**
- * Returns the rate of a swap quote.
- *
- * @param quote - The quote.
- * @returns The rate.
+ * @returns The asset amount ratio for the given quote
  */
 function getSwapQuoteRate(quote: SwapQuote): number {
   if (quote.type === SwapQuoteType.Direct) {
