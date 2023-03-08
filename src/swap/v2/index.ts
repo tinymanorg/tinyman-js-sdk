@@ -419,7 +419,7 @@ async function getFixedOutputSwapQuote({
       amount: assetOut.amount,
       assetInID,
       assetOutID: assetOut.id,
-      swapType: SwapType.FixedInput,
+      swapType: SwapType.FixedOutput,
       network
     });
 
