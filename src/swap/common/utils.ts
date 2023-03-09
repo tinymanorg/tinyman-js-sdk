@@ -1,3 +1,4 @@
+import {CONTRACT_VERSION} from "../../contract/constants";
 import {
   AssetWithAmountAndDecimals,
   AssetWithIdAndAmount
@@ -87,11 +88,19 @@ function getAssetInAndAssetOutFromSwapQuote(quote: SwapQuote): {
   };
 }
 
+function getSwapQuoteContractVersion(quote: SwapQuote) {
+  if (quote.type === SwapQuoteType.Direct) {
+    return quote.quoteWithPool.pool.contractVersion;
+  }
+  return CONTRACT_VERSION.V2;
+}
+
 export {
   calculateSwapRate,
   calculatePriceImpact,
   getSwapQuotePriceImpact,
   getAssetInFromSwapQuote,
   getAssetOutFromSwapQuote,
-  getAssetInAndAssetOutFromSwapQuote
+  getAssetInAndAssetOutFromSwapQuote,
+  getSwapQuoteContractVersion
 };

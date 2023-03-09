@@ -17,4 +17,5 @@ declare function getAssetInAndAssetOutFromSwapQuote(quote: SwapQuote): {
     assetIn: AssetWithIdAndAmount;
     assetOut: AssetWithIdAndAmount;
 };
-export { calculateSwapRate, calculatePriceImpact, getSwapQuotePriceImpact, getAssetInFromSwapQuote, getAssetOutFromSwapQuote, getAssetInAndAssetOutFromSwapQuote };
+declare function getSwapQuoteContractVersion(quote: SwapQuote): import("../..").ContractVersionValue;
+export { calculateSwapRate, calculatePriceImpact, getSwapQuotePriceImpact, getAssetInFromSwapQuote, getAssetOutFromSwapQuote, getAssetInAndAssetOutFromSwapQuote, getSwapQuoteContractVersion };
