@@ -89,13 +89,7 @@ export async function getFixedInputSwapQuote(
 
       try {
         if (pool.info.contractVersion === CONTRACT_VERSION.V1_1) {
-          quote = {
-            type: SwapQuoteType.Direct,
-            quoteWithPool: {
-              quote: SwapV1_1.getFixedInputSwapQuote(quoteGetterArgs),
-              pool: pool.info
-            }
-          };
+          quote = SwapV1_1.getFixedInputSwapQuote(quoteGetterArgs);
         } else {
           quote = await SwapV2.getFixedInputSwapQuote(quoteGetterArgs);
         }
@@ -135,13 +129,7 @@ export async function getFixedOutputSwapQuote(
 
       try {
         if (pool.info.contractVersion === CONTRACT_VERSION.V1_1) {
-          quote = {
-            type: SwapQuoteType.Direct,
-            quoteWithPool: {
-              quote: SwapV1_1.getFixedOutputSwapQuote(quoteGetterArgs),
-              pool: pool.info
-            }
-          };
+          quote = SwapV1_1.getFixedOutputSwapQuote(quoteGetterArgs);
         } else {
           quote = await SwapV2.getFixedOutputSwapQuote(quoteGetterArgs);
         }

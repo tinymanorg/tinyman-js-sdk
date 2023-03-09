@@ -3,11 +3,8 @@ import {convertFromBaseUnits} from "../../../util/util";
 import {SwapRoute} from "../../types";
 import {SWAP_ROUTER_APP_ID} from "./constants";
 
-export function getSwapRouteRate(route: SwapRoute) {
-  const [assetIn, assetOut] = [
-    route[0].quote.amount_in,
-    route[route.length - 1].quote.amount_out
-  ];
+function getSwapRouteRate(route: SwapRoute) {
+  const {assetIn, assetOut} = getAssetInAndOutFromSwapRoute(route);
 
   return (
     convertFromBaseUnits(assetOut.asset.decimals, Number(assetOut.amount)) /
@@ -15,7 +12,7 @@ export function getSwapRouteRate(route: SwapRoute) {
   );
 }
 
-export function getSwapRouterAppID(network: SupportedNetwork) {
+function getSwapRouterAppID(network: SupportedNetwork) {
   const id = SWAP_ROUTER_APP_ID[network];
 
   if (!id) {
@@ -25,10 +22,25 @@ export function getSwapRouterAppID(network: SupportedNetwork) {
   return SWAP_ROUTER_APP_ID[network];
 }
 
-export function getAssetOutFromSwapRoute(route: SwapRoute) {
+function getAssetOutFromSwapRoute(route: SwapRoute) {
   return route[route.length - 1].quote.amount_out;
 }
 
-export function getAssetInFromSwapRoute(route: SwapRoute) {
+function getAssetInFromSwapRoute(route: SwapRoute) {
   return route[0].quote.amount_in;
 }
+
+function getAssetInAndOutFromSwapRoute(route: SwapRoute) {
+  return {
+    assetIn: getAssetInFromSwapRoute(route),
+    assetOut: getAssetOutFromSwapRoute(route)
+  };
+}
+
+export {
+  getSwapRouteRate,
+  getSwapRouterAppID,
+  getAssetOutFromSwapRoute,
+  getAssetInFromSwapRoute,
+  getAssetInAndOutFromSwapRoute
+};

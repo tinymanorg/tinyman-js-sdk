@@ -15,7 +15,13 @@ import {DEFAULT_FEE_TXN_NOTE} from "../../util/constant";
 import {ALGO_ASSET_ID} from "../../util/asset/assetConstants";
 import {PoolReserves, PoolStatus, V1PoolInfo} from "../../util/pool/poolTypes";
 import {getAccountExcessWithinPool} from "../../util/account/accountUtils";
-import {DirectSwapQuote, GenerateV1_1SwapTxnsParams, V1SwapExecution} from "../types";
+import {
+  DirectSwapQuote,
+  GenerateV1_1SwapTxnsParams,
+  SwapQuote,
+  SwapQuoteType,
+  V1SwapExecution
+} from "../types";
 import {SwapType} from "../constants";
 import {calculatePriceImpact, calculateSwapRate} from "../common/utils";
 import OutputAmountExceedsAvailableLiquidityError from "../../util/error/OutputAmountExceedsAvailableLiquidityError";
@@ -189,8 +195,8 @@ function getQuote(
   reserves: PoolReserves,
   asset: AssetWithIdAndAmount,
   decimals: {assetIn: number; assetOut: number}
-): DirectSwapQuote {
-  let quote: DirectSwapQuote;
+): SwapQuote {
+  let quote: SwapQuote;
 
   if (type === SwapType.FixedInput) {
     quote = getFixedInputSwapQuote({pool, reserves, assetIn: asset, decimals});
@@ -220,7 +226,7 @@ function getFixedInputSwapQuote({
   reserves: PoolReserves;
   assetIn: AssetWithIdAndAmount;
   decimals: {assetIn: number; assetOut: number};
-}): DirectSwapQuote {
+}): SwapQuote {
   if (pool.status !== PoolStatus.READY) {
     throw new TinymanError({pool, assetIn}, "Trying to swap on a non-existent pool");
   }
@@ -261,7 +267,7 @@ function getFixedInputSwapQuote({
     assetOut: {amount: assetOutAmount, decimals: decimals.assetOut}
   };
 
-  return {
+  const directSwapQuote: DirectSwapQuote = {
     round: reserves.round,
     assetInID: assetIn.id,
     assetInAmount,
@@ -274,6 +280,14 @@ function getFixedInputSwapQuote({
       outputSupply,
       ...assetDataForSwapUtils
     })
+  };
+
+  return {
+    type: SwapQuoteType.Direct,
+    quoteWithPool: {
+      pool,
+      quote: directSwapQuote
+    }
   };
 }
 
@@ -371,7 +385,7 @@ function getFixedOutputSwapQuote({
   reserves: PoolReserves;
   assetOut: AssetWithIdAndAmount;
   decimals: {assetIn: number; assetOut: number};
-}): DirectSwapQuote {
+}): SwapQuote {
   if (pool.status !== PoolStatus.READY) {
     throw new TinymanError({pool, assetOut}, "Trying to swap on a non-existent pool");
   }
@@ -420,7 +434,7 @@ function getFixedOutputSwapQuote({
 
   const priceImpact = roundNumber({decimalPlaces: 5}, Math.abs(rate / poolPrice - 1));
 
-  return {
+  const directSwapQuote: DirectSwapQuote = {
     round: reserves.round,
     assetInID,
     assetInAmount,
@@ -429,6 +443,14 @@ function getFixedOutputSwapQuote({
     swapFee: Number(swapFee),
     rate,
     priceImpact
+  };
+
+  return {
+    type: SwapQuoteType.Direct,
+    quoteWithPool: {
+      pool,
+      quote: directSwapQuote
+    }
   };
 }
 

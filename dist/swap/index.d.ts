@@ -4,7 +4,7 @@ export declare const Swap: {
         getQuote: (type: import("./constants").SwapType, pool: import("..").V1PoolInfo, reserves: import("..").PoolReserves, asset: import("../util/asset/assetModels").AssetWithIdAndAmount, decimals: {
             assetIn: number;
             assetOut: number;
-        }) => import("./types").DirectSwapQuote;
+        }) => import("./types").SwapQuote;
         getFixedInputSwapQuote: ({ pool, reserves, assetIn, decimals }: {
             pool: import("..").V1PoolInfo;
             reserves: import("..").PoolReserves;
@@ -13,7 +13,7 @@ export declare const Swap: {
                 assetIn: number;
                 assetOut: number;
             };
-        }) => import("./types").DirectSwapQuote;
+        }) => import("./types").SwapQuote;
         getFixedOutputSwapQuote: ({ pool, reserves, assetOut, decimals }: {
             pool: import("..").V1PoolInfo;
             reserves: import("..").PoolReserves;
@@ -22,7 +22,7 @@ export declare const Swap: {
                 assetIn: number;
                 assetOut: number;
             };
-        }) => import("./types").DirectSwapQuote;
+        }) => import("./types").SwapQuote;
         generateTxns: ({ client, quote, swapType, slippage, initiatorAddr }: import("./types").GenerateV1_1SwapTxnsParams) => Promise<import("..").SignerTransaction[]>;
         signTxns: ({ pool, txGroup, initiatorSigner }: {
             pool: import("..").V1PoolInfo;
