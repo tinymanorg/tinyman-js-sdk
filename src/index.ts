@@ -15,6 +15,8 @@ export {
 
 export * from "./swap/v2/router";
 
+export * from "./swap/common/utils";
+
 export {
   applySlippageToAmount,
   ASSET_OPT_IN_PROCESS_TXN_COUNT,
