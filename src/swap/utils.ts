@@ -164,7 +164,8 @@ function getBestQuote(quotes: SwapQuote[]): SwapQuote {
   let bestQuote: SwapQuote = quotes[0];
   let bestQuoteRate = getSwapQuoteRate(bestQuote);
 
-  for (const quote of quotes) {
+  for (let index = 1; index < quotes.length; index++) {
+    const quote = quotes[index];
     const currentRate = getSwapQuoteRate(quote);
 
     if (currentRate > bestQuoteRate) {

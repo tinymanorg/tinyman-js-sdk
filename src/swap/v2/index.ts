@@ -267,7 +267,7 @@ async function getFixedInputSwapQuote({
   network: SupportedNetwork;
   isSwapRouterEnabled?: boolean;
 }): Promise<SwapQuote> {
-  if (pool.status !== PoolStatus.READY) {
+  if (pool.status !== PoolStatus.READY && !isSwapRouterEnabled) {
     throw new TinymanError({pool, assetIn}, "Trying to swap on a non-existent pool");
   }
 
@@ -300,10 +300,6 @@ async function getFixedInputSwapQuote({
     totalFeeShare,
     decimals
   });
-
-  if (swapOutputAmount > outputSupply) {
-    throw new OutputAmountExceedsAvailableLiquidityError();
-  }
 
   const directSwapQuote: DirectSwapQuote = {
     assetInID: assetIn.id,
@@ -338,6 +334,10 @@ async function getFixedInputSwapQuote({
     }
   }
 
+  if (swapOutputAmount > outputSupply) {
+    throw new OutputAmountExceedsAvailableLiquidityError();
+  }
+
   return {
     quoteWithPool: {
       pool,
@@ -363,7 +363,7 @@ async function getFixedOutputSwapQuote({
   network: SupportedNetwork;
   isSwapRouterEnabled?: boolean;
 }): Promise<SwapQuote> {
-  if (pool.status !== PoolStatus.READY) {
+  if (pool.status !== PoolStatus.READY && !isSwapRouterEnabled) {
     throw new TinymanError({pool, assetOut}, "Trying to swap on a non-existent pool");
   }
 
@@ -398,10 +398,6 @@ async function getFixedOutputSwapQuote({
     decimals
   });
 
-  if (assetOutAmount > outputSupply) {
-    throw new OutputAmountExceedsAvailableLiquidityError();
-  }
-
   const directSwapQuote = {
     assetInID,
     assetInAmount: swapInputAmount,
@@ -433,6 +429,10 @@ async function getFixedOutputSwapQuote({
         type: SwapQuoteType.Router
       };
     }
+  }
+
+  if (assetOutAmount > outputSupply) {
+    throw new OutputAmountExceedsAvailableLiquidityError();
   }
 
   return {
