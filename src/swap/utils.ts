@@ -17,9 +17,9 @@ import {SwapV2} from "./v2";
 import {V1_1_SWAP_TOTAL_FEE} from "./v1_1/constants";
 import {getV2SwapTotalFee} from "./v2/util";
 import {isPoolEmpty} from "../util/pool/common";
-import {ContractVersionValue} from "../contract/types";
 import {getSwapRouteRate} from "./v2/router/util";
 import OutputAmountExceedsAvailableLiquidityError from "../util/error/OutputAmountExceedsAvailableLiquidityError";
+import {getSwapQuoteContractVersion} from "./common/utils";
 
 /**
  * Gets the best quote for swap from the pools and swap router and returns the best option.
@@ -151,10 +151,10 @@ export async function getFixedOutputSwapQuote(
  */
 function getSwapQuoteRate(quote: SwapQuote): number {
   if (quote.type === SwapQuoteType.Direct) {
-    return quote.quoteWithPool.quote.rate;
+    return quote.data.quote.rate;
   }
 
-  return getSwapRouteRate(quote.route);
+  return getSwapRouteRate(quote.data.route);
 }
 
 /**
@@ -182,9 +182,9 @@ export function generateTxns(
 ): Promise<SignerTransaction[]> {
   if (
     params.quote.type === SwapQuoteType.Direct &&
-    getContractVersionFromSwapQuote(params.quote) === CONTRACT_VERSION.V1_1
+    getSwapQuoteContractVersion(params.quote) === CONTRACT_VERSION.V1_1
   ) {
-    return SwapV1_1.generateTxns({...params, quote: params.quote.quoteWithPool});
+    return SwapV1_1.generateTxns({...params, quote: params.quote.data});
   }
 
   return SwapV2.generateTxns(params);
@@ -197,10 +197,10 @@ export function signTxns(params: {
 }): Promise<Uint8Array[]> {
   if (
     params.quote.type === SwapQuoteType.Direct &&
-    getContractVersionFromSwapQuote(params.quote) === CONTRACT_VERSION.V1_1
+    getSwapQuoteContractVersion(params.quote) === CONTRACT_VERSION.V1_1
   ) {
     const {
-      quoteWithPool: {pool}
+      data: {pool}
     } = params.quote;
 
     return SwapV1_1.signTxns({pool, ...params});
@@ -260,12 +260,4 @@ export function getSwapTotalFee(
     default:
       throw new Error("Provided contract version was not valid.");
   }
-}
-
-export function getContractVersionFromSwapQuote(quote: SwapQuote): ContractVersionValue {
-  if (quote.type === SwapQuoteType.Direct) {
-    return quote.quoteWithPool.pool.contractVersion;
-  }
-
-  return CONTRACT_VERSION.V2;
 }

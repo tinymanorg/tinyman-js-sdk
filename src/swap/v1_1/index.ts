@@ -284,7 +284,7 @@ function getFixedInputSwapQuote({
 
   return {
     type: SwapQuoteType.Direct,
-    quoteWithPool: {
+    data: {
       pool,
       quote: directSwapQuote
     }
@@ -447,7 +447,7 @@ function getFixedOutputSwapQuote({
 
   return {
     type: SwapQuoteType.Direct,
-    quoteWithPool: {
+    data: {
       pool,
       quote: directSwapQuote
     }

@@ -2,7 +2,7 @@ import algosdk, { Transaction } from "algosdk";
 import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
 import { SupportedNetwork } from "../../../util/commonTypes";
 import { SwapType } from "../../constants";
-import { FetchSwapRouteQuotesResponse, GenerateSwapRouterTxnsParams } from "../../types";
+import { SwapRouterResponse, GenerateSwapRouterTxnsParams } from "../../types";
 export declare function generateSwapRouterAssetOptInTransaction({ client, routerAppID, assetIDs, accountAddress }: {
     client: AlgodClient;
     routerAppID: number;
@@ -24,4 +24,4 @@ export declare function getSwapRoute({ amount, assetInID, assetOutID, swapType, 
     swapType: SwapType;
     amount: number | bigint;
     network: SupportedNetwork;
-}): Promise<FetchSwapRouteQuotesResponse>;
+}): Promise<SwapRouterResponse>;

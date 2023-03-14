@@ -5,6 +5,11 @@ import {SupportedNetwork} from "../util/commonTypes";
 import {PoolReserves, V1PoolInfo, V2PoolInfo} from "../util/pool/poolTypes";
 import {SwapType} from "./constants";
 
+export enum SwapQuoteType {
+  Direct = "direct",
+  Router = "router"
+}
+
 export interface DirectSwapQuote {
   /** The ID of the input asset in this quote. */
   assetInID: number;
@@ -22,6 +27,111 @@ export interface DirectSwapQuote {
   priceImpact: number;
   /** The round that this quote is based on. */
   round?: number;
+}
+
+export interface DirectSwapQuoteAndPool {
+  quote: DirectSwapQuote;
+  pool: V1PoolInfo | V2PoolInfo;
+}
+
+export interface SwapRouteAsset {
+  id: string;
+  name: string;
+  unit_name: string;
+  decimals: number;
+}
+
+export interface SwapRoutePool {
+  address: string;
+  asset_1: SwapRouteAsset;
+  asset_2: SwapRouteAsset;
+  version: "2.0";
+}
+
+export type SwapRoute = {
+  quote: SwapRouterQuote;
+  pool: SwapRoutePool;
+}[];
+
+export interface SwapRouterQuote {
+  swap_type: SwapType;
+  amount_in: {
+    asset: SwapRouteAsset;
+    amount: string;
+  };
+  amount_out: {
+    asset: SwapRouteAsset;
+    amount: string;
+  };
+  swap_fees: {
+    amount: string;
+    asset: SwapRouteAsset;
+  };
+  price: number;
+  price_impact: number;
+}
+
+export interface FetchSwapRouteQuotesPayload {
+  asset_in_id: string;
+  asset_out_id: string;
+  amount: string;
+  swap_type: SwapType;
+}
+
+export type SwapRouterResponse = FetchSwapRouteQuotesPayload & {
+  route: SwapRoute;
+  price_impact: string;
+  status: {
+    round_number: string;
+    round_datetime: string;
+  };
+};
+
+export type GetSwapQuoteParams = {
+  assetIn: Pick<TinymanAnalyticsApiAsset, "id" | "decimals">;
+  assetOut: Pick<TinymanAnalyticsApiAsset, "id" | "decimals">;
+  pools: {info: V1PoolInfo | V2PoolInfo; reserves: PoolReserves}[];
+  amount: number | bigint;
+  type: SwapType;
+  network: SupportedNetwork;
+  /** If `true`, the function will also check the quotes that use swap route */
+  isSwapRouterEnabled?: boolean;
+};
+
+export type SwapQuote =
+  | {
+      data: DirectSwapQuoteAndPool;
+      type: SwapQuoteType.Direct;
+    }
+  | {
+      data: SwapRouterResponse;
+      type: SwapQuoteType.Router;
+    };
+
+export type GetSwapQuoteBySwapTypeParams = Omit<GetSwapQuoteParams, "type">;
+
+export interface GenerateSwapTxnsParams {
+  client: Algodv2;
+  network: SupportedNetwork;
+  quote: SwapQuote;
+  swapType: SwapType;
+  slippage: number;
+  initiatorAddr: string;
+}
+
+export type GenerateV1_1SwapTxnsParams = Omit<
+  GenerateSwapTxnsParams,
+  "quote" | "network"
+> & {
+  quote: DirectSwapQuoteAndPool;
+};
+
+export interface GenerateSwapRouterTxnsParams {
+  client: Algodv2;
+  initiatorAddr: string;
+  swapType: SwapType;
+  route: SwapRoute;
+  network: SupportedNetwork;
 }
 
 /** An object containing information about a successfully executed swap. */
@@ -66,112 +176,3 @@ export interface V2SwapExecution {
   txnID: string;
   round: number;
 }
-
-export type GetSwapQuoteParams = {
-  assetIn: Pick<TinymanAnalyticsApiAsset, "id" | "decimals">;
-  assetOut: Pick<TinymanAnalyticsApiAsset, "id" | "decimals">;
-  pools: {info: V1PoolInfo | V2PoolInfo; reserves: PoolReserves}[];
-  amount: number | bigint;
-  type: SwapType;
-  network: SupportedNetwork;
-  /** If `true`, the function will also check the quotes that use swap route */
-  isSwapRouterEnabled?: boolean;
-};
-
-export interface SwapQuoteWithPool {
-  quote: DirectSwapQuote;
-  pool: V1PoolInfo | V2PoolInfo;
-}
-
-export type SwapQuote =
-  | {
-      quoteWithPool: SwapQuoteWithPool;
-      type: SwapQuoteType.Direct;
-    }
-  | (FetchSwapRouteQuotesResponse & {
-      type: SwapQuoteType.Router;
-    });
-
-export type GetSwapQuoteBySwapTypeParams = Omit<GetSwapQuoteParams, "type">;
-
-export interface SwapRouteAsset {
-  id: string;
-  name: string;
-  unit_name: string;
-  decimals: number;
-}
-
-export interface SwapRoutePool {
-  address: string;
-  asset_1: SwapRouteAsset;
-  asset_2: SwapRouteAsset;
-  version: "2.0";
-}
-
-export type SwapRoute = {
-  quote: SwapRouterQuote;
-  pool: SwapRoutePool;
-}[];
-
-export enum SwapQuoteType {
-  Direct = "direct",
-  Router = "router"
-}
-
-export interface GenerateSwapTxnsParams {
-  client: Algodv2;
-  network: SupportedNetwork;
-  quote: SwapQuote;
-  swapType: SwapType;
-  slippage: number;
-  initiatorAddr: string;
-}
-
-export interface GenerateSwapRouterTxnsParams {
-  client: Algodv2;
-  initiatorAddr: string;
-  swapType: SwapType;
-  route: SwapRoute;
-  network: SupportedNetwork;
-}
-
-export type GenerateV1_1SwapTxnsParams = Omit<
-  GenerateSwapTxnsParams,
-  "quote" | "network"
-> & {
-  quote: SwapQuoteWithPool;
-};
-
-export interface SwapRouterQuote {
-  swap_type: SwapType;
-  amount_in: {
-    asset: SwapRouteAsset;
-    amount: string;
-  };
-  amount_out: {
-    asset: SwapRouteAsset;
-    amount: string;
-  };
-  swap_fees: {
-    amount: string;
-    asset: SwapRouteAsset;
-  };
-  price: number;
-  price_impact: number;
-}
-
-export interface FetchSwapRouteQuotesPayload {
-  asset_in_id: string;
-  asset_out_id: string;
-  amount: string;
-  swap_type: SwapType;
-}
-
-export type FetchSwapRouteQuotesResponse = FetchSwapRouteQuotesPayload & {
-  route: SwapRoute;
-  price_impact: string;
-  status: {
-    round_number: string;
-    round_datetime: string;
-  };
-};

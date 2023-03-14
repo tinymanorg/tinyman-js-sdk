@@ -27,7 +27,11 @@ import {
   V2_SWAP_APP_CALL_INNER_TXN_COUNT
 } from "./constants";
 import {isAlgo} from "../../util/asset/assetUtils";
-import {calculatePriceImpact} from "../common/utils";
+import {
+  calculatePriceImpact,
+  getAssetInFromSwapQuote,
+  getAssetOutFromSwapQuote
+} from "../common/utils";
 import {getAppCallInnerTxns} from "../../util/transaction/transactionUtils";
 import OutputAmountExceedsAvailableLiquidityError from "../../util/error/OutputAmountExceedsAvailableLiquidityError";
 import {AssetWithIdAndAmount} from "../../util/asset/assetModels";
@@ -40,13 +44,13 @@ async function generateTxns(
   params: GenerateSwapTxnsParams
 ): Promise<SignerTransaction[]> {
   if (params.quote.type === SwapQuoteType.Router) {
-    return generateSwapRouterTxns({...params, route: params.quote.route});
+    return generateSwapRouterTxns({...params, route: params.quote.data.route});
   }
 
   const {client, initiatorAddr, slippage, swapType, quote} = params;
 
   const {
-    quoteWithPool: {pool, quote: swapQuote}
+    data: {pool, quote: swapQuote}
   } = quote;
   const {assetInID, assetOutID} = swapQuote;
 
@@ -161,20 +165,8 @@ async function execute({
 }): Promise<V2SwapExecution> {
   let [{confirmedRound, txnID}] = await sendAndWaitRawTransaction(client, [signedTxns]);
   const innerTxns = await getAppCallInnerTxns(client, txGroup);
-  const assetIn: AssetWithIdAndAmount =
-    quote.type === SwapQuoteType.Direct
-      ? {
-          id: quote.quoteWithPool.quote.assetInID,
-          amount: quote.quoteWithPool.quote.assetInAmount
-        }
-      : {
-          id: Number(quote.asset_in_id),
-          amount: Number(quote.route[0].quote.amount_in.amount)
-        };
-  const assetOutId =
-    quote.type === SwapQuoteType.Direct
-      ? quote.quoteWithPool.quote.assetOutID
-      : Number(quote.asset_out_id);
+  const assetIn = getAssetInFromSwapQuote(quote);
+  const assetOutId = getAssetOutFromSwapQuote(quote).id;
   /**
    * If the swap type if Fixed Output, usually there will be a difference between
    * input amount and the actual used input amount. The change will be returned to the user
@@ -328,7 +320,7 @@ async function getFixedInputSwapQuote({
         directSwapQuote.assetOutAmount
     ) {
       return {
-        ...swapRoute,
+        data: swapRoute,
         type: SwapQuoteType.Router
       };
     }
@@ -339,7 +331,7 @@ async function getFixedInputSwapQuote({
   }
 
   return {
-    quoteWithPool: {
+    data: {
       pool,
       quote: directSwapQuote
     },
@@ -425,7 +417,7 @@ async function getFixedOutputSwapQuote({
         directSwapQuote.assetInAmount
     ) {
       return {
-        ...swapRoute,
+        data: swapRoute,
         type: SwapQuoteType.Router
       };
     }
@@ -436,7 +428,7 @@ async function getFixedOutputSwapQuote({
   }
 
   return {
-    quoteWithPool: {
+    data: {
       pool,
       quote: directSwapQuote
     },

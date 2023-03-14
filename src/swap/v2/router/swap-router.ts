@@ -9,7 +9,7 @@ import {getValidatorAppID} from "../../../validator";
 import {SwapType} from "../../constants";
 import {
   FetchSwapRouteQuotesPayload,
-  FetchSwapRouteQuotesResponse,
+  SwapRouterResponse,
   GenerateSwapRouterTxnsParams
 } from "../../types";
 import {
@@ -173,7 +173,7 @@ export async function getSwapRoute({
   swapType: SwapType;
   amount: number | bigint;
   network: SupportedNetwork;
-}): Promise<FetchSwapRouteQuotesResponse> {
+}): Promise<SwapRouterResponse> {
   const payload: FetchSwapRouteQuotesPayload = {
     asset_in_id: String(assetInID),
     asset_out_id: String(assetOutID),

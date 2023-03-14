@@ -5,7 +5,6 @@ import { InitiatorSigner, SignerTransaction, SupportedNetwork } from "../util/co
 import { V1PoolInfo } from "../util/pool/poolTypes";
 import { GetSwapQuoteBySwapTypeParams, GenerateSwapTxnsParams, GetSwapQuoteParams, SwapQuote } from "./types";
 import { SwapType } from "./constants";
-import { ContractVersionValue } from "../contract/types";
 /**
  * Gets the best quote for swap from the pools and swap router and returns the best option.
  */
@@ -52,5 +51,4 @@ export declare function getSwapTotalFee(params: {
     version: typeof CONTRACT_VERSION.V2;
     type: SwapType;
 }): number;
-export declare function getContractVersionFromSwapQuote(quote: SwapQuote): ContractVersionValue;
 export {};

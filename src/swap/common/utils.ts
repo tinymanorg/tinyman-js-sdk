@@ -1,4 +1,5 @@
 import {CONTRACT_VERSION} from "../../contract/constants";
+import {ContractVersionValue} from "../../contract/types";
 import {
   AssetWithAmountAndDecimals,
   AssetWithIdAndAmount
@@ -42,13 +43,13 @@ function calculatePriceImpact({
 
 function getSwapQuotePriceImpact(quote: SwapQuote) {
   return quote.type === SwapQuoteType.Router
-    ? Number(quote.price_impact)
-    : quote.quoteWithPool.quote.priceImpact;
+    ? Number(quote.data.price_impact)
+    : quote.data.quote.priceImpact;
 }
 
 function getAssetInFromSwapQuote(quote: SwapQuote): AssetWithIdAndAmount {
   if (quote.type === SwapQuoteType.Router) {
-    const assetIn = getAssetInFromSwapRoute(quote.route);
+    const assetIn = getAssetInFromSwapRoute(quote.data.route);
 
     return {
       id: getAssetId(assetIn.asset),
@@ -57,14 +58,14 @@ function getAssetInFromSwapQuote(quote: SwapQuote): AssetWithIdAndAmount {
   }
 
   return {
-    id: quote.quoteWithPool.quote.assetInID,
-    amount: quote.quoteWithPool.quote.assetInAmount
+    id: quote.data.quote.assetInID,
+    amount: quote.data.quote.assetInAmount
   };
 }
 
 function getAssetOutFromSwapQuote(quote: SwapQuote): AssetWithIdAndAmount {
   if (quote.type === SwapQuoteType.Router) {
-    const assetOut = getAssetOutFromSwapRoute(quote.route);
+    const assetOut = getAssetOutFromSwapRoute(quote.data.route);
 
     return {
       id: getAssetId(assetOut.asset),
@@ -73,8 +74,8 @@ function getAssetOutFromSwapQuote(quote: SwapQuote): AssetWithIdAndAmount {
   }
 
   return {
-    id: quote.quoteWithPool.quote.assetOutID,
-    amount: quote.quoteWithPool.quote.assetOutAmount
+    id: quote.data.quote.assetOutID,
+    amount: quote.data.quote.assetOutAmount
   };
 }
 
@@ -88,9 +89,9 @@ function getAssetInAndAssetOutFromSwapQuote(quote: SwapQuote): {
   };
 }
 
-function getSwapQuoteContractVersion(quote: SwapQuote) {
+function getSwapQuoteContractVersion(quote: SwapQuote): ContractVersionValue {
   if (quote.type === SwapQuoteType.Direct) {
-    return quote.quoteWithPool.pool.contractVersion;
+    return quote.data.pool.contractVersion;
   }
   return CONTRACT_VERSION.V2;
 }

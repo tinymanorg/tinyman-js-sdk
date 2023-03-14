@@ -1,3 +1,4 @@
+import { ContractVersionValue } from "../../contract/types";
 import { AssetWithAmountAndDecimals, AssetWithIdAndAmount } from "../../util/asset/assetModels";
 import { SwapQuote } from "../types";
 declare function calculateSwapRate({ assetIn, assetOut }: {
@@ -17,5 +18,5 @@ declare function getAssetInAndAssetOutFromSwapQuote(quote: SwapQuote): {
     assetIn: AssetWithIdAndAmount;
     assetOut: AssetWithIdAndAmount;
 };
-declare function getSwapQuoteContractVersion(quote: SwapQuote): import("../..").ContractVersionValue;
+declare function getSwapQuoteContractVersion(quote: SwapQuote): ContractVersionValue;
 export { calculateSwapRate, calculatePriceImpact, getSwapQuotePriceImpact, getAssetInFromSwapQuote, getAssetOutFromSwapQuote, getAssetInAndAssetOutFromSwapQuote, getSwapQuoteContractVersion };
