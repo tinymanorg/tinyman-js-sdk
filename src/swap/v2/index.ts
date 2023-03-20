@@ -39,6 +39,7 @@ import {generateSwapRouterTxns, getSwapRoute} from "./router/swap-router";
 import {poolUtils} from "../../util/pool";
 import {getBestQuote, isSwapQuoteErrorCausedByAmount} from "../utils";
 import SwapQuoteError, {SwapQuoteErrorType} from "../../util/error/SwapQuoteError";
+import {isSwapAssetInAmountLow} from "./util";
 
 async function generateTxns(
   params: GenerateSwapTxnsParams
@@ -306,6 +307,13 @@ function getFixedInputDirectSwapQuote({
     );
   }
 
+  if (isSwapAssetInAmountLow(Number(amount))) {
+    throw new SwapQuoteError(
+      SwapQuoteErrorType.LowSwapAmountError,
+      "Swap amount is too low."
+    );
+  }
+
   const assetInAmount = BigInt(amount);
   const totalFeeShare = pool.totalFeeShare!;
 
@@ -398,6 +406,13 @@ function getFixedOutputDirectSwapQuote({
     totalFeeShare,
     decimals
   });
+
+  if (isSwapAssetInAmountLow(Number(swapInputAmount))) {
+    throw new SwapQuoteError(
+      SwapQuoteErrorType.LowSwapAmountError,
+      "Swap amount is too low."
+    );
+  }
 
   if (assetOutAmount > outputSupply) {
     throw new SwapQuoteError(
@@ -492,6 +507,13 @@ async function getFixedInputSwapQuote({
           swapType: SwapType.FixedInput,
           network
         });
+
+        if (data.route.length < 2) {
+          throw new SwapQuoteError(
+            SwapQuoteErrorType.SwapRouterNoRouteError,
+            "Swap router couldn't find a route for this swap."
+          );
+        }
 
         return {
           type: SwapQuoteType.Router,
