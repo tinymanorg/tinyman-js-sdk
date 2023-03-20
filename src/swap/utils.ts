@@ -16,19 +16,23 @@ import {SwapV1_1} from "./v1_1";
 import {SwapV2} from "./v2";
 import {V1_1_SWAP_TOTAL_FEE} from "./v1_1/constants";
 import {getV2SwapTotalFee} from "./v2/util";
-import {isPoolEmpty} from "../util/pool/common";
 import {getSwapRouteRate} from "./v2/router/util";
-import OutputAmountExceedsAvailableLiquidityError from "../util/error/OutputAmountExceedsAvailableLiquidityError";
 import {getSwapQuoteContractVersion} from "./common/utils";
+import {getAssetId} from "../util/asset/assetUtils";
+import {isPoolEmpty} from "../util/pool/common";
+import SwapQuoteError, {SwapQuoteErrorType} from "../util/error/SwapQuoteError";
 
 /**
  * Gets the best quote for swap from the pools and swap router and returns the best option.
  */
 export function getQuote(params: GetSwapQuoteParams): Promise<SwapQuote> {
-  const {type, isSwapRouterEnabled, pools} = params;
+  const {type, pools, isSwapRouterEnabled} = params;
 
   if (!isSwapRouterEnabled && pools.every((pool) => isPoolEmpty(pool.reserves))) {
-    throw new Error("No pools available for swap");
+    throw new SwapQuoteError(
+      SwapQuoteErrorType.NoAvailablePoolError,
+      "There is not an available pool for this swap. However, you can enable swap router and try to perform this swap with multiple pools."
+    );
   }
 
   if (type === SwapType.FixedInput) {
@@ -37,7 +41,19 @@ export function getQuote(params: GetSwapQuoteParams): Promise<SwapQuote> {
     return getFixedOutputSwapQuote(params);
   }
 
-  return Promise.reject(new Error("Invalid swap type"));
+  throw new SwapQuoteError(SwapQuoteErrorType.InvalidSwapTypeError, "Invalid swap type");
+}
+
+export function isSwapQuoteErrorCausedByAmount(error: Error): boolean {
+  return (
+    error instanceof SwapQuoteError &&
+    [
+      SwapQuoteErrorType.SwapRouterInsufficientReservesError,
+      SwapQuoteErrorType.SwapRouterLowSwapAmountError,
+      SwapQuoteErrorType.OutputAmountExceedsAvailableLiquidityError,
+      SwapQuoteErrorType.LowSwapAmountError
+    ].includes(error.type)
+  );
 }
 
 /**
@@ -47,21 +63,28 @@ export function getQuote(params: GetSwapQuoteParams): Promise<SwapQuote> {
  */
 function validateQuotes(promises: Promise<SwapQuote>[]): Promise<SwapQuote[]> {
   return Promise.allSettled(promises).then((results) => {
-    if (
-      results.every(
-        (result) =>
-          result.status === "rejected" &&
-          result.reason instanceof OutputAmountExceedsAvailableLiquidityError
-      )
-    ) {
-      throw new OutputAmountExceedsAvailableLiquidityError();
+    if (results.every((result) => result.status === "rejected")) {
+      const [v1_1PoolError, v2PoolError] = (results as PromiseRejectedResult[]).map(
+        (result) => result.reason
+      ) as SwapQuoteError[];
+
+      if (
+        isSwapQuoteErrorCausedByAmount(v1_1PoolError) &&
+        !isSwapQuoteErrorCausedByAmount(v2PoolError)
+      ) {
+        throw v1_1PoolError;
+      }
+
+      throw v2PoolError;
     }
 
-    return (
+    const filteredResults = (
       results.filter(
         (result) => result.status === "fulfilled" && result.value !== undefined
       ) as PromiseFulfilledResult<SwapQuote>[]
     ).map((result) => result.value);
+
+    return filteredResults;
   });
 }
 
@@ -72,34 +95,55 @@ function validateQuotes(promises: Promise<SwapQuote>[]): Promise<SwapQuote[]> {
 export async function getFixedInputSwapQuote(
   params: GetSwapQuoteBySwapTypeParams
 ): Promise<SwapQuote> {
-  const {amount, assetIn, assetOut, pools, isSwapRouterEnabled} = params;
+  const {amount, assetIn, assetOut, isSwapRouterEnabled, pools} = params;
 
-  const quotePromises = pools.map<Promise<SwapQuote>>((pool) => {
-    return new Promise(async (resolve, reject) => {
-      let quote: SwapQuote | undefined;
+  const quotePromises: Promise<SwapQuote>[] = [];
 
-      const quoteGetterArgs = {
-        pool: pool.info,
-        assetIn: {amount, id: Number(assetIn.id)},
-        decimals: {assetIn: assetIn.decimals, assetOut: assetOut.decimals},
-        reserves: pool.reserves,
-        isSwapRouterEnabled,
-        network: params.network
-      };
+  const v1_1Pool = pools.find(
+    (pool) => pool.info.contractVersion === CONTRACT_VERSION.V1_1
+  );
 
-      try {
-        if (pool.info.contractVersion === CONTRACT_VERSION.V1_1) {
-          quote = SwapV1_1.getFixedInputSwapQuote(quoteGetterArgs);
-        } else {
-          quote = await SwapV2.getFixedInputSwapQuote(quoteGetterArgs);
+  if (v1_1Pool) {
+    const quoteGetterArgs = {
+      pool: v1_1Pool.info,
+      assetIn: {amount, id: Number(assetIn.id)},
+      decimals: {assetIn: assetIn.decimals, assetOut: assetOut.decimals},
+      reserves: v1_1Pool.reserves
+    };
+
+    quotePromises.push(
+      new Promise((resolve, reject) => {
+        try {
+          resolve(SwapV1_1.getFixedInputSwapQuote(quoteGetterArgs));
+        } catch (error) {
+          reject(error);
         }
+      })
+    );
+  } else {
+    quotePromises.push(
+      Promise.reject(
+        new SwapQuoteError(
+          SwapQuoteErrorType.NoAvailablePoolError,
+          "Trying to swap from non-existent pool"
+        )
+      )
+    );
+  }
 
-        resolve(quote);
-      } catch (error) {
-        reject(error);
-      }
-    });
-  });
+  const v2Pool = pools.find((pool) => pool.info.contractVersion === CONTRACT_VERSION.V2);
+
+  quotePromises.push(
+    SwapV2.getFixedInputSwapQuote({
+      amount,
+      assetInID: getAssetId(assetIn),
+      assetOutID: getAssetId(assetOut),
+      pool: v2Pool?.info ?? null,
+      decimals: {assetIn: assetIn.decimals, assetOut: assetOut.decimals},
+      isSwapRouterEnabled,
+      network: params.network
+    })
+  );
 
   const validQuotes = await validateQuotes(quotePromises);
 
@@ -115,31 +159,53 @@ export async function getFixedOutputSwapQuote(
 ): Promise<SwapQuote> {
   const {amount, assetIn, assetOut, pools, isSwapRouterEnabled} = params;
 
-  const quotePromises = pools.map<Promise<SwapQuote>>((pool) => {
-    return new Promise(async (resolve, reject) => {
-      let quote: SwapQuote | undefined;
-      const quoteGetterArgs = {
-        pool: pool.info,
-        assetOut: {amount, id: Number(assetOut.id)},
-        decimals: {assetIn: assetIn.decimals, assetOut: assetOut.decimals},
-        reserves: pool.reserves,
-        isSwapRouterEnabled,
-        network: params.network
-      };
+  const quotePromises: Promise<SwapQuote>[] = [];
 
-      try {
-        if (pool.info.contractVersion === CONTRACT_VERSION.V1_1) {
-          quote = SwapV1_1.getFixedOutputSwapQuote(quoteGetterArgs);
-        } else {
-          quote = await SwapV2.getFixedOutputSwapQuote(quoteGetterArgs);
+  const v1_1Pool = pools.find(
+    (pool) => pool.info.contractVersion === CONTRACT_VERSION.V1_1
+  );
+
+  if (v1_1Pool) {
+    const quoteGetterArgs = {
+      pool: v1_1Pool.info,
+      assetOut: {amount, id: Number(assetOut.id)},
+      decimals: {assetIn: assetIn.decimals, assetOut: assetOut.decimals},
+      reserves: v1_1Pool.reserves
+    };
+
+    quotePromises.push(
+      new Promise((resolve, reject) => {
+        try {
+          resolve(SwapV1_1.getFixedOutputSwapQuote(quoteGetterArgs));
+        } catch (error) {
+          reject(error);
         }
+      })
+    );
+  } else {
+    quotePromises.push(
+      Promise.reject(
+        new SwapQuoteError(
+          SwapQuoteErrorType.NoAvailablePoolError,
+          "Trying to swap from non-existent pool"
+        )
+      )
+    );
+  }
 
-        resolve(quote);
-      } catch (error) {
-        reject(error);
-      }
-    });
-  });
+  const v2Pool = pools.find((pool) => pool.info.contractVersion === CONTRACT_VERSION.V2);
+
+  quotePromises.push(
+    SwapV2.getFixedOutputSwapQuote({
+      amount,
+      assetInID: getAssetId(assetIn),
+      assetOutID: getAssetId(assetOut),
+      pool: v2Pool?.info ?? null,
+      decimals: {assetIn: assetIn.decimals, assetOut: assetOut.decimals},
+      isSwapRouterEnabled,
+      network: params.network
+    })
+  );
 
   const validQuotes = await validateQuotes(quotePromises);
 
@@ -160,7 +226,7 @@ function getSwapQuoteRate(quote: SwapQuote): number {
 /**
  * Compares the given quotes and returns the best one (with the highest rate).
  */
-function getBestQuote(quotes: SwapQuote[]): SwapQuote {
+export function getBestQuote(quotes: SwapQuote[]): SwapQuote {
   let bestQuote: SwapQuote = quotes[0];
   let bestQuoteRate = getSwapQuoteRate(bestQuote);
 

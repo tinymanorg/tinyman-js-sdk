@@ -10,3 +10,11 @@ export interface SignerTransaction {
 }
 export declare type InitiatorSigner = (txGroupList: SignerTransaction[][]) => Promise<Uint8Array[]>;
 export declare type SupportedNetwork = "testnet" | "mainnet";
+export interface TinymanApiErrorDetailShape {
+    [x: string]: undefined | any;
+}
+export interface TinymanApiErrorShape<Type extends string = string> {
+    type: Type;
+    detail: TinymanApiErrorDetailShape;
+    fallback_message: string;
+}

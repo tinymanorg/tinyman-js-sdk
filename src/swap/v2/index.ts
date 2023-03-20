@@ -11,7 +11,7 @@ import {
   SupportedNetwork
 } from "../../util/commonTypes";
 import TinymanError from "../../util/error/TinymanError";
-import {PoolStatus, V2PoolInfo} from "../../util/pool/poolTypes";
+import {V2PoolInfo} from "../../util/pool/poolTypes";
 import {
   DirectSwapQuote,
   GenerateSwapTxnsParams,
@@ -33,12 +33,12 @@ import {
   getAssetOutFromSwapQuote
 } from "../common/utils";
 import {getAppCallInnerTxns} from "../../util/transaction/transactionUtils";
-import OutputAmountExceedsAvailableLiquidityError from "../../util/error/OutputAmountExceedsAvailableLiquidityError";
-import {AssetWithIdAndAmount} from "../../util/asset/assetModels";
 import {tinymanJSSDKConfig} from "../../config";
 import {CONTRACT_VERSION} from "../../contract/constants";
 import {generateSwapRouterTxns, getSwapRoute} from "./router/swap-router";
-import {getAssetOutFromSwapRoute} from "./router/util";
+import {poolUtils} from "../../util/pool";
+import {getBestQuote, isSwapQuoteErrorCausedByAmount} from "../utils";
+import SwapQuoteError, {SwapQuoteErrorType} from "../../util/error/SwapQuoteError";
 
 async function generateTxns(
   params: GenerateSwapTxnsParams
@@ -207,15 +207,19 @@ async function execute({
  */
 async function getQuote({
   type,
-  pool,
-  asset,
+  amount,
+  assetInID,
+  assetOutID,
   decimals,
   network,
-  isSwapRouterEnabled
+  isSwapRouterEnabled,
+  pool
 }: {
   type: SwapType;
-  pool: V2PoolInfo;
-  asset: AssetWithIdAndAmount;
+  amount: number | bigint;
+  assetInID: number;
+  assetOutID: number;
+  pool: V2PoolInfo | null;
   decimals: {assetIn: number; assetOut: number};
   network: SupportedNetwork;
   isSwapRouterEnabled?: boolean;
@@ -224,64 +228,100 @@ async function getQuote({
 
   if (type === SwapType.FixedInput) {
     quote = await getFixedInputSwapQuote({
-      pool,
-      assetIn: asset,
+      assetInID,
+      assetOutID,
+      amount,
       decimals,
       isSwapRouterEnabled,
-      network
+      network,
+      pool
     });
   } else {
     quote = await getFixedOutputSwapQuote({
-      pool,
-      assetOut: asset,
+      amount,
+      assetInID,
+      assetOutID,
       decimals,
       isSwapRouterEnabled,
-      network
+      network,
+      pool
     });
   }
 
   return quote;
 }
 
-/**
- * @returns A quote for a fixed input swap. Does NOT execute any transactions.
- */
-async function getFixedInputSwapQuote({
-  assetIn,
+function validateQuotes(quotePromises: Promise<SwapQuote>[]): Promise<SwapQuote[]> {
+  return Promise.allSettled(quotePromises).then((results) => {
+    if (results.every((result) => result.status === "rejected")) {
+      const directQuoteError = (results[0] as PromiseRejectedResult)
+        .reason as SwapQuoteError;
+
+      //  If all promises are rejected and there are 2 of them, it means that both direct and router quotes failed.
+      //  In this case, if the direct quote failed because of an OutputAmountExceedsAvailableLiquidityError and the router quote failed because of a SwapRouterRouteError,
+      //  we want to throw OutputAmountExceedsAvailableLiquidityError error instead of the SwapRouterRouteError. Otherwise, we want to throw the error from swap router.
+      if (results.length === 2) {
+        const routerQuoteError = (results[1] as PromiseRejectedResult)
+          .reason as SwapQuoteError;
+
+        if (
+          isSwapQuoteErrorCausedByAmount(directQuoteError) &&
+          !isSwapQuoteErrorCausedByAmount(routerQuoteError)
+        ) {
+          throw directQuoteError;
+        }
+
+        throw routerQuoteError;
+      }
+
+      //  Otherwise, we want to throw the error from the direct quote.
+      throw directQuoteError;
+    }
+
+    return (
+      results.filter(
+        (result) => result.status === "fulfilled" && result.value !== undefined
+      ) as PromiseFulfilledResult<SwapQuote>[]
+    ).map((result) => result.value);
+  });
+}
+
+function getFixedInputDirectSwapQuote({
+  amount,
+  assetInID,
+  assetOutID,
   decimals,
-  pool,
-  isSwapRouterEnabled,
-  network
+  pool
 }: {
   pool: V2PoolInfo;
-  assetIn: AssetWithIdAndAmount;
+  amount: number | bigint;
+  assetInID: number;
+  assetOutID: number;
   decimals: {assetIn: number; assetOut: number};
-  network: SupportedNetwork;
-  isSwapRouterEnabled?: boolean;
-}): Promise<SwapQuote> {
-  if (pool.status !== PoolStatus.READY && !isSwapRouterEnabled) {
-    throw new TinymanError({pool, assetIn}, "Trying to swap on a non-existent pool");
+}): DirectSwapQuote {
+  if (!poolUtils.isPoolReady(pool)) {
+    throw new SwapQuoteError(
+      SwapQuoteErrorType.NoAvailablePoolError,
+      "There is not an available pool for this swap. However, you can enable swap router and try to perform this swap with multiple pools."
+    );
   }
 
-  const assetInAmount = BigInt(assetIn.amount);
+  const assetInAmount = BigInt(amount);
   const totalFeeShare = pool.totalFeeShare!;
 
-  let assetOutID: number;
   let inputSupply: bigint;
   let outputSupply: bigint;
 
-  if (assetIn.id === pool.asset1ID) {
-    assetOutID = pool.asset2ID;
+  if (assetInID === pool.asset1ID) {
     inputSupply = pool.asset1Reserves!;
     outputSupply = pool.asset2Reserves!;
-  } else if (assetIn.id === pool.asset2ID) {
-    assetOutID = pool.asset1ID;
+  } else if (assetInID === pool.asset2ID) {
     inputSupply = pool.asset2Reserves!;
     outputSupply = pool.asset1Reserves!;
   } else {
-    throw new TinymanError(
-      {pool, assetIn},
-      `Input asset (#${assetIn.id}) doesn't belong to the pool ${pool.account.address()}.`
+    throw new SwapQuoteError(
+      SwapQuoteErrorType.AssetDoesNotBelongToPoolError,
+      `Input asset (#${assetInID}) doesn't belong to the pool ${pool.account.address()}.`
     );
   }
 
@@ -293,8 +333,15 @@ async function getFixedInputSwapQuote({
     decimals
   });
 
-  const directSwapQuote: DirectSwapQuote = {
-    assetInID: assetIn.id,
+  if (swapOutputAmount > outputSupply) {
+    throw new SwapQuoteError(
+      SwapQuoteErrorType.OutputAmountExceedsAvailableLiquidityError,
+      "Output amount exceeds available liquidity."
+    );
+  }
+
+  return {
+    assetInID,
     assetInAmount,
     assetOutID,
     assetOutAmount: swapOutputAmount,
@@ -304,81 +351,43 @@ async function getFixedInputSwapQuote({
       convertFromBaseUnits(decimals.assetIn, Number(assetInAmount)),
     priceImpact
   };
-
-  if (isSwapRouterEnabled) {
-    const swapRoute = await getSwapRoute({
-      amount: assetIn.amount,
-      assetInID: Number(assetIn.id),
-      assetOutID,
-      swapType: SwapType.FixedInput,
-      network
-    });
-
-    if (
-      swapRoute.route.length > 1 &&
-      BigInt(getAssetOutFromSwapRoute(swapRoute.route).amount) >
-        directSwapQuote.assetOutAmount
-    ) {
-      return {
-        data: swapRoute,
-        type: SwapQuoteType.Router
-      };
-    }
-  }
-
-  if (swapOutputAmount > outputSupply) {
-    throw new OutputAmountExceedsAvailableLiquidityError();
-  }
-
-  return {
-    data: {
-      pool,
-      quote: directSwapQuote
-    },
-    type: SwapQuoteType.Direct
-  };
 }
 
-/**
- * @returns A quote for a fixed output swap. Does NOT execute any transactions.
- */
-async function getFixedOutputSwapQuote({
-  assetOut,
+function getFixedOutputDirectSwapQuote({
+  amount,
+  assetInID,
+  assetOutID,
   decimals,
-  pool,
-  isSwapRouterEnabled,
-  network
+  pool
 }: {
-  pool: V2PoolInfo;
-  assetOut: AssetWithIdAndAmount;
+  pool: V2PoolInfo | null;
+  amount: number | bigint;
+  assetInID: number;
+  assetOutID: number;
   decimals: {assetIn: number; assetOut: number};
-  network: SupportedNetwork;
-  isSwapRouterEnabled?: boolean;
-}): Promise<SwapQuote> {
-  if (pool.status !== PoolStatus.READY && !isSwapRouterEnabled) {
-    throw new TinymanError({pool, assetOut}, "Trying to swap on a non-existent pool");
+}): SwapQuote {
+  if (!pool || !poolUtils.isPoolReady(pool)) {
+    throw new SwapQuoteError(
+      SwapQuoteErrorType.NoAvailablePoolError,
+      "There is not an available pool for this swap. However, you can enable swap router and try to perform this swap with multiple pools."
+    );
   }
 
-  const assetOutAmount = BigInt(assetOut.amount);
+  const assetOutAmount = BigInt(amount);
   const totalFeeShare = pool.totalFeeShare!;
-  let assetInID: number;
   let inputSupply: bigint;
   let outputSupply: bigint;
 
-  if (assetOut.id === pool.asset1ID) {
-    assetInID = pool.asset2ID;
+  if (assetOutID === pool.asset1ID) {
     inputSupply = pool.asset2Reserves!;
     outputSupply = pool.asset1Reserves!;
-  } else if (assetOut.id === pool.asset2ID) {
-    assetInID = pool.asset1ID;
+  } else if (assetOutID === pool.asset2ID) {
     inputSupply = pool.asset1Reserves!;
     outputSupply = pool.asset2Reserves!;
   } else {
-    throw new TinymanError(
-      {pool, assetOut},
-      `Output asset (#${
-        assetOut.id
-      }) doesn't belong to the pool ${pool.account.address()}.`
+    throw new SwapQuoteError(
+      SwapQuoteErrorType.AssetDoesNotBelongToPoolError,
+      `Output asset (#${assetOutID}) doesn't belong to the pool ${pool.account.address()}.`
     );
   }
 
@@ -390,50 +399,173 @@ async function getFixedOutputSwapQuote({
     decimals
   });
 
-  const directSwapQuote = {
-    assetInID,
-    assetInAmount: swapInputAmount,
-    assetOutID: assetOut.id,
-    assetOutAmount,
-    swapFee: Number(totalFeeAmount),
-    rate:
-      convertFromBaseUnits(decimals.assetOut, Number(assetOutAmount)) /
-      convertFromBaseUnits(decimals.assetIn, Number(swapInputAmount)),
-    priceImpact
-  };
-
-  if (isSwapRouterEnabled) {
-    const swapRoute = await getSwapRoute({
-      amount: assetOut.amount,
-      assetInID,
-      assetOutID: assetOut.id,
-      swapType: SwapType.FixedOutput,
-      network
-    });
-
-    if (
-      swapRoute.route.length > 1 &&
-      BigInt(getAssetOutFromSwapRoute(swapRoute.route).amount) <
-        directSwapQuote.assetInAmount
-    ) {
-      return {
-        data: swapRoute,
-        type: SwapQuoteType.Router
-      };
-    }
-  }
-
   if (assetOutAmount > outputSupply) {
-    throw new OutputAmountExceedsAvailableLiquidityError();
+    throw new SwapQuoteError(
+      SwapQuoteErrorType.OutputAmountExceedsAvailableLiquidityError,
+      "Output amount exceeds available liquidity."
+    );
   }
 
   return {
+    type: SwapQuoteType.Direct,
     data: {
       pool,
-      quote: directSwapQuote
-    },
-    type: SwapQuoteType.Direct
+      quote: {
+        assetInID,
+        assetInAmount: swapInputAmount,
+        assetOutID,
+        assetOutAmount,
+        swapFee: Number(totalFeeAmount),
+        rate:
+          convertFromBaseUnits(decimals.assetOut, Number(assetOutAmount)) /
+          convertFromBaseUnits(decimals.assetIn, Number(swapInputAmount)),
+        priceImpact
+      }
+    }
   };
+}
+
+/**
+ * @returns A quote for a fixed input swap. Does NOT execute any transactions.
+ */
+async function getFixedInputSwapQuote({
+  amount,
+  assetInID,
+  assetOutID,
+  decimals,
+  isSwapRouterEnabled,
+  network,
+  pool
+}: {
+  amount: number | bigint;
+  assetInID: number;
+  assetOutID: number;
+  decimals: {assetIn: number; assetOut: number};
+  network: SupportedNetwork;
+  pool: V2PoolInfo | null;
+  isSwapRouterEnabled?: boolean;
+}): Promise<SwapQuote> {
+  const quotePromises: Promise<SwapQuote>[] = [];
+
+  if (pool) {
+    quotePromises.push(
+      new Promise((resolve, reject) => {
+        try {
+          const quote = getFixedInputDirectSwapQuote({
+            amount,
+            assetInID,
+            assetOutID,
+            decimals,
+            pool
+          });
+
+          resolve({
+            type: SwapQuoteType.Direct,
+            data: {
+              pool,
+              quote
+            }
+          });
+        } catch (error) {
+          reject(error);
+        }
+      })
+    );
+  } else {
+    quotePromises.push(
+      Promise.reject(
+        new SwapQuoteError(
+          SwapQuoteErrorType.NoAvailablePoolError,
+          "There is not an available pool for this swap. However, you can enable swap router and try to perform this swap with multiple pools."
+        )
+      )
+    );
+  }
+
+  if (isSwapRouterEnabled) {
+    quotePromises.push(
+      (async () => {
+        const data = await getSwapRoute({
+          amount,
+          assetInID,
+          assetOutID,
+          swapType: SwapType.FixedInput,
+          network
+        });
+
+        return {
+          type: SwapQuoteType.Router,
+          data
+        };
+      })()
+    );
+  }
+
+  const validQuotes = await validateQuotes(quotePromises);
+
+  return getBestQuote(validQuotes);
+}
+
+/**
+ * @returns A quote for a fixed output swap. Does NOT execute any transactions.
+ */
+async function getFixedOutputSwapQuote({
+  amount,
+  assetInID,
+  assetOutID,
+  decimals,
+  isSwapRouterEnabled,
+  network,
+  pool
+}: {
+  amount: number | bigint;
+  assetInID: number;
+  assetOutID: number;
+  pool: V2PoolInfo | null;
+  decimals: {assetIn: number; assetOut: number};
+  network: SupportedNetwork;
+  isSwapRouterEnabled?: boolean;
+}): Promise<SwapQuote> {
+  const quotePromises: Promise<SwapQuote>[] = [
+    new Promise((resolve, reject) => {
+      try {
+        resolve(
+          getFixedOutputDirectSwapQuote({
+            amount,
+            assetInID,
+            assetOutID,
+            decimals,
+            pool
+          })
+        );
+      } catch (error) {
+        reject(error);
+      }
+    })
+  ];
+
+  if (isSwapRouterEnabled) {
+    quotePromises.push(
+      (async () => {
+        const data = await getSwapRoute({
+          amount,
+          assetInID,
+          assetOutID,
+          swapType: SwapType.FixedOutput,
+          network
+        });
+
+        return {
+          type: SwapQuoteType.Router,
+          data
+        };
+      })()
+    );
+  }
+
+  const validQuotes = await validateQuotes(quotePromises);
+
+  return getBestQuote(validQuotes);
 }
 
 function calculateFixedInputSwap({
@@ -586,6 +718,8 @@ function calculateSwapAmountOfFixedOutputSwap({
 export const SwapV2 = {
   getQuote,
   getFixedInputSwapQuote,
+  getFixedInputDirectSwapQuote,
+  getFixedOutputDirectSwapQuote,
   getFixedOutputSwapQuote,
   generateTxns,
   signTxns,

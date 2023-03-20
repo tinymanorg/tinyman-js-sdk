@@ -1,3 +1,5 @@
+import SwapQuoteError from "./util/error/SwapQuoteError";
+
 export type {
   InitiatorSigner,
   SignerTransaction,
@@ -120,6 +122,9 @@ export {SwapType} from "./swap/constants";
 export {Swap} from "./swap";
 // eslint-disable-next-line no-duplicate-imports
 export {SwapQuoteType} from "./swap/types";
+export {SwapQuoteError};
+// eslint-disable-next-line no-duplicate-imports
+export {SwapQuoteErrorType} from "./util/error/SwapQuoteError";
 
 export {
   redeemExcessAsset,

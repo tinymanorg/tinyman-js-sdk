@@ -15,3 +15,13 @@ export type InitiatorSigner = (
 ) => Promise<Uint8Array[]>;
 
 export type SupportedNetwork = "testnet" | "mainnet";
+
+export interface TinymanApiErrorDetailShape {
+  [x: string]: undefined | any;
+}
+
+export interface TinymanApiErrorShape<Type extends string = string> {
+  type: Type;
+  detail: TinymanApiErrorDetailShape;
+  fallback_message: string;
+}

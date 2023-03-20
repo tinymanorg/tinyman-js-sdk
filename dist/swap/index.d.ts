@@ -47,10 +47,12 @@ export declare const Swap: {
         }) => Promise<Omit<import("./types").V1SwapExecution, "fees" | "groupID">>;
     };
     v2: {
-        getQuote: ({ type, pool, asset, decimals, network, isSwapRouterEnabled }: {
+        getQuote: ({ type, amount, assetInID, assetOutID, decimals, network, isSwapRouterEnabled, pool }: {
             type: import("./constants").SwapType;
-            pool: import("..").V2PoolInfo;
-            asset: import("../util/asset/assetModels").AssetWithIdAndAmount;
+            amount: number | bigint;
+            assetInID: number;
+            assetOutID: number;
+            pool: import("..").V2PoolInfo | null;
             decimals: {
                 assetIn: number;
                 assetOut: number;
@@ -58,19 +60,43 @@ export declare const Swap: {
             network: import("..").SupportedNetwork;
             isSwapRouterEnabled?: boolean | undefined;
         }) => Promise<import("./types").SwapQuote>;
-        getFixedInputSwapQuote: ({ assetIn, decimals, pool, isSwapRouterEnabled, network }: {
-            pool: import("..").V2PoolInfo;
-            assetIn: import("../util/asset/assetModels").AssetWithIdAndAmount;
+        getFixedInputSwapQuote: ({ amount, assetInID, assetOutID, decimals, isSwapRouterEnabled, network, pool }: {
+            amount: number | bigint;
+            assetInID: number;
+            assetOutID: number;
             decimals: {
                 assetIn: number;
                 assetOut: number;
             };
             network: import("..").SupportedNetwork;
+            pool: import("..").V2PoolInfo | null;
             isSwapRouterEnabled?: boolean | undefined;
         }) => Promise<import("./types").SwapQuote>;
-        getFixedOutputSwapQuote: ({ assetOut, decimals, pool, isSwapRouterEnabled, network }: {
+        getFixedInputDirectSwapQuote: ({ amount, assetInID, assetOutID, decimals, pool }: {
             pool: import("..").V2PoolInfo;
-            assetOut: import("../util/asset/assetModels").AssetWithIdAndAmount;
+            amount: number | bigint;
+            assetInID: number;
+            assetOutID: number;
+            decimals: {
+                assetIn: number;
+                assetOut: number;
+            };
+        }) => import("./types").DirectSwapQuote;
+        getFixedOutputDirectSwapQuote: ({ amount, assetInID, assetOutID, decimals, pool }: {
+            pool: import("..").V2PoolInfo | null;
+            amount: number | bigint;
+            assetInID: number;
+            assetOutID: number;
+            decimals: {
+                assetIn: number;
+                assetOut: number;
+            };
+        }) => import("./types").SwapQuote;
+        getFixedOutputSwapQuote: ({ amount, assetInID, assetOutID, decimals, isSwapRouterEnabled, network, pool }: {
+            amount: number | bigint;
+            assetInID: number;
+            assetOutID: number;
+            pool: import("..").V2PoolInfo | null;
             decimals: {
                 assetIn: number;
                 assetOut: number;

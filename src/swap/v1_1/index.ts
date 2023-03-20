@@ -24,10 +24,10 @@ import {
 } from "../types";
 import {SwapType} from "../constants";
 import {calculatePriceImpact, calculateSwapRate} from "../common/utils";
-import OutputAmountExceedsAvailableLiquidityError from "../../util/error/OutputAmountExceedsAvailableLiquidityError";
 import {AssetWithIdAndAmount} from "../../util/asset/assetModels";
 import {tinymanJSSDKConfig} from "../../config";
 import {CONTRACT_VERSION} from "../../contract/constants";
+import SwapQuoteError, {SwapQuoteErrorType} from "../../util/error/SwapQuoteError";
 
 // FEE = %0.3 or 3/1000
 const FEE_NUMERATOR = 3n;
@@ -228,7 +228,10 @@ function getFixedInputSwapQuote({
   decimals: {assetIn: number; assetOut: number};
 }): SwapQuote {
   if (pool.status !== PoolStatus.READY) {
-    throw new TinymanError({pool, assetIn}, "Trying to swap on a non-existent pool");
+    throw new SwapQuoteError(
+      SwapQuoteErrorType.NoAvailablePoolError,
+      "Trying to swap on a non-existent pool"
+    );
   }
 
   const assetInAmount = BigInt(assetIn.amount);
@@ -246,8 +249,8 @@ function getFixedInputSwapQuote({
     inputSupply = reserves.asset2;
     outputSupply = reserves.asset1;
   } else {
-    throw new TinymanError(
-      {pool, assetIn},
+    throw new SwapQuoteError(
+      SwapQuoteErrorType.AssetDoesNotBelongToPoolError,
       `Input asset (#${assetIn.id}) doesn't belong to the pool ${pool.account.address()}.`
     );
   }
@@ -259,7 +262,10 @@ function getFixedInputSwapQuote({
   const assetOutAmount = outputSupply - k / (inputSupply + assetInAmountMinusFee);
 
   if (assetOutAmount > outputSupply) {
-    throw new OutputAmountExceedsAvailableLiquidityError();
+    throw new SwapQuoteError(
+      SwapQuoteErrorType.OutputAmountExceedsAvailableLiquidityError,
+      "Output amount exceeds available liquidity."
+    );
   }
 
   const assetDataForSwapUtils = {
@@ -387,7 +393,10 @@ function getFixedOutputSwapQuote({
   decimals: {assetIn: number; assetOut: number};
 }): SwapQuote {
   if (pool.status !== PoolStatus.READY) {
-    throw new TinymanError({pool, assetOut}, "Trying to swap on a non-existent pool");
+    throw new SwapQuoteError(
+      SwapQuoteErrorType.NoAvailablePoolError,
+      "Trying to swap on a non-existent pool"
+    );
   }
 
   const assetOutAmount = BigInt(assetOut.amount);
@@ -405,8 +414,8 @@ function getFixedOutputSwapQuote({
     inputSupply = reserves.asset1;
     outputSupply = reserves.asset2;
   } else {
-    throw new TinymanError(
-      {pool, assetOut},
+    throw new SwapQuoteError(
+      SwapQuoteErrorType.AssetDoesNotBelongToPoolError,
       `Output asset (#${
         assetOut.id
       }) doesn't belong to the pool ${pool.account.address()}.`
@@ -414,7 +423,10 @@ function getFixedOutputSwapQuote({
   }
 
   if (assetOutAmount > outputSupply) {
-    throw new OutputAmountExceedsAvailableLiquidityError();
+    throw new SwapQuoteError(
+      SwapQuoteErrorType.OutputAmountExceedsAvailableLiquidityError,
+      "Output amount exceeds available liquidity."
+    );
   }
 
   const k = inputSupply * outputSupply;

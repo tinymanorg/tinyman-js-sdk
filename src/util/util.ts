@@ -1,6 +1,6 @@
 import {Algodv2} from "algosdk";
 
-import {SignerTransaction} from "./commonTypes";
+import {SignerTransaction, TinymanApiErrorShape} from "./commonTypes";
 import {AccountInformation} from "./account/accountTypes";
 import TinymanError from "./error/TinymanError";
 
@@ -330,4 +330,8 @@ export function encodeInteger(number) {
  */
 export function encodeString(text: string) {
   return new TextEncoder().encode(text);
+}
+
+export function hasTinymanApiErrorShape(error: any): error is TinymanApiErrorShape {
+  return Boolean(error) && typeof error.fallback_message !== "undefined";
 }

@@ -5,6 +5,8 @@ import {CONTRACT_VERSION} from "../../../contract/constants";
 import {ALGO_ASSET_ID} from "../../../util/asset/assetConstants";
 import {getAssetId, isAlgo} from "../../../util/asset/assetUtils";
 import {SupportedNetwork} from "../../../util/commonTypes";
+import SwapQuoteError, {SwapQuoteErrorType} from "../../../util/error/SwapQuoteError";
+import {hasTinymanApiErrorShape} from "../../../util/util";
 import {getValidatorAppID} from "../../../validator";
 import {SwapType} from "../../constants";
 import {
@@ -181,23 +183,31 @@ export async function getSwapRoute({
     amount: String(amount)
   };
 
-  try {
-    const response = await fetch(
-      `${TINYMAN_ANALYTICS_API_BASE_URLS[network].v1}/swap-router/quotes/`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(payload)
-      }
-    );
+  const response = await fetch(
+    `${TINYMAN_ANALYTICS_API_BASE_URLS[network].v1}/swap-router/quotes/`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    }
+  ).catch(() => {
+    throw new Error("Network error");
+  });
 
-    return response.json();
-    // TODO: Handle all errors properly
-  } catch (error) {
-    console.error(error);
+  const serializedResponse = await response.json();
 
-    throw error;
+  if (!response.ok) {
+    if (hasTinymanApiErrorShape(serializedResponse)) {
+      throw new SwapQuoteError(
+        serializedResponse.type as SwapQuoteErrorType,
+        serializedResponse.fallback_message
+      );
+    } else {
+      throw new SwapQuoteError(SwapQuoteErrorType.UnknownError, "Unknown error");
+    }
   }
+
+  return serializedResponse;
 }

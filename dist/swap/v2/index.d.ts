@@ -1,9 +1,8 @@
 import { Algodv2 } from "algosdk";
 import { InitiatorSigner, SignerTransaction, SupportedNetwork } from "../../util/commonTypes";
 import { V2PoolInfo } from "../../util/pool/poolTypes";
-import { GenerateSwapTxnsParams, SwapQuote, V2SwapExecution } from "../types";
+import { DirectSwapQuote, GenerateSwapTxnsParams, SwapQuote, V2SwapExecution } from "../types";
 import { SwapType } from "../constants";
-import { AssetWithIdAndAmount } from "../../util/asset/assetModels";
 declare function generateTxns(params: GenerateSwapTxnsParams): Promise<SignerTransaction[]>;
 declare function signTxns({ txGroup, initiatorSigner }: {
     txGroup: SignerTransaction[];
@@ -27,10 +26,12 @@ declare function execute({ client, quote, txGroup, signedTxns }: {
  * @param decimals.assetOut - Decimals quantity for the output asset
  * @returns A promise for the Swap quote
  */
-declare function getQuote({ type, pool, asset, decimals, network, isSwapRouterEnabled }: {
+declare function getQuote({ type, amount, assetInID, assetOutID, decimals, network, isSwapRouterEnabled, pool }: {
     type: SwapType;
-    pool: V2PoolInfo;
-    asset: AssetWithIdAndAmount;
+    amount: number | bigint;
+    assetInID: number;
+    assetOutID: number;
+    pool: V2PoolInfo | null;
     decimals: {
         assetIn: number;
         assetOut: number;
@@ -38,25 +39,49 @@ declare function getQuote({ type, pool, asset, decimals, network, isSwapRouterEn
     network: SupportedNetwork;
     isSwapRouterEnabled?: boolean;
 }): Promise<SwapQuote>;
+declare function getFixedInputDirectSwapQuote({ amount, assetInID, assetOutID, decimals, pool }: {
+    pool: V2PoolInfo;
+    amount: number | bigint;
+    assetInID: number;
+    assetOutID: number;
+    decimals: {
+        assetIn: number;
+        assetOut: number;
+    };
+}): DirectSwapQuote;
+declare function getFixedOutputDirectSwapQuote({ amount, assetInID, assetOutID, decimals, pool }: {
+    pool: V2PoolInfo | null;
+    amount: number | bigint;
+    assetInID: number;
+    assetOutID: number;
+    decimals: {
+        assetIn: number;
+        assetOut: number;
+    };
+}): SwapQuote;
 /**
  * @returns A quote for a fixed input swap. Does NOT execute any transactions.
  */
-declare function getFixedInputSwapQuote({ assetIn, decimals, pool, isSwapRouterEnabled, network }: {
-    pool: V2PoolInfo;
-    assetIn: AssetWithIdAndAmount;
+declare function getFixedInputSwapQuote({ amount, assetInID, assetOutID, decimals, isSwapRouterEnabled, network, pool }: {
+    amount: number | bigint;
+    assetInID: number;
+    assetOutID: number;
     decimals: {
         assetIn: number;
         assetOut: number;
     };
     network: SupportedNetwork;
+    pool: V2PoolInfo | null;
     isSwapRouterEnabled?: boolean;
 }): Promise<SwapQuote>;
 /**
  * @returns A quote for a fixed output swap. Does NOT execute any transactions.
  */
-declare function getFixedOutputSwapQuote({ assetOut, decimals, pool, isSwapRouterEnabled, network }: {
-    pool: V2PoolInfo;
-    assetOut: AssetWithIdAndAmount;
+declare function getFixedOutputSwapQuote({ amount, assetInID, assetOutID, decimals, isSwapRouterEnabled, network, pool }: {
+    amount: number | bigint;
+    assetInID: number;
+    assetOutID: number;
+    pool: V2PoolInfo | null;
     decimals: {
         assetIn: number;
         assetOut: number;
@@ -81,6 +106,8 @@ declare function calculateFixedInputSwap({ inputSupply, outputSupply, swapInputA
 export declare const SwapV2: {
     getQuote: typeof getQuote;
     getFixedInputSwapQuote: typeof getFixedInputSwapQuote;
+    getFixedInputDirectSwapQuote: typeof getFixedInputDirectSwapQuote;
+    getFixedOutputDirectSwapQuote: typeof getFixedOutputDirectSwapQuote;
     getFixedOutputSwapQuote: typeof getFixedOutputSwapQuote;
     generateTxns: typeof generateTxns;
     signTxns: typeof signTxns;
