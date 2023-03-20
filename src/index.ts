@@ -118,6 +118,7 @@ export type {
   GenerateSwapTxnsParams
 } from "./swap/types";
 export {getSwapTotalFee} from "./swap/utils";
+export * from "./swap/v2/util";
 export {SwapType} from "./swap/constants";
 export {Swap} from "./swap";
 // eslint-disable-next-line no-duplicate-imports
