@@ -307,13 +307,6 @@ function getFixedInputDirectSwapQuote({
     );
   }
 
-  if (isSwapAssetInAmountLow(Number(amount))) {
-    throw new SwapQuoteError(
-      SwapQuoteErrorType.LowSwapAmountError,
-      "Swap amount is too low."
-    );
-  }
-
   const assetInAmount = BigInt(amount);
   const totalFeeShare = pool.totalFeeShare!;
 
@@ -345,6 +338,13 @@ function getFixedInputDirectSwapQuote({
     throw new SwapQuoteError(
       SwapQuoteErrorType.OutputAmountExceedsAvailableLiquidityError,
       "Output amount exceeds available liquidity."
+    );
+  }
+
+  if (isSwapAssetInAmountLow(Number(amount))) {
+    throw new SwapQuoteError(
+      SwapQuoteErrorType.LowSwapAmountError,
+      "Swap amount is too low."
     );
   }
 
@@ -407,17 +407,17 @@ function getFixedOutputDirectSwapQuote({
     decimals
   });
 
-  if (isSwapAssetInAmountLow(Number(swapInputAmount))) {
-    throw new SwapQuoteError(
-      SwapQuoteErrorType.LowSwapAmountError,
-      "Swap amount is too low."
-    );
-  }
-
   if (assetOutAmount > outputSupply) {
     throw new SwapQuoteError(
       SwapQuoteErrorType.OutputAmountExceedsAvailableLiquidityError,
       "Output amount exceeds available liquidity."
+    );
+  }
+
+  if (isSwapAssetInAmountLow(Number(swapInputAmount))) {
+    throw new SwapQuoteError(
+      SwapQuoteErrorType.LowSwapAmountError,
+      "Swap amount is too low."
     );
   }
 
