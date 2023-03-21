@@ -28,3 +28,10 @@ export function isSwapAssetInAmountLow(
 ) {
   return amount < getV2MinSwapAssetInAmount(feeRate);
 }
+
+export function getSwapAppCallFeeAmount(swapType: SwapType) {
+  // Add +1 to account for the outer txn fee
+  const totalTxnCount = V2_SWAP_APP_CALL_INNER_TXN_COUNT[swapType] + 1;
+
+  return totalTxnCount * ALGORAND_MIN_TX_FEE;
+}

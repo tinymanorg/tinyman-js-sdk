@@ -1,7 +1,7 @@
 import {Algodv2} from "algosdk";
 
 import {AssetWithIdAndAmount, TinymanAnalyticsApiAsset} from "../util/asset/assetModels";
-import {SupportedNetwork} from "../util/commonTypes";
+import {SignerTransaction, SupportedNetwork} from "../util/commonTypes";
 import {PoolReserves, V1PoolInfo, V2PoolInfo} from "../util/pool/poolTypes";
 import {SwapType} from "./constants";
 
@@ -175,4 +175,13 @@ export interface V2SwapExecution {
   quote: SwapQuote;
   txnID: string;
   round: number;
+}
+
+export interface ExecuteSwapCommonParams {
+  swapType: SwapType;
+  client: Algodv2;
+  network: SupportedNetwork;
+  txGroup: SignerTransaction[];
+  signedTxns: Uint8Array[];
+  assetIn: AssetWithIdAndAmount;
 }

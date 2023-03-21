@@ -5,9 +5,17 @@ import {
   AssetWithIdAndAmount
 } from "../../util/asset/assetModels";
 import {getAssetId} from "../../util/asset/assetUtils";
+import SwapQuoteError, {SwapQuoteErrorType} from "../../util/error/SwapQuoteError";
 import {convertFromBaseUnits, roundNumber} from "../../util/util";
+import {SwapType} from "../constants";
 import {SwapQuote, SwapQuoteType} from "../types";
-import {getAssetInFromSwapRoute, getAssetOutFromSwapRoute} from "../v2/router/util";
+import {V1_1_SWAP_TOTAL_FEE} from "../v1_1/constants";
+import {
+  getAssetInFromSwapRoute,
+  getAssetOutFromSwapRoute,
+  getSwapRouteRate
+} from "../v2/router/util";
+import {getV2SwapTotalFee} from "../v2/util";
 
 function calculateSwapRate({
   assetIn,
@@ -96,6 +104,75 @@ function getSwapQuoteContractVersion(quote: SwapQuote): ContractVersionValue {
   return CONTRACT_VERSION.V2;
 }
 
+/**
+ * @returns the total fee that will be paid by the user
+ * for the swap transaction with given parameters
+ */
+function getSwapTotalFee(
+  params:
+    | {
+        version: typeof CONTRACT_VERSION.V1_1;
+      }
+    | {
+        version: typeof CONTRACT_VERSION.V2;
+        type: SwapType;
+      }
+) {
+  switch (params.version) {
+    case CONTRACT_VERSION.V1_1:
+      return V1_1_SWAP_TOTAL_FEE;
+
+    case CONTRACT_VERSION.V2:
+      return getV2SwapTotalFee(params.type);
+
+    default:
+      throw new Error("Provided contract version was not valid.");
+  }
+}
+
+/**
+ * @returns The asset amount ratio for the given quote
+ */
+function getSwapQuoteRate(quote: SwapQuote): number {
+  if (quote.type === SwapQuoteType.Direct) {
+    return quote.data.quote.rate;
+  }
+
+  return getSwapRouteRate(quote.data.route);
+}
+
+/**
+ * Compares the given quotes and returns the best one (with the highest rate).
+ */
+function getBestQuote(quotes: SwapQuote[]): SwapQuote {
+  let bestQuote: SwapQuote = quotes[0];
+  let bestQuoteRate = getSwapQuoteRate(bestQuote);
+
+  for (let index = 1; index < quotes.length; index++) {
+    const quote = quotes[index];
+    const currentRate = getSwapQuoteRate(quote);
+
+    if (currentRate > bestQuoteRate) {
+      bestQuote = quote;
+      bestQuoteRate = currentRate;
+    }
+  }
+
+  return bestQuote;
+}
+
+function isSwapQuoteErrorCausedByAmount(error: Error): boolean {
+  return (
+    error instanceof SwapQuoteError &&
+    [
+      SwapQuoteErrorType.SwapRouterInsufficientReservesError,
+      SwapQuoteErrorType.SwapRouterLowSwapAmountError,
+      SwapQuoteErrorType.OutputAmountExceedsAvailableLiquidityError,
+      SwapQuoteErrorType.LowSwapAmountError
+    ].includes(error.type)
+  );
+}
+
 export {
   calculateSwapRate,
   calculatePriceImpact,
@@ -103,5 +180,9 @@ export {
   getAssetInFromSwapQuote,
   getAssetOutFromSwapQuote,
   getAssetInAndAssetOutFromSwapQuote,
-  getSwapQuoteContractVersion
+  getSwapQuoteContractVersion,
+  getSwapTotalFee,
+  getSwapQuoteRate,
+  getBestQuote,
+  isSwapQuoteErrorCausedByAmount
 };

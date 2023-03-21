@@ -30,7 +30,6 @@ export { V1_1_REMOVE_LIQUIDITY_TXN_COUNT } from "./remove-liquidity/v1_1/constan
 export { V2_REMOVE_LIQUIDITY_APP_CALL_INNER_TXN_COUNT } from "./remove-liquidity/v2/constants";
 export { RemoveLiquidity } from "./remove-liquidity";
 export type { SwapQuote, V1SwapExecution, V2SwapExecution, DirectSwapQuote, SwapRoute, GenerateSwapTxnsParams } from "./swap/types";
-export { getSwapTotalFee } from "./swap/utils";
 export * from "./swap/v2/util";
 export { SwapType } from "./swap/constants";
 export { Swap } from "./swap";

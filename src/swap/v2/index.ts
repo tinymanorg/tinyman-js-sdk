@@ -1,4 +1,4 @@
-import algosdk, {Algodv2, ALGORAND_MIN_TX_FEE, Transaction} from "algosdk";
+import algosdk, {Algodv2, Transaction} from "algosdk";
 
 import {
   applySlippageToAmount,
@@ -23,23 +23,23 @@ import {SwapType} from "../constants";
 import {
   V2_SWAP_APP_CALL_ARG_ENCODED,
   V2_SWAP_APP_CALL_SWAP_TYPE_ARGS_ENCODED,
-  V2SwapTxnGroupIndices,
-  V2_SWAP_APP_CALL_INNER_TXN_COUNT
+  V2SwapTxnGroupIndices
 } from "./constants";
 import {isAlgo} from "../../util/asset/assetUtils";
 import {
   calculatePriceImpact,
   getAssetInFromSwapQuote,
-  getAssetOutFromSwapQuote
+  getAssetOutFromSwapQuote,
+  getBestQuote,
+  isSwapQuoteErrorCausedByAmount
 } from "../common/utils";
 import {getAppCallInnerTxns} from "../../util/transaction/transactionUtils";
 import {tinymanJSSDKConfig} from "../../config";
 import {CONTRACT_VERSION} from "../../contract/constants";
 import {generateSwapRouterTxns, getSwapRoute} from "./router/swap-router";
 import {poolUtils} from "../../util/pool";
-import {getBestQuote, isSwapQuoteErrorCausedByAmount} from "../utils";
 import SwapQuoteError, {SwapQuoteErrorType} from "../../util/error/SwapQuoteError";
-import {isSwapAssetInAmountLow} from "./util";
+import {getSwapAppCallFeeAmount, isSwapAssetInAmountLow} from "./util";
 
 async function generateTxns(
   params: GenerateSwapTxnsParams
@@ -141,13 +141,6 @@ function signTxns({
   initiatorSigner: InitiatorSigner;
 }): Promise<Uint8Array[]> {
   return initiatorSigner([txGroup]);
-}
-
-function getSwapAppCallFeeAmount(swapType: SwapType) {
-  // Add +1 to account for the outer txn fee
-  const totalTxnCount = V2_SWAP_APP_CALL_INNER_TXN_COUNT[swapType] + 1;
-
-  return totalTxnCount * ALGORAND_MIN_TX_FEE;
 }
 
 /**
