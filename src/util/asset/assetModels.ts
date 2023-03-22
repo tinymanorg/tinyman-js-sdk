@@ -16,6 +16,7 @@ export interface TinymanAnalyticsApiAsset {
   liquidity_in_usd?: null | string;
   last_day_volume_in_usd?: null | string;
   last_day_price_change?: null | string;
+  clawback_address: string;
 }
 
 export interface IndexerAssetInformation {
