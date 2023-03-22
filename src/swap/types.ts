@@ -123,16 +123,8 @@ export type GenerateV1_1SwapTxnsParams = Omit<
   GenerateSwapTxnsParams,
   "quote" | "network"
 > & {
-  quote: DirectSwapQuoteAndPool;
+  quoteAndPool: DirectSwapQuoteAndPool;
 };
-
-export interface GenerateSwapRouterTxnsParams {
-  client: Algodv2;
-  initiatorAddr: string;
-  swapType: SwapType;
-  route: SwapRoute;
-  network: SupportedNetwork;
-}
 
 /** An object containing information about a successfully executed swap. */
 export interface V1SwapExecution {

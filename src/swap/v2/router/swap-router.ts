@@ -1,7 +1,13 @@
-import algosdk, {ALGORAND_MIN_TX_FEE, getApplicationAddress, Transaction} from "algosdk";
+import algosdk, {
+  Algodv2,
+  ALGORAND_MIN_TX_FEE,
+  getApplicationAddress,
+  Transaction
+} from "algosdk";
 import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
 
 import {CONTRACT_VERSION} from "../../../contract/constants";
+import {AccountInformation} from "../../../util/account/accountTypes";
 import {ALGO_ASSET_ID} from "../../../util/asset/assetConstants";
 import {getAssetId, isAlgo} from "../../../util/asset/assetUtils";
 import {SupportedNetwork} from "../../../util/commonTypes";
@@ -9,11 +15,7 @@ import SwapQuoteError, {SwapQuoteErrorType} from "../../../util/error/SwapQuoteE
 import {hasTinymanApiErrorShape} from "../../../util/util";
 import {getValidatorAppID} from "../../../validator";
 import {SwapType} from "../../constants";
-import {
-  FetchSwapRouteQuotesPayload,
-  SwapRouterResponse,
-  GenerateSwapRouterTxnsParams
-} from "../../types";
+import {FetchSwapRouteQuotesPayload, SwapRouterResponse, SwapRoute} from "../../types";
 import {
   V2_SWAP_APP_CALL_ARG_ENCODED,
   V2_SWAP_APP_CALL_SWAP_TYPE_ARGS_ENCODED,
@@ -26,21 +28,24 @@ import {
   getSwapRouterAppID
 } from "./util";
 
+/**
+ * Generates txns that would opt in the Swap Router Application to the assets used in the swap router
+ */
 export async function generateSwapRouterAssetOptInTransaction({
   client,
   routerAppID,
   assetIDs,
-  accountAddress
+  initiatorAddr
 }: {
   client: AlgodClient;
   routerAppID: number;
   assetIDs: number[];
-  accountAddress: string;
+  initiatorAddr: string;
 }): Promise<Transaction> {
   const suggestedParams = await client.getTransactionParams().do();
   // We need to create a NoOp transaction to opt-in to the assets
   const assetOptInTxn = algosdk.makeApplicationNoOpTxnFromObject({
-    from: accountAddress,
+    from: initiatorAddr,
     appIndex: routerAppID,
     appArgs: [V2_SWAP_ROUTER_APP_ARGS_ENCODED.ASSET_OPT_IN],
     foreignAssets: assetIDs,
@@ -64,7 +69,13 @@ export async function generateSwapRouterTxns({
   network,
   swapType,
   route
-}: GenerateSwapRouterTxnsParams) {
+}: {
+  client: Algodv2;
+  initiatorAddr: string;
+  swapType: SwapType;
+  route: SwapRoute;
+  network: SupportedNetwork;
+}) {
   const suggestedParams = await client.getTransactionParams().do();
 
   const [assetInID, intermediaryAssetID, assetOutID] = [
@@ -118,14 +129,14 @@ export async function generateSwapRouterTxns({
 
   const optInRequiredAssetIDs = await getSwapRouterAppOptInRequiredAssetIDs({
     client,
-    routerAppID,
+    network,
     assetIDs: [assetInID, intermediaryAssetID, assetOutID]
   });
 
   if (optInRequiredAssetIDs.length > 0) {
     const routerAppAssetOptInTxn = await generateSwapRouterAssetOptInTransaction({
       client,
-      accountAddress: initiatorAddr,
+      initiatorAddr,
       assetIDs: optInRequiredAssetIDs,
       routerAppID
     });
@@ -143,24 +154,23 @@ export async function generateSwapRouterTxns({
 
 export async function getSwapRouterAppOptInRequiredAssetIDs({
   client,
-  routerAppID,
+  network,
   assetIDs
 }: {
   client: AlgodClient;
-  routerAppID: number;
+  network: SupportedNetwork;
   assetIDs: number[];
 }) {
-  const swapRouterAppAddress = getApplicationAddress(routerAppID);
-  const accountInfo = await client.accountInformation(swapRouterAppAddress).do();
-  const appOptedInAssetIDs = accountInfo.assets.map(
-    (asset: {"asset-id": number}) => asset["asset-id"]
-  );
-  const requiredAssetIDs = assetIDs.filter(
+  const swapRouterAppAddress = getApplicationAddress(getSwapRouterAppID(network));
+  const accountInfo = (await client
+    .accountInformation(swapRouterAppAddress)
+    .do()) as AccountInformation;
+  const appOptedInAssetIDs = accountInfo.assets.map((asset) => asset["asset-id"]);
+
+  return assetIDs.filter(
     (assetID: number) =>
       assetID !== ALGO_ASSET_ID && !appOptedInAssetIDs.includes(assetID)
   );
-
-  return requiredAssetIDs;
 }
 
 export async function getSwapRoute({
@@ -205,8 +215,18 @@ export async function getSwapRoute({
         serializedResponse.fallback_message
       );
     } else {
-      throw new SwapQuoteError(SwapQuoteErrorType.UnknownError, "Unknown error");
+      throw new SwapQuoteError(
+        SwapQuoteErrorType.UnknownError,
+        "There was an error while getting a quote from Swap Router"
+      );
     }
+  }
+
+  if ((serializedResponse as SwapRouterResponse).route.length < 2) {
+    throw new SwapQuoteError(
+      SwapQuoteErrorType.SwapRouterNoRouteError,
+      "Swap router couldn't find a route for this swap."
+    );
   }
 
   return serializedResponse;

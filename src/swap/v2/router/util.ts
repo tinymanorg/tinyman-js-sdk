@@ -19,7 +19,7 @@ function getSwapRouterAppID(network: SupportedNetwork) {
     throw new Error(`Unknown network or network not supported: ${network}`);
   }
 
-  return SWAP_ROUTER_APP_ID[network];
+  return id;
 }
 
 function getAssetOutFromSwapRoute(route: SwapRoute) {

@@ -18,21 +18,13 @@ import {
   isSwapQuoteErrorCausedByAmount
 } from "./common/utils";
 import {getAssetId} from "../util/asset/assetUtils";
-import {isPoolEmpty} from "../util/pool/common";
 import SwapQuoteError, {SwapQuoteErrorType} from "../util/error/SwapQuoteError";
 
 /**
  * Gets the best quote for swap from the pools and swap router and returns the best option.
  */
 export function getQuote(params: GetSwapQuoteParams): Promise<SwapQuote> {
-  const {type, pools, isSwapRouterEnabled} = params;
-
-  if (!isSwapRouterEnabled && pools.every((pool) => isPoolEmpty(pool.reserves))) {
-    throw new SwapQuoteError(
-      SwapQuoteErrorType.NoAvailablePoolError,
-      "There is not an available pool for this swap. However, you can enable swap router and try to perform this swap with multiple pools."
-    );
-  }
+  const {type} = params;
 
   if (type === SwapType.FixedInput) {
     return getFixedInputSwapQuote(params);
@@ -67,7 +59,7 @@ function validateQuotes(promises: Promise<SwapQuote>[]): Promise<SwapQuote[]> {
 
     const filteredResults = (
       results.filter(
-        (result) => result.status === "fulfilled" && result.value !== undefined
+        (result) => result.status === "fulfilled" && result.value
       ) as PromiseFulfilledResult<SwapQuote>[]
     ).map((result) => result.value);
 
@@ -91,17 +83,17 @@ export async function getFixedInputSwapQuote(
   );
 
   if (v1_1Pool) {
-    const quoteGetterArgs = {
-      pool: v1_1Pool.info,
-      assetIn: {amount, id: Number(assetIn.id)},
-      decimals: {assetIn: assetIn.decimals, assetOut: assetOut.decimals},
-      reserves: v1_1Pool.reserves
-    };
-
     quotePromises.push(
       new Promise((resolve, reject) => {
         try {
-          resolve(SwapV1_1.getFixedInputSwapQuote(quoteGetterArgs));
+          resolve(
+            SwapV1_1.getFixedInputSwapQuote({
+              pool: v1_1Pool.info,
+              assetIn: {amount, id: Number(assetIn.id)},
+              decimals: {assetIn: assetIn.decimals, assetOut: assetOut.decimals},
+              reserves: v1_1Pool.reserves
+            })
+          );
         } catch (error) {
           reject(error);
         }
@@ -123,10 +115,15 @@ export async function getFixedInputSwapQuote(
   quotePromises.push(
     SwapV2.getFixedInputSwapQuote({
       amount,
-      assetInID: getAssetId(assetIn),
-      assetOutID: getAssetId(assetOut),
+      assetIn: {
+        id: getAssetId(assetIn),
+        decimals: assetIn.decimals
+      },
+      assetOut: {
+        id: getAssetId(assetOut),
+        decimals: assetOut.decimals
+      },
       pool: v2Pool?.info ?? null,
-      decimals: {assetIn: assetIn.decimals, assetOut: assetOut.decimals},
       isSwapRouterEnabled,
       network: params.network
     })
@@ -153,17 +150,17 @@ export async function getFixedOutputSwapQuote(
   );
 
   if (v1_1Pool) {
-    const quoteGetterArgs = {
-      pool: v1_1Pool.info,
-      assetOut: {amount, id: Number(assetOut.id)},
-      decimals: {assetIn: assetIn.decimals, assetOut: assetOut.decimals},
-      reserves: v1_1Pool.reserves
-    };
-
     quotePromises.push(
       new Promise((resolve, reject) => {
         try {
-          resolve(SwapV1_1.getFixedOutputSwapQuote(quoteGetterArgs));
+          resolve(
+            SwapV1_1.getFixedOutputSwapQuote({
+              pool: v1_1Pool.info,
+              assetOut: {amount, id: Number(assetOut.id)},
+              decimals: {assetIn: assetIn.decimals, assetOut: assetOut.decimals},
+              reserves: v1_1Pool.reserves
+            })
+          );
         } catch (error) {
           reject(error);
         }
@@ -185,10 +182,15 @@ export async function getFixedOutputSwapQuote(
   quotePromises.push(
     SwapV2.getFixedOutputSwapQuote({
       amount,
-      assetInID: getAssetId(assetIn),
-      assetOutID: getAssetId(assetOut),
+      assetIn: {
+        id: getAssetId(assetIn),
+        decimals: assetIn.decimals
+      },
+      assetOut: {
+        id: getAssetId(assetOut),
+        decimals: assetOut.decimals
+      },
       pool: v2Pool?.info ?? null,
-      decimals: {assetIn: assetIn.decimals, assetOut: assetOut.decimals},
       isSwapRouterEnabled,
       network: params.network
     })
@@ -206,7 +208,7 @@ export function generateTxns(
     params.quote.type === SwapQuoteType.Direct &&
     getSwapQuoteContractVersion(params.quote) === CONTRACT_VERSION.V1_1
   ) {
-    return SwapV1_1.generateTxns({...params, quote: params.quote.data});
+    return SwapV1_1.generateTxns({...params, quoteAndPool: params.quote.data});
   }
 
   return SwapV2.generateTxns(params);
@@ -225,7 +227,7 @@ export function signTxns(params: {
       data: {pool}
     } = params.quote;
 
-    return SwapV1_1.signTxns({pool, ...params});
+    return SwapV1_1.signTxns({...params, pool});
   }
 
   return SwapV2.signTxns(params);

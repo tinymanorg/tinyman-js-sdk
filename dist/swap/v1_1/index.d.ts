@@ -9,7 +9,7 @@ declare function signTxns({ pool, txGroup, initiatorSigner }: {
     txGroup: SignerTransaction[];
     initiatorSigner: InitiatorSigner;
 }): Promise<Uint8Array[]>;
-declare function generateTxns({ client, quote, swapType, slippage, initiatorAddr }: GenerateV1_1SwapTxnsParams): Promise<SignerTransaction[]>;
+declare function generateTxns({ client, quoteAndPool, swapType, slippage, initiatorAddr }: GenerateV1_1SwapTxnsParams): Promise<SignerTransaction[]>;
 /**
  *
  * @param type - Type of the swap

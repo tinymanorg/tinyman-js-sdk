@@ -68,13 +68,13 @@ async function signTxns({
 
 async function generateTxns({
   client,
-  quote,
+  quoteAndPool,
   swapType,
   slippage,
   initiatorAddr
 }: GenerateV1_1SwapTxnsParams): Promise<SignerTransaction[]> {
-  const {pool, quote: swapQuote} = quote;
-  const {assetInID, assetOutID} = swapQuote;
+  const {pool, quote} = quoteAndPool;
+  const {assetInID, assetOutID} = quote;
 
   const poolAddress = pool.account.address();
   const poolAssets = [pool.asset1ID, pool.asset2ID];
@@ -111,8 +111,8 @@ async function generateTxns({
 
   const assetInAmount =
     swapType === SwapType.FixedOutput
-      ? applySlippageToAmount("positive", slippage, swapQuote.assetInAmount)
-      : swapQuote.assetInAmount;
+      ? applySlippageToAmount("positive", slippage, quote.assetInAmount)
+      : quote.assetInAmount;
   let assetInTxn: algosdk.Transaction;
 
   if (assetInID === ALGO_ASSET_ID) {
@@ -134,8 +134,8 @@ async function generateTxns({
 
   const assetOutAmount =
     swapType === SwapType.FixedInput
-      ? applySlippageToAmount("negative", slippage, swapQuote.assetOutAmount)
-      : swapQuote.assetOutAmount;
+      ? applySlippageToAmount("negative", slippage, quote.assetOutAmount)
+      : quote.assetOutAmount;
   let assetOutTxn: algosdk.Transaction;
 
   if (assetOutID === ALGO_ASSET_ID) {
@@ -230,7 +230,7 @@ function getFixedInputSwapQuote({
   if (pool.status !== PoolStatus.READY) {
     throw new SwapQuoteError(
       SwapQuoteErrorType.NoAvailablePoolError,
-      "Trying to swap on a non-existent pool"
+      "There is not an available pool for this asset pair"
     );
   }
 
@@ -395,7 +395,7 @@ function getFixedOutputSwapQuote({
   if (pool.status !== PoolStatus.READY) {
     throw new SwapQuoteError(
       SwapQuoteErrorType.NoAvailablePoolError,
-      "Trying to swap on a non-existent pool"
+      "There is not an available pool for this asset pair"
     );
   }
 
@@ -577,7 +577,7 @@ async function execute({
   if (pool.status !== PoolStatus.READY) {
     throw new TinymanError(
       {pool, swapType, txGroup},
-      "Trying to swap on a non-existent pool"
+      "There is not an available pool for this asset pair"
     );
   }
 
