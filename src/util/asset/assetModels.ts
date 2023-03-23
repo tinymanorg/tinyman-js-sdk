@@ -13,6 +13,7 @@ export interface TinymanAnalyticsApiAsset {
   decimals: number;
   url: string;
   total_amount: string;
+  clawback_address: string;
   liquidity_in_usd?: null | string;
   last_day_volume_in_usd?: null | string;
   last_day_price_change?: null | string;
