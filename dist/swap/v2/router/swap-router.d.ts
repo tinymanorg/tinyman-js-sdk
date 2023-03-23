@@ -1,5 +1,4 @@
 import algosdk, { Algodv2, Transaction } from "algosdk";
-import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
 import { SupportedNetwork } from "../../../util/commonTypes";
 import { SwapType } from "../../constants";
 import { SwapRouterResponse, SwapRoute } from "../../types";
@@ -7,7 +6,7 @@ import { SwapRouterResponse, SwapRoute } from "../../types";
  * Generates txns that would opt in the Swap Router Application to the assets used in the swap router
  */
 export declare function generateSwapRouterAssetOptInTransaction({ client, routerAppID, assetIDs, initiatorAddr }: {
-    client: AlgodClient;
+    client: Algodv2;
     routerAppID: number;
     assetIDs: number[];
     initiatorAddr: string;
@@ -23,7 +22,7 @@ export declare function generateSwapRouterTxns({ initiatorAddr, client, network,
     signers: string[];
 }[]>;
 export declare function getSwapRouterAppOptInRequiredAssetIDs({ client, network, assetIDs }: {
-    client: AlgodClient;
+    client: Algodv2;
     network: SupportedNetwork;
     assetIDs: number[];
 }): Promise<number[]>;
