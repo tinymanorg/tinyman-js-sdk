@@ -8,5 +8,5 @@ export interface SignerTransaction {
      */
     signers?: string[];
 }
-export declare type InitiatorSigner = (txGroupList: SignerTransaction[][]) => Promise<Uint8Array[]>;
-export declare type SupportedNetwork = "testnet" | "mainnet";
+export type InitiatorSigner = (txGroupList: SignerTransaction[][]) => Promise<Uint8Array[]>;
+export type SupportedNetwork = "testnet" | "mainnet";
