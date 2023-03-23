@@ -9,7 +9,8 @@ export const ALGO_ASSET: TinymanAnalyticsApiAsset = {
   decimals: 6,
   url: "https://algorand.org",
   is_liquidity_token: false,
-  total_amount: "6615503326932151"
+  total_amount: "6615503326932151",
+  clawback_address: ""
 };
 
 export const POOL_TOKEN_UNIT_NAME = {

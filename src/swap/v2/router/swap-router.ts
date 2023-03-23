@@ -4,7 +4,6 @@ import algosdk, {
   getApplicationAddress,
   Transaction
 } from "algosdk";
-import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
 
 import {CONTRACT_VERSION} from "../../../contract/constants";
 import {AccountInformation} from "../../../util/account/accountTypes";
@@ -37,7 +36,7 @@ export async function generateSwapRouterAssetOptInTransaction({
   assetIDs,
   initiatorAddr
 }: {
-  client: AlgodClient;
+  client: Algodv2;
   routerAppID: number;
   assetIDs: number[];
   initiatorAddr: string;
@@ -157,7 +156,7 @@ export async function getSwapRouterAppOptInRequiredAssetIDs({
   network,
   assetIDs
 }: {
-  client: AlgodClient;
+  client: Algodv2;
   network: SupportedNetwork;
   assetIDs: number[];
 }) {
