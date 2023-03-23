@@ -1,6 +1,6 @@
 {
   "name": "@tinymanorg/tinyman-js-sdk",
-  "version": "2.0.7",
+  "version": "2.1.0",
   "description": "Tinyman JS SDK",
   "author": "Tinyman Core Team",
   "license": "MIT",
@@ -58,8 +58,7 @@
     "prettier": "^2.8.6",
     "rollup": "^3.20.0",
     "rollup-plugin-eslint": "^7.0.0",
-    "rollup-plugin-terser": "^7.0.2",
-    "rollup-plugin-typescript2": "^0.34.1",
+    "@rollup/plugin-terser": "0.4.0",
     "typescript": "^5.0.2"
   },
   "dependencies": {
