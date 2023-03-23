@@ -1,3 +1,4 @@
+import { AssetWithIdAndAmount } from "../../util/asset/assetModels";
 export interface V2QuoteAssetAmount {
     assetId: number;
     amount: bigint;
@@ -29,10 +30,7 @@ export interface V2RemoveLiquidityExecution {
      * Can be `undefined` if the execution was successful, but there was an issue while
      * extracting the output asset data fron the transaction response
      */
-    outputAssets: {
-        assetId: number;
-        amount: number;
-    }[] | undefined;
+    outputAssets: AssetWithIdAndAmount[] | undefined;
     txnID: string;
 }
 export {};
