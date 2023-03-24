@@ -10,11 +10,12 @@ jobs:
     if: github.repository_owner == 'tinymanorg'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-      - uses: actions/setup-node@v1
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
           node-version: 16
       - run: npm install
+      - run: npm test
       - run: npm run build
 
       - id: publish-to-npm
