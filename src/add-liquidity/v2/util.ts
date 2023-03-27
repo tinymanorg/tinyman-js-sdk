@@ -2,7 +2,6 @@ import {ALGORAND_MIN_TX_FEE} from "algosdk";
 
 import {calculatePriceImpact} from "../../swap/common/utils";
 import {PoolReserves} from "../../util/pool/poolTypes";
-import {convertToBaseUnits} from "../../util/util";
 import {V2_LOCKED_POOL_TOKENS} from "../../util/pool/poolConstants";
 import {
   V2AddLiquidityType,
@@ -129,21 +128,21 @@ export function calculateSubsequentAddLiquidity({
   };
 }
 
-export function calculateInitialAddLiquidity(
+/**
+ * @returns the amount of pool tokens that should be issued for the initial add liquidity operation
+ */
+export function calculateV2InitialLiquidityAmount(
   asset1: AssetWithAmountAndDecimals,
   asset2: AssetWithAmountAndDecimals
-) {
+): bigint {
   if (!asset1.amount || !asset2.amount) {
     throw new Error("Both assets are required for the initial add liquidity");
   }
 
   return BigInt(
-    Math.abs(
-      Math.floor(
-        Math.sqrt(
-          convertToBaseUnits(asset1.decimals, Math.floor(Number(asset1.amount))) *
-            convertToBaseUnits(asset2.decimals, Math.floor(Number(asset2.amount)))
-        ) - V2_LOCKED_POOL_TOKENS
+    Math.floor(
+      Math.abs(
+        Math.sqrt(Number(asset1.amount) * Number(asset2.amount)) - V2_LOCKED_POOL_TOKENS
       )
     )
   );

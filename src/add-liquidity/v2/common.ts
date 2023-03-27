@@ -1,9 +1,10 @@
 import {Algodv2} from "algosdk";
 
+import {AssetWithIdAndAmount} from "../../util/asset/assetModels";
 import {InitiatorSigner, SignerTransaction} from "../../util/commonTypes";
 import TinymanError from "../../util/error/TinymanError";
 import {V2PoolInfo} from "../../util/pool/poolTypes";
-import {getAppCallInnerTxns} from "../../util/transaction/transactionUtils";
+import {getAppCallInnerAssetData} from "../../util/transaction/transactionUtils";
 import {getTxnGroupID, sendAndWaitRawTransaction, sumUpTxnFees} from "../../util/util";
 import {V2AddLiquidityExecution} from "./types";
 
@@ -39,15 +40,21 @@ export async function execute({
     const [{confirmedRound, txnID}] = await sendAndWaitRawTransaction(client, [
       signedTxns
     ]);
-    const assetOutInnerTxn = (await getAppCallInnerTxns(client, txGroup))?.find(
-      (item) => item.txn.txn.type === "axfer"
-    )?.txn.txn;
+
+    let assetOut: AssetWithIdAndAmount | undefined;
+
+    try {
+      assetOut = (await getAppCallInnerAssetData(client, txGroup))?.find(
+        // Output asset is the pool token for add liquidity
+        ({id}) => id === pool.poolTokenID
+      );
+    } catch (_error) {
+      // We can ignore this error since the main execution was successful
+    }
 
     return {
       round: confirmedRound,
-      assetOut: assetOutInnerTxn
-        ? {amount: assetOutInnerTxn.aamt, id: assetOutInnerTxn.xaid}
-        : undefined,
+      assetOut,
       fees: sumUpTxnFees(txGroup),
       poolTokenID: pool.poolTokenID!,
       txnID,
