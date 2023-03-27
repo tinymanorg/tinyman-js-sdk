@@ -8,13 +8,13 @@ export interface SignerTransaction {
      */
     signers?: string[];
 }
-export declare type InitiatorSigner = (txGroupList: SignerTransaction[][]) => Promise<Uint8Array[]>;
-export declare type SupportedNetwork = "testnet" | "mainnet";
+export type InitiatorSigner = (txGroupList: SignerTransaction[][]) => Promise<Uint8Array[]>;
+export type SupportedNetwork = "testnet" | "mainnet";
 /**
  * Type of the waitForConfirmation()["inner-txns"]
  * NOT a complete type, only the fields we need.
  */
-export declare type TxnResponseInnerTxns = {
+export type TxnResponseInnerTxns = {
     txn: {
         txn: {
             type: TransactionType.axfer;
