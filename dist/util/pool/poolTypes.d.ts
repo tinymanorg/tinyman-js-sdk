@@ -15,7 +15,7 @@ export interface V1PoolInfo {
     status: PoolStatus;
     poolTokenID?: number;
 }
-export declare type V2PoolInfo = V1PoolInfo & {
+export type V2PoolInfo = V1PoolInfo & {
     issuedPoolTokens?: bigint;
     asset1Reserves?: bigint;
     asset2Reserves?: bigint;

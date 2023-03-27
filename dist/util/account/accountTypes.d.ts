@@ -33,7 +33,7 @@ export interface AccountInformation {
     round: number;
     status: "Offline";
 }
-export declare type AccountInformationData = AccountInformation & {
+export type AccountInformationData = AccountInformation & {
     minimum_required_balance: number;
 };
 export interface AccountExcessWithinPool {

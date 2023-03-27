@@ -14,7 +14,7 @@ import {getValidatorAppID} from "../../validator";
 import {ADD_LIQUIDITY_APP_CALL_ARGUMENTS} from "../constants";
 import {V2AddLiquidityType} from "./constants";
 import {V2InitialAddLiquidityQuote} from "./types";
-import {calculateInitialAddLiquidity, getV2AddLiquidityAppCallFee} from "./util";
+import {calculateV2InitialLiquidityAmount, getV2AddLiquidityAppCallFee} from "./util";
 export * from "./common";
 
 export function getQuote({
@@ -42,12 +42,13 @@ export function getQuote({
     );
   }
 
-  const poolTokenAssetAmount = calculateInitialAddLiquidity(asset1, asset2);
-
   return {
     asset1In: {id: pool.asset1ID, amount: BigInt(asset1.amount)},
     asset2In: {id: pool.asset2ID, amount: BigInt(asset2.amount)},
-    poolTokenOut: {id: pool.poolTokenID!, amount: poolTokenAssetAmount},
+    poolTokenOut: {
+      id: pool.poolTokenID!,
+      amount: calculateV2InitialLiquidityAmount(asset1, asset2)
+    },
     slippage
   };
 }
