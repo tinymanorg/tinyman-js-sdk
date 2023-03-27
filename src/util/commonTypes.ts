@@ -1,4 +1,4 @@
-import {Transaction} from "algosdk";
+import {Transaction, TransactionType} from "algosdk";
 
 export interface SignerTransaction {
   txn: Transaction;
@@ -15,3 +15,29 @@ export type InitiatorSigner = (
 ) => Promise<Uint8Array[]>;
 
 export type SupportedNetwork = "testnet" | "mainnet";
+
+/**
+ * Type of the waitForConfirmation()["inner-txns"]
+ * NOT a complete type, only the fields we need.
+ */
+export type TxnResponseInnerTxns = {
+  txn: {
+    txn:
+      | {
+          type: TransactionType.axfer;
+          xaid: number;
+          aamt: number;
+        }
+      | {
+          type: TransactionType.pay;
+          amt: number;
+        }
+      | {
+          /**
+           * This is not a real txn type, only added to
+           * demonstrate that there can be other types
+           */
+          type: "other";
+        };
+  };
+}[];

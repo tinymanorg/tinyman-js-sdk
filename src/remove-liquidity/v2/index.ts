@@ -3,10 +3,11 @@ import algosdk, {Algodv2, ALGORAND_MIN_TX_FEE, Transaction} from "algosdk";
 import {tinymanJSSDKConfig} from "../../config";
 import {CONTRACT_VERSION} from "../../contract/constants";
 import {SwapV2} from "../../swap/v2";
+import {AssetWithIdAndAmount} from "../../util/asset/assetModels";
 import {SignerTransaction, InitiatorSigner} from "../../util/commonTypes";
 import {V2_LOCKED_POOL_TOKENS} from "../../util/pool/poolConstants";
 import {PoolReserves, V2PoolInfo} from "../../util/pool/poolTypes";
-import {getAppCallInnerTxns} from "../../util/transaction/transactionUtils";
+import {getAppCallInnerAssetData} from "../../util/transaction/transactionUtils";
 import {applySlippageToAmount, sendAndWaitRawTransaction} from "../../util/util";
 import {
   V2RemoveLiquidityTxnIndices,
@@ -325,10 +326,13 @@ async function execute({
   signedTxns: Uint8Array[];
 }): Promise<V2RemoveLiquidityExecution> {
   const [{txnID}] = await sendAndWaitRawTransaction(client, [signedTxns]);
-  const outputAssets = (await getAppCallInnerTxns(client, txGroup))?.map((data) => ({
-    assetId: data.txn.txn.xaid,
-    amount: data.txn.txn.aamt
-  }));
+  let outputAssets: AssetWithIdAndAmount[] | undefined;
+
+  try {
+    outputAssets = await getAppCallInnerAssetData(client, txGroup);
+  } catch (_error) {
+    // We can ignore this error since the main execution was successful
+  }
 
   return {
     outputAssets,
