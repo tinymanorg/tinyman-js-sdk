@@ -41,7 +41,7 @@ export interface SwapRoutePool {
     asset_2: SwapRouteAsset;
     version: "2.0";
 }
-export declare type SwapRoute = {
+export type SwapRoute = {
     quote: SwapRouterQuote;
     pool: SwapRoutePool;
 }[];
@@ -68,7 +68,7 @@ export interface FetchSwapRouteQuotesPayload {
     amount: string;
     swap_type: SwapType;
 }
-export declare type SwapRouterResponse = FetchSwapRouteQuotesPayload & {
+export type SwapRouterResponse = FetchSwapRouteQuotesPayload & {
     route: SwapRoute;
     price_impact: string;
     status: {
@@ -76,7 +76,7 @@ export declare type SwapRouterResponse = FetchSwapRouteQuotesPayload & {
         round_datetime: string;
     };
 };
-export declare type GetSwapQuoteParams = {
+export type GetSwapQuoteParams = {
     assetIn: Pick<TinymanAnalyticsApiAsset, "id" | "decimals">;
     assetOut: Pick<TinymanAnalyticsApiAsset, "id" | "decimals">;
     pools: {
@@ -89,14 +89,14 @@ export declare type GetSwapQuoteParams = {
     /** If `true`, the function will also check the quotes that use swap route */
     isSwapRouterEnabled?: boolean;
 };
-export declare type SwapQuote = {
+export type SwapQuote = {
     data: DirectSwapQuoteAndPool;
     type: SwapQuoteType.Direct;
 } | {
     data: SwapRouterResponse;
     type: SwapQuoteType.Router;
 };
-export declare type GetSwapQuoteBySwapTypeParams = Omit<GetSwapQuoteParams, "type">;
+export type GetSwapQuoteBySwapTypeParams = Omit<GetSwapQuoteParams, "type">;
 export interface GenerateSwapTxnsParams {
     client: Algodv2;
     network: SupportedNetwork;
@@ -105,7 +105,7 @@ export interface GenerateSwapTxnsParams {
     slippage: number;
     initiatorAddr: string;
 }
-export declare type GenerateV1_1SwapTxnsParams = Omit<GenerateSwapTxnsParams, "quote" | "network"> & {
+export type GenerateV1_1SwapTxnsParams = Omit<GenerateSwapTxnsParams, "quote" | "network"> & {
     quoteAndPool: DirectSwapQuoteAndPool;
 };
 /** An object containing information about a successfully executed swap. */
@@ -139,11 +139,9 @@ export interface V1SwapExecution {
     groupID: string;
 }
 export interface V2SwapExecution {
+    assetIn: AssetWithIdAndAmount;
     /** Can be `undefined` if the execution was successful, but there was an issue while
-     * extracting the input asset data fron the transaction response */
-    assetIn: AssetWithIdAndAmount | undefined;
-    /** Can be `undefined` if the execution was successful, but there was an issue while
-     * extracting the output asset data fron the transaction response */
+     * extracting the output asset data from the transaction response */
     assetOut: AssetWithIdAndAmount | undefined;
     quote: SwapQuote;
     txnID: string;

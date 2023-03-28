@@ -133,6 +133,10 @@ export async function getPoolReserves(
     const minBalance = getMinBalanceForAccount(info);
 
     asset2Balance = BigInt(info.amount) - minBalance;
+
+    if (asset2Balance < 0n) {
+      asset2Balance = 0n;
+    }
   }
 
   const reserves: PoolReserves = {

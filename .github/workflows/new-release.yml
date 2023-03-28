@@ -1,0 +1,32 @@
+name: "New Release"
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  publish:
+    if: github.repository_owner == 'tinymanorg'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - run: npm install
+      - run: npm test
+      - run: npm run build
+
+      - id: publish-to-npm
+        uses: JS-DevTools/npm-publish@v1
+        with:
+          token: ${{ secrets.NPM_TOKEN }} # This token should be added from repo settings
+
+      - id: create-gh-release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        with:
+          tag_name: ${{ steps.publish-to-npm.outputs.version }}
+          release_name: ${{ steps.publish-to-npm.outputs.version }}

@@ -1,4 +1,4 @@
-declare type TinymanErrorType = "LogicError" | "SlippageTolerance" | "TransactionError" | "ExceedingExcessAmountCount" | "Unknown";
+type TinymanErrorType = "LogicError" | "SlippageTolerance" | "TransactionError" | "ExceedingExcessAmountCount" | "Unknown";
 declare class TinymanError extends Error {
     data: any;
     type: TinymanErrorType;

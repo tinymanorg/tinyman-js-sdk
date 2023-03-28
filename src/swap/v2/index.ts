@@ -33,14 +33,14 @@ import {
   getBestQuote,
   isSwapQuoteErrorCausedByAmount
 } from "../common/utils";
-import {getAppCallInnerTxns} from "../../util/transaction/transactionUtils";
+import {getAppCallInnerAssetData} from "../../util/transaction/transactionUtils";
+import {AssetWithIdAndAmount, AssetWithIdAndDecimals} from "../../util/asset/assetModels";
 import {tinymanJSSDKConfig} from "../../config";
 import {CONTRACT_VERSION} from "../../contract/constants";
 import {generateSwapRouterTxns, getSwapRoute} from "./router/swap-router";
 import {poolUtils} from "../../util/pool";
 import SwapQuoteError, {SwapQuoteErrorType} from "../../util/error/SwapQuoteError";
 import {getSwapAppCallFeeAmount, isSwapAssetInAmountLow} from "./util";
-import {AssetWithIdAndDecimals} from "../../util/asset/assetModels";
 
 async function generateTxns(
   params: GenerateSwapTxnsParams
@@ -158,10 +158,17 @@ async function execute({
   txGroup: SignerTransaction[];
   signedTxns: Uint8Array[];
 }): Promise<V2SwapExecution> {
-  let [{confirmedRound, txnID}] = await sendAndWaitRawTransaction(client, [signedTxns]);
-  const innerTxns = await getAppCallInnerTxns(client, txGroup);
-  const assetIn = getAssetInFromSwapQuote(quote);
+  const [{confirmedRound, txnID}] = await sendAndWaitRawTransaction(client, [signedTxns]);
   const assetOutId = getAssetOutFromSwapQuote(quote).id;
+  const assetIn = getAssetInFromSwapQuote(quote);
+  let innerTxnAssetData: AssetWithIdAndAmount[] | undefined;
+
+  try {
+    innerTxnAssetData = await getAppCallInnerAssetData(client, txGroup);
+  } catch (_error) {
+    // We can ignore this error since the main execution was successful
+  }
+
   /**
    * If the swap type if Fixed Output, usually there will be a difference between
    * input amount and the actual used input amount. The change will be returned to the user
@@ -169,23 +176,19 @@ async function execute({
    * If it is `undefined`, it means that the input amount was exactly the amount used,
    * or the swap type is fixed input.
    */
-  const assetInChangeInnerTxn = innerTxns?.find(
-    (item) => item.txn.txn.xaid === assetIn.id
-  )?.txn.txn;
-  const assetOutInnerTxn = innerTxns?.find((item) => item.txn.txn.xaid === assetOutId)
-    ?.txn.txn;
+  const assetInChangeAmount = innerTxnAssetData?.find(
+    ({id}) => id === assetIn.id
+  )?.amount;
+  const assetOut = innerTxnAssetData?.find(({id}) => id === assetOutId);
 
   return {
     round: confirmedRound,
-    assetIn: assetInChangeInnerTxn && {
-      // The actual spent amount is the input amount minus the change (refunded) amount
-      amount: BigInt(assetIn.amount) - BigInt(assetInChangeInnerTxn.aamt || 0),
+    assetIn: {
+      // The actual spent amount is the input amount minus the change (refunded) amount, if any
+      amount: BigInt(assetIn.amount) - BigInt(assetInChangeAmount || 0),
       id: assetIn.id
     },
-    assetOut: assetOutInnerTxn && {
-      amount: assetOutInnerTxn.aamt,
-      id: assetOutId
-    },
+    assetOut,
     quote,
     txnID
   };
