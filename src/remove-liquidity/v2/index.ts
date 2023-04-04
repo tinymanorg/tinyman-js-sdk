@@ -319,19 +319,17 @@ function signTxns({
 async function execute({
   client,
   txGroup,
-  signedTxns,
-  accountAddress
+  signedTxns
 }: {
   client: Algodv2;
   txGroup: SignerTransaction[];
   signedTxns: Uint8Array[];
-  accountAddress: string;
 }): Promise<V2RemoveLiquidityExecution> {
   const [{txnID}] = await sendAndWaitRawTransaction(client, [signedTxns]);
   let outputAssets: AssetWithIdAndAmount[] | undefined;
 
   try {
-    outputAssets = await getAppCallInnerAssetData(client, txGroup, accountAddress);
+    outputAssets = await getAppCallInnerAssetData(client, txGroup);
   } catch (_error) {
     // We can ignore this error since the main execution was successful
   }

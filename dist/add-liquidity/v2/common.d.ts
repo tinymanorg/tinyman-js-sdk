@@ -13,10 +13,9 @@ export declare function signTxns({ txGroup, initiatorSigner }: {
  * @param params.pool Information for the pool.
  * @param params.txGroup The transaction group to execute.
  */
-export declare function execute({ client, pool, txGroup, signedTxns, accountAddress }: {
+export declare function execute({ client, pool, txGroup, signedTxns }: {
     client: Algodv2;
     pool: V2PoolInfo;
     txGroup: SignerTransaction[];
     signedTxns: Uint8Array[];
-    accountAddress: string;
 }): Promise<V2AddLiquidityExecution>;

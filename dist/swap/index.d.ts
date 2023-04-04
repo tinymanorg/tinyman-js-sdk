@@ -89,12 +89,11 @@ export declare const Swap: {
             txGroup: import("..").SignerTransaction[];
             initiatorSigner: import("..").InitiatorSigner;
         }) => Promise<Uint8Array[]>;
-        execute: ({ client, quote, txGroup, signedTxns, accountAddress }: {
+        execute: ({ client, quote, txGroup, signedTxns }: {
             client: import("algosdk").Algodv2;
             quote: import("./types").SwapQuote;
             txGroup: import("..").SignerTransaction[];
             signedTxns: Uint8Array[];
-            accountAddress: string;
         }) => Promise<import("./types").V2SwapExecution>;
         calculateFixedInputSwap: ({ inputSupply, outputSupply, swapInputAmount, totalFeeShare, decimals }: {
             inputSupply: bigint;

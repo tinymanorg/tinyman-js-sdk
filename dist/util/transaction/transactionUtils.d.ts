@@ -12,10 +12,16 @@ export declare function getAppCallInnerTxns(client: Algodv2, txGroup: SignerTran
  * inner transactions in the app call, and return the extracted asset data.
  * Useful for getting the asset data after an "execute" operation.
  */
-export declare function getAppCallInnerAssetData(client: Algodv2, txGroup: SignerTransaction[], accountAddress: string): Promise<AssetWithIdAndAmount[] | undefined>;
+export declare function getAppCallInnerAssetData(client: Algodv2, txGroup: SignerTransaction[]): Promise<AssetWithIdAndAmount[] | undefined>;
 /**
  * Combines the provided signer transaction groups into one signer transaction group, with a new group ID
  * @param signerTransactions - The signer transaction groups to combine
  * @returns the combined signer transaction groups, with a new assigned group ID
  */
 export declare function combineAndRegroupSignerTxns(...signerTransactions: SignerTransaction[][]): SignerTransaction[];
+/**
+ * Extracts the account address from the first transaction in the provided transaction group.
+ * @param txGroup - The transaction group to extract the account address from
+ * @returns the account address
+ */
+export declare function extractAccountAddressFromTxGroup(txGroup: SignerTransaction[]): string;
