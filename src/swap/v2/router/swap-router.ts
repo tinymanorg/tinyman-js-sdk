@@ -11,7 +11,7 @@ import {ALGO_ASSET_ID} from "../../../util/asset/assetConstants";
 import {getAssetId, isAlgo} from "../../../util/asset/assetUtils";
 import {SupportedNetwork} from "../../../util/commonTypes";
 import SwapQuoteError, {SwapQuoteErrorType} from "../../../util/error/SwapQuoteError";
-import {hasTinymanApiErrorShape} from "../../../util/util";
+import {applySlippageToAmount, hasTinymanApiErrorShape} from "../../../util/util";
 import {getValidatorAppID} from "../../../validator";
 import {SwapType} from "../../constants";
 import {FetchSwapRouteQuotesPayload, SwapRouterResponse, SwapRoute} from "../../types";
@@ -67,13 +67,15 @@ export async function generateSwapRouterTxns({
   client,
   network,
   swapType,
-  route
+  route,
+  slippage
 }: {
   client: Algodv2;
   initiatorAddr: string;
   swapType: SwapType;
   route: SwapRoute;
   network: SupportedNetwork;
+  slippage: number;
 }) {
   const suggestedParams = await client.getTransactionParams().do();
 
@@ -82,11 +84,20 @@ export async function generateSwapRouterTxns({
     getAssetId(route[0].quote.amount_out.asset),
     getAssetId(route[1].quote.amount_out.asset)
   ];
-  const [assetInAmount, assetOutAmount] = [
+  const [assetInAmountFromRoute, assetOutAmountFromRoute] = [
     Number(getAssetInFromSwapRoute(route).amount),
     Number(getAssetOutFromSwapRoute(route).amount)
   ];
   const [pool1Address, pool2Address] = [route[0].pool.address, route[1].pool.address];
+
+  const assetInAmount =
+    swapType === SwapType.FixedInput
+      ? assetInAmountFromRoute
+      : applySlippageToAmount("positive", slippage, assetInAmountFromRoute);
+  const assetOutAmount =
+    swapType === SwapType.FixedOutput
+      ? assetOutAmountFromRoute
+      : applySlippageToAmount("negative", slippage, assetOutAmountFromRoute);
 
   const isAssetInAlgo = isAlgo(assetInID);
 

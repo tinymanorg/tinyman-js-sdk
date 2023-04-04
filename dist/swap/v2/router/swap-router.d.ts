@@ -11,12 +11,13 @@ export declare function generateSwapRouterAssetOptInTransaction({ client, router
     assetIDs: number[];
     initiatorAddr: string;
 }): Promise<Transaction>;
-export declare function generateSwapRouterTxns({ initiatorAddr, client, network, swapType, route }: {
+export declare function generateSwapRouterTxns({ initiatorAddr, client, network, swapType, route, slippage }: {
     client: Algodv2;
     initiatorAddr: string;
     swapType: SwapType;
     route: SwapRoute;
     network: SupportedNetwork;
+    slippage: number;
 }): Promise<{
     txn: algosdk.Transaction;
     signers: string[];
