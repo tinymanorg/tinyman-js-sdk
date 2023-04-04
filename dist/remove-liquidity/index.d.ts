@@ -61,10 +61,11 @@ export declare const RemoveLiquidity: {
             txGroup: import("..").SignerTransaction[];
             initiatorSigner: import("..").InitiatorSigner;
         }) => Promise<Uint8Array[]>;
-        execute: ({ client, txGroup, signedTxns }: {
+        execute: ({ client, txGroup, signedTxns, accountAddress }: {
             client: import("algosdk").Algodv2;
             txGroup: import("..").SignerTransaction[];
             signedTxns: Uint8Array[];
+            accountAddress: string;
         }) => Promise<import("..").V2RemoveLiquidityExecution>;
     };
 };

@@ -1,4 +1,4 @@
-import {
+import algosdk, {
   Algodv2,
   assignGroupID,
   decodeUnsignedTransaction,
@@ -48,7 +48,8 @@ export async function getAppCallInnerTxns(
  */
 export async function getAppCallInnerAssetData(
   client: Algodv2,
-  txGroup: SignerTransaction[]
+  txGroup: SignerTransaction[],
+  accountAddress: string
 ): Promise<AssetWithIdAndAmount[] | undefined> {
   const innerTxns = await getAppCallInnerTxns(client, txGroup);
 
@@ -56,12 +57,18 @@ export async function getAppCallInnerAssetData(
     let updatedAssets = assets;
     const {txn: innerTxn} = txn;
 
-    if (innerTxn.type === TransactionType.axfer) {
+    if (
+      innerTxn.type === TransactionType.axfer &&
+      algosdk.encodeAddress(innerTxn.arcv) === accountAddress
+    ) {
       updatedAssets.push({
         id: innerTxn.xaid,
         amount: innerTxn.aamt
       });
-    } else if (innerTxn.type === TransactionType.pay) {
+    } else if (
+      innerTxn.type === TransactionType.pay &&
+      algosdk.encodeAddress(innerTxn.rcv) === accountAddress
+    ) {
       updatedAssets.push({
         // Payment transactions are always in ALGO
         id: ALGO_ASSET_ID,

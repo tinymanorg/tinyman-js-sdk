@@ -28,9 +28,11 @@ export type TxnResponseInnerTxns = {
             type: TransactionType.axfer;
             xaid: number;
             aamt: number;
+            arcv: Uint8Array;
         } | {
             type: TransactionType.pay;
             amt: number;
+            rcv: Uint8Array;
         } | {
             /**
              * This is not a real txn type, only added to

@@ -151,12 +151,14 @@ async function execute({
   client,
   quote,
   txGroup,
-  signedTxns
+  signedTxns,
+  accountAddress
 }: {
   client: Algodv2;
   quote: SwapQuote;
   txGroup: SignerTransaction[];
   signedTxns: Uint8Array[];
+  accountAddress: string;
 }): Promise<V2SwapExecution> {
   const [{confirmedRound, txnID}] = await sendAndWaitRawTransaction(client, [signedTxns]);
   const assetOutId = getAssetOutFromSwapQuote(quote).id;
@@ -164,7 +166,7 @@ async function execute({
   let innerTxnAssetData: AssetWithIdAndAmount[] | undefined;
 
   try {
-    innerTxnAssetData = await getAppCallInnerAssetData(client, txGroup);
+    innerTxnAssetData = await getAppCallInnerAssetData(client, txGroup, accountAddress);
   } catch (_error) {
     // We can ignore this error since the main execution was successful
   }

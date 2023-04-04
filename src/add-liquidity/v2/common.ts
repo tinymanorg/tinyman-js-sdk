@@ -29,12 +29,14 @@ export async function execute({
   client,
   pool,
   txGroup,
-  signedTxns
+  signedTxns,
+  accountAddress
 }: {
   client: Algodv2;
   pool: V2PoolInfo;
   txGroup: SignerTransaction[];
   signedTxns: Uint8Array[];
+  accountAddress: string;
 }): Promise<V2AddLiquidityExecution> {
   try {
     const [{confirmedRound, txnID}] = await sendAndWaitRawTransaction(client, [
@@ -44,7 +46,7 @@ export async function execute({
     let assetOut: AssetWithIdAndAmount | undefined;
 
     try {
-      assetOut = (await getAppCallInnerAssetData(client, txGroup))?.find(
+      assetOut = (await getAppCallInnerAssetData(client, txGroup, accountAddress))?.find(
         // Output asset is the pool token for add liquidity
         ({id}) => id === pool.poolTokenID
       );

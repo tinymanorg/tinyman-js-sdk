@@ -49,10 +49,11 @@ declare function signTxns({ txGroup, initiatorSigner }: {
     txGroup: SignerTransaction[];
     initiatorSigner: InitiatorSigner;
 }): Promise<Uint8Array[]>;
-declare function execute({ client, txGroup, signedTxns }: {
+declare function execute({ client, txGroup, signedTxns, accountAddress }: {
     client: Algodv2;
     txGroup: SignerTransaction[];
     signedTxns: Uint8Array[];
+    accountAddress: string;
 }): Promise<V2RemoveLiquidityExecution>;
 export declare const RemoveLiquidityV2: {
     getQuote: typeof getQuote;

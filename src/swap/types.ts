@@ -173,5 +173,6 @@ export interface ExecuteSwapCommonParams {
   network: SupportedNetwork;
   txGroup: SignerTransaction[];
   signedTxns: Uint8Array[];
+  accountAddress: string;
   assetIn: AssetWithIdAndAmount;
 }
