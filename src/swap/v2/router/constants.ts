@@ -13,7 +13,6 @@ export const SWAP_ROUTER_APP_ID: Record<SupportedNetwork, number> = {
 export const SWAP_ROUTER_INNER_TXN_COUNT: Record<SwapType, number> = {
   [SwapType.FixedInput]: 7,
   [SwapType.FixedOutput]: 8
-  // ...
 } as const;
 
 const TINYMAN_ANALYTICS_API_BASE_URLS: Record<

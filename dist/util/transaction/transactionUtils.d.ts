@@ -1,4 +1,4 @@
-import { Algodv2 } from "algosdk";
+import { Algodv2, Transaction } from "algosdk";
 import { AssetWithIdAndAmount } from "../asset/assetModels";
 import { SignerTransaction, TxnResponseInnerTxns } from "../commonTypes";
 export declare function getAppCallTxnResponse(client: Algodv2, txGroup: SignerTransaction[]): Promise<Record<string, any> | undefined>;
@@ -20,8 +20,8 @@ export declare function getAppCallInnerAssetData(client: Algodv2, txGroup: Signe
  */
 export declare function combineAndRegroupSignerTxns(...signerTransactions: SignerTransaction[][]): SignerTransaction[];
 /**
- * Extracts the account address from the first transaction in the provided transaction group.
- * @param txGroup - The transaction group to extract the account address from
- * @returns the account address
+ * Extracts the account address from the provided transaction.
+ * @param txn - The transaction to extract the sender address from
+ * @returns the account address of the sender
  */
-export declare function extractAccountAddressFromTxGroup(txGroup: SignerTransaction[]): string;
+export declare function extractSenderAddressFromTransaction(txn: Transaction): string;

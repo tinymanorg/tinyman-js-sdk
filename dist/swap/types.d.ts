@@ -148,11 +148,7 @@ export interface V2SwapExecution {
     round: number;
 }
 export interface ExecuteSwapCommonParams {
-    swapType: SwapType;
     client: Algodv2;
-    network: SupportedNetwork;
     txGroup: SignerTransaction[];
     signedTxns: Uint8Array[];
-    accountAddress: string;
-    assetIn: AssetWithIdAndAmount;
 }

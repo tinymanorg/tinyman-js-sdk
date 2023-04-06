@@ -3,6 +3,7 @@ import algosdk, {
   assignGroupID,
   decodeUnsignedTransaction,
   encodeUnsignedTransaction,
+  Transaction,
   TransactionType,
   waitForConfirmation
 } from "algosdk";
@@ -11,7 +12,6 @@ import {ALGO_ASSET_ID} from "../asset/assetConstants";
 import {AssetWithIdAndAmount} from "../asset/assetModels";
 import {SignerTransaction, TxnResponseInnerTxns} from "../commonTypes";
 import {DEFAULT_WAIT_FOR_CONFIRMATION_ROUNDS} from "../constant";
-import TinymanError from "../error/TinymanError";
 
 export async function getAppCallTxnResponse(
   client: Algodv2,
@@ -52,7 +52,9 @@ export async function getAppCallInnerAssetData(
   txGroup: SignerTransaction[]
 ): Promise<AssetWithIdAndAmount[] | undefined> {
   const innerTxns = await getAppCallInnerTxns(client, txGroup);
-  const accountAddress = extractAccountAddressFromTxGroup(txGroup);
+  // Get the account address that will receive the assets after a certain operation is successful.
+  // This equals to the address of the account that signs the txGroup.
+  const receivingAccountAddress = extractSenderAddressFromTransaction(txGroup[0].txn);
 
   return innerTxns?.reduce<AssetWithIdAndAmount[]>((assets, {txn}) => {
     let updatedAssets = assets;
@@ -60,7 +62,7 @@ export async function getAppCallInnerAssetData(
 
     if (
       innerTxn.type === TransactionType.axfer &&
-      algosdk.encodeAddress(innerTxn.arcv) === accountAddress
+      algosdk.encodeAddress(innerTxn.arcv) === receivingAccountAddress
     ) {
       updatedAssets.push({
         id: innerTxn.xaid,
@@ -68,7 +70,7 @@ export async function getAppCallInnerAssetData(
       });
     } else if (
       innerTxn.type === TransactionType.pay &&
-      algosdk.encodeAddress(innerTxn.rcv) === accountAddress
+      algosdk.encodeAddress(innerTxn.rcv) === receivingAccountAddress
     ) {
       updatedAssets.push({
         // Payment transactions are always in ALGO
@@ -114,20 +116,10 @@ export function combineAndRegroupSignerTxns(
 }
 
 /**
- * Extracts the account address from the first transaction in the provided transaction group.
- * @param txGroup - The transaction group to extract the account address from
- * @returns the account address
+ * Extracts the account address from the provided transaction.
+ * @param txn - The transaction to extract the sender address from
+ * @returns the account address of the sender
  */
-export function extractAccountAddressFromTxGroup(txGroup: SignerTransaction[]): string {
-  if (!txGroup.length) {
-    throw new TinymanError(txGroup, "Transaction group should not be empty");
-  }
-
-  const senderAddress = txGroup[0].txn.from.publicKey;
-
-  if (!senderAddress) {
-    throw new TinymanError(txGroup, "Transaction group should have a sender address");
-  }
-
-  return algosdk.encodeAddress(senderAddress);
+export function extractSenderAddressFromTransaction(txn: Transaction): string {
+  return algosdk.encodeAddress(txn.from.publicKey);
 }

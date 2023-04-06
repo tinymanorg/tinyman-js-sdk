@@ -2,6 +2,7 @@ import { CONTRACT_VERSION } from "../contract/constants";
 import { InitiatorSigner, SignerTransaction } from "../util/commonTypes";
 import { V1PoolInfo } from "../util/pool/poolTypes";
 import { GetSwapQuoteBySwapTypeParams, GenerateSwapTxnsParams, GetSwapQuoteParams, SwapQuote, ExecuteSwapCommonParams } from "./types";
+import { SwapType } from "./constants";
 /**
  * Gets the best quote for swap from the pools and swap router and returns the best option.
  */
@@ -26,6 +27,7 @@ export declare function execute(params: ({
     contractVersion: typeof CONTRACT_VERSION.V1_1;
     initiatorAddr: string;
     pool: V1PoolInfo;
+    swapType: SwapType;
 } | {
     contractVersion: typeof CONTRACT_VERSION.V2;
     quote: SwapQuote;

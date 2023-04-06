@@ -239,6 +239,7 @@ export function execute(
         contractVersion: typeof CONTRACT_VERSION.V1_1;
         initiatorAddr: string;
         pool: V1PoolInfo;
+        swapType: SwapType;
       }
     | {contractVersion: typeof CONTRACT_VERSION.V2; quote: SwapQuote}
   ) &
