@@ -20,12 +20,13 @@ import {
   V2_SWAP_APP_CALL_SWAP_TYPE_ARGS_ENCODED,
   V2_SWAP_ROUTER_APP_ARGS_ENCODED
 } from "../constants";
-import {SWAP_ROUTER_INNER_TXN_COUNT, TINYMAN_ANALYTICS_API_BASE_URLS} from "./constants";
+import {SWAP_ROUTER_INNER_TXN_COUNT} from "./constants";
 import {
   getAssetInFromSwapRoute,
   getAssetOutFromSwapRoute,
   getSwapRouterAppID
 } from "./util";
+import {TINYMAN_ANALYTICS_API_BASE_URLS} from "../../../util/constant";
 
 /**
  * Generates txns that would opt in the Swap Router Application to the assets used in the swap router
