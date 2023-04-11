@@ -1,6 +1,6 @@
 /// <reference types="node" />
 import { Algodv2 } from "algosdk";
-import { SignerTransaction } from "./commonTypes";
+import { SignerTransaction, TinymanApiErrorShape } from "./commonTypes";
 import { AccountInformation } from "./account/accountTypes";
 export declare function decodeState({ stateArray, shouldDecodeKeys }: {
     stateArray: AccountInformation["apps-local-state"][0]["key-value"];
@@ -56,3 +56,4 @@ export declare function encodeInteger(number: any): number[];
  * Converts a text into bytes
  */
 export declare function encodeString(text: string): Uint8Array;
+export declare function hasTinymanApiErrorShape(error: any): error is TinymanApiErrorShape;

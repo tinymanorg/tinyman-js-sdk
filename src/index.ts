@@ -1,3 +1,5 @@
+import SwapQuoteError from "./util/error/SwapQuoteError";
+
 export type {
   InitiatorSigner,
   SignerTransaction,
@@ -12,6 +14,10 @@ export {
   MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE,
   MINIMUM_ADD_LIQUIDITY_AMOUNT
 } from "./util/constant";
+
+export * from "./swap/v2/router";
+
+export * from "./swap/common/utils";
 
 export {
   applySlippageToAmount,
@@ -105,13 +111,20 @@ export {RemoveLiquidity} from "./remove-liquidity";
 
 export type {
   SwapQuote,
-  SwapQuoteWithPool,
   V1SwapExecution,
-  V2SwapExecution
+  V2SwapExecution,
+  DirectSwapQuote,
+  SwapRoute,
+  GenerateSwapTxnsParams
 } from "./swap/types";
-export {getSwapTotalFee} from "./swap/utils";
+export * from "./swap/v2/util";
 export {SwapType} from "./swap/constants";
 export {Swap} from "./swap";
+// eslint-disable-next-line no-duplicate-imports
+export {SwapQuoteType} from "./swap/types";
+export {SwapQuoteError};
+// eslint-disable-next-line no-duplicate-imports
+export {SwapQuoteErrorType} from "./util/error/SwapQuoteError";
 
 export {
   redeemExcessAsset,

@@ -55,6 +55,11 @@ export interface AssetWithIdAndAmount {
   amount: number | bigint;
 }
 
+export interface AssetWithIdAndDecimals {
+  id: number;
+  decimals: number;
+}
+
 export interface AssetWithAmountAndDecimals {
   amount: number | bigint;
   decimals: number;
