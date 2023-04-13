@@ -3,8 +3,7 @@ import {SwapType} from "../../constants";
 
 export const SWAP_ROUTER_APP_ID: Record<SupportedNetwork, number> = {
   testnet: 184778019,
-  //  This is temporary APP ID for testing only, remove it when the actual mainnet APP ID is deployed
-  mainnet: 1071281873
+  mainnet: 1083651166
 };
 
 /**
