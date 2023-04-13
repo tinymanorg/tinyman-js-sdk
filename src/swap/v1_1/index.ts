@@ -15,13 +15,19 @@ import {DEFAULT_FEE_TXN_NOTE} from "../../util/constant";
 import {ALGO_ASSET_ID} from "../../util/asset/assetConstants";
 import {PoolReserves, PoolStatus, V1PoolInfo} from "../../util/pool/poolTypes";
 import {getAccountExcessWithinPool} from "../../util/account/accountUtils";
-import {SwapQuote, V1SwapExecution} from "../types";
+import {
+  DirectSwapQuote,
+  GenerateV1_1SwapTxnsParams,
+  SwapQuote,
+  SwapQuoteType,
+  V1SwapExecution
+} from "../types";
 import {SwapType} from "../constants";
 import {calculatePriceImpact, calculateSwapRate} from "../common/utils";
-import OutputAmountExceedsAvailableLiquidityError from "../../util/error/OutputAmountExceedsAvailableLiquidityError";
 import {AssetWithIdAndAmount} from "../../util/asset/assetModels";
 import {tinymanJSSDKConfig} from "../../config";
 import {CONTRACT_VERSION} from "../../contract/constants";
+import SwapQuoteError, {SwapQuoteErrorType} from "../../util/error/SwapQuoteError";
 
 // FEE = %0.3 or 3/1000
 const FEE_NUMERATOR = 3n;
@@ -62,32 +68,25 @@ async function signTxns({
 
 async function generateTxns({
   client,
-  pool,
+  quoteAndPool,
   swapType,
-  assetIn,
-  assetOut,
   slippage,
   initiatorAddr
-}: {
-  client: Algodv2;
-  pool: V1PoolInfo;
-  swapType: SwapType;
-  assetIn: AssetWithIdAndAmount;
-  assetOut: AssetWithIdAndAmount;
-  slippage: number;
-  initiatorAddr: string;
-}): Promise<SignerTransaction[]> {
+}: GenerateV1_1SwapTxnsParams): Promise<SignerTransaction[]> {
+  const {pool, quote} = quoteAndPool;
+  const {assetInID, assetOutID} = quote;
+
   const poolAddress = pool.account.address();
   const poolAssets = [pool.asset1ID, pool.asset2ID];
 
   if (
-    !poolAssets.includes(assetIn.id) ||
-    !poolAssets.includes(assetOut.id) ||
-    assetIn.id === assetOut.id
+    !poolAssets.includes(assetInID) ||
+    !poolAssets.includes(assetOutID) ||
+    assetInID === assetOutID
   ) {
     throw new TinymanError(
-      {pool, assetIn, assetOut},
-      `Input asset (#${assetIn.id}) and output asset (#${assetOut.id}) provided to generate transactions do not belong to the pool ${poolAddress}.`
+      {pool, quote},
+      `Input asset (#${assetInID}) and output asset (#${assetOutID}) provided to generate transactions do not belong to the pool ${poolAddress}.`
     );
   }
 
@@ -112,11 +111,11 @@ async function generateTxns({
 
   const assetInAmount =
     swapType === SwapType.FixedOutput
-      ? applySlippageToAmount("positive", slippage, assetIn.amount)
-      : assetIn.amount;
+      ? applySlippageToAmount("positive", slippage, quote.assetInAmount)
+      : quote.assetInAmount;
   let assetInTxn: algosdk.Transaction;
 
-  if (assetIn.id === ALGO_ASSET_ID) {
+  if (assetInID === ALGO_ASSET_ID) {
     assetInTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
       from: initiatorAddr,
       to: poolAddress,
@@ -127,7 +126,7 @@ async function generateTxns({
     assetInTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
       from: initiatorAddr,
       to: poolAddress,
-      assetIndex: assetIn.id,
+      assetIndex: assetInID,
       amount: assetInAmount,
       suggestedParams
     });
@@ -135,11 +134,11 @@ async function generateTxns({
 
   const assetOutAmount =
     swapType === SwapType.FixedInput
-      ? applySlippageToAmount("negative", slippage, assetOut.amount)
-      : assetOut.amount;
+      ? applySlippageToAmount("negative", slippage, quote.assetOutAmount)
+      : quote.assetOutAmount;
   let assetOutTxn: algosdk.Transaction;
 
-  if (assetOut.id === ALGO_ASSET_ID) {
+  if (assetOutID === ALGO_ASSET_ID) {
     assetOutTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
       from: poolAddress,
       to: initiatorAddr,
@@ -150,7 +149,7 @@ async function generateTxns({
     assetOutTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
       from: poolAddress,
       to: initiatorAddr,
-      assetIndex: assetOut.id,
+      assetIndex: assetOutID,
       amount: assetOutAmount,
       suggestedParams
     });
@@ -197,7 +196,7 @@ function getQuote(
   asset: AssetWithIdAndAmount,
   decimals: {assetIn: number; assetOut: number}
 ): SwapQuote {
-  let quote;
+  let quote: SwapQuote;
 
   if (type === SwapType.FixedInput) {
     quote = getFixedInputSwapQuote({pool, reserves, assetIn: asset, decimals});
@@ -229,7 +228,10 @@ function getFixedInputSwapQuote({
   decimals: {assetIn: number; assetOut: number};
 }): SwapQuote {
   if (pool.status !== PoolStatus.READY) {
-    throw new TinymanError({pool, assetIn}, "Trying to swap on a non-existent pool");
+    throw new SwapQuoteError(
+      SwapQuoteErrorType.NoAvailablePoolError,
+      "There is not an available pool for this asset pair"
+    );
   }
 
   const assetInAmount = BigInt(assetIn.amount);
@@ -247,8 +249,8 @@ function getFixedInputSwapQuote({
     inputSupply = reserves.asset2;
     outputSupply = reserves.asset1;
   } else {
-    throw new TinymanError(
-      {pool, assetIn},
+    throw new SwapQuoteError(
+      SwapQuoteErrorType.AssetDoesNotBelongToPoolError,
       `Input asset (#${assetIn.id}) doesn't belong to the pool ${pool.account.address()}.`
     );
   }
@@ -260,7 +262,10 @@ function getFixedInputSwapQuote({
   const assetOutAmount = outputSupply - k / (inputSupply + assetInAmountMinusFee);
 
   if (assetOutAmount > outputSupply) {
-    throw new OutputAmountExceedsAvailableLiquidityError();
+    throw new SwapQuoteError(
+      SwapQuoteErrorType.OutputAmountExceedsAvailableLiquidityError,
+      "Output amount exceeds available liquidity."
+    );
   }
 
   const assetDataForSwapUtils = {
@@ -268,7 +273,7 @@ function getFixedInputSwapQuote({
     assetOut: {amount: assetOutAmount, decimals: decimals.assetOut}
   };
 
-  return {
+  const directSwapQuote: DirectSwapQuote = {
     round: reserves.round,
     assetInID: assetIn.id,
     assetInAmount,
@@ -281,6 +286,14 @@ function getFixedInputSwapQuote({
       outputSupply,
       ...assetDataForSwapUtils
     })
+  };
+
+  return {
+    type: SwapQuoteType.Direct,
+    data: {
+      pool,
+      quote: directSwapQuote
+    }
   };
 }
 
@@ -380,7 +393,10 @@ function getFixedOutputSwapQuote({
   decimals: {assetIn: number; assetOut: number};
 }): SwapQuote {
   if (pool.status !== PoolStatus.READY) {
-    throw new TinymanError({pool, assetOut}, "Trying to swap on a non-existent pool");
+    throw new SwapQuoteError(
+      SwapQuoteErrorType.NoAvailablePoolError,
+      "There is not an available pool for this asset pair"
+    );
   }
 
   const assetOutAmount = BigInt(assetOut.amount);
@@ -398,8 +414,8 @@ function getFixedOutputSwapQuote({
     inputSupply = reserves.asset1;
     outputSupply = reserves.asset2;
   } else {
-    throw new TinymanError(
-      {pool, assetOut},
+    throw new SwapQuoteError(
+      SwapQuoteErrorType.AssetDoesNotBelongToPoolError,
       `Output asset (#${
         assetOut.id
       }) doesn't belong to the pool ${pool.account.address()}.`
@@ -407,7 +423,10 @@ function getFixedOutputSwapQuote({
   }
 
   if (assetOutAmount > outputSupply) {
-    throw new OutputAmountExceedsAvailableLiquidityError();
+    throw new SwapQuoteError(
+      SwapQuoteErrorType.OutputAmountExceedsAvailableLiquidityError,
+      "Output amount exceeds available liquidity."
+    );
   }
 
   const k = inputSupply * outputSupply;
@@ -427,7 +446,7 @@ function getFixedOutputSwapQuote({
 
   const priceImpact = roundNumber({decimalPlaces: 5}, Math.abs(rate / poolPrice - 1));
 
-  return {
+  const directSwapQuote: DirectSwapQuote = {
     round: reserves.round,
     assetInID,
     assetInAmount,
@@ -436,6 +455,14 @@ function getFixedOutputSwapQuote({
     swapFee: Number(swapFee),
     rate,
     priceImpact
+  };
+
+  return {
+    type: SwapQuoteType.Direct,
+    data: {
+      pool,
+      quote: directSwapQuote
+    }
   };
 }
 
@@ -550,7 +577,7 @@ async function execute({
   if (pool.status !== PoolStatus.READY) {
     throw new TinymanError(
       {pool, swapType, txGroup},
-      "Trying to swap on a non-existent pool"
+      "There is not an available pool for this asset pair"
     );
   }
 

@@ -1,8 +1,9 @@
-import {
+import algosdk, {
   Algodv2,
   assignGroupID,
   decodeUnsignedTransaction,
   encodeUnsignedTransaction,
+  Transaction,
   TransactionType,
   waitForConfirmation
 } from "algosdk";
@@ -51,17 +52,26 @@ export async function getAppCallInnerAssetData(
   txGroup: SignerTransaction[]
 ): Promise<AssetWithIdAndAmount[] | undefined> {
   const innerTxns = await getAppCallInnerTxns(client, txGroup);
+  // Get the account address that will receive the assets after a certain operation is successful.
+  // This equals to the address of the account that signs the txGroup.
+  const receivingAccountAddress = extractSenderAddressFromTransaction(txGroup[0].txn);
 
   return innerTxns?.reduce<AssetWithIdAndAmount[]>((assets, {txn}) => {
     let updatedAssets = assets;
     const {txn: innerTxn} = txn;
 
-    if (innerTxn.type === TransactionType.axfer) {
+    if (
+      innerTxn.type === TransactionType.axfer &&
+      algosdk.encodeAddress(innerTxn.arcv) === receivingAccountAddress
+    ) {
       updatedAssets.push({
         id: innerTxn.xaid,
         amount: innerTxn.aamt
       });
-    } else if (innerTxn.type === TransactionType.pay) {
+    } else if (
+      innerTxn.type === TransactionType.pay &&
+      algosdk.encodeAddress(innerTxn.rcv) === receivingAccountAddress
+    ) {
       updatedAssets.push({
         // Payment transactions are always in ALGO
         id: ALGO_ASSET_ID,
@@ -103,4 +113,13 @@ export function combineAndRegroupSignerTxns(
     // Replace the old transaction, with the new transaction that has the new group ID
     txn: newTxnGroup[index]
   }));
+}
+
+/**
+ * Extracts the account address from the provided transaction.
+ * @param txn - The transaction to extract the sender address from
+ * @returns the account address of the sender
+ */
+export function extractSenderAddressFromTransaction(txn: Transaction): string {
+  return algosdk.encodeAddress(txn.from.publicKey);
 }
