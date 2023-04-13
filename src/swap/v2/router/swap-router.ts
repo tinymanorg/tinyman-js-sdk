@@ -27,6 +27,7 @@ import {
   getSwapRouterAppID
 } from "./util";
 import {TINYMAN_ANALYTICS_API_BASE_URLS} from "../../../util/constant";
+import {tinymanJSSDKConfig} from "../../../config";
 
 /**
  * Generates txns that would opt in the Swap Router Application to the assets used in the swap router
@@ -130,7 +131,8 @@ export async function generateSwapRouterTxns({
     foreignApps: [getValidatorAppID(network, CONTRACT_VERSION.V2)],
     foreignAssets: [assetInID, intermediaryAssetID, assetOutID],
     accounts: [pool1Address, pool2Address],
-    suggestedParams
+    suggestedParams,
+    note: tinymanJSSDKConfig.getAppCallTxnNoteWithClientName(CONTRACT_VERSION.V2)
   });
 
   routerAppCallTxn.fee =
