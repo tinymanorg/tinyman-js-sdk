@@ -1,4 +1,3 @@
-/* eslint-disable no-magic-numbers */
 import algosdk from "algosdk";
 
 import {parseState} from "./utils";
@@ -94,4 +93,3 @@ async function fetchFolksLendingPool(
 }
 
 export {fetchFolksLendingPool, FolksLendingPool};
-/* eslint-enable no-magic-numbers */
