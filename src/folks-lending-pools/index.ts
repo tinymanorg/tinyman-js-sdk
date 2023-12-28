@@ -2,8 +2,10 @@ import algosdk from "algosdk";
 
 import {parseState} from "./utils";
 import {ONE_14_DP, ONE_16_DP, SECONDS_IN_YEAR} from "./constants";
+import * as AddLiquidity from "./add-liquidity";
+import * as RemoveLiquidity from "./remove-liquidity";
 
-class FolksLendingPool {
+export class FolksLendingPool {
   escrowAddress: string;
 
   // eslint-disable-next-line max-params
@@ -60,7 +62,7 @@ class FolksLendingPool {
 /**
  * Fetches Folks lending pool application info from the algod, parses the global state and builds FolksLendingPool object.
  */
-async function fetchFolksLendingPool(
+export async function fetchFolksLendingPool(
   algod: algosdk.Algodv2,
   appId: number
 ): Promise<FolksLendingPool> {
@@ -92,4 +94,4 @@ async function fetchFolksLendingPool(
   );
 }
 
-export {fetchFolksLendingPool, FolksLendingPool};
+export const LendingPool = {AddLiquidity, RemoveLiquidity};

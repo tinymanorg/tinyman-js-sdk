@@ -1,5 +1,7 @@
 import algosdk from "algosdk";
-declare class FolksLendingPool {
+import * as AddLiquidity from "./add-liquidity";
+import * as RemoveLiquidity from "./remove-liquidity";
+export declare class FolksLendingPool {
     appId: number;
     managerAppId: number;
     depositInterestRate: number;
@@ -25,5 +27,8 @@ declare class FolksLendingPool {
 /**
  * Fetches Folks lending pool application info from the algod, parses the global state and builds FolksLendingPool object.
  */
-declare function fetchFolksLendingPool(algod: algosdk.Algodv2, appId: number): Promise<FolksLendingPool>;
-export { fetchFolksLendingPool, FolksLendingPool };
+export declare function fetchFolksLendingPool(algod: algosdk.Algodv2, appId: number): Promise<FolksLendingPool>;
+export declare const LendingPool: {
+    AddLiquidity: typeof AddLiquidity;
+    RemoveLiquidity: typeof RemoveLiquidity;
+};

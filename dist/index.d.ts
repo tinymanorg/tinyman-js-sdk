@@ -37,7 +37,7 @@ export { SwapQuoteType } from "./swap/types";
 export { SwapQuoteError };
 export { SwapQuoteErrorType } from "./util/error/SwapQuoteError";
 export { redeemExcessAsset, redeemAllExcessAsset, generateRedeemTxns, REDEEM_PROCESS_TXN_COUNT } from "./redeem";
-export { FolksLendingPool, fetchFolksLendingPool } from "./folks-lending-pools";
+export { fetchFolksLendingPool, LendingPool, FolksLendingPool } from "./folks-lending-pools";
 export { prepareCommitTransactions, getStakingAppID } from "./stake";
 export { tinymanJSSDKConfig } from "./config";
 export { combineAndRegroupSignerTxns } from "./util/transaction/transactionUtils";
