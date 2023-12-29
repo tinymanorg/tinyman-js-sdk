@@ -5,7 +5,7 @@ import algosdk, {
   encodeUint64
 } from "algosdk";
 
-import {SupportedNetwork} from "../../util/commonTypes";
+import {SignerTransaction, SupportedNetwork} from "../../util/commonTypes";
 import {isAlgo, prepareAssetPairData} from "../../util/asset/assetUtils";
 import {FOLKS_WRAPPER_APP_ID} from "../constants";
 import {encodeString} from "../../util/util";
@@ -33,7 +33,7 @@ export async function generateTxns({
   asset2In: FolksLendingAssetInfo;
   initiatorAddr: string;
   shouldOptInToPoolToken: boolean;
-}) {
+}): Promise<SignerTransaction[]> {
   const wrapperAppAddress = algosdk.getApplicationAddress(FOLKS_WRAPPER_APP_ID[network]);
   const suggestedParams = await client.getTransactionParams().do();
   const [asset1, asset2] = prepareAssetPairData(asset1In, asset2In);
@@ -92,7 +92,7 @@ export async function generateTxns({
 
   appCallTxn2.fee = ALGORAND_MIN_TX_FEE;
 
-  let txnGroup = [asset1InTxn, asset2InTxn, appCallTxn1, appCallTxn2];
+  let txns = [asset1InTxn, asset2InTxn, appCallTxn1, appCallTxn2];
 
   if (shouldOptInToPoolToken) {
     const optInTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
@@ -103,8 +103,12 @@ export async function generateTxns({
       suggestedParams
     });
 
-    txnGroup.unshift(optInTxn);
+    txns.unshift(optInTxn);
   }
 
-  return algosdk.assignGroupID(txnGroup);
+  const txnGroup = algosdk.assignGroupID(txns);
+
+  return txnGroup.map((txn) => {
+    return {txn, signers: [initiatorAddr]};
+  });
 }
