@@ -7,7 +7,7 @@ import algosdk, {
 
 import {V2PoolInfo} from "../../util/pool/poolTypes";
 import {FOLKS_WRAPPER_APP_ID} from "../constants";
-import {SupportedNetwork} from "../../util/commonTypes";
+import {SignerTransaction, SupportedNetwork} from "../../util/commonTypes";
 import {encodeString} from "../../util/util";
 import {getValidatorAppID} from "../../validator";
 import {CONTRACT_VERSION} from "../../contract/constants";
@@ -33,7 +33,7 @@ export async function generateTxns({
   lendingManagerId: number;
   slippage: number;
   network: SupportedNetwork;
-}) {
+}): Promise<SignerTransaction[]> {
   const wrapperAppAddress = algosdk.getApplicationAddress(FOLKS_WRAPPER_APP_ID[network]);
 
   const suggestedParams = await client.getTransactionParams().do();
@@ -82,5 +82,9 @@ export async function generateTxns({
 
   appCallTxn2.fee = ALGORAND_MIN_TX_FEE;
 
-  return algosdk.assignGroupID([assetTransferTxn, appCallTxn1, appCallTxn2]);
+  const txnGroup = algosdk.assignGroupID([assetTransferTxn, appCallTxn1, appCallTxn2]);
+
+  return txnGroup.map((txn) => {
+    return {txn, signers: [initiatorAddr]};
+  });
 }

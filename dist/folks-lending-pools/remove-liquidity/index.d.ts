@@ -1,6 +1,6 @@
-import algosdk, { Algodv2 } from "algosdk";
+import { Algodv2 } from "algosdk";
 import { V2PoolInfo } from "../../util/pool/poolTypes";
-import { SupportedNetwork } from "../../util/commonTypes";
+import { SignerTransaction, SupportedNetwork } from "../../util/commonTypes";
 export declare function generateTxns({ client, pool, poolTokenIn, initiatorAddr, lendingAsset1, lendingAsset2, lendingManagerId, network }: {
     client: Algodv2;
     pool: V2PoolInfo;
@@ -19,4 +19,4 @@ export declare function generateTxns({ client, pool, poolTokenIn, initiatorAddr,
     lendingManagerId: number;
     slippage: number;
     network: SupportedNetwork;
-}): Promise<algosdk.Transaction[]>;
+}): Promise<SignerTransaction[]>;
