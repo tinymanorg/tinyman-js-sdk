@@ -11,23 +11,24 @@ import {SignerTransaction, SupportedNetwork} from "../../util/commonTypes";
 import {encodeString} from "../../util/util";
 import {getValidatorAppID} from "../../validator";
 import {CONTRACT_VERSION} from "../../contract/constants";
+import {FolksLendingAssetInfo} from "../types";
 
 export async function generateTxns({
   client,
   pool,
   poolTokenIn,
   initiatorAddr,
-  lendingAsset1,
-  lendingAsset2,
+  asset1Out,
+  asset2Out,
   lendingManagerId,
   network
 }: {
   client: Algodv2;
-  pool: V2PoolInfo;
+  pool: Pick<V2PoolInfo, "account" | "poolTokenID">;
   poolTokenIn: number | bigint;
   initiatorAddr: string;
-  lendingAsset1: {id: number; appId: number};
-  lendingAsset2: {id: number; appId: number};
+  asset1Out: Omit<FolksLendingAssetInfo, "amount">;
+  asset2Out: Omit<FolksLendingAssetInfo, "amount">;
   lendingManagerId: number;
   network: SupportedNetwork;
 }): Promise<SignerTransaction[]> {
@@ -55,12 +56,12 @@ export async function generateTxns({
     appArgs: [
       encodeString("remove_liquidity"),
       decodeAddress(poolAddress).publicKey,
-      encodeUint64(lendingAsset1.appId),
-      encodeUint64(lendingAsset2.appId)
+      encodeUint64(asset1Out.lendingAppId),
+      encodeUint64(asset2Out.lendingAppId)
     ],
     accounts: [poolAddress],
-    foreignAssets: [pool.asset1ID, pool.asset2ID, lendingAsset1.id, lendingAsset2.id],
-    foreignApps: [lendingAsset1.appId, lendingAsset2.appId, lendingManagerId],
+    foreignAssets: [asset1Out.id, asset2Out.id, asset1Out.fAssetId, asset2Out.fAssetId],
+    foreignApps: [asset1Out.lendingAppId, asset2Out.lendingAppId, lendingManagerId],
     suggestedParams
   });
 
@@ -72,7 +73,7 @@ export async function generateTxns({
     appIndex: FOLKS_WRAPPER_APP_ID[network],
     appArgs: [encodeString("noop")],
     accounts: [poolAddress],
-    foreignAssets: [poolTokenId, lendingAsset1.id, lendingAsset2.id],
+    foreignAssets: [poolTokenId, asset1Out.fAssetId, asset2Out.fAssetId],
     foreignApps: [validatorAppID],
     suggestedParams
   });

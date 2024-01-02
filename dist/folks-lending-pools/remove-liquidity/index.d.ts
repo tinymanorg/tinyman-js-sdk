@@ -1,19 +1,14 @@
 import { Algodv2 } from "algosdk";
 import { V2PoolInfo } from "../../util/pool/poolTypes";
 import { SignerTransaction, SupportedNetwork } from "../../util/commonTypes";
-export declare function generateTxns({ client, pool, poolTokenIn, initiatorAddr, lendingAsset1, lendingAsset2, lendingManagerId, network }: {
+import { FolksLendingAssetInfo } from "../types";
+export declare function generateTxns({ client, pool, poolTokenIn, initiatorAddr, asset1Out, asset2Out, lendingManagerId, network }: {
     client: Algodv2;
-    pool: V2PoolInfo;
+    pool: Pick<V2PoolInfo, "account" | "poolTokenID">;
     poolTokenIn: number | bigint;
     initiatorAddr: string;
-    lendingAsset1: {
-        id: number;
-        appId: number;
-    };
-    lendingAsset2: {
-        id: number;
-        appId: number;
-    };
+    asset1Out: Omit<FolksLendingAssetInfo, "amount">;
+    asset2Out: Omit<FolksLendingAssetInfo, "amount">;
     lendingManagerId: number;
     network: SupportedNetwork;
 }): Promise<SignerTransaction[]>;
