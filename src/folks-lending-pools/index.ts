@@ -12,11 +12,9 @@ export class FolksLendingPool {
   constructor(
     public appId: number,
     public managerAppId: number,
-    public depositInterestRate: number,
-    public depositInterestIndex: number,
-    public updatedAt: Date,
-    public originalAssetId: number,
-    public fAssetId: number
+    private depositInterestRate: number,
+    private depositInterestIndex: number,
+    private updatedAt: Date
   ) {
     this.escrowAddress = algosdk.getApplicationAddress(this.appId);
   }
@@ -43,20 +41,6 @@ export class FolksLendingPool {
 
     return Math.floor((amount * ONE_14_DP) / interestIndex);
   }
-
-  /**
-   * Calculates the amount original asset received according to fAsset amount when removing liquidity from lending pool.
-   */
-  convertRemoveAmount(amount: number, options: {ceil?: boolean} = {}): number {
-    const interestIndex = this.calcDepositInterestIndex(this.getLastTimestamp());
-    const converted = (amount * interestIndex) / ONE_14_DP;
-
-    if (options.ceil) {
-      return Math.ceil(converted);
-    }
-
-    return Math.floor(converted);
-  }
 }
 
 /**
@@ -72,13 +56,7 @@ export async function fetchFolksLendingPool(
 
   const managerAppId = Number(Buffer.from(state.pm, "base64").readBigUInt64BE(0));
 
-  const assetsIds = Buffer.from(state.a, "base64");
-
-  const originalAssetId = Number(assetsIds.readBigUInt64BE(0));
-  const fAssetId = Number(assetsIds.readBigUInt64BE(8));
-
   const interestInfo = Buffer.from(state.i, "base64");
-
   const depositInterestRate = Number(interestInfo.readBigUInt64BE(32));
   const depositInterestIndex = Number(interestInfo.readBigUInt64BE(40));
   const updatedAt = Number(interestInfo.readBigUInt64BE(48));
@@ -88,9 +66,7 @@ export async function fetchFolksLendingPool(
     managerAppId,
     depositInterestRate,
     depositInterestIndex,
-    new Date(updatedAt * 1000),
-    originalAssetId,
-    fAssetId
+    new Date(updatedAt * 1000)
   );
 }
 
