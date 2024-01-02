@@ -6,8 +6,6 @@ export declare function generateTxns({ client, pool, poolTokenIn, initiatorAddr,
     pool: V2PoolInfo;
     poolTokenIn: number | bigint;
     initiatorAddr: string;
-    minAsset1Amount: number | bigint;
-    minAsset2Amount: number | bigint;
     lendingAsset1: {
         id: number;
         appId: number;
@@ -17,6 +15,5 @@ export declare function generateTxns({ client, pool, poolTokenIn, initiatorAddr,
         appId: number;
     };
     lendingManagerId: number;
-    slippage: number;
     network: SupportedNetwork;
 }): Promise<SignerTransaction[]>;

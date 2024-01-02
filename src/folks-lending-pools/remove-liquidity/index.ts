@@ -26,12 +26,9 @@ export async function generateTxns({
   pool: V2PoolInfo;
   poolTokenIn: number | bigint;
   initiatorAddr: string;
-  minAsset1Amount: number | bigint;
-  minAsset2Amount: number | bigint;
   lendingAsset1: {id: number; appId: number};
   lendingAsset2: {id: number; appId: number};
   lendingManagerId: number;
-  slippage: number;
   network: SupportedNetwork;
 }): Promise<SignerTransaction[]> {
   const wrapperAppAddress = algosdk.getApplicationAddress(FOLKS_WRAPPER_APP_ID[network]);
