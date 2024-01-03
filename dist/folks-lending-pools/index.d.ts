@@ -8,13 +8,17 @@ export declare class FolksLendingPool {
     private depositInterestIndex;
     private lastUpdate;
     escrowAddress: string;
-    constructor(appId: number, managerAppId: number, depositInterestRate: number, depositInterestIndex: number, lastUpdate: number);
-    private calcDepositInterestIndex;
+    constructor(appId: number, managerAppId: number, depositInterestRate: bigint, depositInterestIndex: bigint, lastUpdate: number);
     private getLastTimestamp;
+    private getDepositInterestIndex;
     /**
      * Calculates the amount fAsset received when adding liquidity with original asset.
      */
-    convertAddAmount(amount: number): number;
+    calculateDepositReturn(depositAmount: number): bigint;
+    /**
+     * Calculates the amount original asset received when removing liquidity from fAsset pool.
+     */
+    calculateWithdrawReturn(withdrawAmount: number): bigint;
 }
 /**
  * Fetches Folks lending pool application info from the algod, parses the global state and builds FolksLendingPool object.

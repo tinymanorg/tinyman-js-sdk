@@ -78,8 +78,6 @@ export async function generateTxns({
     suggestedParams
   });
 
-  appCallTxn2.fee = ALGORAND_MIN_TX_FEE;
-
   const txnGroup = algosdk.assignGroupID([assetTransferTxn, appCallTxn1, appCallTxn2]);
 
   return txnGroup.map((txn) => {

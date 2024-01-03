@@ -25,3 +25,11 @@ export function parseState(kv: any) {
   }
   return res;
 }
+
+export function mulScale(n1: bigint, n2: bigint, scale: bigint): bigint {
+  return (n1 * n2) / scale;
+}
+
+export function divScale(n1: bigint, n2: bigint, scale: bigint): bigint {
+  return (n1 * scale) / n2;
+}

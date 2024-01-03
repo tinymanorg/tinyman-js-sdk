@@ -9,3 +9,5 @@
  * @returns Key value dictionary parsed from the argument.
  */
 export declare function parseState(kv: any): any;
+export declare function mulScale(n1: bigint, n2: bigint, scale: bigint): bigint;
+export declare function divScale(n1: bigint, n2: bigint, scale: bigint): bigint;

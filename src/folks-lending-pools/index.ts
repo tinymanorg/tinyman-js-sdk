@@ -1,7 +1,7 @@
 import algosdk from "algosdk";
 
-import {parseState} from "./utils";
-import {ONE_14_DP, ONE_16_DP, YEAR_IN_SECONDS} from "./constants";
+import {divScale, mulScale, parseState} from "./utils";
+import {ONE_14_DP, ONE_16_DP, SECONDS_IN_YEAR} from "./constants";
 import * as AddLiquidity from "./add-liquidity";
 import * as RemoveLiquidity from "./remove-liquidity";
 
@@ -11,36 +11,45 @@ export class FolksLendingPool {
   constructor(
     public appId: number,
     public managerAppId: number,
-    private depositInterestRate: number,
-    private depositInterestIndex: number,
+    private depositInterestRate: bigint,
+    private depositInterestIndex: bigint,
     private lastUpdate: number
   ) {
     this.escrowAddress = algosdk.getApplicationAddress(this.appId);
-  }
-
-  private calcDepositInterestIndex(timestamp: number): number {
-    const timestampDelta = timestamp - this.lastUpdate;
-
-    return Math.floor(
-      (this.depositInterestIndex *
-        Math.floor(
-          ONE_16_DP + (this.depositInterestRate * timestampDelta) / YEAR_IN_SECONDS
-        )) /
-        ONE_16_DP
-    );
   }
 
   private getLastTimestamp(): number {
     return this.lastUpdate ?? Math.floor(new Date().getTime() / 1000);
   }
 
+  private getDepositInterestIndex() {
+    const timestampDelta = BigInt(
+      Math.floor(new Date().getTime() / 1000) - this.getLastTimestamp()
+    );
+
+    return mulScale(
+      this.depositInterestIndex,
+      ONE_16_DP + (this.depositInterestRate * timestampDelta) / SECONDS_IN_YEAR,
+      ONE_16_DP
+    );
+  }
+
   /**
    * Calculates the amount fAsset received when adding liquidity with original asset.
    */
-  convertAddAmount(amount: number): number {
-    const interestIndex = this.calcDepositInterestIndex(this.getLastTimestamp());
+  calculateDepositReturn(depositAmount: number) {
+    const depositInterestIndex = this.getDepositInterestIndex();
 
-    return Math.floor((amount * ONE_14_DP) / interestIndex);
+    return divScale(BigInt(depositAmount), depositInterestIndex, ONE_14_DP);
+  }
+
+  /**
+   * Calculates the amount original asset received when removing liquidity from fAsset pool.
+   */
+  calculateWithdrawReturn(withdrawAmount: number) {
+    const depositInterestIndex = this.getDepositInterestIndex();
+
+    return mulScale(BigInt(withdrawAmount), depositInterestIndex, ONE_14_DP);
   }
 }
 
@@ -58,8 +67,8 @@ export async function fetchFolksLendingPool(
   const managerAppId = Number(Buffer.from(state.pm, "base64").readBigUInt64BE(0));
 
   const interestInfo = Buffer.from(state.i, "base64");
-  const depositInterestRate = Number(interestInfo.readBigUInt64BE(32));
-  const depositInterestIndex = Number(interestInfo.readBigUInt64BE(40));
+  const depositInterestRate = interestInfo.readBigUInt64BE(32);
+  const depositInterestIndex = interestInfo.readBigUInt64BE(40);
   const lastUpdate = Number(interestInfo.readBigUInt64BE(48));
 
   return new FolksLendingPool(
