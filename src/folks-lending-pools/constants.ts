@@ -1,7 +1,7 @@
 import {SupportedNetwork} from "../util/commonTypes";
 
 // eslint-disable-next-line no-magic-numbers
-const SECONDS_IN_YEAR = 365 * 24 * 60 * 60;
+const YEAR_IN_SECONDS = 365 * 24 * 60 * 60;
 const ONE_14_DP = 1e14;
 const ONE_16_DP = 1e16;
 
@@ -11,4 +11,4 @@ const FOLKS_WRAPPER_APP_ID: Record<SupportedNetwork, number> = {
   mainnet: NaN
 };
 
-export {SECONDS_IN_YEAR, ONE_14_DP, ONE_16_DP, FOLKS_WRAPPER_APP_ID};
+export {YEAR_IN_SECONDS, ONE_14_DP, ONE_16_DP, FOLKS_WRAPPER_APP_ID};

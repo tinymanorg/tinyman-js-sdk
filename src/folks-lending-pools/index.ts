@@ -1,36 +1,37 @@
 import algosdk from "algosdk";
 
 import {parseState} from "./utils";
-import {ONE_14_DP, ONE_16_DP, SECONDS_IN_YEAR} from "./constants";
+import {ONE_14_DP, ONE_16_DP, YEAR_IN_SECONDS} from "./constants";
 import * as AddLiquidity from "./add-liquidity";
 import * as RemoveLiquidity from "./remove-liquidity";
 
 export class FolksLendingPool {
   escrowAddress: string;
 
-  // eslint-disable-next-line max-params
   constructor(
     public appId: number,
     public managerAppId: number,
     private depositInterestRate: number,
     private depositInterestIndex: number,
-    private updatedAt: Date
+    private lastUpdate: number
   ) {
     this.escrowAddress = algosdk.getApplicationAddress(this.appId);
   }
 
   private calcDepositInterestIndex(timestamp: number): number {
-    const dt = Math.floor(timestamp - Math.floor(this.updatedAt.getTime() / 1000));
+    const timestampDelta = timestamp - this.lastUpdate;
 
     return Math.floor(
       (this.depositInterestIndex *
-        Math.floor(ONE_16_DP + (this.depositInterestRate * dt) / SECONDS_IN_YEAR)) /
+        Math.floor(
+          ONE_16_DP + (this.depositInterestRate * timestampDelta) / YEAR_IN_SECONDS
+        )) /
         ONE_16_DP
     );
   }
 
   private getLastTimestamp(): number {
-    return Math.floor(new Date().getTime() / 1000);
+    return this.lastUpdate ?? Math.floor(new Date().getTime() / 1000);
   }
 
   /**
@@ -59,14 +60,14 @@ export async function fetchFolksLendingPool(
   const interestInfo = Buffer.from(state.i, "base64");
   const depositInterestRate = Number(interestInfo.readBigUInt64BE(32));
   const depositInterestIndex = Number(interestInfo.readBigUInt64BE(40));
-  const updatedAt = Number(interestInfo.readBigUInt64BE(48));
+  const lastUpdate = Number(interestInfo.readBigUInt64BE(48));
 
   return new FolksLendingPool(
     appId,
     managerAppId,
     depositInterestRate,
     depositInterestIndex,
-    new Date(updatedAt * 1000)
+    lastUpdate
   );
 }
 

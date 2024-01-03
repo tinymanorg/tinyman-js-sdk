@@ -6,9 +6,9 @@ export declare class FolksLendingPool {
     managerAppId: number;
     private depositInterestRate;
     private depositInterestIndex;
-    private updatedAt;
+    private lastUpdate;
     escrowAddress: string;
-    constructor(appId: number, managerAppId: number, depositInterestRate: number, depositInterestIndex: number, updatedAt: Date);
+    constructor(appId: number, managerAppId: number, depositInterestRate: number, depositInterestIndex: number, lastUpdate: number);
     private calcDepositInterestIndex;
     private getLastTimestamp;
     /**
