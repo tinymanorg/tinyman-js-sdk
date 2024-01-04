@@ -7,7 +7,10 @@ import algosdk, {
 
 import {SignerTransaction, SupportedNetwork} from "../../util/commonTypes";
 import {isAlgo, prepareAssetPairData} from "../../util/asset/assetUtils";
-import {FOLKS_WRAPPER_APP_ID} from "../constants";
+import {
+  FOLKS_LENDING_POOL_APP_CALL_INNER_TXN_COUNT,
+  FOLKS_WRAPPER_APP_ID
+} from "../constants";
 import {encodeString} from "../../util/util";
 import {FolksLendingAssetInfo} from "../types";
 import {CONTRACT_VERSION} from "../../contract/constants";
@@ -21,8 +24,7 @@ export async function generateTxns({
   lendingManagerId,
   asset1In,
   asset2In,
-  initiatorAddr,
-  shouldOptInToPoolToken
+  initiatorAddr
 }: {
   client: Algodv2;
   network: SupportedNetwork;
@@ -32,7 +34,6 @@ export async function generateTxns({
   asset1In: FolksLendingAssetInfo;
   asset2In: FolksLendingAssetInfo;
   initiatorAddr: string;
-  shouldOptInToPoolToken: boolean;
 }): Promise<SignerTransaction[]> {
   const wrapperAppAddress = algosdk.getApplicationAddress(FOLKS_WRAPPER_APP_ID[network]);
   const suggestedParams = await client.getTransactionParams().do();
@@ -77,7 +78,8 @@ export async function generateTxns({
     suggestedParams
   });
 
-  appCallTxn1.fee = ALGORAND_MIN_TX_FEE * 16;
+  appCallTxn1.fee =
+    ALGORAND_MIN_TX_FEE * (FOLKS_LENDING_POOL_APP_CALL_INNER_TXN_COUNT + 1);
 
   const validatorAppID = getValidatorAppID(network, CONTRACT_VERSION.V2);
   const appCallTxn2 = algosdk.makeApplicationNoOpTxnFromObject({
@@ -90,25 +92,19 @@ export async function generateTxns({
     suggestedParams
   });
 
-  appCallTxn2.fee = ALGORAND_MIN_TX_FEE;
-
-  let txns = [asset1InTxn, asset2InTxn, appCallTxn1, appCallTxn2];
-
-  if (shouldOptInToPoolToken) {
-    const optInTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-      from: initiatorAddr,
-      to: initiatorAddr,
-      assetIndex: poolTokenId,
-      amount: 0,
-      suggestedParams
-    });
-
-    txns.unshift(optInTxn);
-  }
-
-  const txnGroup = algosdk.assignGroupID(txns);
+  const txnGroup = algosdk.assignGroupID([
+    asset1InTxn,
+    asset2InTxn,
+    appCallTxn1,
+    appCallTxn2
+  ]);
 
   return txnGroup.map((txn) => {
     return {txn, signers: [initiatorAddr]};
   });
+}
+
+export function getAddLiquidityTotalFee() {
+  // 1 asset transfer txn, 1 payment/asset transfer txn, 1 app call txn and 1 app call txn with inner txns
+  return ALGORAND_MIN_TX_FEE * (4 + FOLKS_LENDING_POOL_APP_CALL_INNER_TXN_COUNT);
 }

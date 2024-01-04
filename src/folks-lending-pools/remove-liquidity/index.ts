@@ -6,7 +6,10 @@ import algosdk, {
 } from "algosdk";
 
 import {V2PoolInfo} from "../../util/pool/poolTypes";
-import {FOLKS_WRAPPER_APP_ID} from "../constants";
+import {
+  FOLKS_LENDING_POOL_APP_CALL_INNER_TXN_COUNT,
+  FOLKS_WRAPPER_APP_ID
+} from "../constants";
 import {SignerTransaction, SupportedNetwork} from "../../util/commonTypes";
 import {encodeString} from "../../util/util";
 import {getValidatorAppID} from "../../validator";
@@ -65,7 +68,8 @@ export async function generateTxns({
     suggestedParams
   });
 
-  appCallTxn1.fee = 15 * ALGORAND_MIN_TX_FEE;
+  appCallTxn1.fee =
+    ALGORAND_MIN_TX_FEE * (FOLKS_LENDING_POOL_APP_CALL_INNER_TXN_COUNT + 1);
 
   const validatorAppID = getValidatorAppID(network, CONTRACT_VERSION.V2);
   const appCallTxn2 = algosdk.makeApplicationNoOpTxnFromObject({
@@ -83,4 +87,9 @@ export async function generateTxns({
   return txnGroup.map((txn) => {
     return {txn, signers: [initiatorAddr]};
   });
+}
+
+export function getRemoveLiquidityTotalFee() {
+  // 1 asset transfer txn, 1 app call txn and 1 app call txn with inner txns
+  return ALGORAND_MIN_TX_FEE * (3 + FOLKS_LENDING_POOL_APP_CALL_INNER_TXN_COUNT);
 }
