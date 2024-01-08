@@ -7,8 +7,7 @@ const ONE_16_DP = BigInt(1e16);
 
 const FOLKS_WRAPPER_APP_ID: Record<SupportedNetwork, number> = {
   testnet: 548587153,
-  // TODO: Update mainnet vault app id when it is available
-  mainnet: NaN
+  mainnet: 1385499515
 };
 
 const FOLKS_LENDING_POOL_APP_CALL_INNER_TXN_COUNT = 14;
