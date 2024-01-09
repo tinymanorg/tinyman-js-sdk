@@ -9,10 +9,11 @@ import {FolksLendingPool} from "./types";
 
 function getLatestDepositInterestIndex(
   depositInterestIndex: bigint,
-  depositInterestRate: bigint
+  depositInterestRate: bigint,
+  lastUpdate?: number
 ) {
   const timestampDelta = BigInt(
-    Math.floor(new Date().getTime() / 1000) - getLastTimestamp()
+    Math.floor(new Date().getTime() / 1000) - getLastTimestamp(lastUpdate)
   );
 
   return mulScale(
@@ -32,11 +33,13 @@ function getLastTimestamp(lastUpdate?: number): number {
 function calculateDepositReturn(
   depositAmount: number,
   depositInterestIndex: bigint,
-  depositInterestRate: bigint
+  depositInterestRate: bigint,
+  lastUpdate?: number
 ) {
   const latestDepositInterestIndex = getLatestDepositInterestIndex(
     depositInterestIndex,
-    depositInterestRate
+    depositInterestRate,
+    lastUpdate
   );
 
   return divScale(BigInt(depositAmount), latestDepositInterestIndex, ONE_14_DP);
@@ -48,11 +51,13 @@ function calculateDepositReturn(
 function calculateWithdrawReturn(
   withdrawAmount: number,
   depositInterestIndex: bigint,
-  depositInterestRate: bigint
+  depositInterestRate: bigint,
+  lastUpdate?: number
 ) {
   const latestDepositInterestIndex = getLatestDepositInterestIndex(
     depositInterestIndex,
-    depositInterestRate
+    depositInterestRate,
+    lastUpdate
   );
 
   return mulScale(BigInt(withdrawAmount), latestDepositInterestIndex, ONE_14_DP);
