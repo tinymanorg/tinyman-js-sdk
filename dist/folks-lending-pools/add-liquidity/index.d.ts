@@ -11,4 +11,4 @@ export declare function generateTxns({ client, network, poolAddress, poolTokenId
     asset2In: FolksLendingAssetInfo;
     initiatorAddr: string;
 }): Promise<SignerTransaction[]>;
-export declare function getAddLiquidityTotalFee(): number;
+export declare function getAddLiquidityTotalFee(wrapperAppOptInRequiredAssetIdCount?: number): number;

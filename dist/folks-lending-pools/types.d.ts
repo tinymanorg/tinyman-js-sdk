@@ -6,9 +6,7 @@ export type FolksLendingAssetInfo = AssetWithIdAndAmount & {
 export interface FolksLendingPool {
     appId: number;
     managerAppId: number;
-    depositInterestRate: number;
-    depositInterestIndex: number;
-    updatedAt: Date;
-    originalAssetId: number;
-    fAssetId: number;
+    depositInterestRate: bigint;
+    depositInterestIndex: bigint;
+    lastUpdate: number;
 }

@@ -133,7 +133,13 @@ export async function generateTxns({
   });
 }
 
-export function getAddLiquidityTotalFee() {
+export function getAddLiquidityTotalFee(wrapperAppOptInRequiredAssetIdCount?: number) {
   // 1 asset transfer txn, 1 payment/asset transfer txn, 1 app call txn and 1 app call txn with inner txns
-  return ALGORAND_MIN_TX_FEE * (4 + FOLKS_LENDING_POOL_APP_CALL_INNER_TXN_COUNT);
+  return (
+    ALGORAND_MIN_TX_FEE * (4 + FOLKS_LENDING_POOL_APP_CALL_INNER_TXN_COUNT) +
+    (wrapperAppOptInRequiredAssetIdCount
+      ? (wrapperAppOptInRequiredAssetIdCount + 1) * ALGORAND_MIN_TX_FEE +
+        wrapperAppOptInRequiredAssetIdCount * MINIMUM_BALANCE_REQUIRED_PER_ASSET
+      : 0)
+  );
 }

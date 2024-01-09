@@ -4,53 +4,58 @@ import {divScale, mulScale, parseState} from "./utils";
 import {ONE_14_DP, ONE_16_DP, SECONDS_IN_YEAR} from "./constants";
 import * as AddLiquidity from "./add-liquidity";
 import * as RemoveLiquidity from "./remove-liquidity";
+import {getFolksWrapperAppOptInRequiredAssetIDs} from "./add-liquidity/utils";
+import {FolksLendingPool} from "./types";
 
-export class FolksLendingPool {
-  escrowAddress: string;
+function getLatestDepositInterestIndex(
+  depositInterestIndex: bigint,
+  depositInterestRate: bigint
+) {
+  const timestampDelta = BigInt(
+    Math.floor(new Date().getTime() / 1000) - getLastTimestamp()
+  );
 
-  constructor(
-    public appId: number,
-    public managerAppId: number,
-    private depositInterestRate: bigint,
-    private depositInterestIndex: bigint,
-    private lastUpdate: number
-  ) {
-    this.escrowAddress = algosdk.getApplicationAddress(this.appId);
-  }
+  return mulScale(
+    depositInterestIndex,
+    ONE_16_DP + (depositInterestRate * timestampDelta) / SECONDS_IN_YEAR,
+    ONE_16_DP
+  );
+}
 
-  private getLastTimestamp(): number {
-    return this.lastUpdate ?? Math.floor(new Date().getTime() / 1000);
-  }
+function getLastTimestamp(lastUpdate?: number): number {
+  return lastUpdate ?? Math.floor(new Date().getTime() / 1000);
+}
 
-  private getDepositInterestIndex() {
-    const timestampDelta = BigInt(
-      Math.floor(new Date().getTime() / 1000) - this.getLastTimestamp()
-    );
+/**
+ * Calculates the amount fAsset received when adding liquidity with original asset.
+ */
+function calculateDepositReturn(
+  depositAmount: number,
+  depositInterestIndex: bigint,
+  depositInterestRate: bigint
+) {
+  const latestDepositInterestIndex = getLatestDepositInterestIndex(
+    depositInterestIndex,
+    depositInterestRate
+  );
 
-    return mulScale(
-      this.depositInterestIndex,
-      ONE_16_DP + (this.depositInterestRate * timestampDelta) / SECONDS_IN_YEAR,
-      ONE_16_DP
-    );
-  }
+  return divScale(BigInt(depositAmount), latestDepositInterestIndex, ONE_14_DP);
+}
 
-  /**
-   * Calculates the amount fAsset received when adding liquidity with original asset.
-   */
-  calculateDepositReturn(depositAmount: number) {
-    const depositInterestIndex = this.getDepositInterestIndex();
+/**
+ * Calculates the amount original asset received when removing liquidity from fAsset pool.
+ */
+function calculateWithdrawReturn(
+  withdrawAmount: number,
+  depositInterestIndex: bigint,
+  depositInterestRate: bigint
+) {
+  const latestDepositInterestIndex = getLatestDepositInterestIndex(
+    depositInterestIndex,
+    depositInterestRate
+  );
 
-    return divScale(BigInt(depositAmount), depositInterestIndex, ONE_14_DP);
-  }
-
-  /**
-   * Calculates the amount original asset received when removing liquidity from fAsset pool.
-   */
-  calculateWithdrawReturn(withdrawAmount: number) {
-    const depositInterestIndex = this.getDepositInterestIndex();
-
-    return mulScale(BigInt(withdrawAmount), depositInterestIndex, ONE_14_DP);
-  }
+  return mulScale(BigInt(withdrawAmount), latestDepositInterestIndex, ONE_14_DP);
 }
 
 /**
@@ -71,13 +76,17 @@ export async function fetchFolksLendingPool(
   const depositInterestIndex = interestInfo.readBigUInt64BE(40);
   const lastUpdate = Number(interestInfo.readBigUInt64BE(48));
 
-  return new FolksLendingPool(
+  return {
     appId,
     managerAppId,
     depositInterestRate,
     depositInterestIndex,
     lastUpdate
-  );
+  };
 }
 
-export const LendingPool = {AddLiquidity, RemoveLiquidity};
+export const LendingPool = {
+  AddLiquidity: {...AddLiquidity, calculateDepositReturn},
+  RemoveLiquidity: {...RemoveLiquidity, calculateWithdrawReturn},
+  getFolksWrapperAppOptInRequiredAssetIDs
+};

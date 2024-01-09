@@ -133,11 +133,8 @@ export {
   REDEEM_PROCESS_TXN_COUNT
 } from "./redeem";
 
-export {
-  fetchFolksLendingPool,
-  LendingPool,
-  FolksLendingPool
-} from "./folks-lending-pools";
+export {fetchFolksLendingPool, LendingPool} from "./folks-lending-pools";
+export {FolksLendingPool} from "./folks-lending-pools/types";
 
 export {prepareCommitTransactions, getStakingAppID} from "./stake";
 export {tinymanJSSDKConfig} from "./config";
