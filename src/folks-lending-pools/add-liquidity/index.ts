@@ -6,7 +6,7 @@ import algosdk, {
 } from "algosdk";
 
 import {SignerTransaction, SupportedNetwork} from "../../util/commonTypes";
-import {isAlgo, prepareAssetPairData} from "../../util/asset/assetUtils";
+import {isAlgo} from "../../util/asset/assetUtils";
 import {
   FOLKS_LENDING_POOL_APP_CALL_INNER_TXN_COUNT,
   FOLKS_WRAPPER_APP_ID
@@ -39,14 +39,13 @@ export async function generateTxns({
 }): Promise<SignerTransaction[]> {
   const wrapperAppAddress = algosdk.getApplicationAddress(FOLKS_WRAPPER_APP_ID[network]);
   const suggestedParams = await client.getTransactionParams().do();
-  const [asset1, asset2] = prepareAssetPairData(asset1In, asset2In);
-  const isAlgoPool = isAlgo(asset2.id);
+  const isAlgoPool = isAlgo(asset2In.id);
 
   const asset1InTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
     from: initiatorAddr,
     to: wrapperAppAddress,
-    assetIndex: asset1.id,
-    amount: asset1.amount,
+    assetIndex: asset1In.id,
+    amount: asset1In.amount,
     suggestedParams
   });
 
@@ -54,14 +53,14 @@ export async function generateTxns({
     ? algosdk.makePaymentTxnWithSuggestedParamsFromObject({
         from: initiatorAddr,
         to: wrapperAppAddress,
-        amount: asset2.amount,
+        amount: asset2In.amount,
         suggestedParams
       })
     : algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
         from: initiatorAddr,
         to: wrapperAppAddress,
-        assetIndex: asset2.id,
-        amount: asset2.amount,
+        assetIndex: asset2In.id,
+        amount: asset2In.amount,
         suggestedParams
       });
 
@@ -71,11 +70,11 @@ export async function generateTxns({
     appArgs: [
       encodeString("add_liquidity"),
       decodeAddress(poolAddress).publicKey,
-      encodeUint64(asset1.lendingAppId),
-      encodeUint64(asset2.lendingAppId)
+      encodeUint64(asset1In.lendingAppId),
+      encodeUint64(asset2In.lendingAppId)
     ],
-    foreignAssets: [asset1.id, asset2.id, asset1.fAssetId, asset2.fAssetId],
-    foreignApps: [asset1.lendingAppId, asset2.lendingAppId, lendingManagerId],
+    foreignAssets: [asset1In.id, asset2In.id, asset1In.fAssetId, asset2In.fAssetId],
+    foreignApps: [asset1In.lendingAppId, asset2In.lendingAppId, lendingManagerId],
     accounts: [poolAddress],
     suggestedParams
   });
@@ -99,7 +98,13 @@ export async function generateTxns({
   const optInRequiredAssetIds = await getFolksWrapperAppOptInRequiredAssetIDs({
     client,
     network,
-    assetIDs: [asset1.id, asset2.id, asset1.fAssetId, asset2.fAssetId, poolTokenId]
+    assetIDs: [
+      asset1In.id,
+      asset2In.id,
+      asset1In.fAssetId,
+      asset2In.fAssetId,
+      poolTokenId
+    ]
   });
 
   if (optInRequiredAssetIds.length) {

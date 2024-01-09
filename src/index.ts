@@ -134,7 +134,7 @@ export {
 } from "./redeem";
 
 export {fetchFolksLendingPool, LendingPool} from "./folks-lending-pools";
-export {FolksLendingPool} from "./folks-lending-pools/types";
+export type {FolksLendingPool} from "./folks-lending-pools/types";
 
 export {prepareCommitTransactions, getStakingAppID} from "./stake";
 export {tinymanJSSDKConfig} from "./config";
