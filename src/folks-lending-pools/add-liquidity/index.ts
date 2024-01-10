@@ -39,13 +39,17 @@ export async function generateTxns({
 }): Promise<SignerTransaction[]> {
   const wrapperAppAddress = algosdk.getApplicationAddress(FOLKS_WRAPPER_APP_ID[network]);
   const suggestedParams = await client.getTransactionParams().do();
-  const isAlgoPool = isAlgo(asset2In.id);
+
+  // Make sure to sort the assets according to the fAssetIds
+  const [asset1, asset2] = [asset1In, asset2In].sort((a, b) => b.fAssetId - a.fAssetId);
+
+  const isAlgoPool = isAlgo(asset2.id);
 
   const asset1InTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
     from: initiatorAddr,
     to: wrapperAppAddress,
-    assetIndex: asset1In.id,
-    amount: asset1In.amount,
+    assetIndex: asset1.id,
+    amount: asset1.amount,
     suggestedParams
   });
 
@@ -53,14 +57,14 @@ export async function generateTxns({
     ? algosdk.makePaymentTxnWithSuggestedParamsFromObject({
         from: initiatorAddr,
         to: wrapperAppAddress,
-        amount: asset2In.amount,
+        amount: asset2.amount,
         suggestedParams
       })
     : algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
         from: initiatorAddr,
         to: wrapperAppAddress,
-        assetIndex: asset2In.id,
-        amount: asset2In.amount,
+        assetIndex: asset2.id,
+        amount: asset2.amount,
         suggestedParams
       });
 
@@ -70,11 +74,11 @@ export async function generateTxns({
     appArgs: [
       encodeString("add_liquidity"),
       decodeAddress(poolAddress).publicKey,
-      encodeUint64(asset1In.lendingAppId),
-      encodeUint64(asset2In.lendingAppId)
+      encodeUint64(asset1.lendingAppId),
+      encodeUint64(asset2.lendingAppId)
     ],
-    foreignAssets: [asset1In.id, asset2In.id, asset1In.fAssetId, asset2In.fAssetId],
-    foreignApps: [asset1In.lendingAppId, asset2In.lendingAppId, lendingManagerId],
+    foreignAssets: [asset1.id, asset2.id, asset1.fAssetId, asset2.fAssetId],
+    foreignApps: [asset1.lendingAppId, asset2.lendingAppId, lendingManagerId],
     accounts: [poolAddress],
     suggestedParams
   });
@@ -98,13 +102,7 @@ export async function generateTxns({
   const optInRequiredAssetIds = await getFolksWrapperAppOptInRequiredAssetIDs({
     client,
     network,
-    assetIDs: [
-      asset1In.id,
-      asset2In.id,
-      asset1In.fAssetId,
-      asset2In.fAssetId,
-      poolTokenId
-    ]
+    assetIDs: [asset1.id, asset2.id, asset1.fAssetId, asset2.fAssetId, poolTokenId]
   });
 
   if (optInRequiredAssetIds.length) {
