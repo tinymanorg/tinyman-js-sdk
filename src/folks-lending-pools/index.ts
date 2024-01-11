@@ -91,7 +91,9 @@ export async function fetchFolksLendingPool(
 }
 
 export const LendingPool = {
-  AddLiquidity: {...AddLiquidity, calculateDepositReturn},
-  RemoveLiquidity: {...RemoveLiquidity, calculateWithdrawReturn},
+  AddLiquidity,
+  RemoveLiquidity,
+  calculateWithdrawReturn,
+  calculateDepositReturn,
   getFolksWrapperAppOptInRequiredAssetIDs
 };
