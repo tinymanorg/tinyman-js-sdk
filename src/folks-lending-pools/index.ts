@@ -30,12 +30,17 @@ function getLastTimestamp(lastUpdate?: number): number {
 /**
  * Calculates the amount fAsset received when adding liquidity with original asset.
  */
-function calculateDepositReturn(
-  depositAmount: number,
-  depositInterestIndex: bigint,
-  depositInterestRate: bigint,
-  lastUpdate?: number
-) {
+function calculateDepositReturn({
+  depositAmount,
+  depositInterestIndex,
+  depositInterestRate,
+  lastUpdate
+}: {
+  depositAmount: number;
+  depositInterestIndex: bigint;
+  depositInterestRate: bigint;
+  lastUpdate?: number;
+}) {
   const latestDepositInterestIndex = getLatestDepositInterestIndex(
     depositInterestIndex,
     depositInterestRate,
@@ -48,12 +53,17 @@ function calculateDepositReturn(
 /**
  * Calculates the amount original asset received when removing liquidity from fAsset pool.
  */
-function calculateWithdrawReturn(
-  withdrawAmount: number,
-  depositInterestIndex: bigint,
-  depositInterestRate: bigint,
-  lastUpdate?: number
-) {
+function calculateWithdrawReturn({
+  withdrawAmount,
+  depositInterestIndex,
+  depositInterestRate,
+  lastUpdate
+}: {
+  withdrawAmount: number;
+  depositInterestIndex: bigint;
+  depositInterestRate: bigint;
+  lastUpdate?: number;
+}) {
   const latestDepositInterestIndex = getLatestDepositInterestIndex(
     depositInterestIndex,
     depositInterestRate,

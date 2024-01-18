@@ -6,11 +6,21 @@ import { FolksLendingPool } from "./types";
 /**
  * Calculates the amount fAsset received when adding liquidity with original asset.
  */
-declare function calculateDepositReturn(depositAmount: number, depositInterestIndex: bigint, depositInterestRate: bigint, lastUpdate?: number): bigint;
+declare function calculateDepositReturn({ depositAmount, depositInterestIndex, depositInterestRate, lastUpdate }: {
+    depositAmount: number;
+    depositInterestIndex: bigint;
+    depositInterestRate: bigint;
+    lastUpdate?: number;
+}): bigint;
 /**
  * Calculates the amount original asset received when removing liquidity from fAsset pool.
  */
-declare function calculateWithdrawReturn(withdrawAmount: number, depositInterestIndex: bigint, depositInterestRate: bigint, lastUpdate?: number): bigint;
+declare function calculateWithdrawReturn({ withdrawAmount, depositInterestIndex, depositInterestRate, lastUpdate }: {
+    withdrawAmount: number;
+    depositInterestIndex: bigint;
+    depositInterestRate: bigint;
+    lastUpdate?: number;
+}): bigint;
 /**
  * Fetches Folks lending pool application info from the algod, parses the global state and builds FolksLendingPool object.
  */

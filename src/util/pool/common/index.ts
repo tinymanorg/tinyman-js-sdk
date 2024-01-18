@@ -1,7 +1,6 @@
 import {Algodv2} from "algosdk";
 
 import {SupportedNetwork} from "../../commonTypes";
-import {convertFromBaseUnits} from "../../util";
 import {V1PoolInfo, V2PoolInfo, PoolReserves, PoolStatus} from "../poolTypes";
 import {getPoolInfo as getV1_1PoolInfo} from "../v1_1";
 import {getPoolInfo as getV2PoolInfo} from "../v2";
@@ -24,27 +23,12 @@ export function getPoolShare(totalLiquidity: bigint, ownedLiquidity: bigint) {
 /**
  * Calculates the pair ratio for the pool reserves
  */
-export function getPoolPairRatio(
-  decimals: {
-    asset1: undefined | number;
-    asset2: undefined | number;
-  },
-  reserves: null | PoolReserves
-): null | number {
+export function getPoolPairRatio(reserves: null | PoolReserves): null | number {
   const isEmpty = isPoolEmpty(reserves);
   let pairRatio: null | number = null;
 
-  if (
-    reserves &&
-    !isEmpty &&
-    reserves.asset1 &&
-    reserves.asset2 &&
-    typeof decimals.asset2 === "number" &&
-    typeof decimals.asset1 === "number"
-  ) {
-    pairRatio =
-      convertFromBaseUnits(decimals.asset1, reserves.asset1) /
-      convertFromBaseUnits(decimals.asset2, reserves.asset2);
+  if (reserves && !isEmpty && reserves.asset1 && reserves.asset2) {
+    pairRatio = Number(reserves.asset1) / Number(reserves.asset2);
   }
 
   return pairRatio;
