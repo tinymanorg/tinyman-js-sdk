@@ -30,29 +30,24 @@ export async function fixedInputSwap({
    * Swap.getQuote method, which will return the best quote (highest rate)
    * after checking both v1 and v2
    */
-  const fixedInputSwapQuote = Swap.v2.getQuote(
-    SwapType.FixedInput,
+
+  const fixedInputSwapQuote = await  Swap.v2.getQuote({
+    type: SwapType.FixedInput,
     pool,
-    {id: pool.asset1ID, amount: 1_000_000},
-    {assetIn: 6, assetOut: 6}
-  );
-  const assetIn = {
-    id: fixedInputSwapQuote.assetInID,
-    amount: fixedInputSwapQuote.assetInAmount
-  };
-  const assetOut = {
-    id: fixedInputSwapQuote.assetOutID,
-    amount: fixedInputSwapQuote.assetOutAmount
-  };
+    amount: 1_000_000,
+    assetIn: {id: pool.asset1ID, decimals: 6},
+    assetOut: {id: pool.asset2ID, decimals: 6},
+    isSwapRouterEnabled: true,
+    network: "testnet"
+  });
 
   const fixedInputSwapTxns = await Swap.v2.generateTxns({
     client: algodClient,
-    swapType: SwapType.FixedInput,
-    pool,
+    network: "testnet",
+    quote: fixedInputSwapQuote,
+    swapType:  SwapType.FixedInput,
+    slippage:  0.05,
     initiatorAddr,
-    assetIn,
-    assetOut,
-    slippage: 0.05
   });
 
   const signedTxns = await Swap.v2.signTxns({
@@ -61,12 +56,17 @@ export async function fixedInputSwap({
   });
 
   const swapExecutionResponse = await Swap.v2.execute({
-    network: "testnet" as SupportedNetwork,
+    quote: fixedInputSwapQuote,
     client: algodClient,
     signedTxns,
-    pool,
-    txGroup: fixedInputSwapTxns,
-    assetIn
+    txGroup: fixedInputSwapTxns
+  });
+
+  const data = await Swap.v2.execute({
+    quote: fixedInputSwapQuote!,
+    client: algodClient,
+    signedTxns,
+    txGroup: fixedInputSwapTxns
   });
 
   console.log("✅ Fixed Input Swap executed successfully!");

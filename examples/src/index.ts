@@ -23,7 +23,7 @@ async function main() {
   // await bootstrapPool({ account, asset_1, asset_2 });
 
   // Add some initial liquidity to the pool
-  await addInitialLiquidity({account, asset_1, asset_2});
+  // await addInitialLiquidity({account, asset_1, asset_2});
 
   // Add subsequent liquidity to the pool using the flexible mode
   await addFlexibleLiquidity({account, asset_1, asset_2});
