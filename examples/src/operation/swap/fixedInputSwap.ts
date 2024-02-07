@@ -62,13 +62,6 @@ export async function fixedInputSwap({
     txGroup: fixedInputSwapTxns
   });
 
-  const data = await Swap.v2.execute({
-    quote: fixedInputSwapQuote!,
-    client: algodClient,
-    signedTxns,
-    txGroup: fixedInputSwapTxns
-  });
-
   console.log("✅ Fixed Input Swap executed successfully!");
   console.log({txnID: swapExecutionResponse.txnID});
 }
