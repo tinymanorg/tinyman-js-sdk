@@ -1,9 +1,6 @@
 export declare const poolUtils: {
     getPoolShare(totalLiquidity: bigint, ownedLiquidity: bigint): number;
-    getPoolPairRatio(decimals: {
-        asset1: number | undefined;
-        asset2: number | undefined;
-    }, reserves: import("./poolTypes").PoolReserves | null): number | null;
+    getPoolPairRatio(reserves: import("./poolTypes").PoolReserves | null): number | null;
     isPoolEmpty(poolReserves: import("./poolTypes").PoolReserves | null | undefined): boolean;
     isPoolNotCreated(pool: import("./poolTypes").V1PoolInfo | import("./poolTypes").V2PoolInfo | null | undefined): boolean;
     isPoolReady(pool: import("./poolTypes").V1PoolInfo | import("./poolTypes").V2PoolInfo | null | undefined): boolean;
@@ -15,10 +12,7 @@ export declare const poolUtils: {
     }): Promise<[import("./poolTypes").V1PoolInfo, import("./poolTypes").V2PoolInfo]>;
     v1_1: {
         getPoolShare(totalLiquidity: bigint, ownedLiquidity: bigint): number;
-        getPoolPairRatio(decimals: {
-            asset1: number | undefined;
-            asset2: number | undefined;
-        }, reserves: import("./poolTypes").PoolReserves | null): number | null;
+        getPoolPairRatio(reserves: import("./poolTypes").PoolReserves | null): number | null;
         isPoolEmpty(poolReserves: import("./poolTypes").PoolReserves | null | undefined): boolean;
         isPoolNotCreated(pool: import("./poolTypes").V1PoolInfo | import("./poolTypes").V2PoolInfo | null | undefined): boolean;
         isPoolReady(pool: import("./poolTypes").V1PoolInfo | import("./poolTypes").V2PoolInfo | null | undefined): boolean;
@@ -43,10 +37,7 @@ export declare const poolUtils: {
     };
     v2: {
         getPoolShare(totalLiquidity: bigint, ownedLiquidity: bigint): number;
-        getPoolPairRatio(decimals: {
-            asset1: number | undefined;
-            asset2: number | undefined;
-        }, reserves: import("./poolTypes").PoolReserves | null): number | null;
+        getPoolPairRatio(reserves: import("./poolTypes").PoolReserves | null): number | null;
         isPoolEmpty(poolReserves: import("./poolTypes").PoolReserves | null | undefined): boolean;
         isPoolNotCreated(pool: import("./poolTypes").V1PoolInfo | import("./poolTypes").V2PoolInfo | null | undefined): boolean;
         isPoolReady(pool: import("./poolTypes").V1PoolInfo | import("./poolTypes").V2PoolInfo | null | undefined): boolean;
