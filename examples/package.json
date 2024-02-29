@@ -9,7 +9,7 @@
   "author": "Tinyman Core Team",
   "license": "ISC",
   "dependencies": {
-    "algosdk": "^2.1.0",
+    "algosdk": "^2.7.0",
     "@tinymanorg/tinyman-js-sdk": "^3.1.0"
   },
   "devDependencies": {
