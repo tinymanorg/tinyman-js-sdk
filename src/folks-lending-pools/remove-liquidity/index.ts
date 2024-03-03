@@ -41,6 +41,9 @@ export async function generateTxns({
   const poolAddress = pool.account.address();
   const poolTokenId = pool.poolTokenID;
 
+  // Make sure to sort the assets according to the fAssetIds
+  const [asset1, asset2] = [asset1Out, asset2Out].sort((a, b) => b.fAssetId - a.fAssetId);
+
   if (!poolTokenId) {
     throw new Error("Pool token asset ID is missing");
   }
@@ -59,12 +62,12 @@ export async function generateTxns({
     appArgs: [
       encodeString("remove_liquidity"),
       decodeAddress(poolAddress).publicKey,
-      encodeUint64(asset1Out.lendingAppId),
-      encodeUint64(asset2Out.lendingAppId)
+      encodeUint64(asset1.lendingAppId),
+      encodeUint64(asset2.lendingAppId)
     ],
     accounts: [poolAddress],
-    foreignAssets: [asset1Out.id, asset2Out.id, asset1Out.fAssetId, asset2Out.fAssetId],
-    foreignApps: [asset1Out.lendingAppId, asset2Out.lendingAppId, lendingManagerId],
+    foreignAssets: [asset1.id, asset2.id, asset1.fAssetId, asset2.fAssetId],
+    foreignApps: [asset1.lendingAppId, asset2.lendingAppId, lendingManagerId],
     suggestedParams
   });
 
@@ -77,7 +80,7 @@ export async function generateTxns({
     appIndex: FOLKS_WRAPPER_APP_ID[network],
     appArgs: [encodeString("noop")],
     accounts: [poolAddress],
-    foreignAssets: [poolTokenId, asset1Out.fAssetId, asset2Out.fAssetId],
+    foreignAssets: [poolTokenId, asset1.fAssetId, asset2.fAssetId],
     foreignApps: [validatorAppID],
     suggestedParams
   });

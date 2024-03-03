@@ -39,7 +39,7 @@ const isAppOptInRequired = isAccountOptedIntoApp({
   accountAppsLocalState: account["apps-local-state"]
 });
 
-if (!hasOptedIn) {
+if (isAppOptInRequired) {
   const v1AppOptInTxns = await generateOptIntoValidatorTxns({
     client: algodClient,
     network: "mainnet",
