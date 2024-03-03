@@ -10,7 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "algosdk": "^2.7.0",
-    "@tinymanorg/tinyman-js-sdk": "^3.1.0"
+    "@tinymanorg/tinyman-js-sdk": "^3.1.1"
   },
   "devDependencies": {
     "@types/node": "^18.8.5",

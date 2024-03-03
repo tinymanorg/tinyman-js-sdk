@@ -100,3 +100,17 @@ export async function getIsAccountOptedIntoAsset(
     (asset) => asset["asset-id"] === assetId
   );
 }
+
+/**
+ * Searches the asset within the account and returns its balance
+ */
+export async function getAssetBalance(
+  accountAddress: string,
+  assetID: number
+): Promise<number> {
+  const account = await getAccountInformation(algodClient, accountAddress);
+
+  return assetID === 0
+    ? account?.amount || 0
+    : account?.assets.find((asset: any) => asset["asset-id"] === assetID)?.amount || 0;
+}

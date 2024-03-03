@@ -37,8 +37,8 @@ export async function lendingPoolRemoveLiquidity({
   const poolInfo = await poolUtils.v2.getPoolInfo({
     network: "testnet" as SupportedNetwork,
     client: algodClient,
-    asset1ID: Number(asset_1.id),
-    asset2ID: Number(asset_2.id)
+    asset1ID: Number(asset_1.fAsset_id),
+    asset2ID: Number(asset_2.fAsset_id)
   });
 
   const asset1FolksLendingPool = await fetchFolksLendingPool(
@@ -56,7 +56,7 @@ export async function lendingPoolRemoveLiquidity({
    * For testing purposes, we will remove 1/4 of the owned lending pool tokens,
    * it can be any amount that is lower than the owned amount
    */
-  const poolTokenAmountToBeRemoved = Math.floor(ownedPoolTokenAssetAmount / 4);
+  const poolTokenAmountToBeRemoved = Math.floor(ownedPoolTokenAssetAmount / 2);
 
   let txGroup = await LendingPool.RemoveLiquidity.generateTxns({
     client: algodClient,
@@ -69,22 +69,22 @@ export async function lendingPoolRemoveLiquidity({
       id: Number(asset_1.id)
     },
     asset2Out: {
-      fAssetId: Number(asset_1.fAsset_id),
-      lendingAppId: Number(asset_1.folks_lending_pool_application_id),
-      id: Number(asset_1.id)
+      fAssetId: Number(asset_2.fAsset_id),
+      lendingAppId: Number(asset_2.folks_lending_pool_application_id),
+      id: Number(asset_2.id)
     },
     lendingManagerId: asset1FolksLendingPool.managerAppId,
     network: "testnet" as SupportedNetwork
   });
 
-  const shouldIncludeAsset1OptInTxn = !getIsAccountOptedIntoAsset(
+  const shouldIncludeAsset1OptInTxn = !(await getIsAccountOptedIntoAsset(
     initiatorAddr,
     Number(asset_1.id)
-  );
-  const shouldIncludeAsset2OptInTxn = !getIsAccountOptedIntoAsset(
+  ));
+  const shouldIncludeAsset2OptInTxn = !(await getIsAccountOptedIntoAsset(
     initiatorAddr,
     Number(asset_2.id)
-  );
+  ));
 
   if (shouldIncludeAsset1OptInTxn) {
     txGroup = combineAndRegroupSignerTxns(

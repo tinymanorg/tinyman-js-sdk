@@ -51,10 +51,10 @@ export async function lendingPoolAddLiquidity({
     Number(asset_2.folks_lending_pool_application_id)
   );
   /*
-   * For testing purposes, we will add 25_000_000 of asset1 into the pool,
+   * For testing purposes, we will add 100_000 of asset1 into the pool,
    * and calculate the amount of asset2 to be added.
    */
-  const asset1Amount = 25_000_000;
+  const asset1Amount = 100_000;
   const lendingPoolRatio =
     Number(poolInfo.asset1Reserves) / Number(poolInfo.asset2Reserves);
 
@@ -92,7 +92,7 @@ export async function lendingPoolAddLiquidity({
     initiatorAddr
   });
 
-  if (!getIsAccountOptedIntoAsset(initiatorAddr, Number(poolInfo.poolTokenID!))) {
+  if (!(await getIsAccountOptedIntoAsset(initiatorAddr, Number(poolInfo.poolTokenID!)))) {
     /**
      * Insert opt-in transaction to the txn group
      * if the account is not opted-in to the pool token
