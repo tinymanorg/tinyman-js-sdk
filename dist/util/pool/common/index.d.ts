@@ -10,10 +10,7 @@ export declare function getPoolShare(totalLiquidity: bigint, ownedLiquidity: big
 /**
  * Calculates the pair ratio for the pool reserves
  */
-export declare function getPoolPairRatio(decimals: {
-    asset1: undefined | number;
-    asset2: undefined | number;
-}, reserves: null | PoolReserves): null | number;
+export declare function getPoolPairRatio(reserves: null | PoolReserves): null | number;
 /**
  * Checks if the pool is empty
  *
