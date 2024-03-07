@@ -31,7 +31,7 @@ export async function fixedInputSwap({
    * after checking both v1 and v2
    */
 
-  const fixedInputSwapQuote = await  Swap.v2.getQuote({
+  const fixedInputSwapQuote = await Swap.v2.getQuote({
     type: SwapType.FixedInput,
     pool,
     amount: 1_000_000,

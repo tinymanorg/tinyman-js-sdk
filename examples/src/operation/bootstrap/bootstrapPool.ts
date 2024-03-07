@@ -55,6 +55,6 @@ export async function bootstrapPool({
   console.log(`✅ Pool token ID: ${bootstrapExecutionResponse.poolTokenID}`);
   console.log(
     "✅ See pool account on PeraExplorer: " +
-      `https://testnet-api.algonode.cloud/v2/accounts/${poolAddress}`
+    `https://testnet-api.algonode.cloud/v2/accounts/${poolAddress}`
   );
 }
