@@ -6,7 +6,7 @@ import {addSingleAssetLiquidity} from "./operation/add-liquidity/addSingleAssetL
 import {bootstrapPool} from "./operation/bootstrap/bootstrapPool";
 import {removeLiquidity} from "./operation/remove-liquidity/removeLiquidity";
 import {removeLiquidityWithSingleAssetOut} from "./operation/remove-liquidity/removeLiquidityWithSingleAssetOut";
-import {fixedInputSwap} from "./operation/swap/fixedInputSwap";
+import {fixedInputSwap, fixedInputSwapWithoutSwapRouter} from "./operation/swap/fixedInputSwap";
 import {fixedOutputSwap, fixedOutputSwapWithoutSwapRouter} from "./operation/swap/fixedOutputSwap";
 import {getAccount} from "./util/account";
 import {getAssetParams} from "./util/asset";
@@ -55,6 +55,9 @@ async function main() {
 
   // Swap assets with fixed input
   await fixedInputSwap({account, asset_1, asset_2});
+
+  // Swap assets with fixed input without using the swap router
+  await fixedInputSwapWithoutSwapRouter({account, asset_1, asset_2});
 
   // Swap assets with fixed output
   await fixedOutputSwap({account, asset_1, asset_2});

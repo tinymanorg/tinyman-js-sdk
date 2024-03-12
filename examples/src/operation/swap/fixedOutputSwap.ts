@@ -89,7 +89,7 @@ export async function fixedOutputSwapWithoutSwapRouter({
     amount: 1_000_000,
     assetIn: {id: pool.asset1ID, decimals: 6},
     assetOut: {id: pool.asset2ID, decimals: 6},
-    isSwapRouterEnabled: false, // Disable swap router
+    isSwapRouterEnabled: false,
     network: "testnet"
   });
 
@@ -112,6 +112,6 @@ export async function fixedOutputSwapWithoutSwapRouter({
     txGroup: fixedOutputSwapTxns,
   });
 
-  console.log("✅ Fixed Output Swap without Swap Router executed successfully!");
+  console.log("✅ Fixed Output Swap with disabled Swap Router executed successfully!");
   console.log({txnID: swapExecutionResponse.txnID});
 }
