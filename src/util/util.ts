@@ -312,7 +312,7 @@ export function encodeInteger(numberIn) {
   while (true) {
     let towrite = Number(number & BigInt(0x7f));
 
-    number >>= BigIng(7);
+    number >>= BigInt(7);
 
     if (number) {
       buf.push(towrite | 0x80);
