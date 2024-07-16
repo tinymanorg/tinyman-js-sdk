@@ -302,16 +302,16 @@ export function getTxnGroupID(txns: SignerTransaction[]) {
   return bufferToBase64(txns[0].txn.group);
 }
 
-export function encodeInteger(number) {
+export function encodeInteger(number: bigint) {
   let buf: number[] = [];
 
   /* eslint-disable no-bitwise */
   /* eslint-disable no-constant-condition */
   /* eslint-disable no-param-reassign */
   while (true) {
-    let towrite = number & 0x7f;
+    let towrite = Number(number & BigInt(0x7f));
 
-    number >>= 7;
+    number >>= BigInt(7);
 
     if (number) {
       buf.push(towrite | 0x80);

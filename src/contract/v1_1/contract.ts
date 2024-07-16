@@ -53,7 +53,7 @@ export class TinymanContractV1_1 extends BaseTinymanContract<V1_1ValidatorApp> {
       let start = v.index - offset;
       let end = start + v.length;
       // All of the template variables are ints
-      let value_encoded = encodeInteger(value);
+      let value_encoded = encodeInteger(BigInt(value));
       let diff = v.length - value_encoded.length;
 
       offset += diff;
