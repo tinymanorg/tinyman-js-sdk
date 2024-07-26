@@ -1,0 +1,18 @@
+import { SupportedNetwork } from "../util/commonTypes";
+declare const HOUR_IN_S: number;
+declare const DAY_IN_S: number;
+declare const WEEK_IN_S: number;
+declare const TINY_ASSET_ID: Record<SupportedNetwork, number>;
+declare const VAULT_APP_ID: Record<SupportedNetwork, number>;
+declare const STAKING_VOTING_APP_ID: Record<SupportedNetwork, number>;
+declare const REWARDS_APP_ID: Record<SupportedNetwork, number>;
+declare const PROPOSALS_APP_ID: Record<SupportedNetwork, number>;
+declare const PROPOSAL_VOTING_APP_ID: Record<SupportedNetwork, number>;
+declare const BOX_FLAT_MIN_BALANCE = 2500;
+declare const BOX_BYTE_MIN_BALANCE = 400;
+declare const HOUR: number;
+declare const DAY: number;
+declare const WEEK: number;
+export { HOUR, DAY, WEEK };
+declare const TWO_TO_THE_64: number;
+export { TINY_ASSET_ID, VAULT_APP_ID, STAKING_VOTING_APP_ID, REWARDS_APP_ID, BOX_BYTE_MIN_BALANCE, BOX_FLAT_MIN_BALANCE, TWO_TO_THE_64, WEEK_IN_S, PROPOSALS_APP_ID, DAY_IN_S, HOUR_IN_S, PROPOSAL_VOTING_APP_ID };

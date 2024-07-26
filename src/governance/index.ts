@@ -836,4 +836,4 @@ class TinymanGovernanceClient {
   }
 }
 
-export default TinymanGovernanceClient;
+export {TinymanGovernanceClient};
