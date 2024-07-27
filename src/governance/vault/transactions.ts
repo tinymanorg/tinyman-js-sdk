@@ -1,7 +1,7 @@
 import algosdk from "algosdk";
 import AlgodClient from "algosdk/dist/types/client/v2/algod/algod";
 
-import {TINY_ASSET_ID, VAULT_APP_ID, WEEK} from "../constants";
+import {VAULT_APP_ID, WEEK} from "../constants";
 import {
   ACCOUNT_POWER_BOX_COST,
   ACCOUNT_STATE_BOX_COST,
@@ -23,6 +23,7 @@ import {getNewTotalPowerTimestamps} from "./utils";
 import {intToBytes} from "../util/utils";
 import {SupportedNetwork} from "../../util/commonTypes";
 import {encodeString} from "../../util/util";
+import {TINY_ASSET_ID} from "../../util/asset/assetConstants";
 
 async function prepareCreateLockTransactions({
   accountState,

@@ -4,12 +4,6 @@ const HOUR_IN_S = 60 * 60;
 const DAY_IN_S = 24 * HOUR_IN_S;
 const WEEK_IN_S = 7 * DAY_IN_S;
 
-const TINY_ASSET_ID: Record<SupportedNetwork, number> = {
-  testnet: 258703304,
-  // TODO: Update mainnet tiny asset id when it is available
-  mainnet: NaN
-};
-
 const VAULT_APP_ID: Record<SupportedNetwork, number> = {
   testnet: 480164661,
   // TODO: Update mainnet vault app id when it is available
@@ -52,7 +46,6 @@ export {HOUR, DAY, WEEK};
 const TWO_TO_THE_64 = 2 ** 64;
 
 export {
-  TINY_ASSET_ID,
   VAULT_APP_ID,
   STAKING_VOTING_APP_ID,
   REWARDS_APP_ID,

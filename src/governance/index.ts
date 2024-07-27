@@ -20,7 +20,6 @@ import {
   PROPOSAL_VOTING_APP_ID,
   REWARDS_APP_ID,
   STAKING_VOTING_APP_ID,
-  TINY_ASSET_ID,
   VAULT_APP_ID,
   WEEK,
   WEEK_IN_S
@@ -56,6 +55,7 @@ import {GetRawBoxValueCacheProps} from "./types";
 import {SupportedNetwork} from "../util/commonTypes";
 import {generateOptIntoAssetTxns} from "../util/asset/assetUtils";
 import {TINYMAN_ANALYTICS_API_BASE_URLS} from "../util/constant";
+import {TINY_ASSET_ID} from "../util/asset/assetConstants";
 
 class TinymanGovernanceClient {
   private algodClient: AlgodClient;
@@ -400,7 +400,6 @@ class TinymanGovernanceClient {
       client: this.algodClient
     });
 
-    // TODO: Once we move these functions into js-sdk, we can check if the TINY token is opted in via getIsAccountOptedIntoAsset function
     if (shouldOptIntoTINY) {
       const optIntoTINYAssetTxn = await generateOptIntoAssetTxns({
         client: this.algodClient,
