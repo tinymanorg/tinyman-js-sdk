@@ -1,4 +1,4 @@
-import algosdk from "algosdk";
+import algosdk, {SuggestedParams} from "algosdk";
 import AlgodClient from "algosdk/dist/types/client/v2/algod/algod";
 
 import {VAULT_APP_ID, WEEK} from "../constants";
@@ -25,23 +25,23 @@ import {SupportedNetwork} from "../../util/commonTypes";
 import {encodeString} from "../../util/util";
 import {TINY_ASSET_ID} from "../../util/asset/assetConstants";
 
-async function prepareCreateLockTransactions({
+function prepareCreateLockTransactions({
   accountState,
   lockEndTime,
   lockedAmount,
   network,
   sender,
   vaultAppGlobalState,
+  suggestedParams,
   slopeChangeAtLockEndTime,
-  client,
   appCallNote
 }: {
   network: SupportedNetwork;
   sender: string;
   lockedAmount: number;
   lockEndTime: number;
-  client: AlgodClient;
   vaultAppGlobalState: VaultAppGlobalState;
+  suggestedParams: SuggestedParams;
   accountState?: AccountState | null;
   slopeChangeAtLockEndTime?: SlopeChange | null;
   appCallNote?: Uint8Array;
@@ -131,8 +131,6 @@ async function prepareCreateLockTransactions({
     minBalanceIncrease += SLOPE_CHANGE_BOX_COST;
   }
 
-  const suggestedParams = await client.getTransactionParams().do();
-
   const txns = [
     algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
       amount: lockedAmount,
@@ -173,21 +171,21 @@ async function prepareCreateLockTransactions({
   return txnGroup;
 }
 
-async function prepareIncreaseLockAmountTransactions({
+function prepareIncreaseLockAmountTransactions({
   accountState,
   lockedAmount,
   network,
   sender,
   vaultAppGlobalState,
-  client,
+  suggestedParams,
   appCallNote
 }: {
   network: SupportedNetwork;
-  client: AlgodClient;
   sender: string;
   lockedAmount: number;
   vaultAppGlobalState: VaultAppGlobalState;
   accountState: AccountState;
+  suggestedParams: SuggestedParams;
   appCallNote?: Uint8Array;
 }) {
   if (lockedAmount < MIN_LOCK_AMOUNT) {
@@ -248,8 +246,6 @@ async function prepareIncreaseLockAmountTransactions({
     minBalanceIncrease += ACCOUNT_POWER_BOX_COST;
   }
 
-  const suggestedParams = await client.getTransactionParams().do();
-
   const txns = [
     algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
       assetIndex: TINY_ASSET_ID[network],
@@ -289,14 +285,14 @@ async function prepareIncreaseLockAmountTransactions({
   return txnGroup;
 }
 
-async function prepareExtendLockEndTimeTransactions({
+function prepareExtendLockEndTimeTransactions({
   accountState,
-  client,
   network,
   newLockEndTime,
   slopeChangeAtNewLockEndTime,
   sender,
   vaultAppGlobalState,
+  suggestedParams,
   appCallNote
 }: {
   network: SupportedNetwork;
@@ -305,7 +301,7 @@ async function prepareExtendLockEndTimeTransactions({
   vaultAppGlobalState: VaultAppGlobalState;
   accountState: AccountState;
   slopeChangeAtNewLockEndTime?: number;
-  client: AlgodClient;
+  suggestedParams: SuggestedParams;
   appCallNote?: Uint8Array;
 }) {
   if (newLockEndTime % WEEK) {
@@ -381,8 +377,6 @@ async function prepareExtendLockEndTimeTransactions({
     minBalanceIncrease += TOTAL_POWER_BOX_COST;
   }
 
-  const suggestedParams = await client.getTransactionParams().do();
-
   const txns = [
     algosdk.makeApplicationNoOpTxnFromObject({
       appIndex: VAULT_APP_ID[network],
@@ -416,17 +410,18 @@ async function prepareExtendLockEndTimeTransactions({
   return txnGroup;
 }
 
-async function prepareWithdrawTransactions({
+function prepareWithdrawTransactions({
   accountState,
   network,
   sender,
-  client,
+  suggestedParams,
   appCallNote
 }: {
   network: SupportedNetwork;
   client: AlgodClient;
   sender: string;
   accountState: AccountState;
+  suggestedParams: SuggestedParams;
   appCallNote?: Uint8Array;
 }) {
   // Boxes
@@ -444,8 +439,6 @@ async function prepareWithdrawTransactions({
     {appIndex: VAULT_APP_ID[network], name: accountPowerBoxName},
     {appIndex: VAULT_APP_ID[network], name: nextAccountPowerBoxName}
   ];
-
-  const suggestedParams = await client.getTransactionParams().do();
 
   const withdrawTxn = algosdk.makeApplicationNoOpTxnFromObject({
     appIndex: VAULT_APP_ID[network],

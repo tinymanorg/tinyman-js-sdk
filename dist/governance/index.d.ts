@@ -15,25 +15,29 @@ declare class TinymanGovernanceClient {
     getTotalTinyPower(timeStamp?: number, cacheProps?: GetRawBoxValueCacheProps): Promise<number>;
     getCumulativeTinyPower(cacheProps?: GetRawBoxValueCacheProps, timeStamp?: number): Promise<number>;
     fetchVaultAppGlobalState(): Promise<VaultAppGlobalState | null>;
-    generateCreateLockTransactions({ lockedAmount, lockEndTime, userAddress }: {
+    generateCreateLockTransactions({ lockedAmount, lockEndTime, userAddress, suggestedParams }: {
         lockedAmount: number;
         lockEndTime: number;
         userAddress?: string;
+        suggestedParams?: SuggestedParams;
     }): Promise<Transaction[]>;
-    generateIncreaseLockAmountTransactions({ lockedAmount, userAddress }: {
+    generateIncreaseLockAmountTransactions({ lockedAmount, userAddress, suggestedParams }: {
         lockedAmount: number;
         userAddress?: string;
+        suggestedParams?: SuggestedParams;
     }): Promise<Transaction[]>;
-    generateExtendLockTimeTransactions({ newLockEndTime, userAddress }: {
+    generateExtendLockTimeTransactions({ newLockEndTime, userAddress, suggestedParams }: {
         newLockEndTime: number;
         userAddress?: string;
+        suggestedParams?: SuggestedParams;
     }): Promise<Transaction[]>;
-    generateIncreaseLockAmountAndExtendLockEndTimeTransactions({ lockAmount, lockEndTime, userAddress }: {
+    generateIncreaseLockAmountAndExtendLockEndTimeTransactions({ lockAmount, lockEndTime, userAddress, suggestedParams }: {
         lockAmount: number;
         lockEndTime: number;
         userAddress?: string;
+        suggestedParams?: SuggestedParams;
     }): Promise<Transaction[]>;
-    generateWithdrawTransactions(userAddress?: string, shouldOptIntoTINY?: boolean): Promise<Transaction[]>;
+    generateWithdrawTransactions(userAddress?: string, shouldOptIntoTINY?: boolean, suggestedParams?: SuggestedParams): Promise<Transaction[]>;
     fetchAccountState(): Promise<import("./vault/storage").AccountState | null>;
     fetchStakingDistributionProposal(proposalId: string): Promise<import("./staking-voting/storage").StakingDistributionProposal | null>;
     generateCastVoteForStakingDistributionProposalTransactions({ proposalId, votes, assetIds, userAddress, suggestedParams }: {

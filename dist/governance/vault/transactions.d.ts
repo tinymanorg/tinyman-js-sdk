@@ -1,42 +1,43 @@
-import algosdk from "algosdk";
+import algosdk, { SuggestedParams } from "algosdk";
 import AlgodClient from "algosdk/dist/types/client/v2/algod/algod";
 import { AccountState, SlopeChange, VaultAppGlobalState } from "./storage";
 import { SupportedNetwork } from "../../util/commonTypes";
-declare function prepareCreateLockTransactions({ accountState, lockEndTime, lockedAmount, network, sender, vaultAppGlobalState, slopeChangeAtLockEndTime, client, appCallNote }: {
+declare function prepareCreateLockTransactions({ accountState, lockEndTime, lockedAmount, network, sender, vaultAppGlobalState, suggestedParams, slopeChangeAtLockEndTime, appCallNote }: {
     network: SupportedNetwork;
     sender: string;
     lockedAmount: number;
     lockEndTime: number;
-    client: AlgodClient;
     vaultAppGlobalState: VaultAppGlobalState;
+    suggestedParams: SuggestedParams;
     accountState?: AccountState | null;
     slopeChangeAtLockEndTime?: SlopeChange | null;
     appCallNote?: Uint8Array;
-}): Promise<algosdk.Transaction[]>;
-declare function prepareIncreaseLockAmountTransactions({ accountState, lockedAmount, network, sender, vaultAppGlobalState, client, appCallNote }: {
+}): algosdk.Transaction[];
+declare function prepareIncreaseLockAmountTransactions({ accountState, lockedAmount, network, sender, vaultAppGlobalState, suggestedParams, appCallNote }: {
     network: SupportedNetwork;
-    client: AlgodClient;
     sender: string;
     lockedAmount: number;
     vaultAppGlobalState: VaultAppGlobalState;
     accountState: AccountState;
+    suggestedParams: SuggestedParams;
     appCallNote?: Uint8Array;
-}): Promise<algosdk.Transaction[]>;
-declare function prepareExtendLockEndTimeTransactions({ accountState, client, network, newLockEndTime, slopeChangeAtNewLockEndTime, sender, vaultAppGlobalState, appCallNote }: {
+}): algosdk.Transaction[];
+declare function prepareExtendLockEndTimeTransactions({ accountState, network, newLockEndTime, slopeChangeAtNewLockEndTime, sender, vaultAppGlobalState, suggestedParams, appCallNote }: {
     network: SupportedNetwork;
     sender: string;
     newLockEndTime: number;
     vaultAppGlobalState: VaultAppGlobalState;
     accountState: AccountState;
     slopeChangeAtNewLockEndTime?: number;
-    client: AlgodClient;
+    suggestedParams: SuggestedParams;
     appCallNote?: Uint8Array;
-}): Promise<algosdk.Transaction[]>;
-declare function prepareWithdrawTransactions({ accountState, network, sender, client, appCallNote }: {
+}): algosdk.Transaction[];
+declare function prepareWithdrawTransactions({ accountState, network, sender, suggestedParams, appCallNote }: {
     network: SupportedNetwork;
     client: AlgodClient;
     sender: string;
     accountState: AccountState;
+    suggestedParams: SuggestedParams;
     appCallNote?: Uint8Array;
-}): Promise<algosdk.Transaction[]>;
+}): algosdk.Transaction[];
 export { prepareCreateLockTransactions, prepareIncreaseLockAmountTransactions, prepareExtendLockEndTimeTransactions, prepareWithdrawTransactions };

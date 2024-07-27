@@ -36,4 +36,3 @@ export declare class ProposalVotingAppGlobalState {
 export declare function getProposalBoxName(proposalId: string): Uint8Array;
 export declare function getAttendanceSheetBoxName(address: string, boxIndex: number): Uint8Array;
 export declare function getProposal(client: AlgodClient, appId: number, proposalId: string): Promise<Proposal | null>;
-export declare function getStakingAttendanceSheetBoxName(address: string, boxIndex: number): Uint8Array;

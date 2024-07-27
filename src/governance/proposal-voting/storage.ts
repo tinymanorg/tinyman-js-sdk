@@ -157,12 +157,3 @@ export async function getProposal(
 
   return parseBoxProposal(rawBox);
 }
-
-//  TODO: Remove this function from here and use it from staking voting storage when its merged
-export function getStakingAttendanceSheetBoxName(address: string, boxIndex: number) {
-  return concatUint8Arrays(
-    encodeString("a"),
-    decodeAddress(address).publicKey,
-    intToBytes(boxIndex)
-  );
-}

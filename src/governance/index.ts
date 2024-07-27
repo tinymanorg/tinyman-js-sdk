@@ -32,16 +32,15 @@ import {
   getCumulativePowerDelta,
   getGlobalState
 } from "./utils";
-import {getStakingDistributionProposal} from "./staking-voting/storage";
+import {
+  getStakingAttendanceSheetBoxName,
+  getStakingDistributionProposal
+} from "./staking-voting/storage";
 import {prepareCastVoteForStakingDistributionProposalTransactions} from "./staking-voting/transactions";
 import {getRewardClaimSheet, RewardsAppGlobalState} from "./rewards/storage";
 import {REWARD_CLAIM_SHEET_BOX_SIZE} from "./rewards/constants";
 import {prepareClaimRewardsTransactions} from "./rewards/transactions";
-import {
-  getProposal,
-  getStakingAttendanceSheetBoxName,
-  ProposalVotingAppGlobalState
-} from "./proposal-voting/storage";
+import {getProposal, ProposalVotingAppGlobalState} from "./proposal-voting/storage";
 import {
   prepareCastVoteTransactions,
   prepareCreateProposalTransactions
@@ -224,19 +223,25 @@ class TinymanGovernanceClient {
   async generateCreateLockTransactions({
     lockedAmount,
     lockEndTime,
-    userAddress
+    userAddress,
+    suggestedParams
   }: {
     lockedAmount: number;
     lockEndTime: number;
     userAddress?: string;
-    //  TODO: add suggestedParams
+    suggestedParams?: SuggestedParams;
   }) {
     const sender = userAddress || this.userAddress;
     const accountState = await this.fetchAccountState();
     const vaultAppGlobalState = await this.fetchVaultAppGlobalState();
+    let sp = suggestedParams;
 
     if (!vaultAppGlobalState) {
       throw new Error("There was an error while fetching vault app global state");
+    }
+
+    if (!sp) {
+      sp = await this.algodClient.getTransactionParams().do();
     }
 
     const slopeChangeAtLockEndTime = await getSlopeChange(
@@ -246,28 +251,30 @@ class TinymanGovernanceClient {
     );
 
     return prepareCreateLockTransactions({
-      client: this.algodClient,
       lockedAmount,
       lockEndTime,
       vaultAppGlobalState,
       slopeChangeAtLockEndTime,
       sender,
       network: this.network,
-      accountState
+      accountState,
+      suggestedParams: sp
     });
   }
 
   async generateIncreaseLockAmountTransactions({
     lockedAmount,
-    userAddress
+    userAddress,
+    suggestedParams
   }: {
     lockedAmount: number;
     userAddress?: string;
-    //  TODO: Add suggested params
+    suggestedParams?: SuggestedParams;
   }) {
     const sender = userAddress || this.userAddress;
     const accountState = await this.fetchAccountState();
     const vaultAppGlobalState = await this.fetchVaultAppGlobalState();
+    let sp = suggestedParams;
 
     if (!vaultAppGlobalState) {
       throw new Error("There was an error while fetching vault app global state");
@@ -277,27 +284,33 @@ class TinymanGovernanceClient {
       throw new Error("There was an error while fetcing the account state");
     }
 
+    if (!sp) {
+      sp = await this.algodClient.getTransactionParams().do();
+    }
+
     return prepareIncreaseLockAmountTransactions({
       accountState,
-      client: this.algodClient,
       lockedAmount,
       network: this.network,
       sender,
-      vaultAppGlobalState
+      vaultAppGlobalState,
+      suggestedParams: sp
     });
   }
 
   async generateExtendLockTimeTransactions({
     newLockEndTime,
-    userAddress
+    userAddress,
+    suggestedParams
   }: {
     newLockEndTime: number;
     userAddress?: string;
-    //  TODO: Add suggestedParams
+    suggestedParams?: SuggestedParams;
   }) {
     const sender = userAddress || this.userAddress;
     const accountState = await this.fetchAccountState();
     const vaultAppGlobalState = await this.fetchVaultAppGlobalState();
+    let sp = suggestedParams;
 
     if (!vaultAppGlobalState) {
       throw new Error("There was an error while fetching vault app global state");
@@ -305,6 +318,10 @@ class TinymanGovernanceClient {
 
     if (!accountState) {
       throw new Error("There was an error while fetcing the account state");
+    }
+
+    if (!sp) {
+      sp = await this.algodClient.getTransactionParams().do();
     }
 
     const slopeChangeAtNewLockEndTime = await getSlopeChange(
@@ -315,11 +332,11 @@ class TinymanGovernanceClient {
 
     return prepareExtendLockEndTimeTransactions({
       accountState,
-      client: this.algodClient,
       network: this.network,
       newLockEndTime,
       sender,
       vaultAppGlobalState,
+      suggestedParams: sp,
       slopeChangeAtNewLockEndTime: slopeChangeAtNewLockEndTime?.slopeDelta
     });
   }
@@ -327,12 +344,13 @@ class TinymanGovernanceClient {
   async generateIncreaseLockAmountAndExtendLockEndTimeTransactions({
     lockAmount,
     lockEndTime,
-    userAddress
+    userAddress,
+    suggestedParams
   }: {
     lockAmount: number;
     lockEndTime: number;
     userAddress?: string;
-    //  TODO: Add suggestedParams
+    suggestedParams?: SuggestedParams;
   }) {
     const sender = userAddress || this.userAddress;
     const accountState = await this.fetchAccountState();
@@ -340,6 +358,8 @@ class TinymanGovernanceClient {
 
     let increaseLockAmountTxnGroup: Transaction[] = [];
     let extendLockEndTimeTxnGroup: Transaction[] = [];
+
+    let sp = suggestedParams;
 
     if (!vaultAppGlobalState) {
       throw new Error("There was an error while fetching vault app global state");
@@ -349,13 +369,17 @@ class TinymanGovernanceClient {
       throw new Error("There was an error while fetcing the account state");
     }
 
-    increaseLockAmountTxnGroup = await prepareIncreaseLockAmountTransactions({
+    if (!sp) {
+      sp = await this.algodClient.getTransactionParams().do();
+    }
+
+    increaseLockAmountTxnGroup = prepareIncreaseLockAmountTransactions({
       accountState,
-      client: this.algodClient,
       lockedAmount: lockAmount,
       network: this.network,
       sender,
-      vaultAppGlobalState
+      vaultAppGlobalState,
+      suggestedParams: sp
     });
 
     accountState.powerCount += 1;
@@ -367,13 +391,13 @@ class TinymanGovernanceClient {
       lockEndTime
     );
 
-    extendLockEndTimeTxnGroup = await prepareExtendLockEndTimeTransactions({
+    extendLockEndTimeTxnGroup = prepareExtendLockEndTimeTransactions({
       accountState,
-      client: this.algodClient,
       network: this.network,
       newLockEndTime: lockEndTime,
       sender,
       vaultAppGlobalState,
+      suggestedParams: sp,
       slopeChangeAtNewLockEndTime: slopeChangeAtNewLockEndTime?.slopeDelta
     });
 
@@ -385,18 +409,28 @@ class TinymanGovernanceClient {
       : txnGroup;
   }
 
-  async generateWithdrawTransactions(userAddress?: string, shouldOptIntoTINY?: boolean) {
+  async generateWithdrawTransactions(
+    userAddress?: string,
+    shouldOptIntoTINY?: boolean,
+    suggestedParams?: SuggestedParams
+  ) {
     const sender = userAddress || this.userAddress;
     const accountState = await this.fetchAccountState();
+    let sp = suggestedParams;
 
     if (!accountState) {
       throw new Error("There was an error while fetcing the account state");
     }
 
-    let withdrawTxns = await prepareWithdrawTransactions({
+    if (!sp) {
+      sp = await this.algodClient.getTransactionParams().do();
+    }
+
+    let withdrawTxns = prepareWithdrawTransactions({
       accountState,
       network: this.network,
       sender,
+      suggestedParams: sp,
       client: this.algodClient
     });
 
@@ -606,7 +640,6 @@ class TinymanGovernanceClient {
       suggestedParams: sp
     });
 
-    // TODO: Once we move these functions into js-sdk, we can check if the TINY token is opted in via getIsAccountOptedIntoAsset function
     if (shouldOptIntoTINY) {
       const optIntoTINYAssetTxns = await generateOptIntoAssetTxns({
         client: this.algodClient,
@@ -634,7 +667,6 @@ class TinymanGovernanceClient {
       metadata
     };
     const promise = fetch(
-      //  TODO: change it with TINYMAN_ANALYTICS_API_BASE_URLS from js sdk repository when we move it
       `${TINYMAN_ANALYTICS_API_BASE_URLS[this.network].v1}/governance/proposals/`,
       {
         method: "POST",
