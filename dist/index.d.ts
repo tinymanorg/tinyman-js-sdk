@@ -50,4 +50,4 @@ export { ProposalVote } from "./governance/proposal-voting/constants";
 export { generateProposalMetadata } from "./governance/proposal-voting/transactions";
 export type { GenerateProposalMetadataPayload } from "./governance/proposal-voting/types";
 export { intToBytes } from "./governance/util/utils";
-export { generateCidFromProposalMetadata, calculateTinyPower, combineAndRegroupTxns } from "./governance/utils";
+export { generateCidFromProposalMetadata, calculateTinyPower, combineAndRegroupTxns, concatUint8Arrays } from "./governance/utils";

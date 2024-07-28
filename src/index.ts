@@ -154,5 +154,6 @@ export {intToBytes} from "./governance/util/utils";
 export {
   generateCidFromProposalMetadata,
   calculateTinyPower,
-  combineAndRegroupTxns
+  combineAndRegroupTxns,
+  concatUint8Arrays
 } from "./governance/utils";
