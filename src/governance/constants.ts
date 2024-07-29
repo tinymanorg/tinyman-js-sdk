@@ -6,32 +6,22 @@ const WEEK_IN_S = 7 * DAY_IN_S;
 
 const VAULT_APP_ID: Record<SupportedNetwork, number> = {
   testnet: 480164661,
-  // TODO: Update mainnet vault app id when it is available
-  mainnet: NaN
+  mainnet: 2200606875
 };
 
 const STAKING_VOTING_APP_ID: Record<SupportedNetwork, number> = {
   testnet: 360907790,
-  // TODO: Update mainnet staking voting app id when it is available
-  mainnet: NaN
+  mainnet: 2200609638
 };
 
 const REWARDS_APP_ID: Record<SupportedNetwork, number> = {
   testnet: 336189106,
-  // TODO: Update mainnet rewards app id when it is available
-  mainnet: NaN
-};
-
-const PROPOSALS_APP_ID: Record<SupportedNetwork, number> = {
-  testnet: 383416252,
-  // TODO: Update mainnet proposal app id when it is available
-  mainnet: NaN
+  mainnet: 2200608153
 };
 
 const PROPOSAL_VOTING_APP_ID: Record<SupportedNetwork, number> = {
   testnet: 383416252,
-  // TODO: Update mainnet proposal voting app id when it is available
-  mainnet: NaN
+  mainnet: 2200608887
 };
 
 const BOX_FLAT_MIN_BALANCE = 2_500;
@@ -53,7 +43,6 @@ export {
   BOX_FLAT_MIN_BALANCE,
   TWO_TO_THE_64,
   WEEK_IN_S,
-  PROPOSALS_APP_ID,
   DAY_IN_S,
   HOUR_IN_S,
   PROPOSAL_VOTING_APP_ID

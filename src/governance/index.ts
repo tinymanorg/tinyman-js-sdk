@@ -16,7 +16,6 @@ import {
   prepareWithdrawTransactions
 } from "./vault/transactions";
 import {
-  PROPOSALS_APP_ID,
   PROPOSAL_VOTING_APP_ID,
   REWARDS_APP_ID,
   STAKING_VOTING_APP_ID,
@@ -657,7 +656,11 @@ class TinymanGovernanceClient {
   }
 
   fetchProposal(proposalId: string) {
-    return getProposal(this.algodClient, PROPOSALS_APP_ID[this.network], proposalId);
+    return getProposal(
+      this.algodClient,
+      PROPOSAL_VOTING_APP_ID[this.network],
+      proposalId
+    );
   }
 
   //  TODO: update metadata type
@@ -734,7 +737,7 @@ class TinymanGovernanceClient {
 
     return prepareCreateProposalTransactions({
       proposalId,
-      proposalVotingAppId: PROPOSALS_APP_ID[this.network],
+      proposalVotingAppId: PROPOSAL_VOTING_APP_ID[this.network],
       sender,
       suggestedParams: sp,
       vaultAppGlobalState,
@@ -811,12 +814,12 @@ class TinymanGovernanceClient {
     );
     const createAttendanceSheetBox = !(await doesBoxExist(
       this.algodClient,
-      PROPOSALS_APP_ID[this.network],
+      PROPOSAL_VOTING_APP_ID[this.network],
       accountAttendanceSheetBoxName
     ));
 
     return prepareCastVoteTransactions({
-      proposalVotingAppId: PROPOSALS_APP_ID[this.network],
+      proposalVotingAppId: PROPOSAL_VOTING_APP_ID[this.network],
       vaultAppId: VAULT_APP_ID[this.network],
       sender,
       proposalId,
