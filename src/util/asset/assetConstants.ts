@@ -22,6 +22,5 @@ export const POOL_TOKEN_UNIT_NAME = {
 
 export const TINY_ASSET_ID: Record<SupportedNetwork, number> = {
   testnet: 258703304,
-  // TODO: Update mainnet tiny asset id when it is available
-  mainnet: NaN
+  mainnet: 2200000000
 };
