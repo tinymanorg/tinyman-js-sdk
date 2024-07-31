@@ -40,7 +40,8 @@ export type {
 export {
   ALGO_ASSET,
   ALGO_ASSET_ID,
-  POOL_TOKEN_UNIT_NAME
+  POOL_TOKEN_UNIT_NAME,
+  TINY_ASSET_ID
 } from "./util/asset/assetConstants";
 
 export {
@@ -139,3 +140,20 @@ export type {FolksLendingPool} from "./folks-lending-pools/types";
 export {prepareCommitTransactions, getStakingAppID} from "./stake";
 export {tinymanJSSDKConfig} from "./config";
 export {combineAndRegroupSignerTxns} from "./util/transaction/transactionUtils";
+
+export {TinymanGovernanceClient} from "./governance";
+export type {GetRawBoxValueCacheProps, RawBoxCacheValue} from "./governance/types";
+
+export {AccountState} from "./governance/vault/storage";
+export {getStartTimestampOfWeek} from "./governance/vault/utils";
+export {ProposalVote} from "./governance/proposal-voting/constants";
+export {generateProposalMetadata} from "./governance/proposal-voting/transactions";
+export type {GenerateProposalMetadataPayload} from "./governance/proposal-voting/types";
+export {intToBytes} from "./governance/util/utils";
+
+export {
+  generateCidFromProposalMetadata,
+  calculateTinyPower,
+  combineAndRegroupTxns,
+  concatUint8Arrays
+} from "./governance/utils";

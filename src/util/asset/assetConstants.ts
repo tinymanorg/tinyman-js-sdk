@@ -1,3 +1,4 @@
+import {SupportedNetwork} from "../commonTypes";
 import {TinymanAnalyticsApiAsset} from "./assetModels";
 
 export const ALGO_ASSET_ID = 0;
@@ -17,4 +18,9 @@ export const POOL_TOKEN_UNIT_NAME = {
   V1: "TM1POOL",
   V1_1: "TMPOOL11",
   V2: "TMPOOL2"
+};
+
+export const TINY_ASSET_ID: Record<SupportedNetwork, number> = {
+  testnet: 258703304,
+  mainnet: 2200000000
 };
