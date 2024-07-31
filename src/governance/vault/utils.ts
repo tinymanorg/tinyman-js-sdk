@@ -1,8 +1,10 @@
 import {WEEK} from "../constants";
 import {MAX_LOCK_TIME, TWO_TO_THE_64} from "./constants";
 
-function getStartTimestampOfWeek(value: number) {
-  return Math.floor(value / WEEK) * WEEK;
+function getStartTimestampOfWeek(timestamp: number, isFloor = false) {
+  const numberOfWeeks = timestamp / WEEK;
+
+  return (isFloor ? Math.floor(numberOfWeeks) : Math.ceil(numberOfWeeks)) * WEEK;
 }
 
 function getNewTotalPowerTimestamps(oldTimeStamp: number, newTimeStamp: number) {
