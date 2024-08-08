@@ -39,9 +39,7 @@ async function getRawBoxValue(
 
     return value;
   } catch (error: any) {
-    if (
-      error.message === "Network request error. Received status 404 (): box not found"
-    ) {
+    if (error.message.includes("box not found")) {
       return null;
     }
 
