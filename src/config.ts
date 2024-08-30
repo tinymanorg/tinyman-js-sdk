@@ -21,11 +21,15 @@ class TinymanJSSDKConfig {
   /**
    * @returns {Uint8Array} - encoded note includings version with client name
    */
-  getAppCallTxnNoteWithClientName(contractVersion: ContractVersionValue): Uint8Array {
+  getAppCallTxnNoteWithClientName(
+    contractVersion: ContractVersionValue,
+    extraData?: Record<string, string>
+  ): Uint8Array {
     const versionMarker =
       contractVersion === CONTRACT_VERSION.V1_1 ? "v1" : contractVersion;
+    const data = JSON.stringify({origin: this.clientName, ...extraData});
 
-    return encodeString(`tinyman/${versionMarker}:j{"origin":"${this.clientName}"}`);
+    return encodeString(`tinyman/${versionMarker}:j${data}`);
   }
 }
 
