@@ -104,7 +104,6 @@ export interface GenerateSwapTxnsParams {
     swapType: SwapType;
     slippage: number;
     initiatorAddr: string;
-    appCallNoteExtraData?: Record<string, string>;
 }
 export type GenerateV1_1SwapTxnsParams = Omit<GenerateSwapTxnsParams, "quote" | "network"> & {
     quoteAndPool: DirectSwapQuoteAndPool;

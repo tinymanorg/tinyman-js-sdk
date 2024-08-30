@@ -107,10 +107,7 @@ async function generateTxns(
       V2_SWAP_APP_CALL_SWAP_TYPE_ARGS_ENCODED[swapType],
       algosdk.encodeUint64(assetOutAmount)
     ],
-    note: tinymanJSSDKConfig.getAppCallTxnNoteWithClientName(
-      CONTRACT_VERSION.V2,
-      params.appCallNoteExtraData
-    ),
+    note: tinymanJSSDKConfig.getAppCallTxnNoteWithClientName(CONTRACT_VERSION.V2),
     accounts: [poolAddress],
     foreignAssets: [pool.asset1ID, pool.asset2ID],
     suggestedParams
