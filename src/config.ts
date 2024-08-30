@@ -27,8 +27,7 @@ class TinymanJSSDKConfig {
   ): Uint8Array {
     const versionMarker =
       contractVersion === CONTRACT_VERSION.V1_1 ? "v1" : contractVersion;
-
-    let data = JSON.stringify({origin: this.clientName, ...extraData});
+    const data = JSON.stringify({origin: this.clientName, ...extraData});
 
     return encodeString(`tinyman/${versionMarker}:j${data}`);
   }
