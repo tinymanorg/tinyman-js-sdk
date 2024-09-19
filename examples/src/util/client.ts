@@ -5,6 +5,6 @@ console.log(
 );
 export const algodClient = new algosdk.Algodv2(
   "",
-  "https://node.testnet.algoexplorerapi.io/",
+  "https://testnet-api.algonode.cloud",
   ""
 );

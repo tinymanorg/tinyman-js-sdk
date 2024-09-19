@@ -5,6 +5,7 @@ import { algodClient } from "./client";
  */
 export async function assertAccountHasBalance(address: string) {
   const accountInfo = await algodClient.accountInformation(address).do();
+  
   if (!accountInfo["amount"]) {
     throw new Error(
       `Go to https://bank.testnet.algorand.network/?account=${address} and fund your account.`

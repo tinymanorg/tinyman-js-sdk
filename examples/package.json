@@ -9,8 +9,8 @@
   "author": "Tinyman Core Team",
   "license": "ISC",
   "dependencies": {
-    "algosdk": "^1.22.0",
-    "@tinymanorg/tinyman-js-sdk": "^2.0.1"
+    "algosdk": "^2.1.0",
+    "@tinymanorg/tinyman-js-sdk": "^3.1.0"
   },
   "devDependencies": {
     "@types/node": "^18.8.5",
