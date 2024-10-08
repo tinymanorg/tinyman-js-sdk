@@ -1,5 +1,4 @@
 import AlgodClient from "algosdk/dist/types/client/v2/algod/algod";
-import { GetRawBoxValueCacheProps } from "../types";
 declare class RewardsAppGlobalState {
     tinyAssetId: number;
     vaultAppId: number;
@@ -16,5 +15,5 @@ declare class RewardClaimSheet {
 }
 declare function getRewardPeriodBoxName(boxIndex: number): Uint8Array;
 declare function getAccountRewardClaimSheetBoxName(address: string, boxIndex: number): Uint8Array;
-declare function getRewardClaimSheet(algod: AlgodClient, appId: number, address: string, accountRewardClaimSheetBoxIndex: number, cacheProps?: GetRawBoxValueCacheProps): Promise<RewardClaimSheet | null>;
-export { RewardClaimSheet, RewardsAppGlobalState, getRewardPeriodBoxName, getAccountRewardClaimSheetBoxName, getRewardClaimSheet };
+declare function getRewardClaimSheet(algod: AlgodClient, appId: number, address: string, accountRewardClaimSheetBoxIndex: number): Promise<RewardClaimSheet | null>;
+export { getAccountRewardClaimSheetBoxName, getRewardClaimSheet, getRewardPeriodBoxName, RewardClaimSheet, RewardsAppGlobalState };

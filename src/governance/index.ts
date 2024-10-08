@@ -491,8 +491,7 @@ class TinymanGovernanceClient {
     return getStakingDistributionProposal(
       this.algodClient,
       STAKING_VOTING_APP_ID[this.network],
-      proposalId,
-      this.cacheProps
+      proposalId
     );
   }
 

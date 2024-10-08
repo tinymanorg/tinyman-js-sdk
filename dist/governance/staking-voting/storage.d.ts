@@ -1,5 +1,4 @@
 import AlgodClient from "algosdk/dist/types/client/v2/algod/algod";
-import { GetRawBoxValueCacheProps } from "../types";
 declare class StakingDistributionProposal {
     index: number;
     creationTimestamp: number;
@@ -13,5 +12,5 @@ declare class StakingDistributionProposal {
 declare function getStakingDistributionProposalBoxName(proposalId: string): Uint8Array;
 declare function getStakingAttendanceSheetBoxName(sender: string, boxIndex: number): Uint8Array;
 declare function getStakingVoteBoxName(proposalIndex: number, assetId: number): Uint8Array;
-declare function getStakingDistributionProposal(algod: AlgodClient, appId: number, proposalId: string, cacheProps?: GetRawBoxValueCacheProps): Promise<StakingDistributionProposal | null>;
-export { StakingDistributionProposal, getStakingDistributionProposalBoxName, getStakingAttendanceSheetBoxName, getStakingVoteBoxName, getStakingDistributionProposal };
+declare function getStakingDistributionProposal(algod: AlgodClient, appId: number, proposalId: string): Promise<StakingDistributionProposal | null>;
+export { getStakingAttendanceSheetBoxName, getStakingDistributionProposal, getStakingDistributionProposalBoxName, getStakingVoteBoxName, StakingDistributionProposal };

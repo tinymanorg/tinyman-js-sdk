@@ -1,16 +1,15 @@
 import {decodeAddress} from "algosdk";
 import AlgodClient from "algosdk/dist/types/client/v2/algod/algod";
 
+import {encodeString} from "../../util/util";
+import {getProposalBoxName} from "../proposal-voting/storage";
+import {bytesToInt, intToBytes} from "../util/utils";
 import {concatUint8Arrays, getRawBoxValue} from "../utils";
 import {
   PROPOSAL_BOX_PREFIX,
   STAKING_ATTENDANCE_BOX_PREFIX,
   STAKING_VOTE_BOX_PREFIX
 } from "./constants";
-import {bytesToInt, intToBytes} from "../util/utils";
-import {getProposalBoxName} from "../proposal-voting/storage";
-import {encodeString} from "../../util/util";
-import {GetRawBoxValueCacheProps} from "../types";
 
 class StakingDistributionProposal {
   index: number;
@@ -80,11 +79,10 @@ function parseBoxStakingDistributionProposal(
 async function getStakingDistributionProposal(
   algod: AlgodClient,
   appId: number,
-  proposalId: string,
-  cacheProps?: GetRawBoxValueCacheProps
+  proposalId: string
 ) {
   const boxName = getProposalBoxName(proposalId);
-  const rawBox = await getRawBoxValue(algod, appId, boxName, cacheProps);
+  const rawBox = await getRawBoxValue(algod, appId, boxName);
 
   if (!rawBox) {
     return null;
@@ -94,9 +92,9 @@ async function getStakingDistributionProposal(
 }
 
 export {
-  StakingDistributionProposal,
-  getStakingDistributionProposalBoxName,
   getStakingAttendanceSheetBoxName,
+  getStakingDistributionProposal,
+  getStakingDistributionProposalBoxName,
   getStakingVoteBoxName,
-  getStakingDistributionProposal
+  StakingDistributionProposal
 };
