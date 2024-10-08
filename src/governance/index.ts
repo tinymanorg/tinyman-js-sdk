@@ -274,8 +274,7 @@ class TinymanGovernanceClient {
     const slopeChangeAtLockEndTime = await getSlopeChange(
       this.algodClient,
       VAULT_APP_ID[this.network],
-      lockEndTime,
-      this.cacheProps
+      lockEndTime
     );
 
     return prepareCreateLockTransactions({
@@ -355,8 +354,7 @@ class TinymanGovernanceClient {
     const slopeChangeAtNewLockEndTime = await getSlopeChange(
       this.algodClient,
       VAULT_APP_ID[this.network],
-      newLockEndTime,
-      this.cacheProps
+      newLockEndTime
     );
 
     return prepareExtendLockEndTimeTransactions({
@@ -417,8 +415,7 @@ class TinymanGovernanceClient {
     const slopeChangeAtNewLockEndTime = await getSlopeChange(
       this.algodClient,
       VAULT_APP_ID[this.network],
-      lockEndTime,
-      this.cacheProps
+      lockEndTime
     );
 
     extendLockEndTimeTxnGroup = prepareExtendLockEndTimeTransactions({
