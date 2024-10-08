@@ -1,9 +1,9 @@
 import AlgodClient from "algosdk/dist/types/client/v2/algod/algod";
 import {CID} from "multiformats";
 /* eslint-disable import/no-unresolved */
-import {sha256} from "multiformats/hashes/sha2";
-import {code} from "multiformats/codecs/raw";
 import {base32} from "multiformats/bases/base32";
+import {code} from "multiformats/codecs/raw";
+import {sha256} from "multiformats/hashes/sha2";
 /* eslint-enable import/no-unresolved */
 import {
   Transaction,
@@ -12,29 +12,32 @@ import {
   encodeUnsignedTransaction
 } from "algosdk";
 
+import {GetRawBoxValueCacheProps} from "./types";
 import {TWO_TO_THE_64} from "./vault/constants";
 import {getSlope} from "./vault/utils";
-import {GetRawBoxValueCacheProps} from "./types";
 
 async function getRawBoxValue(
   algod: AlgodClient,
   appId: number,
   boxName: Uint8Array,
-  cacheProps?: GetRawBoxValueCacheProps
+  cacheProps?: GetRawBoxValueCacheProps,
+  shouldReadCacheFirst?: boolean
 ) {
   try {
     const boxNameString = Buffer.from(boxName).toString("base64");
 
-    if (cacheProps?.cacheData && cacheProps.cacheData[boxNameString]) {
+    if (
+      cacheProps?.cacheData &&
+      cacheProps.cacheData[boxNameString] &&
+      shouldReadCacheFirst
+    ) {
       return Uint8Array.from(Object.values(cacheProps.cacheData[boxNameString]));
     }
 
     const {value} = await algod.getApplicationBoxByName(appId, boxName).do();
 
     if (cacheProps?.onCacheUpdate) {
-      const newCacheData = {...cacheProps.cacheData, [boxNameString]: value};
-
-      cacheProps.onCacheUpdate(newCacheData);
+      cacheProps.onCacheUpdate({[boxNameString]: value});
     }
 
     return value;
@@ -189,14 +192,14 @@ async function getAllBoxNames(algod: AlgodClient, appId: number) {
 }
 
 export {
-  getRawBoxValue,
-  getCumulativePowerDelta,
-  getBias,
-  getGlobalState,
+  calculateTinyPower,
+  combineAndRegroupTxns,
   concatUint8Arrays,
   doesBoxExist,
-  getAllBoxNames,
   generateCidFromProposalMetadata,
-  combineAndRegroupTxns,
-  calculateTinyPower
+  getAllBoxNames,
+  getBias,
+  getCumulativePowerDelta,
+  getGlobalState,
+  getRawBoxValue
 };

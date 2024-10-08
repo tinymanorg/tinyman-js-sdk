@@ -4,6 +4,7 @@ import AlgodClient from "algosdk/dist/types/client/v2/algod/algod";
 import {intToBytes} from "../util/utils";
 import {REWARD_CLAIM_SHEET_BOX_PREFIX, REWARD_PERIOD_BOX_PREFIX} from "./constants";
 import {getRawBoxValue} from "../utils";
+import {GetRawBoxValueCacheProps} from "../types";
 
 class RewardsAppGlobalState {
   tinyAssetId: number;
@@ -79,14 +80,15 @@ async function getRewardClaimSheet(
   algod: AlgodClient,
   appId: number,
   address: string,
-  accountRewardClaimSheetBoxIndex: number
+  accountRewardClaimSheetBoxIndex: number,
+  cacheProps?: GetRawBoxValueCacheProps
 ) {
   const boxName = getAccountRewardClaimSheetBoxName(
     address,
     accountRewardClaimSheetBoxIndex
   );
 
-  const rawBox = await getRawBoxValue(algod, appId, boxName);
+  const rawBox = await getRawBoxValue(algod, appId, boxName, cacheProps);
 
   if (!rawBox) {
     return null;

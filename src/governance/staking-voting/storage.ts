@@ -10,6 +10,7 @@ import {
 import {bytesToInt, intToBytes} from "../util/utils";
 import {getProposalBoxName} from "../proposal-voting/storage";
 import {encodeString} from "../../util/util";
+import {GetRawBoxValueCacheProps} from "../types";
 
 class StakingDistributionProposal {
   index: number;
@@ -79,10 +80,11 @@ function parseBoxStakingDistributionProposal(
 async function getStakingDistributionProposal(
   algod: AlgodClient,
   appId: number,
-  proposalId: string
+  proposalId: string,
+  cacheProps?: GetRawBoxValueCacheProps
 ) {
   const boxName = getProposalBoxName(proposalId);
-  const rawBox = await getRawBoxValue(algod, appId, boxName);
+  const rawBox = await getRawBoxValue(algod, appId, boxName, cacheProps);
 
   if (!rawBox) {
     return null;

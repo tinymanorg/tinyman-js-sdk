@@ -5,6 +5,7 @@ import {intToBytes} from "../util/utils";
 import {concatUint8Arrays, getRawBoxValue} from "../utils";
 import {ATTENDANCE_SHEET_BOX_PREFIX, PROPOSAL_BOX_PREFIX} from "./constants";
 import {encodeString} from "../../util/util";
+import {GetRawBoxValueCacheProps} from "../types";
 
 export class Proposal {
   index: number;
@@ -137,19 +138,20 @@ function parseBoxProposal(rawBox: Uint8Array) {
     Boolean(buffer.readUIntBE(81, 1)),
     Boolean(buffer.readUIntBE(82, 1)),
     Boolean(buffer.readUIntBE(83, 1)),
-    encodeAddress(buffer.subarray(84, 116)),
+    encodeAddress(new Uint8Array(buffer.subarray(84, 116))),
     rawBox.slice(116, 150).toString(),
-    encodeAddress(buffer.subarray(150, 182))
+    encodeAddress(new Uint8Array(buffer.subarray(150, 182)))
   );
 }
 
 export async function getProposal(
   client: AlgodClient,
   appId: number,
-  proposalId: string
+  proposalId: string,
+  cacheProps?: GetRawBoxValueCacheProps
 ) {
   const boxName = getProposalBoxName(proposalId);
-  const rawBox = await getRawBoxValue(client, appId, boxName);
+  const rawBox = await getRawBoxValue(client, appId, boxName, cacheProps);
 
   if (!rawBox) {
     return null;

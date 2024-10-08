@@ -10,10 +10,11 @@ declare class TinymanGovernanceClient {
     private algodClient;
     private userAddress;
     private network;
-    constructor(algodClient: AlgodClient, userAddress: string, network: SupportedNetwork);
-    getTinyPower(timeStamp?: number, cacheProps?: GetRawBoxValueCacheProps): Promise<number>;
-    getTotalTinyPower(timeStamp?: number, cacheProps?: GetRawBoxValueCacheProps): Promise<number>;
-    getCumulativeTinyPower(cacheProps?: GetRawBoxValueCacheProps, timeStamp?: number): Promise<number>;
+    private cacheProps?;
+    constructor(algodClient: AlgodClient, userAddress: string, network: SupportedNetwork, cacheProps?: GetRawBoxValueCacheProps);
+    getTinyPower(shouldReadCacheFirst?: boolean, timeStamp?: number): Promise<number>;
+    getTotalTinyPower(shouldReadCacheFirst?: boolean, timeStamp?: number): Promise<number>;
+    getCumulativeTinyPower(shouldReadCacheFirst?: boolean, timeStamp?: number): Promise<number>;
     fetchVaultAppGlobalState(): Promise<VaultAppGlobalState | null>;
     generateCreateLockTransactions({ lockedAmount, lockEndTime, userAddress, suggestedParams }: {
         lockedAmount: number;
@@ -38,7 +39,7 @@ declare class TinymanGovernanceClient {
         suggestedParams?: SuggestedParams;
     }): Promise<Transaction[]>;
     generateWithdrawTransactions(userAddress?: string, shouldOptIntoTINY?: boolean, suggestedParams?: SuggestedParams): Promise<Transaction[]>;
-    fetchAccountState(): Promise<import("./vault/storage").AccountState | null>;
+    fetchAccountState(shouldReadCacheFirst?: boolean): Promise<import("./vault/storage").AccountState | null>;
     fetchStakingDistributionProposal(proposalId: string): Promise<import("./staking-voting/storage").StakingDistributionProposal | null>;
     generateCastVoteForStakingDistributionProposalTransactions({ proposalId, votes, assetIds, userAddress, suggestedParams }: {
         proposalId: string;

@@ -40,14 +40,21 @@ declare class VaultAppGlobalState {
     get lastTotalPowerBoxIndex(): number;
     get lastTotalPowerArrayIndex(): number;
 }
-declare function getAccountState(algodClient: AlgodClient, appId: number, address: string): Promise<AccountState | null>;
+declare function getAccountState(algodClient: AlgodClient, appId: number, address: string, cacheProps?: GetRawBoxValueCacheProps, shouldReadCacheFirst?: boolean): Promise<AccountState | null>;
 declare function getAccountStateBoxName(address: string): Uint8Array;
 declare function getTotalPowerBoxName(boxIndex: number): Uint8Array;
 declare function getLastAccountPowerBoxIndexes(powerCount: number): [number, number];
 declare function getAccountPowerBoxName(address: string, boxIndex: number): Uint8Array;
-declare function getSlopeChange(algod: AlgodClient, appId: number, timeStamp: number): Promise<SlopeChange | null>;
+declare function getSlopeChange(algod: AlgodClient, appId: number, timeStamp: number, cacheProps?: GetRawBoxValueCacheProps, shouldReadCacheFirst?: boolean): Promise<SlopeChange | null>;
 declare function getSlopeChangeBoxName(timestamp: number): Uint8Array;
-declare function getAllTotalPowers(algodClient: AlgodClient, appId: number, totalPowerCount: number, cacheProps?: GetRawBoxValueCacheProps): Promise<TotalPower[]>;
-declare function getAccountPowers(algodClient: AlgodClient, address: string, appId: number, powerCount?: number | null, cacheProps?: GetRawBoxValueCacheProps): Promise<AccountPower[]>;
+declare function getAllTotalPowers(algodClient: AlgodClient, appId: number, totalPowerCount: number, cacheProps?: GetRawBoxValueCacheProps, shouldReadCacheFirst?: boolean): Promise<TotalPower[]>;
+declare function getAccountPowers({ algodClient, address, appId, powerCount, cacheProps, shouldReadCacheFirst }: {
+    algodClient: AlgodClient;
+    address: string;
+    appId: number;
+    powerCount: number | null;
+    cacheProps?: GetRawBoxValueCacheProps;
+    shouldReadCacheFirst?: boolean;
+}): Promise<AccountPower[]>;
 declare function getPowerIndexAt(powers: AccountPower[] | TotalPower[], timestamp: number): number | null;
 export { AccountState, AccountPower, TotalPower, VaultAppGlobalState, SlopeChange, getAccountState, getAccountPowers, getAccountPowerBoxName, getAccountStateBoxName, getLastAccountPowerBoxIndexes, getPowerIndexAt, getTotalPowerBoxName, getSlopeChangeBoxName, getSlopeChange, getAllTotalPowers };
