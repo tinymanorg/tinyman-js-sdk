@@ -127,11 +127,23 @@ class VaultAppGlobalState {
   }
 }
 
-async function getAccountState(algodClient: AlgodClient, appId: number, address: string) {
+async function getAccountState(
+  algodClient: AlgodClient,
+  appId: number,
+  address: string,
+  cacheProps?: GetRawBoxValueCacheProps,
+  shouldReadCacheFirst?: boolean
+) {
   const boxName = getAccountStateBoxName(address);
 
   try {
-    const rawBox = await getRawBoxValue(algodClient, appId, boxName);
+    const rawBox = await getRawBoxValue(
+      algodClient,
+      appId,
+      boxName,
+      cacheProps,
+      shouldReadCacheFirst
+    );
 
     if (rawBox) {
       return parseBoxAccountState(rawBox);
@@ -189,10 +201,22 @@ function getAccountPowerBoxName(address: string, boxIndex: number) {
   return combinedArray;
 }
 
-async function getSlopeChange(algod: AlgodClient, appId: number, timeStamp: number) {
+async function getSlopeChange(
+  algod: AlgodClient,
+  appId: number,
+  timeStamp: number,
+  cacheProps?: GetRawBoxValueCacheProps,
+  shouldReadCacheFirst?: boolean
+) {
   const boxName = getSlopeChangeBoxName(timeStamp);
 
-  const rawBox = await getRawBoxValue(algod, appId, boxName);
+  const rawBox = await getRawBoxValue(
+    algod,
+    appId,
+    boxName,
+    cacheProps,
+    shouldReadCacheFirst
+  );
 
   if (!rawBox) {
     return null;
@@ -215,7 +239,8 @@ async function getAllTotalPowers(
   algodClient: AlgodClient,
   appId: number,
   totalPowerCount: number,
-  cacheProps?: GetRawBoxValueCacheProps
+  cacheProps?: GetRawBoxValueCacheProps,
+  shouldReadCacheFirst?: boolean
 ): Promise<TotalPower[]> {
   let boxCount = 0;
 
@@ -227,7 +252,14 @@ async function getAllTotalPowers(
 
   for (let boxIndex = 0; boxIndex < boxCount; boxIndex++) {
     const boxName = getTotalPowerBoxName(boxIndex);
-    const rawBox = await getRawBoxValue(algodClient, appId, boxName, cacheProps);
+
+    const rawBox = await getRawBoxValue(
+      algodClient,
+      appId,
+      boxName,
+      cacheProps,
+      shouldReadCacheFirst
+    );
 
     if (rawBox) {
       totalPowers.push(...parseBoxTotalPower(rawBox));
@@ -272,13 +304,21 @@ function parseBoxTotalPower(rawBox: Uint8Array) {
   return powers;
 }
 
-async function getAccountPowers(
-  algodClient: AlgodClient,
-  address: string,
-  appId: number,
-  powerCount: number | null = null,
-  cacheProps?: GetRawBoxValueCacheProps
-) {
+async function getAccountPowers({
+  algodClient,
+  address,
+  appId,
+  powerCount = null,
+  cacheProps,
+  shouldReadCacheFirst
+}: {
+  algodClient: AlgodClient;
+  address: string;
+  appId: number;
+  powerCount: number | null;
+  cacheProps?: GetRawBoxValueCacheProps;
+  shouldReadCacheFirst?: boolean;
+}) {
   let boxCount = 0;
 
   if (powerCount) {
@@ -289,7 +329,14 @@ async function getAccountPowers(
 
   for (let boxIndex = 0; boxIndex < boxCount; boxIndex++) {
     const boxName = getAccountPowerBoxName(address, boxIndex);
-    const rawBox = await getRawBoxValue(algodClient, appId, boxName, cacheProps);
+
+    const rawBox = await getRawBoxValue(
+      algodClient,
+      appId,
+      boxName,
+      cacheProps,
+      shouldReadCacheFirst
+    );
 
     if (rawBox) {
       accountPowers.push(...parseBoxAccountPower(rawBox));

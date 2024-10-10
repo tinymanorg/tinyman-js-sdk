@@ -137,9 +137,9 @@ function parseBoxProposal(rawBox: Uint8Array) {
     Boolean(buffer.readUIntBE(81, 1)),
     Boolean(buffer.readUIntBE(82, 1)),
     Boolean(buffer.readUIntBE(83, 1)),
-    encodeAddress(buffer.subarray(84, 116)),
+    encodeAddress(new Uint8Array(buffer.subarray(84, 116))),
     rawBox.slice(116, 150).toString(),
-    encodeAddress(buffer.subarray(150, 182))
+    encodeAddress(new Uint8Array(buffer.subarray(150, 182)))
   );
 }
 

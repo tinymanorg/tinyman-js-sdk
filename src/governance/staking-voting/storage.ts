@@ -1,15 +1,15 @@
 import {decodeAddress} from "algosdk";
 import AlgodClient from "algosdk/dist/types/client/v2/algod/algod";
 
+import {encodeString} from "../../util/util";
+import {getProposalBoxName} from "../proposal-voting/storage";
+import {bytesToInt, intToBytes} from "../util/utils";
 import {concatUint8Arrays, getRawBoxValue} from "../utils";
 import {
   PROPOSAL_BOX_PREFIX,
   STAKING_ATTENDANCE_BOX_PREFIX,
   STAKING_VOTE_BOX_PREFIX
 } from "./constants";
-import {bytesToInt, intToBytes} from "../util/utils";
-import {getProposalBoxName} from "../proposal-voting/storage";
-import {encodeString} from "../../util/util";
 
 class StakingDistributionProposal {
   index: number;
@@ -92,9 +92,9 @@ async function getStakingDistributionProposal(
 }
 
 export {
-  StakingDistributionProposal,
-  getStakingDistributionProposalBoxName,
   getStakingAttendanceSheetBoxName,
+  getStakingDistributionProposal,
+  getStakingDistributionProposalBoxName,
   getStakingVoteBoxName,
-  getStakingDistributionProposal
+  StakingDistributionProposal
 };

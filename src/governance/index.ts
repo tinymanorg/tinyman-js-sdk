@@ -1,6 +1,46 @@
-import AlgodClient from "algosdk/dist/types/client/v2/algod/algod";
 import {decodeAddress, encodeAddress, SuggestedParams, Transaction} from "algosdk";
+import AlgodClient from "algosdk/dist/types/client/v2/algod/algod";
 
+import {TINY_ASSET_ID} from "../util/asset/assetConstants";
+import {generateOptIntoAssetTxns} from "../util/asset/assetUtils";
+import {SupportedNetwork} from "../util/commonTypes";
+import {TINYMAN_ANALYTICS_API_BASE_URLS} from "../util/constant";
+import {
+  PROPOSAL_VOTING_APP_ID,
+  REWARDS_APP_ID,
+  SECOND_IN_MS,
+  STAKING_VOTING_APP_ID,
+  VAULT_APP_ID,
+  WEEK,
+  WEEK_IN_S
+} from "./constants";
+import {
+  ACCOUNT_ATTENDANCE_SHEET_BOX_SIZE,
+  EXECUTION_HASH_SIZE,
+  ProposalVote
+} from "./proposal-voting/constants";
+import {getProposal, ProposalVotingAppGlobalState} from "./proposal-voting/storage";
+import {
+  prepareCastVoteTransactions,
+  prepareCreateProposalTransactions
+} from "./proposal-voting/transactions";
+import {REWARD_CLAIM_SHEET_BOX_SIZE} from "./rewards/constants";
+import {getRewardClaimSheet, RewardsAppGlobalState} from "./rewards/storage";
+import {prepareClaimRewardsTransactions} from "./rewards/transactions";
+import {
+  getStakingAttendanceSheetBoxName,
+  getStakingDistributionProposal
+} from "./staking-voting/storage";
+import {prepareCastVoteForStakingDistributionProposalTransactions} from "./staking-voting/transactions";
+import {GetRawBoxValueCacheProps} from "./types";
+import {
+  combineAndRegroupTxns,
+  doesBoxExist,
+  getAllBoxNames,
+  getBias,
+  getCumulativePowerDelta,
+  getGlobalState
+} from "./utils";
 import {
   getAccountPowers,
   getAccountState,
@@ -15,45 +55,6 @@ import {
   prepareIncreaseLockAmountTransactions,
   prepareWithdrawTransactions
 } from "./vault/transactions";
-import {
-  PROPOSAL_VOTING_APP_ID,
-  REWARDS_APP_ID,
-  STAKING_VOTING_APP_ID,
-  VAULT_APP_ID,
-  WEEK,
-  WEEK_IN_S
-} from "./constants";
-import {
-  doesBoxExist,
-  combineAndRegroupTxns,
-  getAllBoxNames,
-  getBias,
-  getCumulativePowerDelta,
-  getGlobalState
-} from "./utils";
-import {
-  getStakingAttendanceSheetBoxName,
-  getStakingDistributionProposal
-} from "./staking-voting/storage";
-import {prepareCastVoteForStakingDistributionProposalTransactions} from "./staking-voting/transactions";
-import {getRewardClaimSheet, RewardsAppGlobalState} from "./rewards/storage";
-import {REWARD_CLAIM_SHEET_BOX_SIZE} from "./rewards/constants";
-import {prepareClaimRewardsTransactions} from "./rewards/transactions";
-import {getProposal, ProposalVotingAppGlobalState} from "./proposal-voting/storage";
-import {
-  prepareCastVoteTransactions,
-  prepareCreateProposalTransactions
-} from "./proposal-voting/transactions";
-import {
-  ACCOUNT_ATTENDANCE_SHEET_BOX_SIZE,
-  EXECUTION_HASH_SIZE,
-  ProposalVote
-} from "./proposal-voting/constants";
-import {GetRawBoxValueCacheProps} from "./types";
-import {SupportedNetwork} from "../util/commonTypes";
-import {generateOptIntoAssetTxns} from "../util/asset/assetUtils";
-import {TINYMAN_ANALYTICS_API_BASE_URLS} from "../util/constant";
-import {TINY_ASSET_ID} from "../util/asset/assetConstants";
 
 class TinymanGovernanceClient {
   private algodClient: AlgodClient;
@@ -66,23 +67,29 @@ class TinymanGovernanceClient {
     this.network = network;
   }
 
-  async getTinyPower(
-    timeStamp: number = Math.floor(Date.now() / 1000),
-    cacheProps?: GetRawBoxValueCacheProps
-  ) {
-    const accountState = await this.fetchAccountState();
+  async getTinyPower({
+    shouldReadCacheFirst,
+    cacheProps,
+    timeStamp = Math.floor(Date.now() / SECOND_IN_MS)
+  }: {
+    shouldReadCacheFirst?: boolean;
+    cacheProps?: GetRawBoxValueCacheProps;
+    timeStamp?: number;
+  }) {
+    const accountState = await this.fetchAccountState(true);
 
     if (!accountState) {
       return 0;
     }
 
-    const accountPowers = await getAccountPowers(
-      this.algodClient,
-      this.userAddress,
-      VAULT_APP_ID[this.network],
-      accountState.powerCount,
-      cacheProps
-    );
+    const accountPowers = await getAccountPowers({
+      algodClient: this.algodClient,
+      address: this.userAddress,
+      appId: VAULT_APP_ID[this.network],
+      powerCount: accountState.powerCount,
+      cacheProps,
+      shouldReadCacheFirst
+    });
 
     const accountPowerIndex = getPowerIndexAt(accountPowers, timeStamp);
 
@@ -100,10 +107,15 @@ class TinymanGovernanceClient {
     return tinyPower;
   }
 
-  async getTotalTinyPower(
-    timeStamp: number = Math.floor(Date.now() / 1000),
-    cacheProps?: GetRawBoxValueCacheProps
-  ) {
+  async getTotalTinyPower({
+    timeStamp = Math.floor(Date.now() / SECOND_IN_MS),
+    shouldReadCacheFirst,
+    cacheProps
+  }: {
+    timeStamp?: number;
+    shouldReadCacheFirst?: boolean;
+    cacheProps?: GetRawBoxValueCacheProps;
+  }) {
     const vaultAppGlobalState = await this.fetchVaultAppGlobalState();
 
     if (!vaultAppGlobalState) {
@@ -114,7 +126,8 @@ class TinymanGovernanceClient {
       this.algodClient,
       VAULT_APP_ID[this.network],
       vaultAppGlobalState.totalPowerCount,
-      cacheProps
+      cacheProps,
+      shouldReadCacheFirst
     );
 
     const totalPowerIndex = getPowerIndexAt(totalPowers, timeStamp);
@@ -151,7 +164,9 @@ class TinymanGovernanceClient {
       const slopeChange = await getSlopeChange(
         this.algodClient,
         VAULT_APP_ID[this.network],
-        timeRange[1]
+        timeRange[1],
+        cacheProps,
+        true
       );
 
       const slopeDelta = slopeChange?.slopeDelta || 0;
@@ -167,23 +182,29 @@ class TinymanGovernanceClient {
     return tinyPower;
   }
 
-  async getCumulativeTinyPower(
-    cacheProps?: GetRawBoxValueCacheProps,
-    timeStamp: number = Math.floor(Date.now() / 1000)
-  ) {
-    const accountState = await this.fetchAccountState();
+  async getCumulativeTinyPower({
+    cacheProps,
+    shouldReadCacheFirst,
+    timeStamp = Math.floor(Date.now() / SECOND_IN_MS)
+  }: {
+    cacheProps?: GetRawBoxValueCacheProps;
+    shouldReadCacheFirst?: boolean;
+    timeStamp?: number;
+  }) {
+    const accountState = await this.fetchAccountState(true);
 
     if (!accountState) {
       return 0;
     }
 
-    const accountPowers = await getAccountPowers(
-      this.algodClient,
-      this.userAddress,
-      VAULT_APP_ID[this.network],
-      accountState.powerCount,
-      cacheProps
-    );
+    const accountPowers = await getAccountPowers({
+      algodClient: this.algodClient,
+      address: this.userAddress,
+      appId: VAULT_APP_ID[this.network],
+      powerCount: accountState.powerCount,
+      cacheProps,
+      shouldReadCacheFirst
+    });
     const accountPowerIndex = getPowerIndexAt(accountPowers, timeStamp);
 
     if (accountPowerIndex === null) {
@@ -446,11 +467,16 @@ class TinymanGovernanceClient {
     return withdrawTxns;
   }
 
-  fetchAccountState() {
+  fetchAccountState(
+    shouldReadCacheFirst?: boolean,
+    cacheProps?: GetRawBoxValueCacheProps
+  ) {
     return getAccountState(
       this.algodClient,
       VAULT_APP_ID[this.network],
-      this.userAddress
+      this.userAddress,
+      cacheProps,
+      shouldReadCacheFirst
     );
   }
 
@@ -495,12 +521,12 @@ class TinymanGovernanceClient {
       this.algodClient,
       STAKING_VOTING_APP_ID[this.network]
     );
-    const accountPowers = await getAccountPowers(
-      this.algodClient,
-      selectedUserAddress,
-      VAULT_APP_ID[this.network],
-      accountState?.powerCount
-    );
+    const accountPowers = await getAccountPowers({
+      algodClient: this.algodClient,
+      address: selectedUserAddress,
+      appId: VAULT_APP_ID[this.network],
+      powerCount: accountState?.powerCount ?? null
+    });
     const accountPowerIndex = getPowerIndexAt(
       accountPowers,
       stakingDistributionProposal.creationTimestamp
@@ -580,12 +606,12 @@ class TinymanGovernanceClient {
       );
     }
 
-    const accountPowers = await getAccountPowers(
-      this.algodClient,
-      selectedUserAddress,
-      VAULT_APP_ID[this.network],
-      accountState?.powerCount
-    );
+    const accountPowers = await getAccountPowers({
+      algodClient: this.algodClient,
+      address: selectedUserAddress,
+      appId: VAULT_APP_ID[this.network],
+      powerCount: accountState?.powerCount ?? null
+    });
 
     const claimPeriodStartTimestamp =
       rewardsAppGlobalState.firstPeriodTimestamp + periodIndexStart * WEEK_IN_S;
@@ -787,18 +813,18 @@ class TinymanGovernanceClient {
     }
 
     if (
-      proposal.votingStartTimestamp >= Math.floor(Date.now() / 1000) ||
-      proposal.votingEndTimestamp <= Math.floor(Date.now() / 1000)
+      proposal.votingStartTimestamp >= Math.floor(Date.now() / SECOND_IN_MS) ||
+      proposal.votingEndTimestamp <= Math.floor(Date.now() / SECOND_IN_MS)
     ) {
       throw new Error("Voting period is not active");
     }
 
-    const accountPowers = await getAccountPowers(
-      this.algodClient,
-      sender,
-      VAULT_APP_ID[this.network],
-      accountState.powerCount
-    );
+    const accountPowers = await getAccountPowers({
+      algodClient: this.algodClient,
+      address: sender,
+      appId: VAULT_APP_ID[this.network],
+      powerCount: accountState.powerCount
+    });
     const accountPowerIndex = getPowerIndexAt(accountPowers, proposal.creationTimestamp);
 
     if (accountPowerIndex === null) {
@@ -856,7 +882,7 @@ class TinymanGovernanceClient {
     let requiredTinyPower = votingAppGlobalState.proposalThreshold;
 
     if (votingAppGlobalState.proposalThresholdNumerator) {
-      const totalTinyPower = await this.getTotalTinyPower();
+      const totalTinyPower = await this.getTotalTinyPower({});
 
       requiredTinyPower = Math.max(
         requiredTinyPower,
