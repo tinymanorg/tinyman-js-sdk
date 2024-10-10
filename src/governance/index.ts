@@ -8,6 +8,7 @@ import {TINYMAN_ANALYTICS_API_BASE_URLS} from "../util/constant";
 import {
   PROPOSAL_VOTING_APP_ID,
   REWARDS_APP_ID,
+  SECOND_IN_MS,
   STAKING_VOTING_APP_ID,
   VAULT_APP_ID,
   WEEK,
@@ -66,11 +67,15 @@ class TinymanGovernanceClient {
     this.network = network;
   }
 
-  async getTinyPower(
-    shouldReadCacheFirst?: boolean,
-    cacheProps?: GetRawBoxValueCacheProps,
-    timeStamp: number = Math.floor(Date.now() / 1000)
-  ) {
+  async getTinyPower({
+    shouldReadCacheFirst,
+    cacheProps,
+    timeStamp = Math.floor(Date.now() / SECOND_IN_MS)
+  }: {
+    shouldReadCacheFirst?: boolean;
+    cacheProps?: GetRawBoxValueCacheProps;
+    timeStamp?: number;
+  }) {
     const accountState = await this.fetchAccountState(true);
 
     if (!accountState) {
@@ -102,11 +107,15 @@ class TinymanGovernanceClient {
     return tinyPower;
   }
 
-  async getTotalTinyPower(
-    shouldReadCacheFirst?: boolean,
-    cacheProps?: GetRawBoxValueCacheProps,
-    timeStamp: number = Math.floor(Date.now() / 1000)
-  ) {
+  async getTotalTinyPower({
+    timeStamp = Math.floor(Date.now() / SECOND_IN_MS),
+    shouldReadCacheFirst,
+    cacheProps
+  }: {
+    timeStamp?: number;
+    shouldReadCacheFirst?: boolean;
+    cacheProps?: GetRawBoxValueCacheProps;
+  }) {
     const vaultAppGlobalState = await this.fetchVaultAppGlobalState();
 
     if (!vaultAppGlobalState) {
@@ -173,11 +182,15 @@ class TinymanGovernanceClient {
     return tinyPower;
   }
 
-  async getCumulativeTinyPower(
-    cacheProps?: GetRawBoxValueCacheProps,
-    shouldReadCacheFirst?: boolean,
-    timeStamp: number = Math.floor(Date.now() / 1000)
-  ) {
+  async getCumulativeTinyPower({
+    cacheProps,
+    shouldReadCacheFirst,
+    timeStamp = Math.floor(Date.now() / SECOND_IN_MS)
+  }: {
+    cacheProps?: GetRawBoxValueCacheProps;
+    shouldReadCacheFirst?: boolean;
+    timeStamp?: number;
+  }) {
     const accountState = await this.fetchAccountState(true);
 
     if (!accountState) {
@@ -800,8 +813,8 @@ class TinymanGovernanceClient {
     }
 
     if (
-      proposal.votingStartTimestamp >= Math.floor(Date.now() / 1000) ||
-      proposal.votingEndTimestamp <= Math.floor(Date.now() / 1000)
+      proposal.votingStartTimestamp >= Math.floor(Date.now() / SECOND_IN_MS) ||
+      proposal.votingEndTimestamp <= Math.floor(Date.now() / SECOND_IN_MS)
     ) {
       throw new Error("Voting period is not active");
     }
@@ -869,7 +882,7 @@ class TinymanGovernanceClient {
     let requiredTinyPower = votingAppGlobalState.proposalThreshold;
 
     if (votingAppGlobalState.proposalThresholdNumerator) {
-      const totalTinyPower = await this.getTotalTinyPower();
+      const totalTinyPower = await this.getTotalTinyPower({});
 
       requiredTinyPower = Math.max(
         requiredTinyPower,

@@ -11,9 +11,21 @@ declare class TinymanGovernanceClient {
     private userAddress;
     private network;
     constructor(algodClient: AlgodClient, userAddress: string, network: SupportedNetwork);
-    getTinyPower(shouldReadCacheFirst?: boolean, cacheProps?: GetRawBoxValueCacheProps, timeStamp?: number): Promise<number>;
-    getTotalTinyPower(shouldReadCacheFirst?: boolean, cacheProps?: GetRawBoxValueCacheProps, timeStamp?: number): Promise<number>;
-    getCumulativeTinyPower(cacheProps?: GetRawBoxValueCacheProps, shouldReadCacheFirst?: boolean, timeStamp?: number): Promise<number>;
+    getTinyPower({ shouldReadCacheFirst, cacheProps, timeStamp }: {
+        shouldReadCacheFirst?: boolean;
+        cacheProps?: GetRawBoxValueCacheProps;
+        timeStamp?: number;
+    }): Promise<number>;
+    getTotalTinyPower({ timeStamp, shouldReadCacheFirst, cacheProps }: {
+        timeStamp?: number;
+        shouldReadCacheFirst?: boolean;
+        cacheProps?: GetRawBoxValueCacheProps;
+    }): Promise<number>;
+    getCumulativeTinyPower({ cacheProps, shouldReadCacheFirst, timeStamp }: {
+        cacheProps?: GetRawBoxValueCacheProps;
+        shouldReadCacheFirst?: boolean;
+        timeStamp?: number;
+    }): Promise<number>;
     fetchVaultAppGlobalState(): Promise<VaultAppGlobalState | null>;
     generateCreateLockTransactions({ lockedAmount, lockEndTime, userAddress, suggestedParams }: {
         lockedAmount: number;
