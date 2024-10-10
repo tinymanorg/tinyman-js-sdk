@@ -1,6 +1,45 @@
-import AlgodClient from "algosdk/dist/types/client/v2/algod/algod";
 import {decodeAddress, encodeAddress, SuggestedParams, Transaction} from "algosdk";
+import AlgodClient from "algosdk/dist/types/client/v2/algod/algod";
 
+import {TINY_ASSET_ID} from "../util/asset/assetConstants";
+import {generateOptIntoAssetTxns} from "../util/asset/assetUtils";
+import {SupportedNetwork} from "../util/commonTypes";
+import {TINYMAN_ANALYTICS_API_BASE_URLS} from "../util/constant";
+import {
+  PROPOSAL_VOTING_APP_ID,
+  REWARDS_APP_ID,
+  STAKING_VOTING_APP_ID,
+  VAULT_APP_ID,
+  WEEK,
+  WEEK_IN_S
+} from "./constants";
+import {
+  ACCOUNT_ATTENDANCE_SHEET_BOX_SIZE,
+  EXECUTION_HASH_SIZE,
+  ProposalVote
+} from "./proposal-voting/constants";
+import {getProposal, ProposalVotingAppGlobalState} from "./proposal-voting/storage";
+import {
+  prepareCastVoteTransactions,
+  prepareCreateProposalTransactions
+} from "./proposal-voting/transactions";
+import {REWARD_CLAIM_SHEET_BOX_SIZE} from "./rewards/constants";
+import {getRewardClaimSheet, RewardsAppGlobalState} from "./rewards/storage";
+import {prepareClaimRewardsTransactions} from "./rewards/transactions";
+import {
+  getStakingAttendanceSheetBoxName,
+  getStakingDistributionProposal
+} from "./staking-voting/storage";
+import {prepareCastVoteForStakingDistributionProposalTransactions} from "./staking-voting/transactions";
+import {GetRawBoxValueCacheProps} from "./types";
+import {
+  combineAndRegroupTxns,
+  doesBoxExist,
+  getAllBoxNames,
+  getBias,
+  getCumulativePowerDelta,
+  getGlobalState
+} from "./utils";
 import {
   getAccountPowers,
   getAccountState,
@@ -15,82 +54,21 @@ import {
   prepareIncreaseLockAmountTransactions,
   prepareWithdrawTransactions
 } from "./vault/transactions";
-import {
-  PROPOSAL_VOTING_APP_ID,
-  REWARDS_APP_ID,
-  STAKING_VOTING_APP_ID,
-  VAULT_APP_ID,
-  WEEK,
-  WEEK_IN_S
-} from "./constants";
-import {
-  doesBoxExist,
-  combineAndRegroupTxns,
-  getAllBoxNames,
-  getBias,
-  getCumulativePowerDelta,
-  getGlobalState
-} from "./utils";
-import {
-  getStakingAttendanceSheetBoxName,
-  getStakingDistributionProposal
-} from "./staking-voting/storage";
-import {prepareCastVoteForStakingDistributionProposalTransactions} from "./staking-voting/transactions";
-import {getRewardClaimSheet, RewardsAppGlobalState} from "./rewards/storage";
-import {REWARD_CLAIM_SHEET_BOX_SIZE} from "./rewards/constants";
-import {prepareClaimRewardsTransactions} from "./rewards/transactions";
-import {getProposal, ProposalVotingAppGlobalState} from "./proposal-voting/storage";
-import {
-  prepareCastVoteTransactions,
-  prepareCreateProposalTransactions
-} from "./proposal-voting/transactions";
-import {
-  ACCOUNT_ATTENDANCE_SHEET_BOX_SIZE,
-  EXECUTION_HASH_SIZE,
-  ProposalVote
-} from "./proposal-voting/constants";
-import {GetRawBoxValueCacheProps, RawBoxCacheValue} from "./types";
-import {SupportedNetwork} from "../util/commonTypes";
-import {generateOptIntoAssetTxns} from "../util/asset/assetUtils";
-import {TINYMAN_ANALYTICS_API_BASE_URLS} from "../util/constant";
-import {TINY_ASSET_ID} from "../util/asset/assetConstants";
 
 class TinymanGovernanceClient {
   private algodClient: AlgodClient;
   private userAddress: string;
   private network: SupportedNetwork;
-  private cacheProps?: GetRawBoxValueCacheProps;
 
-  constructor(
-    algodClient: AlgodClient,
-    userAddress: string,
-    network: SupportedNetwork,
-    cacheProps?: GetRawBoxValueCacheProps
-  ) {
+  constructor(algodClient: AlgodClient, userAddress: string, network: SupportedNetwork) {
     this.algodClient = algodClient;
     this.userAddress = userAddress;
     this.network = network;
-    this.cacheProps = cacheProps
-      ? {
-          cacheData: cacheProps.cacheData ?? null,
-          onCacheUpdate: (newCache: RawBoxCacheValue) => {
-            const newCacheData = {...this.cacheProps?.cacheData, ...newCache};
-
-            cacheProps.onCacheUpdate(newCacheData);
-
-            if (this.cacheProps) {
-              this.cacheProps = {
-                ...this.cacheProps,
-                cacheData: newCacheData
-              };
-            }
-          }
-        }
-      : undefined;
   }
 
   async getTinyPower(
     shouldReadCacheFirst?: boolean,
+    cacheProps?: GetRawBoxValueCacheProps,
     timeStamp: number = Math.floor(Date.now() / 1000)
   ) {
     const accountState = await this.fetchAccountState(true);
@@ -104,7 +82,7 @@ class TinymanGovernanceClient {
       address: this.userAddress,
       appId: VAULT_APP_ID[this.network],
       powerCount: accountState.powerCount,
-      cacheProps: this.cacheProps,
+      cacheProps,
       shouldReadCacheFirst
     });
 
@@ -126,6 +104,7 @@ class TinymanGovernanceClient {
 
   async getTotalTinyPower(
     shouldReadCacheFirst?: boolean,
+    cacheProps?: GetRawBoxValueCacheProps,
     timeStamp: number = Math.floor(Date.now() / 1000)
   ) {
     const vaultAppGlobalState = await this.fetchVaultAppGlobalState();
@@ -138,7 +117,7 @@ class TinymanGovernanceClient {
       this.algodClient,
       VAULT_APP_ID[this.network],
       vaultAppGlobalState.totalPowerCount,
-      this.cacheProps,
+      cacheProps,
       shouldReadCacheFirst
     );
 
@@ -177,7 +156,7 @@ class TinymanGovernanceClient {
         this.algodClient,
         VAULT_APP_ID[this.network],
         timeRange[1],
-        this.cacheProps,
+        cacheProps,
         true
       );
 
@@ -195,6 +174,7 @@ class TinymanGovernanceClient {
   }
 
   async getCumulativeTinyPower(
+    cacheProps?: GetRawBoxValueCacheProps,
     shouldReadCacheFirst?: boolean,
     timeStamp: number = Math.floor(Date.now() / 1000)
   ) {
@@ -209,7 +189,7 @@ class TinymanGovernanceClient {
       address: this.userAddress,
       appId: VAULT_APP_ID[this.network],
       powerCount: accountState.powerCount,
-      cacheProps: this.cacheProps,
+      cacheProps,
       shouldReadCacheFirst
     });
     const accountPowerIndex = getPowerIndexAt(accountPowers, timeStamp);
@@ -474,12 +454,15 @@ class TinymanGovernanceClient {
     return withdrawTxns;
   }
 
-  fetchAccountState(shouldReadCacheFirst?: boolean) {
+  fetchAccountState(
+    shouldReadCacheFirst?: boolean,
+    cacheProps?: GetRawBoxValueCacheProps
+  ) {
     return getAccountState(
       this.algodClient,
       VAULT_APP_ID[this.network],
       this.userAddress,
-      this.cacheProps,
+      cacheProps,
       shouldReadCacheFirst
     );
   }
