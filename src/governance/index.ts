@@ -32,7 +32,6 @@ import {
   getStakingDistributionProposal
 } from "./staking-voting/storage";
 import {prepareCastVoteForStakingDistributionProposalTransactions} from "./staking-voting/transactions";
-import {GetRawBoxValueCacheProps} from "./types";
 import {
   combineAndRegroupTxns,
   doesBoxExist,
@@ -67,16 +66,8 @@ class TinymanGovernanceClient {
     this.network = network;
   }
 
-  async getTinyPower({
-    shouldReadCacheFirst,
-    cacheProps,
-    timeStamp = Math.floor(Date.now() / SECOND_IN_MS)
-  }: {
-    shouldReadCacheFirst?: boolean;
-    cacheProps?: GetRawBoxValueCacheProps;
-    timeStamp?: number;
-  }) {
-    const accountState = await this.fetchAccountState(true);
+  async getTinyPower(timeStamp = Math.floor(Date.now() / SECOND_IN_MS)) {
+    const accountState = await this.fetchAccountState();
 
     if (!accountState) {
       return 0;
@@ -86,9 +77,7 @@ class TinymanGovernanceClient {
       algodClient: this.algodClient,
       address: this.userAddress,
       appId: VAULT_APP_ID[this.network],
-      powerCount: accountState.powerCount,
-      cacheProps,
-      shouldReadCacheFirst
+      powerCount: accountState.powerCount
     });
 
     const accountPowerIndex = getPowerIndexAt(accountPowers, timeStamp);
@@ -107,15 +96,7 @@ class TinymanGovernanceClient {
     return tinyPower;
   }
 
-  async getTotalTinyPower({
-    timeStamp = Math.floor(Date.now() / SECOND_IN_MS),
-    shouldReadCacheFirst,
-    cacheProps
-  }: {
-    timeStamp?: number;
-    shouldReadCacheFirst?: boolean;
-    cacheProps?: GetRawBoxValueCacheProps;
-  }) {
+  async getTotalTinyPower(timeStamp = Math.floor(Date.now() / SECOND_IN_MS)) {
     const vaultAppGlobalState = await this.fetchVaultAppGlobalState();
 
     if (!vaultAppGlobalState) {
@@ -125,9 +106,7 @@ class TinymanGovernanceClient {
     const totalPowers = await getAllTotalPowers(
       this.algodClient,
       VAULT_APP_ID[this.network],
-      vaultAppGlobalState.totalPowerCount,
-      cacheProps,
-      shouldReadCacheFirst
+      vaultAppGlobalState.totalPowerCount
     );
 
     const totalPowerIndex = getPowerIndexAt(totalPowers, timeStamp);
@@ -164,9 +143,7 @@ class TinymanGovernanceClient {
       const slopeChange = await getSlopeChange(
         this.algodClient,
         VAULT_APP_ID[this.network],
-        timeRange[1],
-        cacheProps,
-        true
+        timeRange[1]
       );
 
       const slopeDelta = slopeChange?.slopeDelta || 0;
@@ -182,16 +159,8 @@ class TinymanGovernanceClient {
     return tinyPower;
   }
 
-  async getCumulativeTinyPower({
-    cacheProps,
-    shouldReadCacheFirst,
-    timeStamp = Math.floor(Date.now() / SECOND_IN_MS)
-  }: {
-    cacheProps?: GetRawBoxValueCacheProps;
-    shouldReadCacheFirst?: boolean;
-    timeStamp?: number;
-  }) {
-    const accountState = await this.fetchAccountState(true);
+  async getCumulativeTinyPower(timeStamp = Math.floor(Date.now() / SECOND_IN_MS)) {
+    const accountState = await this.fetchAccountState();
 
     if (!accountState) {
       return 0;
@@ -201,9 +170,7 @@ class TinymanGovernanceClient {
       algodClient: this.algodClient,
       address: this.userAddress,
       appId: VAULT_APP_ID[this.network],
-      powerCount: accountState.powerCount,
-      cacheProps,
-      shouldReadCacheFirst
+      powerCount: accountState.powerCount
     });
     const accountPowerIndex = getPowerIndexAt(accountPowers, timeStamp);
 
@@ -467,16 +434,11 @@ class TinymanGovernanceClient {
     return withdrawTxns;
   }
 
-  fetchAccountState(
-    shouldReadCacheFirst?: boolean,
-    cacheProps?: GetRawBoxValueCacheProps
-  ) {
+  fetchAccountState() {
     return getAccountState(
       this.algodClient,
       VAULT_APP_ID[this.network],
-      this.userAddress,
-      cacheProps,
-      shouldReadCacheFirst
+      this.userAddress
     );
   }
 
@@ -877,13 +839,11 @@ class TinymanGovernanceClient {
     );
   }
 
-  async getRequiredTinyPowerToCreateProposal() {
+  async getRequiredTinyPowerToCreateProposal(totalTinyPower: number) {
     const votingAppGlobalState = await this.fetchProposalVotingAppGlobalState();
     let requiredTinyPower = votingAppGlobalState.proposalThreshold;
 
     if (votingAppGlobalState.proposalThresholdNumerator) {
-      const totalTinyPower = await this.getTotalTinyPower({});
-
       requiredTinyPower = Math.max(
         requiredTinyPower,
         Math.floor(

@@ -4,28 +4,15 @@ import { SupportedNetwork } from "../util/commonTypes";
 import { ProposalVote } from "./proposal-voting/constants";
 import { ProposalVotingAppGlobalState } from "./proposal-voting/storage";
 import { RewardsAppGlobalState } from "./rewards/storage";
-import { GetRawBoxValueCacheProps } from "./types";
 import { VaultAppGlobalState } from "./vault/storage";
 declare class TinymanGovernanceClient {
     private algodClient;
     private userAddress;
     private network;
     constructor(algodClient: AlgodClient, userAddress: string, network: SupportedNetwork);
-    getTinyPower({ shouldReadCacheFirst, cacheProps, timeStamp }: {
-        shouldReadCacheFirst?: boolean;
-        cacheProps?: GetRawBoxValueCacheProps;
-        timeStamp?: number;
-    }): Promise<number>;
-    getTotalTinyPower({ timeStamp, shouldReadCacheFirst, cacheProps }: {
-        timeStamp?: number;
-        shouldReadCacheFirst?: boolean;
-        cacheProps?: GetRawBoxValueCacheProps;
-    }): Promise<number>;
-    getCumulativeTinyPower({ cacheProps, shouldReadCacheFirst, timeStamp }: {
-        cacheProps?: GetRawBoxValueCacheProps;
-        shouldReadCacheFirst?: boolean;
-        timeStamp?: number;
-    }): Promise<number>;
+    getTinyPower(timeStamp?: number): Promise<number>;
+    getTotalTinyPower(timeStamp?: number): Promise<number>;
+    getCumulativeTinyPower(timeStamp?: number): Promise<number>;
     fetchVaultAppGlobalState(): Promise<VaultAppGlobalState | null>;
     generateCreateLockTransactions({ lockedAmount, lockEndTime, userAddress, suggestedParams }: {
         lockedAmount: number;
@@ -50,7 +37,7 @@ declare class TinymanGovernanceClient {
         suggestedParams?: SuggestedParams;
     }): Promise<Transaction[]>;
     generateWithdrawTransactions(userAddress?: string, shouldOptIntoTINY?: boolean, suggestedParams?: SuggestedParams): Promise<Transaction[]>;
-    fetchAccountState(shouldReadCacheFirst?: boolean, cacheProps?: GetRawBoxValueCacheProps): Promise<import("./vault/storage").AccountState | null>;
+    fetchAccountState(): Promise<import("./vault/storage").AccountState | null>;
     fetchStakingDistributionProposal(proposalId: string): Promise<import("./staking-voting/storage").StakingDistributionProposal | null>;
     generateCastVoteForStakingDistributionProposalTransactions({ proposalId, votes, assetIds, userAddress, suggestedParams }: {
         proposalId: string;
@@ -83,6 +70,6 @@ declare class TinymanGovernanceClient {
         suggestedParams?: SuggestedParams;
     }): Promise<Transaction[]>;
     fetchProposalVotingAppGlobalState(): Promise<ProposalVotingAppGlobalState>;
-    getRequiredTinyPowerToCreateProposal(): Promise<number>;
+    getRequiredTinyPowerToCreateProposal(totalTinyPower: number): Promise<number>;
 }
 export { TinymanGovernanceClient };

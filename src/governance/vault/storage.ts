@@ -1,6 +1,7 @@
 import {bytesToBigInt, decodeAddress} from "algosdk";
 import AlgodClient from "algosdk/dist/types/client/v2/algod/algod";
 
+import {intToBytes} from "../util/utils";
 import {concatUint8Arrays, getCumulativePowerDelta, getRawBoxValue} from "../utils";
 import {
   ACCOUNT_POWER_BOX_ARRAY_LEN,
@@ -9,8 +10,6 @@ import {
   TOTAL_POWERS,
   TOTAL_POWER_SIZE
 } from "./constants";
-import {intToBytes} from "../util/utils";
-import {GetRawBoxValueCacheProps} from "../types";
 
 class AccountState {
   lockedAmount: number;
@@ -127,23 +126,11 @@ class VaultAppGlobalState {
   }
 }
 
-async function getAccountState(
-  algodClient: AlgodClient,
-  appId: number,
-  address: string,
-  cacheProps?: GetRawBoxValueCacheProps,
-  shouldReadCacheFirst?: boolean
-) {
+async function getAccountState(algodClient: AlgodClient, appId: number, address: string) {
   const boxName = getAccountStateBoxName(address);
 
   try {
-    const rawBox = await getRawBoxValue(
-      algodClient,
-      appId,
-      boxName,
-      cacheProps,
-      shouldReadCacheFirst
-    );
+    const rawBox = await getRawBoxValue(algodClient, appId, boxName);
 
     if (rawBox) {
       return parseBoxAccountState(rawBox);
@@ -201,22 +188,10 @@ function getAccountPowerBoxName(address: string, boxIndex: number) {
   return combinedArray;
 }
 
-async function getSlopeChange(
-  algod: AlgodClient,
-  appId: number,
-  timeStamp: number,
-  cacheProps?: GetRawBoxValueCacheProps,
-  shouldReadCacheFirst?: boolean
-) {
+async function getSlopeChange(algod: AlgodClient, appId: number, timeStamp: number) {
   const boxName = getSlopeChangeBoxName(timeStamp);
 
-  const rawBox = await getRawBoxValue(
-    algod,
-    appId,
-    boxName,
-    cacheProps,
-    shouldReadCacheFirst
-  );
+  const rawBox = await getRawBoxValue(algod, appId, boxName);
 
   if (!rawBox) {
     return null;
@@ -238,9 +213,7 @@ function getSlopeChangeBoxName(timestamp: number) {
 async function getAllTotalPowers(
   algodClient: AlgodClient,
   appId: number,
-  totalPowerCount: number,
-  cacheProps?: GetRawBoxValueCacheProps,
-  shouldReadCacheFirst?: boolean
+  totalPowerCount: number
 ): Promise<TotalPower[]> {
   let boxCount = 0;
 
@@ -253,13 +226,7 @@ async function getAllTotalPowers(
   for (let boxIndex = 0; boxIndex < boxCount; boxIndex++) {
     const boxName = getTotalPowerBoxName(boxIndex);
 
-    const rawBox = await getRawBoxValue(
-      algodClient,
-      appId,
-      boxName,
-      cacheProps,
-      shouldReadCacheFirst
-    );
+    const rawBox = await getRawBoxValue(algodClient, appId, boxName);
 
     if (rawBox) {
       totalPowers.push(...parseBoxTotalPower(rawBox));
@@ -308,16 +275,12 @@ async function getAccountPowers({
   algodClient,
   address,
   appId,
-  powerCount = null,
-  cacheProps,
-  shouldReadCacheFirst
+  powerCount = null
 }: {
   algodClient: AlgodClient;
   address: string;
   appId: number;
   powerCount: number | null;
-  cacheProps?: GetRawBoxValueCacheProps;
-  shouldReadCacheFirst?: boolean;
 }) {
   let boxCount = 0;
 
@@ -330,13 +293,7 @@ async function getAccountPowers({
   for (let boxIndex = 0; boxIndex < boxCount; boxIndex++) {
     const boxName = getAccountPowerBoxName(address, boxIndex);
 
-    const rawBox = await getRawBoxValue(
-      algodClient,
-      appId,
-      boxName,
-      cacheProps,
-      shouldReadCacheFirst
-    );
+    const rawBox = await getRawBoxValue(algodClient, appId, boxName);
 
     if (rawBox) {
       accountPowers.push(...parseBoxAccountPower(rawBox));
@@ -398,19 +355,19 @@ function parseBoxAccountPower(rawBox: Uint8Array) {
 }
 
 export {
-  AccountState,
   AccountPower,
+  AccountState,
+  SlopeChange,
   TotalPower,
   VaultAppGlobalState,
-  SlopeChange,
-  getAccountState,
-  getAccountPowers,
   getAccountPowerBoxName,
+  getAccountPowers,
+  getAccountState,
   getAccountStateBoxName,
+  getAllTotalPowers,
   getLastAccountPowerBoxIndexes,
   getPowerIndexAt,
-  getTotalPowerBoxName,
-  getSlopeChangeBoxName,
   getSlopeChange,
-  getAllTotalPowers
+  getSlopeChangeBoxName,
+  getTotalPowerBoxName
 };

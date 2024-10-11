@@ -1,7 +1,6 @@
 import AlgodClient from "algosdk/dist/types/client/v2/algod/algod";
 import { Transaction } from "algosdk";
-import { GetRawBoxValueCacheProps } from "./types";
-declare function getRawBoxValue(algod: AlgodClient, appId: number, boxName: Uint8Array, cacheProps?: GetRawBoxValueCacheProps, shouldReadCacheFirst?: boolean): Promise<Uint8Array | null>;
+declare function getRawBoxValue(algod: AlgodClient, appId: number, boxName: Uint8Array): Promise<Uint8Array | null>;
 declare function doesBoxExist(algod: AlgodClient, appId: number, boxName: Uint8Array): Promise<boolean>;
 declare function getBias(slope: number, timeDelta: number): number;
 /**

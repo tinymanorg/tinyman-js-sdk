@@ -12,33 +12,12 @@ import {
   encodeUnsignedTransaction
 } from "algosdk";
 
-import {GetRawBoxValueCacheProps} from "./types";
 import {TWO_TO_THE_64} from "./vault/constants";
 import {getSlope} from "./vault/utils";
 
-async function getRawBoxValue(
-  algod: AlgodClient,
-  appId: number,
-  boxName: Uint8Array,
-  cacheProps?: GetRawBoxValueCacheProps,
-  shouldReadCacheFirst?: boolean
-) {
+async function getRawBoxValue(algod: AlgodClient, appId: number, boxName: Uint8Array) {
   try {
-    const boxNameString = Buffer.from(boxName).toString("base64");
-
-    if (
-      cacheProps?.cacheData &&
-      cacheProps.cacheData[boxNameString] &&
-      shouldReadCacheFirst
-    ) {
-      return Uint8Array.from(Object.values(cacheProps.cacheData[boxNameString]));
-    }
-
     const {value} = await algod.getApplicationBoxByName(appId, boxName).do();
-
-    if (cacheProps?.onCacheUpdate) {
-      cacheProps.onCacheUpdate({[boxNameString]: value});
-    }
 
     return value;
   } catch (error: any) {
