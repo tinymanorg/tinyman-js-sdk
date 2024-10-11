@@ -16,4 +16,4 @@ declare class RewardClaimSheet {
 declare function getRewardPeriodBoxName(boxIndex: number): Uint8Array;
 declare function getAccountRewardClaimSheetBoxName(address: string, boxIndex: number): Uint8Array;
 declare function getRewardClaimSheet(algod: AlgodClient, appId: number, address: string, accountRewardClaimSheetBoxIndex: number): Promise<RewardClaimSheet | null>;
-export { RewardClaimSheet, RewardsAppGlobalState, getRewardPeriodBoxName, getAccountRewardClaimSheetBoxName, getRewardClaimSheet };
+export { getAccountRewardClaimSheetBoxName, getRewardClaimSheet, getRewardPeriodBoxName, RewardClaimSheet, RewardsAppGlobalState };

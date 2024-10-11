@@ -1,19 +1,18 @@
-import AlgodClient from "algosdk/dist/types/client/v2/algod/algod";
 import { SuggestedParams, Transaction } from "algosdk";
-import { VaultAppGlobalState } from "./vault/storage";
-import { RewardsAppGlobalState } from "./rewards/storage";
-import { ProposalVotingAppGlobalState } from "./proposal-voting/storage";
-import { ProposalVote } from "./proposal-voting/constants";
-import { GetRawBoxValueCacheProps } from "./types";
+import AlgodClient from "algosdk/dist/types/client/v2/algod/algod";
 import { SupportedNetwork } from "../util/commonTypes";
+import { ProposalVote } from "./proposal-voting/constants";
+import { ProposalVotingAppGlobalState } from "./proposal-voting/storage";
+import { RewardsAppGlobalState } from "./rewards/storage";
+import { VaultAppGlobalState } from "./vault/storage";
 declare class TinymanGovernanceClient {
     private algodClient;
     private userAddress;
     private network;
     constructor(algodClient: AlgodClient, userAddress: string, network: SupportedNetwork);
-    getTinyPower(timeStamp?: number, cacheProps?: GetRawBoxValueCacheProps): Promise<number>;
-    getTotalTinyPower(timeStamp?: number, cacheProps?: GetRawBoxValueCacheProps): Promise<number>;
-    getCumulativeTinyPower(cacheProps?: GetRawBoxValueCacheProps, timeStamp?: number): Promise<number>;
+    getTinyPower(timeStamp?: number): Promise<number>;
+    getTotalTinyPower(timeStamp?: number): Promise<number>;
+    getCumulativeTinyPower(timeStamp?: number): Promise<number>;
     fetchVaultAppGlobalState(): Promise<VaultAppGlobalState | null>;
     generateCreateLockTransactions({ lockedAmount, lockEndTime, userAddress, suggestedParams }: {
         lockedAmount: number;
@@ -71,6 +70,6 @@ declare class TinymanGovernanceClient {
         suggestedParams?: SuggestedParams;
     }): Promise<Transaction[]>;
     fetchProposalVotingAppGlobalState(): Promise<ProposalVotingAppGlobalState>;
-    getRequiredTinyPowerToCreateProposal(): Promise<number>;
+    getRequiredTinyPowerToCreateProposal(totalTinyPower: number): Promise<number>;
 }
 export { TinymanGovernanceClient };
