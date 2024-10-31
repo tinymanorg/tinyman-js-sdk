@@ -34,7 +34,8 @@ export {generateOptIntoAssetTxns} from "./util/asset/assetUtils";
 export type {
   AccountAsset,
   TinymanAnalyticsApiAsset,
-  IndexerAssetInformation
+  IndexerAssetInformation,
+  AssetWithIdAndAmount
 } from "./util/asset/assetModels";
 
 export {
@@ -139,7 +140,10 @@ export type {FolksLendingPool} from "./folks-lending-pools/types";
 
 export {prepareCommitTransactions, getStakingAppID} from "./stake";
 export {tinymanJSSDKConfig} from "./config";
-export {combineAndRegroupSignerTxns} from "./util/transaction/transactionUtils";
+export {
+  combineAndRegroupSignerTxns,
+  getAppCallInnerAssetData
+} from "./util/transaction/transactionUtils";
 
 export {TinymanGovernanceClient} from "./governance";
 export type {GetRawBoxValueCacheProps, RawBoxCacheValue} from "./governance/types";

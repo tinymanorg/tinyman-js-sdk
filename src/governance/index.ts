@@ -851,13 +851,11 @@ class TinymanGovernanceClient {
     );
   }
 
-  async getRequiredTinyPowerToCreateProposal() {
+  async getRequiredTinyPowerToCreateProposal(totalTinyPower: number) {
     const votingAppGlobalState = await this.fetchProposalVotingAppGlobalState();
     let requiredTinyPower = votingAppGlobalState.proposalThreshold;
 
     if (votingAppGlobalState.proposalThresholdNumerator) {
-      const totalTinyPower = await this.getTotalTinyPower();
-
       requiredTinyPower = Math.max(
         requiredTinyPower,
         Math.floor(

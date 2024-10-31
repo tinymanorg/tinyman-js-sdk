@@ -71,6 +71,6 @@ declare class TinymanGovernanceClient {
         suggestedParams?: SuggestedParams;
     }): Promise<Transaction[]>;
     fetchProposalVotingAppGlobalState(): Promise<ProposalVotingAppGlobalState>;
-    getRequiredTinyPowerToCreateProposal(): Promise<number>;
+    getRequiredTinyPowerToCreateProposal(totalTinyPower: number): Promise<number>;
 }
 export { TinymanGovernanceClient };
