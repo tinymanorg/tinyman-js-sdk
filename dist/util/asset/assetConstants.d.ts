@@ -8,3 +8,5 @@ export declare const POOL_TOKEN_UNIT_NAME: {
     V2: string;
 };
 export declare const TINY_ASSET_ID: Record<SupportedNetwork, number>;
+export declare const TALGO_ASSET_ID: Record<SupportedNetwork, number>;
+export declare const STALGO_ASSET_ID: Record<SupportedNetwork, number>;

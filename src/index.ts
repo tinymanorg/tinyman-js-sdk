@@ -41,8 +41,7 @@ export type {
 export {
   ALGO_ASSET,
   ALGO_ASSET_ID,
-  POOL_TOKEN_UNIT_NAME,
-  TINY_ASSET_ID
+  POOL_TOKEN_UNIT_NAME
 } from "./util/asset/assetConstants";
 
 export {
@@ -147,6 +146,9 @@ export {
 
 export {TinymanGovernanceClient} from "./governance";
 export type {GetRawBoxValueCacheProps, RawBoxCacheValue} from "./governance/types";
+
+export {TinymanSTAlgoClient} from "./liquid-stake/stAlgoClient";
+export {TinymanTAlgoClient} from "./liquid-stake/tAlgoClient";
 
 export {AccountState} from "./governance/vault/storage";
 export {getStartTimestampOfWeek} from "./governance/vault/utils";
