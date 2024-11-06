@@ -90,10 +90,21 @@ class TinymanTAlgoClient extends TinymanBaseClient {
     return this.setupTxnFeeAndAssignGroupId({txns, additionalFeeCount: 1});
   }
 
+  /**
+   * Retrieves the current ratio of ALGO to tALGO in base units.
+   * The ratio is calculated as (algoAmount / tAlgoAmount) * 10^6.
+   *
+   * @returns {Promise<number>} The current ALGO to tALGO ratio.
+   */
   getRatio(): Promise<number> {
     return this.getGlobal(encodeString("rate"));
   }
 
+  /**
+   * Retrieves the circulating supply of minted tALGO in base units.
+   *
+   * @returns {Promise<number>}
+   */
   getCirculatingSupply(): Promise<number> {
     return this.getGlobal(encodeString("minted_talgo"));
   }
