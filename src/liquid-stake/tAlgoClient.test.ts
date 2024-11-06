@@ -8,18 +8,18 @@ import {sendAndWaitRawTransaction} from "../util/util";
 import {calculateAccountMinimumRequiredBalance} from "../util/account/accountUtils";
 
 const algod = new algosdk.Algodv2("", "https://testnet-api.algonode.cloud", "");
+const TEST_ACCOUNT: algosdk.Account = {
+  addr: "XNG5OX7MMUTYVJN4AR7YU27Z6PM7FRRILMXOXWAIXMVPTTW5I7INN7AEPE",
+  sk: new Uint8Array([
+    14, 109, 69, 154, 246, 14, 24, 178, 50, 15, 86, 9, 107, 152, 149, 174, 9, 6, 85, 232,
+    195, 223, 225, 19, 76, 225, 4, 60, 80, 90, 76, 176, 187, 77, 215, 95, 236, 101, 39,
+    138, 165, 188, 4, 127, 138, 107, 249, 243, 217, 242, 198, 40, 91, 46, 235, 216, 8,
+    187, 42, 249, 206, 221, 71, 208
+  ])
+};
 
 describe("TinymanTAlgoClient", () => {
   let client: TinymanTAlgoClient;
-  const testAccount: algosdk.Account = {
-    addr: "XNG5OX7MMUTYVJN4AR7YU27Z6PM7FRRILMXOXWAIXMVPTTW5I7INN7AEPE",
-    sk: new Uint8Array([
-      14, 109, 69, 154, 246, 14, 24, 178, 50, 15, 86, 9, 107, 152, 149, 174, 9, 6, 85,
-      232, 195, 223, 225, 19, 76, 225, 4, 60, 80, 90, 76, 176, 187, 77, 215, 95, 236, 101,
-      39, 138, 165, 188, 4, 127, 138, 107, 249, 243, 217, 242, 198, 40, 91, 46, 235, 216,
-      8, 187, 42, 249, 206, 221, 71, 208
-    ])
-  };
   const network: SupportedNetwork = "testnet";
   const mintAmount = 1000000;
   const burnAmount = 500000;
@@ -28,7 +28,7 @@ describe("TinymanTAlgoClient", () => {
     // Create a new instance of the tAlgoClient
     client = new TinymanTAlgoClient(algod, network);
     const accountInfo = (await algod
-      .accountInformation(testAccount.addr)
+      .accountInformation(TEST_ACCOUNT.addr)
       .do()) as AccountInformation;
 
     if (
@@ -37,9 +37,9 @@ describe("TinymanTAlgoClient", () => {
     ) {
       // Wait for the user to fund the account
       console.log(
-        `Go to https://bank.testnet.algorand.network/?account=${testAccount.addr} and fund your account.`
+        `Go to https://bank.testnet.algorand.network/?account=${TEST_ACCOUNT.addr} and fund your account.`
       );
-      await waitUntilAccountIsFunded(testAccount.addr);
+      await waitUntilAccountIsFunded(TEST_ACCOUNT.addr);
     }
   }, 180000);
 
@@ -65,16 +65,16 @@ describe("TinymanTAlgoClient", () => {
   it("should create mint transactions", async () => {
     const spy = jest.spyOn(client, "mint");
 
-    await client.mint(mintAmount, testAccount.addr);
+    await client.mint(mintAmount, TEST_ACCOUNT.addr);
 
     expect(spy).toHaveBeenCalledTimes(1);
   });
 
   it("should include opt-in txn inside the mint transactions if needed", async () => {
     const latestAccountInfo = (await algod
-      .accountInformation(testAccount.addr)
+      .accountInformation(TEST_ACCOUNT.addr)
       .do()) as AccountInformation;
-    const result = await client.mint(mintAmount, testAccount.addr);
+    const result = await client.mint(mintAmount, TEST_ACCOUNT.addr);
 
     if (
       latestAccountInfo.assets.some(
@@ -89,27 +89,27 @@ describe("TinymanTAlgoClient", () => {
   });
 
   it("should calculate the mint transaction fee correctly", async () => {
-    const result = await client.mint(mintAmount, testAccount.addr);
+    const result = await client.mint(mintAmount, TEST_ACCOUNT.addr);
 
     expect(result[0].fee).toBe((result.length + 4) * ALGORAND_MIN_TX_FEE);
   });
 
   it("should receive correct amount of tALGOs after mint transaction", async () => {
     const initialAccountInfo = (await algod
-      .accountInformation(testAccount.addr)
+      .accountInformation(TEST_ACCOUNT.addr)
       .do()) as AccountInformation;
     const initialTAlgoAccountAsset = initialAccountInfo.assets.find(
       (asset) => asset["asset-id"] === TALGO_ASSET_ID[network]
     );
-    const txnsToBeSigned = await client.mint(mintAmount, testAccount.addr);
+    const txnsToBeSigned = await client.mint(mintAmount, TEST_ACCOUNT.addr);
     const signedTxns: Uint8Array[] = txnsToBeSigned.map((txn) =>
-      txn.signTxn(testAccount.sk)
+      txn.signTxn(TEST_ACCOUNT.sk)
     );
 
     await sendAndWaitRawTransaction(algod, [signedTxns]);
 
     const finalAccountInfo = (await algod
-      .accountInformation(testAccount.addr)
+      .accountInformation(TEST_ACCOUNT.addr)
       .do()) as AccountInformation;
     const tAlgoAccountAsset = finalAccountInfo.assets.find(
       (asset) => asset["asset-id"] === TALGO_ASSET_ID[network]
@@ -131,30 +131,30 @@ describe("TinymanTAlgoClient", () => {
   it("should create burn transactions", async () => {
     const spy = jest.spyOn(client, "burn");
 
-    await client.burn(burnAmount, testAccount.addr);
+    await client.burn(burnAmount, TEST_ACCOUNT.addr);
 
     expect(spy).toHaveBeenCalledTimes(1);
   });
 
   it("should calculate the burn transaction fee correctly", async () => {
-    const result = await client.burn(burnAmount, testAccount.addr);
+    const result = await client.burn(burnAmount, TEST_ACCOUNT.addr);
 
     expect(result[0].fee).toBe((result.length + 1) * ALGORAND_MIN_TX_FEE);
   });
 
   it("should receive correct amount of ALGOs after burn transaction", async () => {
     const initialAccountInfo = (await algod
-      .accountInformation(testAccount.addr)
+      .accountInformation(TEST_ACCOUNT.addr)
       .do()) as AccountInformation;
-    const txnsToBeSigned = await client.burn(burnAmount, testAccount.addr);
+    const txnsToBeSigned = await client.burn(burnAmount, TEST_ACCOUNT.addr);
     const signedTxns: Uint8Array[] = txnsToBeSigned.map((txn) =>
-      txn.signTxn(testAccount.sk)
+      txn.signTxn(TEST_ACCOUNT.sk)
     );
 
     await sendAndWaitRawTransaction(algod, [signedTxns]);
 
     const finalAccountInfo = (await algod
-      .accountInformation(testAccount.addr)
+      .accountInformation(TEST_ACCOUNT.addr)
       .do()) as AccountInformation;
 
     const initialTAlgoAccountAsset = initialAccountInfo.assets.find(
