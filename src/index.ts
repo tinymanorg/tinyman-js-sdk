@@ -145,7 +145,7 @@ export {
 } from "./util/transaction/transactionUtils";
 
 export {TinymanGovernanceClient} from "./governance";
-export type {GetRawBoxValueCacheProps, RawBoxCacheValue} from "./governance/types";
+export type {RawBoxCacheValue} from "./governance/types";
 
 export {TinymanSTAlgoClient} from "./liquid-stake/stAlgoClient";
 export {TinymanTAlgoClient} from "./liquid-stake/tAlgoClient";
