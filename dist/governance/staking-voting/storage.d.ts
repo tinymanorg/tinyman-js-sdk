@@ -13,4 +13,4 @@ declare function getStakingDistributionProposalBoxName(proposalId: string): Uint
 declare function getStakingAttendanceSheetBoxName(sender: string, boxIndex: number): Uint8Array;
 declare function getStakingVoteBoxName(proposalIndex: number, assetId: number): Uint8Array;
 declare function getStakingDistributionProposal(algod: AlgodClient, appId: number, proposalId: string): Promise<StakingDistributionProposal | null>;
-export { StakingDistributionProposal, getStakingDistributionProposalBoxName, getStakingAttendanceSheetBoxName, getStakingVoteBoxName, getStakingDistributionProposal };
+export { getStakingAttendanceSheetBoxName, getStakingDistributionProposal, getStakingDistributionProposalBoxName, getStakingVoteBoxName, StakingDistributionProposal };

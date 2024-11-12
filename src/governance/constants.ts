@@ -3,6 +3,7 @@ import {SupportedNetwork} from "../util/commonTypes";
 const HOUR_IN_S = 60 * 60;
 const DAY_IN_S = 24 * HOUR_IN_S;
 const WEEK_IN_S = 7 * DAY_IN_S;
+const SECOND_IN_MS = 1000;
 
 const VAULT_APP_ID: Record<SupportedNetwork, number> = {
   testnet: 480164661,
@@ -45,5 +46,6 @@ export {
   WEEK_IN_S,
   DAY_IN_S,
   HOUR_IN_S,
+  SECOND_IN_MS,
   PROPOSAL_VOTING_APP_ID
 };
