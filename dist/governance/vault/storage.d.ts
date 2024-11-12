@@ -1,4 +1,5 @@
 import AlgodClient from "algosdk/dist/types/client/v2/algod/algod";
+import { GetRawBoxValueCacheProps } from "../types";
 declare class AccountState {
     lockedAmount: number;
     lockEndTime: number;
@@ -46,12 +47,7 @@ declare function getLastAccountPowerBoxIndexes(powerCount: number): [number, num
 declare function getAccountPowerBoxName(address: string, boxIndex: number): Uint8Array;
 declare function getSlopeChange(algod: AlgodClient, appId: number, timeStamp: number): Promise<SlopeChange | null>;
 declare function getSlopeChangeBoxName(timestamp: number): Uint8Array;
-declare function getAllTotalPowers(algodClient: AlgodClient, appId: number, totalPowerCount: number): Promise<TotalPower[]>;
-declare function getAccountPowers({ algodClient, address, appId, powerCount }: {
-    algodClient: AlgodClient;
-    address: string;
-    appId: number;
-    powerCount: number | null;
-}): Promise<AccountPower[]>;
+declare function getAllTotalPowers(algodClient: AlgodClient, appId: number, totalPowerCount: number, cacheProps?: GetRawBoxValueCacheProps): Promise<TotalPower[]>;
+declare function getAccountPowers(algodClient: AlgodClient, address: string, appId: number, powerCount?: number | null, cacheProps?: GetRawBoxValueCacheProps): Promise<AccountPower[]>;
 declare function getPowerIndexAt(powers: AccountPower[] | TotalPower[], timestamp: number): number | null;
-export { AccountPower, AccountState, SlopeChange, TotalPower, VaultAppGlobalState, getAccountPowerBoxName, getAccountPowers, getAccountState, getAccountStateBoxName, getAllTotalPowers, getLastAccountPowerBoxIndexes, getPowerIndexAt, getSlopeChange, getSlopeChangeBoxName, getTotalPowerBoxName };
+export { AccountState, AccountPower, TotalPower, VaultAppGlobalState, SlopeChange, getAccountState, getAccountPowers, getAccountPowerBoxName, getAccountStateBoxName, getLastAccountPowerBoxIndexes, getPowerIndexAt, getTotalPowerBoxName, getSlopeChangeBoxName, getSlopeChange, getAllTotalPowers };

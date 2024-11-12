@@ -1,7 +1,6 @@
 import {bytesToBigInt, decodeAddress} from "algosdk";
 import AlgodClient from "algosdk/dist/types/client/v2/algod/algod";
 
-import {intToBytes} from "../util/utils";
 import {concatUint8Arrays, getCumulativePowerDelta, getRawBoxValue} from "../utils";
 import {
   ACCOUNT_POWER_BOX_ARRAY_LEN,
@@ -10,6 +9,8 @@ import {
   TOTAL_POWERS,
   TOTAL_POWER_SIZE
 } from "./constants";
+import {intToBytes} from "../util/utils";
+import {GetRawBoxValueCacheProps} from "../types";
 
 class AccountState {
   lockedAmount: number;
@@ -213,7 +214,8 @@ function getSlopeChangeBoxName(timestamp: number) {
 async function getAllTotalPowers(
   algodClient: AlgodClient,
   appId: number,
-  totalPowerCount: number
+  totalPowerCount: number,
+  cacheProps?: GetRawBoxValueCacheProps
 ): Promise<TotalPower[]> {
   let boxCount = 0;
 
@@ -225,8 +227,7 @@ async function getAllTotalPowers(
 
   for (let boxIndex = 0; boxIndex < boxCount; boxIndex++) {
     const boxName = getTotalPowerBoxName(boxIndex);
-
-    const rawBox = await getRawBoxValue(algodClient, appId, boxName);
+    const rawBox = await getRawBoxValue(algodClient, appId, boxName, cacheProps);
 
     if (rawBox) {
       totalPowers.push(...parseBoxTotalPower(rawBox));
@@ -271,17 +272,13 @@ function parseBoxTotalPower(rawBox: Uint8Array) {
   return powers;
 }
 
-async function getAccountPowers({
-  algodClient,
-  address,
-  appId,
-  powerCount = null
-}: {
-  algodClient: AlgodClient;
-  address: string;
-  appId: number;
-  powerCount: number | null;
-}) {
+async function getAccountPowers(
+  algodClient: AlgodClient,
+  address: string,
+  appId: number,
+  powerCount: number | null = null,
+  cacheProps?: GetRawBoxValueCacheProps
+) {
   let boxCount = 0;
 
   if (powerCount) {
@@ -292,8 +289,7 @@ async function getAccountPowers({
 
   for (let boxIndex = 0; boxIndex < boxCount; boxIndex++) {
     const boxName = getAccountPowerBoxName(address, boxIndex);
-
-    const rawBox = await getRawBoxValue(algodClient, appId, boxName);
+    const rawBox = await getRawBoxValue(algodClient, appId, boxName, cacheProps);
 
     if (rawBox) {
       accountPowers.push(...parseBoxAccountPower(rawBox));
@@ -355,19 +351,19 @@ function parseBoxAccountPower(rawBox: Uint8Array) {
 }
 
 export {
-  AccountPower,
   AccountState,
-  SlopeChange,
+  AccountPower,
   TotalPower,
   VaultAppGlobalState,
-  getAccountPowerBoxName,
-  getAccountPowers,
+  SlopeChange,
   getAccountState,
+  getAccountPowers,
+  getAccountPowerBoxName,
   getAccountStateBoxName,
-  getAllTotalPowers,
   getLastAccountPowerBoxIndexes,
   getPowerIndexAt,
-  getSlopeChange,
+  getTotalPowerBoxName,
   getSlopeChangeBoxName,
-  getTotalPowerBoxName
+  getSlopeChange,
+  getAllTotalPowers
 };

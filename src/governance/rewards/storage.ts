@@ -2,8 +2,8 @@ import {decodeAddress} from "algosdk";
 import AlgodClient from "algosdk/dist/types/client/v2/algod/algod";
 
 import {intToBytes} from "../util/utils";
-import {getRawBoxValue} from "../utils";
 import {REWARD_CLAIM_SHEET_BOX_PREFIX, REWARD_PERIOD_BOX_PREFIX} from "./constants";
+import {getRawBoxValue} from "../utils";
 
 class RewardsAppGlobalState {
   tinyAssetId: number;
@@ -96,9 +96,9 @@ async function getRewardClaimSheet(
 }
 
 export {
-  getAccountRewardClaimSheetBoxName,
-  getRewardClaimSheet,
-  getRewardPeriodBoxName,
   RewardClaimSheet,
-  RewardsAppGlobalState
+  RewardsAppGlobalState,
+  getRewardPeriodBoxName,
+  getAccountRewardClaimSheetBoxName,
+  getRewardClaimSheet
 };

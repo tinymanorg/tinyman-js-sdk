@@ -43,7 +43,7 @@ export { prepareCommitTransactions, getStakingAppID } from "./stake";
 export { tinymanJSSDKConfig } from "./config";
 export { combineAndRegroupSignerTxns } from "./util/transaction/transactionUtils";
 export { TinymanGovernanceClient } from "./governance";
-export type { RawBoxCacheValue } from "./governance/types";
+export type { GetRawBoxValueCacheProps, RawBoxCacheValue } from "./governance/types";
 export { AccountState } from "./governance/vault/storage";
 export { getStartTimestampOfWeek } from "./governance/vault/utils";
 export { ProposalVote } from "./governance/proposal-voting/constants";
