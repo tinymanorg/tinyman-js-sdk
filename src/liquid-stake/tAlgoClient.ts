@@ -5,7 +5,7 @@ import {encodeString} from "../util/util";
 import {TALGO_ASSET_ID} from "../util/asset/assetConstants";
 import {intToBytes} from "../governance/util/utils";
 import {SupportedNetwork} from "../util/commonTypes";
-import {STAKE_APP_ID} from "./constants";
+import {STAKE_APP_ID, STAKE_RATIO_COEFFICIENT} from "./constants";
 
 class TinymanTAlgoClient extends TinymanBaseClient {
   constructor(algod: algosdk.Algodv2, network: SupportedNetwork) {
@@ -92,12 +92,14 @@ class TinymanTAlgoClient extends TinymanBaseClient {
 
   /**
    * Retrieves the current ratio of ALGO to tALGO in base units.
-   * The ratio is calculated as (algoAmount / tAlgoAmount) * 10^6.
+   * The ratio is calculated as (algoAmount / tAlgoAmount) * 10^12.
    *
    * @returns {Promise<number>} The current ALGO to tALGO ratio.
    */
-  getRatio(): Promise<number> {
-    return this.getGlobal(encodeString("rate"));
+  async getRatio(): Promise<number> {
+    return (
+      ((await this.getGlobal(encodeString("rate"))) as number) / STAKE_RATIO_COEFFICIENT
+    );
   }
 
   /**

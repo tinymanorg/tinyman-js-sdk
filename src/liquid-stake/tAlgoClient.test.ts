@@ -117,8 +117,7 @@ describe("TinymanTAlgoClient", () => {
 
     const ratio = await client.getRatio();
     const expectedTAlgoAmount =
-      (initialTAlgoAccountAsset?.amount ?? 0) +
-      Math.floor((mintAmount * Math.pow(10, 6)) / ratio);
+      (initialTAlgoAccountAsset?.amount ?? 0) + Math.floor(mintAmount / ratio);
 
     // Check if the account has the correct amount of ALGOs
     expect(finalAccountInfo.amount).toBe(
