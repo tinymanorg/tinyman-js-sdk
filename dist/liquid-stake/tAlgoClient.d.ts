@@ -8,7 +8,7 @@ declare class TinymanTAlgoClient extends TinymanBaseClient {
     burn(amount: number, userAddress: string): Promise<algosdk.Transaction[]>;
     /**
      * Retrieves the current ratio of ALGO to tALGO in base units.
-     * The ratio is calculated as (algoAmount / tAlgoAmount) * 10^6.
+     * The ratio is calculated as (algoAmount / tAlgoAmount) * 10^12.
      *
      * @returns {Promise<number>} The current ALGO to tALGO ratio.
      */
