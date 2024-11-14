@@ -58,7 +58,9 @@ class TinymanSTAlgoClient extends TinymanBaseClient {
       })
     ];
 
-    if (!(await this.boxExists(userStateBoxName))) {
+    const doesUserBoxExist = await this.boxExists(userStateBoxName);
+
+    if (!doesUserBoxExist) {
       newBox = {
         [fromByteArray(userStateBoxName)]: USER_STATE
       };
@@ -73,7 +75,10 @@ class TinymanSTAlgoClient extends TinymanBaseClient {
       txns.splice(1, 0, boxPaymentTxn);
     }
 
-    return this.setupTxnFeeAndAssignGroupId({txns, additionalFeeCount: 1});
+    return this.setupTxnFeeAndAssignGroupId({
+      txns,
+      additionalFeeCount: doesUserBoxExist ? 1 : 2
+    });
   }
 
   async decreaseStake(amount: number, userAddress: string) {
@@ -113,7 +118,7 @@ class TinymanSTAlgoClient extends TinymanBaseClient {
       })
     ];
 
-    return this.setupTxnFeeAndAssignGroupId({txns, additionalFeeCount: 1});
+    return this.setupTxnFeeAndAssignGroupId({txns, additionalFeeCount: 3});
   }
 
   async calculateIncreaseStakeFee(accountAddress: string) {
@@ -154,6 +159,7 @@ class TinymanSTAlgoClient extends TinymanBaseClient {
 
   private async getApplyRateChangeTxnIfNeeded() {
     if (await this.shouldApplyRateChange()) {
+      console.log("Applying rate change txn");
       return this.getApplyRateChangeTxn();
     }
 
