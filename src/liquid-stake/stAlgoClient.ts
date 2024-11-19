@@ -58,9 +58,7 @@ class TinymanSTAlgoClient extends TinymanBaseClient {
       })
     ];
 
-    const doesUserBoxExist = await this.boxExists(userStateBoxName);
-
-    if (!doesUserBoxExist) {
+    if (!(await this.boxExists(userStateBoxName))) {
       newBox = {
         [fromByteArray(userStateBoxName)]: USER_STATE
       };
@@ -77,7 +75,7 @@ class TinymanSTAlgoClient extends TinymanBaseClient {
 
     return this.setupTxnFeeAndAssignGroupId({
       txns,
-      additionalFeeCount: doesUserBoxExist ? 1 : 2
+      additionalFeeCount: 2
     });
   }
 
