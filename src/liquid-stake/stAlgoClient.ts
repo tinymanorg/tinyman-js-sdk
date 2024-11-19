@@ -113,7 +113,11 @@ class TinymanSTAlgoClient extends TinymanBaseClient {
         appIndex: this.appId,
         appArgs: [encodeString("claim_rewards")],
         foreignAssets: [TINY_ASSET_ID[this.network]],
-        boxes: [{appIndex: 0, name: userStateBoxName}],
+        foreignApps: [this.vaultAppId],
+        boxes: [
+          {appIndex: 0, name: userStateBoxName},
+          {appIndex: this.vaultAppId, name: userStateBoxName}
+        ],
         suggestedParams
       })
     ];
