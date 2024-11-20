@@ -1,9 +1,8 @@
-import {ALGORAND_MIN_TX_FEE} from "algosdk";
-
 import {calculatePriceImpact} from "../../swap/common/utils";
 import {PoolReserves} from "../../util/pool/poolTypes";
 import {V2_LOCKED_POOL_TOKENS} from "../../util/pool/poolConstants";
 import {
+  ALGORAND_MIN_TX_FEE,
   V2AddLiquidityType,
   V2_ADD_LIQUIDITY_INNER_TXN_COUNT,
   V2_ADD_LIQUIDITY_TXN_COUNT
@@ -162,7 +161,7 @@ export function getV2AddLiquidityAppCallFee(mode: V2AddLiquidityType) {
   const innerTxnCount = V2_ADD_LIQUIDITY_INNER_TXN_COUNT[mode];
 
   // Add +1 to the inner transaction count to account for the app call transaction
-  return (innerTxnCount + 1) * ALGORAND_MIN_TX_FEE;
+  return BigInt((innerTxnCount + 1) * ALGORAND_MIN_TX_FEE);
 }
 
 /**
@@ -172,5 +171,5 @@ export function getV2AddLiquidityTotalFee(mode: V2AddLiquidityType) {
   const totalTxnCount =
     V2_ADD_LIQUIDITY_INNER_TXN_COUNT[mode] + V2_ADD_LIQUIDITY_TXN_COUNT[mode];
 
-  return totalTxnCount * ALGORAND_MIN_TX_FEE;
+  return BigInt(totalTxnCount * ALGORAND_MIN_TX_FEE);
 }

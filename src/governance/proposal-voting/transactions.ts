@@ -65,13 +65,13 @@ export function prepareCreateProposalTransactions({
 
   const txns: algosdk.Transaction[] = [
     algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-      from: sender,
-      to: getApplicationAddress(proposalVotingAppId),
+      sender,
+      receiver: getApplicationAddress(proposalVotingAppId),
       amount: PROPOSAL_BOX_COST,
       suggestedParams
     }),
     algosdk.makeApplicationNoOpTxnFromObject({
-      from: sender,
+      sender,
       suggestedParams,
       appIndex: proposalVotingAppId,
       appArgs: [
@@ -93,7 +93,7 @@ export function prepareCreateProposalTransactions({
   ];
 
   // 2 inner txns
-  txns[1].fee *= 3;
+  txns[1].fee *= 3n;
 
   return algosdk.assignGroupID(txns);
 }
@@ -156,7 +156,7 @@ export function prepareCastVoteTransactions({
 
   const txns: algosdk.Transaction[] = [
     algosdk.makeApplicationNoOpTxnFromObject({
-      from: sender,
+      sender,
       suggestedParams,
       appIndex: proposalVotingAppId,
       appArgs: [
@@ -172,13 +172,13 @@ export function prepareCastVoteTransactions({
   ];
 
   // 1 inner txn
-  txns[0].fee *= 2;
+  txns[0].fee *= 2n;
 
   if (createAttendanceSheetBox) {
     const minimumBalancePaymentTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-      from: sender,
+      sender,
       suggestedParams,
-      to: getApplicationAddress(proposalVotingAppId),
+      receiver: getApplicationAddress(proposalVotingAppId),
       amount: ATTENDANCE_SHEET_BOX_COST
     });
 

@@ -1,14 +1,13 @@
-import {Algodv2} from "algosdk";
+import {Algodv2, modelsv2} from "algosdk";
 
 import {SignerTransaction, TinymanApiErrorShape} from "./commonTypes";
-import {AccountInformation} from "./account/accountTypes";
 import TinymanError from "./error/TinymanError";
 
 export function decodeState({
   stateArray = [],
   shouldDecodeKeys = false
 }: {
-  stateArray: AccountInformation["apps-local-state"][0]["key-value"];
+  stateArray: modelsv2.TealKeyValue[];
   /**
    * If `true`, the returned object will have decoded keys instead of base64 encoded keys.
    */
@@ -31,7 +30,7 @@ export function decodeState({
       throw new Error(`Unexpected state type: ${pair.value.type}`);
     }
 
-    let finalKey = shouldDecodeKeys ? atob(key) : key;
+    let finalKey = shouldDecodeKeys ? Buffer.from(key).toString() : key.toString();
 
     state[finalKey] = value;
   }
@@ -106,17 +105,15 @@ function delay(timeout: number) {
 export async function waitForConfirmation(
   client: Algodv2,
   txId: string
-): Promise<Record<string, any>> {
+): Promise<modelsv2.PendingTransactionResponse> {
   // eslint-disable-next-line no-constant-condition
   while (true) {
     await delay(1000);
 
-    let pendingTransactionInfo: Record<string, any> | null = null;
+    let pendingTransactionInfo: modelsv2.PendingTransactionResponse | null = null;
 
     try {
-      pendingTransactionInfo = (await client
-        .pendingTransactionInformation(txId)
-        .do()) as Record<string, any> | null;
+      pendingTransactionInfo = await client.pendingTransactionInformation(txId).do();
     } catch (error: any) {
       // Ignore errors from PendingTransactionInformation, since it may return 404 if the algod
       // instance is behind a load balancer and the request goes to a different algod than the
@@ -124,14 +121,14 @@ export async function waitForConfirmation(
     }
 
     if (pendingTransactionInfo) {
-      if (pendingTransactionInfo["confirmed-round"]) {
+      if (pendingTransactionInfo.confirmedRound) {
         // Got the completed Transaction
         return pendingTransactionInfo;
       }
 
-      if (pendingTransactionInfo["pool-error"]) {
+      if (pendingTransactionInfo.poolError) {
         // If there was a pool error, then the transaction has been rejected
-        throw new Error(`Transaction Rejected: ${pendingTransactionInfo["pool-error"]}`);
+        throw new Error(`Transaction Rejected: ${pendingTransactionInfo.poolError}`);
       }
     }
   }
@@ -274,14 +271,13 @@ export async function sendAndWaitRawTransaction(
     }[] = [];
 
     for (let signedTxnGroup of signedTxnGroups) {
-      const {txId} = await client.sendRawTransaction(signedTxnGroup).do();
+      const {txid} = await client.sendRawTransaction(signedTxnGroup).do();
 
-      const status = await waitForConfirmation(client, txId);
-      const confirmedRound = status["confirmed-round"];
+      const status = await waitForConfirmation(client, txid);
 
       networkResponse.push({
-        confirmedRound,
-        txnID: txId
+        confirmedRound: Number(status.confirmedRound),
+        txnID: txid
       });
     }
 
@@ -294,8 +290,8 @@ export async function sendAndWaitRawTransaction(
   }
 }
 
-export function sumUpTxnFees(txns: SignerTransaction[]): number {
-  return txns.reduce((totalFee, txDetail) => totalFee + txDetail.txn.fee, 0);
+export function sumUpTxnFees(txns: SignerTransaction[]): bigint {
+  return txns.reduce((totalFee, txDetail) => totalFee + txDetail.txn.fee, 0n);
 }
 
 export function getTxnGroupID(txns: SignerTransaction[]) {

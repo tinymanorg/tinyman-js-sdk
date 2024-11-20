@@ -1,5 +1,4 @@
-import algosdk, {SuggestedParams} from "algosdk";
-import AlgodClient from "algosdk/dist/types/client/v2/algod/algod";
+import algosdk, {Algodv2, SuggestedParams} from "algosdk";
 
 import {VAULT_APP_ID, WEEK} from "../constants";
 import {
@@ -135,13 +134,13 @@ function prepareCreateLockTransactions({
     algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
       amount: lockedAmount,
       assetIndex: TINY_ASSET_ID[network],
-      from: sender,
+      sender,
       suggestedParams,
-      to: algosdk.getApplicationAddress(vaultAppId)
+      receiver: algosdk.getApplicationAddress(vaultAppId)
     }),
     algosdk.makeApplicationNoOpTxnFromObject({
       appIndex: vaultAppId,
-      from: sender,
+      sender,
       suggestedParams,
       appArgs: [encodeString("create_lock"), intToBytes(lockEndTime)],
       boxes: boxes.slice(0, 8),
@@ -158,9 +157,9 @@ function prepareCreateLockTransactions({
   if (minBalanceIncrease) {
     const minimumBalancePayment = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
       amount: minBalanceIncrease,
-      from: sender,
+      sender,
       suggestedParams,
-      to: algosdk.getApplicationAddress(vaultAppId)
+      receiver: algosdk.getApplicationAddress(vaultAppId)
     });
 
     txns.unshift(minimumBalancePayment);
@@ -249,14 +248,14 @@ function prepareIncreaseLockAmountTransactions({
   const txns = [
     algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
       assetIndex: TINY_ASSET_ID[network],
-      from: sender,
-      to: algosdk.getApplicationAddress(VAULT_APP_ID[network]),
+      sender,
+      receiver: algosdk.getApplicationAddress(VAULT_APP_ID[network]),
       amount: lockedAmount,
       suggestedParams
     }),
     algosdk.makeApplicationNoOpTxnFromObject({
       appIndex: VAULT_APP_ID[network],
-      from: sender,
+      sender,
       suggestedParams,
       appArgs: [encodeString("increase_lock_amount")],
       boxes,
@@ -271,9 +270,9 @@ function prepareIncreaseLockAmountTransactions({
 
   if (minBalanceIncrease) {
     const minimumBalancePayment = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-      from: sender,
+      sender,
       suggestedParams,
-      to: algosdk.getApplicationAddress(VAULT_APP_ID[network]),
+      receiver: algosdk.getApplicationAddress(VAULT_APP_ID[network]),
       amount: minBalanceIncrease
     });
 
@@ -380,7 +379,7 @@ function prepareExtendLockEndTimeTransactions({
   const txns = [
     algosdk.makeApplicationNoOpTxnFromObject({
       appIndex: VAULT_APP_ID[network],
-      from: sender,
+      sender,
       suggestedParams,
       appArgs: [encodeString("extend_lock_end_time"), intToBytes(newLockEndTime)],
       boxes: boxes.slice(0, 8),
@@ -396,9 +395,9 @@ function prepareExtendLockEndTimeTransactions({
 
   if (minBalanceIncrease) {
     const minimumBalancePayment = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-      from: sender,
+      sender,
       suggestedParams,
-      to: algosdk.getApplicationAddress(VAULT_APP_ID[network]),
+      receiver: algosdk.getApplicationAddress(VAULT_APP_ID[network]),
       amount: minBalanceIncrease
     });
 
@@ -418,7 +417,7 @@ function prepareWithdrawTransactions({
   appCallNote
 }: {
   network: SupportedNetwork;
-  client: AlgodClient;
+  client: Algodv2;
   sender: string;
   accountState: AccountState;
   suggestedParams: SuggestedParams;
@@ -442,7 +441,7 @@ function prepareWithdrawTransactions({
 
   const withdrawTxn = algosdk.makeApplicationNoOpTxnFromObject({
     appIndex: VAULT_APP_ID[network],
-    from: sender,
+    sender,
     suggestedParams,
     appArgs: [encodeString("withdraw")],
     foreignAssets: [TINY_ASSET_ID[network]],
@@ -450,16 +449,16 @@ function prepareWithdrawTransactions({
     note: appCallNote
   });
 
-  withdrawTxn.fee *= 2;
+  withdrawTxn.fee *= 2n;
 
   const txns = [withdrawTxn];
 
   // Min Balance
   if (!accountState.freeAccountPowerSpaceCount) {
     const minBalancePaymentTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-      from: sender,
+      sender,
       suggestedParams,
-      to: algosdk.getApplicationAddress(VAULT_APP_ID[network]),
+      receiver: algosdk.getApplicationAddress(VAULT_APP_ID[network]),
       amount: ACCOUNT_POWER_BOX_COST
     });
 

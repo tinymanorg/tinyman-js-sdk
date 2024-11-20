@@ -97,7 +97,7 @@ async function generateTxns({
   ];
 
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
-    from: poolAddress,
+    sender: poolAddress,
     appIndex: pool.validatorAppID!,
     appArgs: validatorAppCallArgs,
     accounts: [initiatorAddr],
@@ -117,15 +117,15 @@ async function generateTxns({
 
   if (assetInID === ALGO_ASSET_ID) {
     assetInTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-      from: initiatorAddr,
-      to: poolAddress,
+      sender: initiatorAddr,
+      receiver: poolAddress,
       amount: assetInAmount,
       suggestedParams
     });
   } else {
     assetInTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-      from: initiatorAddr,
-      to: poolAddress,
+      sender: initiatorAddr,
+      receiver: poolAddress,
       assetIndex: assetInID,
       amount: assetInAmount,
       suggestedParams
@@ -140,15 +140,15 @@ async function generateTxns({
 
   if (assetOutID === ALGO_ASSET_ID) {
     assetOutTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-      from: poolAddress,
-      to: initiatorAddr,
+      sender: poolAddress,
+      receiver: initiatorAddr,
       amount: assetOutAmount,
       suggestedParams
     });
   } else {
     assetOutTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-      from: poolAddress,
-      to: initiatorAddr,
+      sender: poolAddress,
+      receiver: initiatorAddr,
       assetIndex: assetOutID,
       amount: assetOutAmount,
       suggestedParams
@@ -156,8 +156,8 @@ async function generateTxns({
   }
 
   const feeTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-    from: initiatorAddr,
-    to: poolAddress,
+    sender: initiatorAddr,
+    receiver: poolAddress,
     amount: validatorAppCallTxn.fee + assetOutTxn.fee,
     note: DEFAULT_FEE_TXN_NOTE,
     suggestedParams
@@ -172,9 +172,9 @@ async function generateTxns({
 
   return [
     {txn: txGroup[0], signers: [initiatorAddr]},
-    {txn: txGroup[1], signers: [poolAddress]},
+    {txn: txGroup[1], signers: [poolAddress.toString()]},
     {txn: txGroup[2], signers: [initiatorAddr]},
-    {txn: txGroup[3], signers: [poolAddress]}
+    {txn: txGroup[3], signers: [poolAddress.toString()]}
   ];
 }
 
@@ -359,7 +359,7 @@ async function executeFixedInputSwap({
   }
 
   return {
-    round: confirmedRound,
+    round: Number(confirmedRound),
     assetInID: assetIn.id,
     assetInAmount: BigInt(assetIn.amount),
     assetOutID: assetOut.id,
@@ -530,7 +530,7 @@ async function executeFixedOutputSwap({
   }
 
   return {
-    round: confirmedRound,
+    round: Number(confirmedRound),
     assetInID: assetIn.id,
     assetInAmount: BigInt(assetIn.amount) - excessAmountDelta,
     assetOutID: assetOut.id,
@@ -582,15 +582,50 @@ async function execute({
   }
 
   try {
-    const assetIn: AssetWithIdAndAmount = {
-      id: txGroup[SwapTxnGroupIndices.ASSET_IN_TXN_INDEX].txn.assetIndex || ALGO_ASSET_ID,
-      amount: txGroup[SwapTxnGroupIndices.ASSET_IN_TXN_INDEX].txn.amount
-    };
-    const assetOut: AssetWithIdAndAmount = {
-      id:
-        txGroup[SwapTxnGroupIndices.ASSET_OUT_TXN_INDEX].txn.assetIndex || ALGO_ASSET_ID,
-      amount: txGroup[SwapTxnGroupIndices.ASSET_OUT_TXN_INDEX].txn.amount
-    };
+    let assetIn: AssetWithIdAndAmount;
+
+    if (txGroup[SwapTxnGroupIndices.ASSET_IN_TXN_INDEX].txn.assetTransfer) {
+      assetIn = {
+        id: Number(
+          txGroup[SwapTxnGroupIndices.ASSET_IN_TXN_INDEX].txn.assetTransfer?.assetIndex
+        ),
+        amount: txGroup[SwapTxnGroupIndices.ASSET_IN_TXN_INDEX].txn.assetTransfer.amount
+      };
+    } else if (txGroup[SwapTxnGroupIndices.ASSET_IN_TXN_INDEX].txn.payment) {
+      assetIn = {
+        id: ALGO_ASSET_ID,
+        amount: Number(txGroup[SwapTxnGroupIndices.ASSET_IN_TXN_INDEX].txn.payment.amount)
+      };
+    } else {
+      throw new TinymanError(
+        {txGroup},
+        "The asset in transaction is not a valid transaction type."
+      );
+    }
+
+    let assetOut: AssetWithIdAndAmount;
+
+    if (txGroup[SwapTxnGroupIndices.ASSET_OUT_TXN_INDEX].txn.assetTransfer) {
+      assetOut = {
+        id: Number(
+          txGroup[SwapTxnGroupIndices.ASSET_OUT_TXN_INDEX].txn.assetTransfer?.assetIndex
+        ),
+        amount: txGroup[SwapTxnGroupIndices.ASSET_OUT_TXN_INDEX].txn.assetTransfer.amount
+      };
+    } else if (txGroup[SwapTxnGroupIndices.ASSET_OUT_TXN_INDEX].txn.payment) {
+      assetOut = {
+        id: ALGO_ASSET_ID,
+        amount: Number(
+          txGroup[SwapTxnGroupIndices.ASSET_OUT_TXN_INDEX].txn.payment.amount
+        )
+      };
+    } else {
+      throw new TinymanError(
+        {txGroup},
+        "The asset out transaction is not a valid transaction type."
+      );
+    }
+
     let swapData: Omit<V1SwapExecution, "fees" | "groupID">;
 
     if (swapType === SwapType.FixedInput) {
@@ -613,7 +648,11 @@ async function execute({
       });
     }
 
-    return {...swapData, groupID: getTxnGroupID(txGroup), fees: sumUpTxnFees(txGroup)};
+    return {
+      ...swapData,
+      groupID: getTxnGroupID(txGroup),
+      fees: Number(sumUpTxnFees(txGroup))
+    };
   } catch (error: any) {
     const parsedError = new TinymanError(
       error,

@@ -1,4 +1,4 @@
-import algosdk, {Algodv2, IntDecoding} from "algosdk";
+import algosdk, {Algodv2} from "algosdk";
 import {fromByteArray} from "base64-js";
 
 import {PoolReserves, PoolStatus, PoolAssets, V1PoolInfo} from "../poolTypes";
@@ -39,7 +39,7 @@ export async function getPoolInfo(params: {
     accountInformation,
     validatorAppID
   );
-  const poolTokenID = accountInformation["created-assets"][0]?.index;
+  const poolTokenID = Number(accountInformation.createdAssets![0]?.index);
   let result: V1PoolInfo = {
     account: poolLogicSig,
     validatorAppID,
@@ -51,8 +51,8 @@ export async function getPoolInfo(params: {
   };
 
   if (appState) {
-    result.asset1ID = appState[DECODED_APP_STATE_KEYS.v1_1.asset1] as number;
-    result.asset2ID = appState[DECODED_APP_STATE_KEYS.v1_1.asset2] as number;
+    result.asset1ID = Number(appState[DECODED_APP_STATE_KEYS.v1_1.asset1]);
+    result.asset2ID = Number(appState[DECODED_APP_STATE_KEYS.v1_1.asset2]);
   }
 
   return result;
@@ -62,22 +62,18 @@ export async function getPoolReserves(
   client: Algodv2,
   pool: V1PoolInfo
 ): Promise<PoolReserves> {
-  const info = await getAccountInformation(
-    client,
-    pool.account.address(),
-    IntDecoding.BIGINT
-  );
-  const appsLocalState = info["apps-local-state"] || [];
+  const info = await getAccountInformation(client, pool.account.address());
+  const appsLocalState = info.appsLocalState || [];
 
   let outstandingAsset1 = 0n;
   let outstandingAsset2 = 0n;
   let outstandingPoolTokens = 0n;
 
   for (const app of appsLocalState) {
-    if (app.id != pool.validatorAppID) {
+    if (app.id != BigInt(pool.validatorAppID)) {
       continue;
     }
-    const keyValue = app["key-value"];
+    const {keyValue} = app;
 
     if (!keyValue) {
       break;
@@ -116,8 +112,8 @@ export async function getPoolReserves(
   let asset2Balance = 0n;
   let poolTokenBalance = 0n;
 
-  for (const asset of info.assets) {
-    const id = asset["asset-id"];
+  for (const asset of info.assets ?? []) {
+    const id = Number(asset.assetId);
     const {amount} = asset;
 
     if (id == pool.asset1ID) {
@@ -143,7 +139,7 @@ export async function getPoolReserves(
     asset1: asset1Balance - outstandingAsset1,
     asset2: asset2Balance - outstandingAsset2,
     issuedLiquidity: TOTAL_LIQUIDITY - poolTokenBalance + outstandingPoolTokens,
-    round: info.round
+    round: Number(info.round)
   };
 
   /**
@@ -201,8 +197,8 @@ export async function getPoolAssets(
     poolTokenID = poolTokenAsset.index;
 
     assets = {
-      asset1ID: appState[DECODED_APP_STATE_KEYS[CONTRACT_VERSION.V1_1].asset1] as number,
-      asset2ID: appState[DECODED_APP_STATE_KEYS[CONTRACT_VERSION.V1_1].asset2] as number,
+      asset1ID: Number(appState[DECODED_APP_STATE_KEYS[CONTRACT_VERSION.V1_1].asset1]),
+      asset2ID: Number(appState[DECODED_APP_STATE_KEYS[CONTRACT_VERSION.V1_1].asset2]),
       poolTokenID
     };
 

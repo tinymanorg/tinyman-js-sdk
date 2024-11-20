@@ -63,7 +63,7 @@
     "@types/uuid": "^10.0.0"
   },
   "dependencies": {
-    "algosdk": "^2.8.0",
+    "algosdk": "^3.0.0",
     "base64-js": "^1.5.1",
     "multiformats": "^13.2.1",
     "uuid": "^10.0.0"

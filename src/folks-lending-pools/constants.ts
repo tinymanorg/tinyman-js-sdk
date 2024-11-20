@@ -19,3 +19,9 @@ export {
   FOLKS_WRAPPER_APP_ID,
   FOLKS_LENDING_POOL_APP_CALL_INNER_TXN_COUNT
 };
+
+/**
+ * The minimum transaction fee for Algorand.
+ * @deprecated This constant is no longer included in js-algorand-sdk v3. New code should use suggestedParams.minFee instead.
+ */
+export const ALGORAND_MIN_TX_FEE = 1000;

@@ -38,3 +38,10 @@ export const V2_ADD_LIQUIDITY_TXN_COUNT: Record<V2AddLiquidityType, number> = {
   /** Consists of: App Call, Asset In */
   [V2AddLiquidityType.SINGLE]: 2
 };
+
+
+/**
+ * The minimum transaction fee for Algorand.
+ * @deprecated This constant is no longer included in js-algorand-sdk v3. New code should use suggestedParams.minFee instead.
+ */
+export const ALGORAND_MIN_TX_FEE = 1000;

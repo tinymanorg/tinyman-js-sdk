@@ -1,13 +1,9 @@
-import algosdk, {
-  ALGORAND_MIN_TX_FEE,
-  Algodv2,
-  decodeAddress,
-  encodeUint64
-} from "algosdk";
+import algosdk, {Algodv2, decodeAddress, encodeUint64} from "algosdk";
 
 import {SignerTransaction, SupportedNetwork} from "../../util/commonTypes";
 import {isAlgo} from "../../util/asset/assetUtils";
 import {
+  ALGORAND_MIN_TX_FEE,
   FOLKS_LENDING_POOL_APP_CALL_INNER_TXN_COUNT,
   FOLKS_WRAPPER_APP_ID
 } from "../constants";
@@ -46,8 +42,8 @@ export async function generateTxns({
   const isAlgoPool = isAlgo(asset2.id);
 
   const asset1InTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-    from: initiatorAddr,
-    to: wrapperAppAddress,
+    sender: initiatorAddr,
+    receiver: wrapperAppAddress,
     assetIndex: asset1.id,
     amount: asset1.amount,
     suggestedParams
@@ -55,21 +51,21 @@ export async function generateTxns({
 
   const asset2InTxn = isAlgoPool
     ? algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-        from: initiatorAddr,
-        to: wrapperAppAddress,
+        sender: initiatorAddr,
+        receiver: wrapperAppAddress,
         amount: asset2.amount,
         suggestedParams
       })
     : algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-        from: initiatorAddr,
-        to: wrapperAppAddress,
+        sender: initiatorAddr,
+        receiver: wrapperAppAddress,
         assetIndex: asset2.id,
         amount: asset2.amount,
         suggestedParams
       });
 
   const appCallTxn1 = algosdk.makeApplicationNoOpTxnFromObject({
-    from: initiatorAddr,
+    sender: initiatorAddr,
     appIndex: FOLKS_WRAPPER_APP_ID[network],
     appArgs: [
       encodeString("add_liquidity"),
@@ -83,12 +79,13 @@ export async function generateTxns({
     suggestedParams
   });
 
-  appCallTxn1.fee =
-    ALGORAND_MIN_TX_FEE * (FOLKS_LENDING_POOL_APP_CALL_INNER_TXN_COUNT + 1);
+  appCallTxn1.fee = BigInt(
+    ALGORAND_MIN_TX_FEE * (FOLKS_LENDING_POOL_APP_CALL_INNER_TXN_COUNT + 1)
+  );
 
   const validatorAppID = getValidatorAppID(network, CONTRACT_VERSION.V2);
   const appCallTxn2 = algosdk.makeApplicationNoOpTxnFromObject({
-    from: initiatorAddr,
+    sender: initiatorAddr,
     appIndex: FOLKS_WRAPPER_APP_ID[network],
     appArgs: [encodeString("noop")],
     foreignAssets: [poolTokenId],
@@ -108,13 +105,13 @@ export async function generateTxns({
   if (optInRequiredAssetIds.length) {
     const wrapperAppAssetOptInTxns = [
       algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-        from: initiatorAddr,
-        to: wrapperAppAddress,
+        sender: initiatorAddr,
+        receiver: wrapperAppAddress,
         amount: MINIMUM_BALANCE_REQUIRED_PER_ASSET * optInRequiredAssetIds.length,
         suggestedParams
       }),
       algosdk.makeApplicationNoOpTxnFromObject({
-        from: initiatorAddr,
+        sender: initiatorAddr,
         appIndex: FOLKS_WRAPPER_APP_ID[network],
         appArgs: [
           encodeString("asset_optin"),
@@ -125,8 +122,9 @@ export async function generateTxns({
       })
     ];
 
-    wrapperAppAssetOptInTxns[1].fee =
-      (optInRequiredAssetIds.length + 1) * ALGORAND_MIN_TX_FEE;
+    wrapperAppAssetOptInTxns[1].fee = BigInt(
+      (optInRequiredAssetIds.length + 1) * ALGORAND_MIN_TX_FEE
+    );
 
     txns.unshift(...wrapperAppAssetOptInTxns);
   }

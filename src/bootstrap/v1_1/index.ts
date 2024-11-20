@@ -50,7 +50,7 @@ async function generateTxns({
   const poolAddress = poolLogicSig.address();
 
   const validatorAppCallTxn = algosdk.makeApplicationOptInTxnFromObject({
-    from: poolAddress,
+    sender: poolAddress,
     appIndex: validatorAppID,
     note: tinymanJSSDKConfig.getAppCallTxnNoteWithClientName(CONTRACT_VERSION.V1_1),
     appArgs: [
@@ -63,7 +63,7 @@ async function generateTxns({
   });
 
   const poolTokenCreateTxn = algosdk.makeAssetCreateTxnWithSuggestedParamsFromObject({
-    from: poolAddress,
+    sender: poolAddress,
     total: 0xffffffffffffffffn,
     decimals: 6,
     defaultFrozen: false,
@@ -74,16 +74,16 @@ async function generateTxns({
   });
 
   const asset1Optin = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-    from: poolAddress,
-    to: poolAddress,
+    sender: poolAddress,
+    receiver: poolAddress,
     assetIndex: asset1ID,
     amount: 0,
     suggestedParams
   });
 
   const fundingTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-    from: initiatorAddr,
-    to: poolAddress,
+    sender: initiatorAddr,
+    receiver: poolAddress,
     amount: getBootstrapFundingTxnAmount(isAlgoPool),
     suggestedParams
   });
@@ -98,8 +98,8 @@ async function generateTxns({
   if (!isAlgoPool) {
     txns[V1_1BootstrapTxnGroupIndices.ASSET2_OPT_IN] =
       algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-        from: poolAddress,
-        to: poolAddress,
+        sender: poolAddress,
+        receiver: poolAddress,
         assetIndex: asset2ID,
         amount: 0,
         suggestedParams
@@ -115,22 +115,22 @@ async function generateTxns({
     },
     {
       txn: txGroup[V1_1BootstrapTxnGroupIndices.VALIDATOR_APP_CALL],
-      signers: [poolAddress]
+      signers: [poolAddress.toString()]
     },
     {
       txn: txGroup[V1_1BootstrapTxnGroupIndices.POOL_TOKEN_CREATE],
-      signers: [poolAddress]
+      signers: [poolAddress.toString()]
     },
     {
       txn: txGroup[V1_1BootstrapTxnGroupIndices.ASSET1_OPT_IN],
-      signers: [poolAddress]
+      signers: [poolAddress.toString()]
     }
   ];
 
   if (txGroup[V1_1BootstrapTxnGroupIndices.ASSET2_OPT_IN]) {
     finalSignerTxns.push({
       txn: txGroup[V1_1BootstrapTxnGroupIndices.ASSET2_OPT_IN],
-      signers: [poolAddress]
+      signers: [poolAddress.toString()]
     });
   }
 

@@ -1,9 +1,6 @@
-export interface AccountAsset {
-  amount: number;
-  "asset-id": number;
-  creator: string;
-  "is-frozen": boolean;
-}
+import {indexerModels, modelsv2} from "algosdk";
+
+export type AccountAsset = modelsv2.AssetHolding;
 
 export interface TinymanAnalyticsApiAsset {
   id: string;
@@ -19,36 +16,7 @@ export interface TinymanAnalyticsApiAsset {
   last_day_price_change?: null | string;
 }
 
-export interface IndexerAssetInformation {
-  asset: {
-    "asset-tx-counter": number;
-    "created-at": number;
-    "created-at-round": number;
-    "creation-txid": string;
-    deleted: true;
-    "destroyed-at-round": number;
-    index: number;
-    params: IndexerAssetParams;
-  };
-  "current-round": number;
-}
-
-interface IndexerAssetParams {
-  "circulating-supply": number;
-  clawback: string;
-  creator: string;
-  decimals: number;
-  "default-frozen": boolean;
-  freeze: string;
-  manager: string;
-  name: string;
-  reserve: string;
-  score: number;
-  total: number;
-  "unit-name": string;
-  url: string;
-  verified: boolean;
-}
+export type IndexerAssetInformation = indexerModels.Asset;
 
 export interface AssetWithIdAndAmount {
   id: number;

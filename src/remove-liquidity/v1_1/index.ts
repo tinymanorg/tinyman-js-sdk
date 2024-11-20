@@ -76,7 +76,7 @@ async function generateTxns({
   const isAlgoPool = isAlgo(pool.asset2ID);
 
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
-    from: poolAddress,
+    sender: poolAddress,
     appIndex: pool.validatorAppID,
     appArgs: [encodeString("burn")],
     note: tinymanJSSDKConfig.getAppCallTxnNoteWithClientName(CONTRACT_VERSION.V1_1),
@@ -89,8 +89,8 @@ async function generateTxns({
 
   const asset1OutAmount = applySlippageToAmount("negative", slippage, asset1Out);
   const asset1OutTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-    from: poolAddress,
-    to: initiatorAddr,
+    sender: poolAddress,
+    receiver: initiatorAddr,
     assetIndex: pool.asset1ID,
     amount: asset1OutAmount,
     suggestedParams
@@ -99,22 +99,22 @@ async function generateTxns({
   const asset2OutAmount = applySlippageToAmount("negative", slippage, asset2Out);
   const asset2OutTxn = isAlgoPool
     ? algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-        from: poolAddress,
-        to: initiatorAddr,
+        sender: poolAddress,
+        receiver: initiatorAddr,
         amount: asset2OutAmount,
         suggestedParams
       })
     : algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-        from: poolAddress,
-        to: initiatorAddr,
+        sender: poolAddress,
+        receiver: initiatorAddr,
         assetIndex: pool.asset2ID,
         amount: asset2OutAmount,
         suggestedParams
       });
 
   const poolTokenInTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-    from: initiatorAddr,
-    to: poolAddress,
+    sender: initiatorAddr,
+    receiver: poolAddress,
     assetIndex: pool.poolTokenID as number,
     amount: poolTokenIn,
     suggestedParams
@@ -123,8 +123,8 @@ async function generateTxns({
   let txnFees = validatorAppCallTxn.fee + asset1OutTxn.fee + asset2OutTxn.fee;
 
   const feeTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-    from: initiatorAddr,
-    to: poolAddress,
+    sender: initiatorAddr,
+    receiver: poolAddress,
     amount: txnFees,
     note: DEFAULT_FEE_TXN_NOTE,
     suggestedParams
@@ -147,15 +147,15 @@ async function generateTxns({
     },
     {
       txn: txGroup[V1_1RemoveLiquidityTxnIndices.VALIDATOR_APP_CALL_TXN],
-      signers: [poolAddress]
+      signers: [poolAddress.toString()]
     },
     {
       txn: txGroup[V1_1RemoveLiquidityTxnIndices.ASSET1_OUT_TXN],
-      signers: [poolAddress]
+      signers: [poolAddress.toString()]
     },
     {
       txn: txGroup[V1_1RemoveLiquidityTxnIndices.ASSET2_OUT_TXN],
-      signers: [poolAddress]
+      signers: [poolAddress.toString()]
     },
     {
       txn: txGroup[V1_1RemoveLiquidityTxnIndices.POOL_TOKEN_IN_TXN],
@@ -208,10 +208,17 @@ async function execute({
   initiatorAddr: string;
 }): Promise<V1_1RemoveLiquidityExecution> {
   try {
-    const asset1Out = txGroup[V1_1RemoveLiquidityTxnIndices.ASSET1_OUT_TXN].txn.amount;
-    const asset2Out = txGroup[V1_1RemoveLiquidityTxnIndices.ASSET2_OUT_TXN].txn.amount;
+    const asset1Out =
+      txGroup[V1_1RemoveLiquidityTxnIndices.ASSET1_OUT_TXN].txn.payment?.amount ??
+      txGroup[V1_1RemoveLiquidityTxnIndices.ASSET1_OUT_TXN].txn.assetTransfer?.amount ??
+      0n;
+    const asset2Out =
+      txGroup[V1_1RemoveLiquidityTxnIndices.ASSET2_OUT_TXN].txn.payment?.amount ??
+      txGroup[V1_1RemoveLiquidityTxnIndices.ASSET2_OUT_TXN].txn.assetTransfer?.amount ??
+      0n;
     const poolTokenIn =
-      txGroup[V1_1RemoveLiquidityTxnIndices.POOL_TOKEN_IN_TXN].txn.amount;
+      txGroup[V1_1RemoveLiquidityTxnIndices.POOL_TOKEN_IN_TXN].txn.assetTransfer
+        ?.amount ?? 0n;
 
     const prevExcessAssets = await getAccountExcessWithinPool({
       client,
@@ -244,14 +251,14 @@ async function execute({
     }
 
     return {
-      round: confirmedRound,
-      fees: sumUpTxnFees(txGroup),
+      round: Number(confirmedRound),
+      fees: Number(sumUpTxnFees(txGroup)),
       asset1ID: pool.asset1ID,
-      asset1Out: BigInt(asset1Out) + excessAmountDeltaAsset1,
+      asset1Out: asset1Out + excessAmountDeltaAsset1,
       asset2ID: pool.asset2ID,
-      asset2Out: BigInt(asset2Out) + excessAmountDeltaAsset2,
+      asset2Out: asset2Out + excessAmountDeltaAsset2,
       poolTokenID: pool.poolTokenID!,
-      poolTokenIn: BigInt(poolTokenIn),
+      poolTokenIn,
       excessAmounts: [
         {
           assetID: pool.asset1ID,

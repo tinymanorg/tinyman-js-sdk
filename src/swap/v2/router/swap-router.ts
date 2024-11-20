@@ -1,12 +1,6 @@
-import algosdk, {
-  Algodv2,
-  ALGORAND_MIN_TX_FEE,
-  getApplicationAddress,
-  Transaction
-} from "algosdk";
+import algosdk, {Algodv2, getApplicationAddress, Transaction} from "algosdk";
 
 import {CONTRACT_VERSION} from "../../../contract/constants";
-import {AccountInformation} from "../../../util/account/accountTypes";
 import {ALGO_ASSET_ID} from "../../../util/asset/assetConstants";
 import {getAssetId, isAlgo} from "../../../util/asset/assetUtils";
 import {SupportedNetwork} from "../../../util/commonTypes";
@@ -20,7 +14,7 @@ import {
   V2_SWAP_APP_CALL_SWAP_TYPE_ARGS_ENCODED,
   V2_SWAP_ROUTER_APP_ARGS_ENCODED
 } from "../constants";
-import {SWAP_ROUTER_INNER_TXN_COUNT} from "./constants";
+import {ALGORAND_MIN_TX_FEE, SWAP_ROUTER_INNER_TXN_COUNT} from "./constants";
 import {
   getAssetInFromSwapRoute,
   getAssetOutFromSwapRoute,
@@ -46,7 +40,7 @@ export async function generateSwapRouterAssetOptInTransaction({
   const suggestedParams = await client.getTransactionParams().do();
   // We need to create a NoOp transaction to opt-in to the assets
   const assetOptInTxn = algosdk.makeApplicationNoOpTxnFromObject({
-    from: initiatorAddr,
+    sender: initiatorAddr,
     appIndex: routerAppID,
     appArgs: [V2_SWAP_ROUTER_APP_ARGS_ENCODED.ASSET_OPT_IN],
     foreignAssets: assetIDs,
@@ -59,7 +53,7 @@ export async function generateSwapRouterAssetOptInTransaction({
    * The opt-in transaction fee should cover the total cost of inner transactions,
    * and the outer transaction (thus the +1)
    */
-  assetOptInTxn.fee = ALGORAND_MIN_TX_FEE * (innerTransactionCount + 1);
+  assetOptInTxn.fee = BigInt(ALGORAND_MIN_TX_FEE * (innerTransactionCount + 1));
 
   return assetOptInTxn;
 }
@@ -107,21 +101,21 @@ export async function generateSwapRouterTxns({
 
   const inputTxn = isAssetInAlgo
     ? algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-        from: initiatorAddr,
-        to: getApplicationAddress(routerAppID),
+        sender: initiatorAddr,
+        receiver: getApplicationAddress(routerAppID),
         amount: assetInAmount,
         suggestedParams
       })
     : algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-        from: initiatorAddr,
-        to: getApplicationAddress(routerAppID),
+        sender: initiatorAddr,
+        receiver: getApplicationAddress(routerAppID),
         amount: assetInAmount,
         assetIndex: assetInID,
         suggestedParams
       });
 
   const routerAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
-    from: initiatorAddr,
+    sender: initiatorAddr,
     appIndex: routerAppID,
     appArgs: [
       V2_SWAP_APP_CALL_ARG_ENCODED,
@@ -135,8 +129,9 @@ export async function generateSwapRouterTxns({
     note: tinymanJSSDKConfig.getAppCallTxnNoteWithClientName(CONTRACT_VERSION.V2)
   });
 
-  routerAppCallTxn.fee =
-    ALGORAND_MIN_TX_FEE * (SWAP_ROUTER_INNER_TXN_COUNT[swapType] + 1);
+  routerAppCallTxn.fee = BigInt(
+    ALGORAND_MIN_TX_FEE * (SWAP_ROUTER_INNER_TXN_COUNT[swapType] + 1)
+  );
 
   const txnList = [inputTxn, routerAppCallTxn];
 
@@ -175,14 +170,12 @@ export async function getSwapRouterAppOptInRequiredAssetIDs({
   assetIDs: number[];
 }) {
   const swapRouterAppAddress = getApplicationAddress(getSwapRouterAppID(network));
-  const accountInfo = (await client
-    .accountInformation(swapRouterAppAddress)
-    .do()) as AccountInformation;
-  const appOptedInAssetIDs = accountInfo.assets.map((asset) => asset["asset-id"]);
+  const accountInfo = await client.accountInformation(swapRouterAppAddress).do();
+  const appOptedInAssetIDs =
+    accountInfo.assets?.map((asset) => Number(asset.assetId)) ?? [];
 
   return assetIDs.filter(
-    (assetID: number) =>
-      assetID !== ALGO_ASSET_ID && !appOptedInAssetIDs.includes(assetID)
+    (assetID) => assetID !== ALGO_ASSET_ID && !appOptedInAssetIDs.includes(assetID)
   );
 }
 

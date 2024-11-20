@@ -10,15 +10,15 @@ export async function generateOptIntoAssetTxns({
   initiatorAddr
 }: {
   client: Algodv2;
-  assetID: number;
+  assetID: number | bigint;
   initiatorAddr: string;
 }): Promise<SignerTransaction[]> {
   try {
     const suggestedParams = await client.getTransactionParams().do();
 
     const optInTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-      from: initiatorAddr,
-      to: initiatorAddr,
+      sender: initiatorAddr,
+      receiver: initiatorAddr,
       assetIndex: assetID,
       amount: 0,
       suggestedParams

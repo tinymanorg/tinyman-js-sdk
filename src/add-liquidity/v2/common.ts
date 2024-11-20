@@ -53,9 +53,9 @@ export async function execute({
     }
 
     return {
-      round: confirmedRound,
+      round: Number(confirmedRound),
       assetOut,
-      fees: sumUpTxnFees(txGroup),
+      fees: Number(sumUpTxnFees(txGroup)),
       poolTokenID: pool.poolTokenID!,
       txnID,
       groupID: getTxnGroupID(txGroup)
