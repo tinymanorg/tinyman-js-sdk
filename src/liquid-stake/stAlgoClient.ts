@@ -17,6 +17,7 @@ import {
   VAULT_APP_ID
 } from "./constants";
 import {getStruct, Struct} from "../util/client/base/utils";
+import {SECOND_IN_MS} from "../governance/constants";
 
 const USER_STATE = getStruct("UserState", STRUCTS);
 
@@ -161,7 +162,6 @@ class TinymanSTAlgoClient extends TinymanBaseClient {
 
   private async getApplyRateChangeTxnIfNeeded() {
     if (await this.shouldApplyRateChange()) {
-      console.log("Applying rate change txn");
       return this.getApplyRateChangeTxn();
     }
 
@@ -169,8 +169,7 @@ class TinymanSTAlgoClient extends TinymanBaseClient {
   }
 
   private async shouldApplyRateChange() {
-    // eslint-disable-next-line no-magic-numbers
-    const now = Math.floor(Date.now() / 1000);
+    const now = Math.floor(Date.now() / SECOND_IN_MS);
 
     const currentRateEndTimestamp = await this.getGlobal(
       encodeString(CURRENT_REWARD_RATE_PER_TIME_END_TIMESTAMP_KEY)
