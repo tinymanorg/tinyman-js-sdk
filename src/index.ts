@@ -31,11 +31,7 @@ export {
 
 export {generateOptIntoAssetTxns} from "./util/asset/assetUtils";
 
-export type {
-  AccountAsset,
-  TinymanAnalyticsApiAsset,
-  IndexerAssetInformation
-} from "./util/asset/assetModels";
+export type {TinymanAnalyticsApiAsset} from "./util/asset/assetModels";
 
 export {
   ALGO_ASSET,

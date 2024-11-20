@@ -31,7 +31,7 @@ export async function redeemExcessAsset({
   txGroup: SignerTransaction[];
   initiatorSigner: InitiatorSigner;
 }): Promise<{
-  fees: number;
+  fees: bigint;
   confirmedRound: number;
   groupID: string;
   txnID: string;
@@ -48,7 +48,7 @@ export async function redeemExcessAsset({
 
     return {
       fees: sumUpTxnFees(txGroup),
-      confirmedRound,
+      confirmedRound: Number(confirmedRound),
       txnID,
       groupID: getTxnGroupID(txGroup)
     };
@@ -106,7 +106,7 @@ export async function redeemAllExcessAsset({
   initiatorSigner: InitiatorSigner;
 }): Promise<
   {
-    fees: number;
+    fees: bigint;
     confirmedRound: number;
     groupID: string;
     txnID: string;
@@ -128,7 +128,7 @@ export async function redeemAllExcessAsset({
       redeemGroups.map(
         (redeemGroup, groupIndex) =>
           new Promise<{
-            fees: number;
+            fees: bigint;
             confirmedRound: number;
             groupID: string;
             txnID: string;
@@ -155,7 +155,7 @@ export async function redeemAllExcessAsset({
                 fees: redeemGroup.txnFees,
                 groupID: redeemGroup.groupID,
                 txnID,
-                confirmedRound
+                confirmedRound: Number(confirmedRound)
               });
             } catch (error: any) {
               reject(error);
@@ -191,7 +191,7 @@ export async function generateRedeemTxns({
   const suggestedParams = await client.getTransactionParams().do();
   const poolAddress = pool.account.address();
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
-    from: poolAddress,
+    sender: poolAddress,
     appIndex: pool.validatorAppID,
     appArgs: [encodeString("redeem")],
     note: tinymanJSSDKConfig.getAppCallTxnNoteWithClientName(pool.contractVersion),
@@ -207,15 +207,15 @@ export async function generateRedeemTxns({
 
   if (assetID === 0) {
     assetOutTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-      from: poolAddress,
-      to: initiatorAddr,
+      sender: poolAddress,
+      receiver: initiatorAddr,
       amount: BigInt(assetOut),
       suggestedParams
     });
   } else {
     assetOutTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-      from: poolAddress,
-      to: initiatorAddr,
+      sender: poolAddress,
+      receiver: initiatorAddr,
       assetIndex: assetID,
       amount: BigInt(assetOut),
       suggestedParams
@@ -223,8 +223,8 @@ export async function generateRedeemTxns({
   }
 
   const feeTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-    from: initiatorAddr,
-    to: poolAddress,
+    sender: initiatorAddr,
+    receiver: poolAddress,
     amount: validatorAppCallTxn.fee + assetOutTxn.fee,
     note: DEFAULT_FEE_TXN_NOTE,
     suggestedParams
@@ -239,11 +239,11 @@ export async function generateRedeemTxns({
     },
     {
       txn: txGroup[1],
-      signers: [poolAddress]
+      signers: [poolAddress.toString()]
     },
     {
       txn: txGroup[2],
-      signers: [poolAddress]
+      signers: [poolAddress.toString()]
     }
   ];
 }

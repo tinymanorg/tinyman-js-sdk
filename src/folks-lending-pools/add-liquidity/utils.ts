@@ -15,9 +15,9 @@ export async function getFolksWrapperAppOptInRequiredAssetIDs({
   assetIDs: number[];
 }) {
   const wrapperAppAddress = getApplicationAddress(FOLKS_WRAPPER_APP_ID[network]);
-  const appOptedInAssetIDs = (
-    await getAccountInformation(client, wrapperAppAddress)
-  ).assets.map((asset) => asset["asset-id"]);
+  const accountInfo = await getAccountInformation(client, wrapperAppAddress);
+  const appOptedInAssetIDs =
+    accountInfo.assets?.map((asset) => Number(asset.assetId)) || [];
 
   return assetIDs.filter(
     (assetID: number) =>

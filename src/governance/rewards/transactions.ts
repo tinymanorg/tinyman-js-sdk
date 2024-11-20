@@ -110,7 +110,7 @@ function prepareClaimRewardsTransactions({
   const txnsBoxes = boxes.slice(0, 6);
   const txns = [
     algosdk.makeApplicationNoOpTxnFromObject({
-      from: sender,
+      sender,
       suggestedParams,
       appIndex: rewardsAppId,
       appArgs: [
@@ -126,7 +126,7 @@ function prepareClaimRewardsTransactions({
     })
   ];
 
-  txns[0].fee = txns[0].fee * (periodCount + 2);
+  txns[0].fee = txns[0].fee * BigInt(periodCount + 2);
 
   // TODO: Update budget costs according to final code. (backend note)
   let increaseBudgetTxnCount = 0;
@@ -148,15 +148,15 @@ function prepareClaimRewardsTransactions({
       boxes: budgetIncreaseBoxes
     });
 
-    budgetIncreaseTxn.fee *= Math.max(increaseBudgetTxnCount, 1);
+    budgetIncreaseTxn.fee *= BigInt(Math.max(increaseBudgetTxnCount, 1));
 
     txns.unshift(budgetIncreaseTxn);
   }
 
   if (createRewardClaimSheet) {
     const minimumBalancePayment = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-      from: sender,
-      to: getApplicationAddress(rewardsAppId),
+      sender,
+      receiver: getApplicationAddress(rewardsAppId),
       amount: REWARD_CLAIM_SHEET_BOX_COST,
       suggestedParams
     });

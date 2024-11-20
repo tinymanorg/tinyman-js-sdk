@@ -1,5 +1,10 @@
-import {decodeAddress, encodeAddress, SuggestedParams, Transaction} from "algosdk";
-import AlgodClient from "algosdk/dist/types/client/v2/algod/algod";
+import {
+  Algodv2,
+  decodeAddress,
+  encodeAddress,
+  SuggestedParams,
+  Transaction
+} from "algosdk";
 
 import {TINY_ASSET_ID} from "../util/asset/assetConstants";
 import {generateOptIntoAssetTxns} from "../util/asset/assetUtils";
@@ -56,11 +61,11 @@ import {
 } from "./vault/transactions";
 
 class TinymanGovernanceClient {
-  private algodClient: AlgodClient;
+  private algodClient: Algodv2;
   private userAddress: string;
   private network: SupportedNetwork;
 
-  constructor(algodClient: AlgodClient, userAddress: string, network: SupportedNetwork) {
+  constructor(algodClient: Algodv2, userAddress: string, network: SupportedNetwork) {
     this.algodClient = algodClient;
     this.userAddress = userAddress;
     this.network = network;

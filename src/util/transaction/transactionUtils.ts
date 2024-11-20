@@ -121,5 +121,5 @@ export function combineAndRegroupSignerTxns(
  * @returns the account address of the sender
  */
 export function extractSenderAddressFromTransaction(txn: Transaction): string {
-  return algosdk.encodeAddress(txn.from.publicKey);
+  return algosdk.encodeAddress(txn.sender.publicKey);
 }

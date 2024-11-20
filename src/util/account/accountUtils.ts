@@ -1,4 +1,4 @@
-import algosdk, {Algodv2, IntDecoding} from "algosdk";
+import algosdk, {Algodv2, modelsv2} from "algosdk";
 import {fromByteArray, toByteArray} from "base64-js";
 
 import {V1PoolInfo} from "../pool/poolTypes";
@@ -14,7 +14,6 @@ import {
 import {decodeState, encodeString, joinByteArrays} from "../util";
 import {
   AccountExcessWithinPool,
-  AccountInformation,
   AccountInformationData,
   AccountExcess
 } from "./accountTypes";
@@ -23,20 +22,16 @@ import {getContract} from "../../contract";
 
 export function getAccountInformation(
   client: Algodv2,
-  address: string,
-  intDecoding: IntDecoding = IntDecoding.DEFAULT
+  address: string | algosdk.Address
 ) {
   return new Promise<AccountInformationData>(async (resolve, reject) => {
     try {
-      const accountInfo = await (client
-        .accountInformation(address)
-        .setIntDecoding(intDecoding)
-        .do() as Promise<AccountInformation>);
+      const accountInfo = await client.accountInformation(address).do();
 
       resolve({
         ...accountInfo,
         minimum_required_balance: calculateAccountMinimumRequiredBalance(accountInfo)
-      });
+      } as AccountInformationData);
     } catch (error: any) {
       reject(new Error(error.message || "Failed to fetch account information"));
     }
@@ -50,35 +45,35 @@ export function getDecodedAccountApplicationLocalState(
   accountInfo: AccountInformationData,
   validatorAppID: number
 ) {
-  const appState = accountInfo["apps-local-state"].find(
-    (app) => app.id === validatorAppID
+  const appState = accountInfo.appsLocalState?.find(
+    (app) => app.id === BigInt(validatorAppID)
   );
 
   if (!appState) {
     return null;
   }
 
-  const keyValue = appState["key-value"];
+  const keyValue = appState.keyValue || [];
   const decodedState = decodeState({stateArray: keyValue, shouldDecodeKeys: true});
 
   return decodedState;
 }
 
 export function calculateAccountMinimumRequiredBalance(
-  account: AccountInformation
-): number {
-  const totalSchema = account["apps-total-schema"];
+  account: modelsv2.Account
+): bigint {
+  const totalSchema = account.appsTotalSchema;
 
-  return (
+  return BigInt(
     BASE_MINIMUM_BALANCE +
-    MINIMUM_BALANCE_REQUIRED_PER_ASSET * (account.assets || []).length +
-    MINIMUM_BALANCE_REQUIRED_PER_CREATED_APP * (account["created-apps"] || []).length +
-    MINIMUM_BALANCE_REQUIRED_PER_APP * (account["apps-local-state"] || []).length +
-    MINIMUM_BALANCE_REQUIRED_PER_BYTE_SCHEMA *
-      Number((totalSchema && totalSchema["num-byte-slice"]) || 0) +
-    MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE *
-      Number((totalSchema && totalSchema["num-uint"]) || 0) +
-    MINIMUM_BALANCE_REQUIRED_PER_EXTRA_APP_PAGE * (account["apps-total-extra-pages"] || 0)
+      MINIMUM_BALANCE_REQUIRED_PER_ASSET * (account.assets || []).length +
+      MINIMUM_BALANCE_REQUIRED_PER_CREATED_APP * (account.createdApps || []).length +
+      MINIMUM_BALANCE_REQUIRED_PER_APP * (account.appsLocalState || []).length +
+      MINIMUM_BALANCE_REQUIRED_PER_BYTE_SCHEMA *
+        Number((totalSchema && totalSchema.numByteSlice) || 0) +
+      MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE *
+        Number((totalSchema && totalSchema.numUint) || 0) +
+      MINIMUM_BALANCE_REQUIRED_PER_EXTRA_APP_PAGE * (account.appsTotalExtraPages || 0)
   );
 }
 
@@ -104,12 +99,9 @@ export async function getAccountExcessWithinPool({
   pool: V1PoolInfo;
   accountAddr: string;
 }): Promise<AccountExcessWithinPool> {
-  const info = (await client
-    .accountInformation(accountAddr)
-    .setIntDecoding(IntDecoding.BIGINT)
-    .do()) as AccountInformation;
+  const info = await client.accountInformation(accountAddr).do();
 
-  const appsLocalState = info["apps-local-state"] || [];
+  const appsLocalState = info.appsLocalState || [];
 
   let excessAsset1 = 0n;
   let excessAsset2 = 0n;
@@ -118,11 +110,11 @@ export async function getAccountExcessWithinPool({
   const poolAddress = pool.account.address();
 
   for (const app of appsLocalState) {
-    if (app.id != pool.validatorAppID) {
+    if (app.id != BigInt(pool.validatorAppID)) {
       continue;
     }
 
-    const keyValue = app["key-value"];
+    const {keyValue} = app;
 
     if (!keyValue) {
       break;
@@ -132,21 +124,21 @@ export async function getAccountExcessWithinPool({
 
     const excessAsset1Key = fromByteArray(
       joinByteArrays([
-        algosdk.decodeAddress(poolAddress).publicKey,
+        poolAddress.publicKey,
         EXCESS_ENCODED,
         algosdk.encodeUint64(pool.asset1ID)
       ])
     );
     const excessAsset2Key = fromByteArray(
       joinByteArrays([
-        algosdk.decodeAddress(poolAddress).publicKey,
+        poolAddress.publicKey,
         EXCESS_ENCODED,
         algosdk.encodeUint64(pool.asset2ID)
       ])
     );
     const excessPoolTokenKey = fromByteArray(
       joinByteArrays([
-        algosdk.decodeAddress(poolAddress).publicKey,
+        poolAddress.publicKey,
         EXCESS_ENCODED,
         algosdk.encodeUint64(pool.poolTokenID!)
       ])
@@ -200,22 +192,19 @@ export async function getAccountExcess({
 }: {
   client: Algodv2;
   accountAddr: string;
-  validatorAppID: number;
+  validatorAppID: bigint;
 }) {
-  const info = (await client
-    .accountInformation(accountAddr)
-    .setIntDecoding(IntDecoding.BIGINT)
-    .do()) as AccountInformation;
+  const info = await client.accountInformation(accountAddr).do();
 
-  const appsLocalState = info["apps-local-state"] || [];
+  const appsLocalState = info.appsLocalState || [];
   const appState = appsLocalState.find(
     // `==` is used here to coerce bigints if necessary
     (appLocalState) => appLocalState.id == validatorAppID
   );
   let excessData: AccountExcess[] = [];
 
-  if (appState && appState["key-value"]) {
-    const state = decodeState({stateArray: appState["key-value"]});
+  if (appState && appState.keyValue) {
+    const state = decodeState({stateArray: appState.keyValue});
 
     for (let entry of Object.entries(state)) {
       const [key, value] = entry;
@@ -225,7 +214,7 @@ export async function getAccountExcess({
         excessData.push({
           poolAddress: algosdk.encodeAddress(decodedKey.slice(0, 32)),
           assetID: algosdk.decodeUint64(decodedKey.slice(33, 41), "safe"),
-          amount: parseInt(value as string)
+          amount: parseInt(value.toString())
         });
       }
     }
@@ -245,8 +234,8 @@ export function isAccountOptedIntoApp({
   appID,
   accountAppsLocalState
 }: {
-  appID: number;
-  accountAppsLocalState: AccountInformation["apps-local-state"];
+  appID: bigint;
+  accountAppsLocalState: modelsv2.ApplicationLocalState[];
 }): boolean {
   return accountAppsLocalState.some((appState) => appState.id === appID);
 }

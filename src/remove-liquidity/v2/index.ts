@@ -1,4 +1,4 @@
-import algosdk, {Algodv2, ALGORAND_MIN_TX_FEE, Transaction} from "algosdk";
+import algosdk, {Algodv2, Transaction} from "algosdk";
 
 import {tinymanJSSDKConfig} from "../../config";
 import {CONTRACT_VERSION} from "../../contract/constants";
@@ -10,6 +10,7 @@ import {PoolReserves, V2PoolInfo} from "../../util/pool/poolTypes";
 import {getAppCallInnerAssetData} from "../../util/transaction/transactionUtils";
 import {applySlippageToAmount, sendAndWaitRawTransaction} from "../../util/util";
 import {
+  ALGORAND_MIN_TX_FEE,
   V2RemoveLiquidityTxnIndices,
   V2_REMOVE_LIQUIDITY_APP_ARGUMENT,
   V2_REMOVE_LIQUIDITY_APP_CALL_INNER_TXN_COUNT
@@ -169,15 +170,15 @@ async function generateTxns({
   }
 
   const assetTransferTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-    from: initiatorAddr,
-    to: poolAddress,
+    sender: initiatorAddr,
+    receiver: poolAddress,
     assetIndex: poolTokenId,
     amount: poolTokenIn,
     suggestedParams
   });
 
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
-    from: initiatorAddr,
+    sender: initiatorAddr,
     appIndex: pool.validatorAppID,
     note: tinymanJSSDKConfig.getAppCallTxnNoteWithClientName(CONTRACT_VERSION.V2),
     appArgs: [
@@ -191,8 +192,9 @@ async function generateTxns({
   });
 
   // Add + 1 for outer txn cost
-  validatorAppCallTxn.fee =
-    (V2_REMOVE_LIQUIDITY_APP_CALL_INNER_TXN_COUNT + 1) * ALGORAND_MIN_TX_FEE;
+  validatorAppCallTxn.fee = BigInt(
+    (V2_REMOVE_LIQUIDITY_APP_CALL_INNER_TXN_COUNT + 1) * ALGORAND_MIN_TX_FEE
+  );
 
   const txns: Transaction[] = [];
 
@@ -262,15 +264,15 @@ async function generateSingleAssetOutTxns({
   }
 
   const assetTransferTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-    from: initiatorAddr,
-    to: poolAddress,
+    sender: initiatorAddr,
+    receiver: poolAddress,
     assetIndex: poolTokenId,
     amount: poolTokenIn,
     suggestedParams
   });
 
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
-    from: initiatorAddr,
+    sender: initiatorAddr,
     appIndex: pool.validatorAppID,
     note: tinymanJSSDKConfig.getAppCallTxnNoteWithClientName(CONTRACT_VERSION.V2),
     appArgs: [
@@ -284,8 +286,9 @@ async function generateSingleAssetOutTxns({
   });
 
   // Add + 1 for outer txn cost
-  validatorAppCallTxn.fee =
-    (V2_REMOVE_LIQUIDITY_APP_CALL_INNER_TXN_COUNT + 1) * ALGORAND_MIN_TX_FEE;
+  validatorAppCallTxn.fee = BigInt(
+    (V2_REMOVE_LIQUIDITY_APP_CALL_INNER_TXN_COUNT + 1) * ALGORAND_MIN_TX_FEE
+  );
 
   const txns: Transaction[] = [];
 

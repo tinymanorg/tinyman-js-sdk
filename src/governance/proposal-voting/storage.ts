@@ -1,5 +1,4 @@
-import {decodeAddress, encodeAddress} from "algosdk";
-import AlgodClient from "algosdk/dist/types/client/v2/algod/algod";
+import {Algodv2, decodeAddress, encodeAddress} from "algosdk";
 
 import {intToBytes} from "../util/utils";
 import {concatUint8Arrays, getRawBoxValue} from "../utils";
@@ -143,11 +142,7 @@ function parseBoxProposal(rawBox: Uint8Array) {
   );
 }
 
-export async function getProposal(
-  client: AlgodClient,
-  appId: number,
-  proposalId: string
-) {
+export async function getProposal(client: Algodv2, appId: number, proposalId: string) {
   const boxName = getProposalBoxName(proposalId);
   const rawBox = await getRawBoxValue(client, appId, boxName);
 

@@ -83,7 +83,7 @@ export async function getPoolReserves(
     asset1: 0n,
     asset2: 0n,
     issuedLiquidity: 0n,
-    round: accountInformation.round
+    round: Number(accountInformation.round)
   };
 
   if (appState) {
@@ -116,11 +116,11 @@ export async function getPoolAssets({
 
   if (appState) {
     assets = {
-      asset1ID: appState[DECODED_APP_STATE_KEYS[CONTRACT_VERSION.V2].asset1] as number,
-      asset2ID: appState[DECODED_APP_STATE_KEYS[CONTRACT_VERSION.V2].asset2] as number,
-      poolTokenID: appState[
+      asset1ID: Number(appState[DECODED_APP_STATE_KEYS[CONTRACT_VERSION.V2].asset1]),
+      asset2ID: Number(appState[DECODED_APP_STATE_KEYS[CONTRACT_VERSION.V2].asset2]),
+      poolTokenID: Number(appState[
         DECODED_APP_STATE_KEYS[CONTRACT_VERSION.V2].poolTokenID
-      ] as number
+      ])
     };
   }
 
