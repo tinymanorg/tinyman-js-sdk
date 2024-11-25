@@ -6,17 +6,17 @@ const CURRENT_REWARD_RATE_PER_TIME_END_TIMESTAMP_KEY =
 
 const STAKE_APP_ID: Record<SupportedNetwork, number> = {
   testnet: 724519988,
-  mainnet: NaN
+  mainnet: 2536694789
 };
 
 const RESTAKE_APP_ID: Record<SupportedNetwork, number> = {
   testnet: 724676904,
-  mainnet: NaN
+  mainnet: 2536699383
 };
 
 const VAULT_APP_ID: Record<SupportedNetwork, number> = {
   testnet: 480164661,
-  mainnet: NaN
+  mainnet: 2200606875
 };
 
 const STRUCTS: Record<string, StructDefinition> = {
