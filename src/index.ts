@@ -34,14 +34,14 @@ export {generateOptIntoAssetTxns} from "./util/asset/assetUtils";
 export type {
   AccountAsset,
   TinymanAnalyticsApiAsset,
-  IndexerAssetInformation
+  IndexerAssetInformation,
+  AssetWithIdAndAmount
 } from "./util/asset/assetModels";
 
 export {
   ALGO_ASSET,
   ALGO_ASSET_ID,
-  POOL_TOKEN_UNIT_NAME,
-  TINY_ASSET_ID
+  POOL_TOKEN_UNIT_NAME
 } from "./util/asset/assetConstants";
 
 export {
@@ -139,10 +139,16 @@ export type {FolksLendingPool} from "./folks-lending-pools/types";
 
 export {prepareCommitTransactions, getStakingAppID} from "./stake";
 export {tinymanJSSDKConfig} from "./config";
-export {combineAndRegroupSignerTxns} from "./util/transaction/transactionUtils";
+export {
+  combineAndRegroupSignerTxns,
+  getAppCallInnerAssetData
+} from "./util/transaction/transactionUtils";
 
 export {TinymanGovernanceClient} from "./governance";
 export type {RawBoxCacheValue} from "./governance/types";
+
+export {TinymanSTAlgoClient} from "./liquid-stake/stAlgoClient";
+export {TinymanTAlgoClient} from "./liquid-stake/tAlgoClient";
 
 export {AccountState} from "./governance/vault/storage";
 export {getStartTimestampOfWeek} from "./governance/vault/utils";

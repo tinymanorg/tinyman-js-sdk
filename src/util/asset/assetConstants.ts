@@ -24,3 +24,13 @@ export const TINY_ASSET_ID: Record<SupportedNetwork, number> = {
   testnet: 258703304,
   mainnet: 2200000000
 };
+
+export const TALGO_ASSET_ID: Record<SupportedNetwork, number> = {
+  testnet: 724519992,
+  mainnet: 2537013734
+};
+
+export const STALGO_ASSET_ID: Record<SupportedNetwork, number> = {
+  testnet: 724676936,
+  mainnet: 2537023208
+};

@@ -1,14 +1,14 @@
 import { execute, generateTxns, getQuote, signTxns } from "./utils";
 export declare const Swap: {
     v1_1: {
-        getQuote: (type: import("./constants").SwapType, pool: import("..").V1PoolInfo, reserves: import("..").PoolReserves, asset: import("../util/asset/assetModels").AssetWithIdAndAmount, decimals: {
+        getQuote: (type: import("./constants").SwapType, pool: import("..").V1PoolInfo, reserves: import("..").PoolReserves, asset: import("..").AssetWithIdAndAmount, decimals: {
             assetIn: number;
             assetOut: number;
         }) => import("./types").SwapQuote;
         getFixedInputSwapQuote: ({ pool, reserves, assetIn, decimals }: {
             pool: import("..").V1PoolInfo;
             reserves: import("..").PoolReserves;
-            assetIn: import("../util/asset/assetModels").AssetWithIdAndAmount;
+            assetIn: import("..").AssetWithIdAndAmount;
             decimals: {
                 assetIn: number;
                 assetOut: number;
@@ -17,7 +17,7 @@ export declare const Swap: {
         getFixedOutputSwapQuote: ({ pool, reserves, assetOut, decimals }: {
             pool: import("..").V1PoolInfo;
             reserves: import("..").PoolReserves;
-            assetOut: import("../util/asset/assetModels").AssetWithIdAndAmount;
+            assetOut: import("..").AssetWithIdAndAmount;
             decimals: {
                 assetIn: number;
                 assetOut: number;
@@ -41,8 +41,8 @@ export declare const Swap: {
             client: import("algosdk").Algodv2;
             pool: import("..").V1PoolInfo;
             signedTxns: Uint8Array[];
-            assetIn: import("../util/asset/assetModels").AssetWithIdAndAmount;
-            assetOut: import("../util/asset/assetModels").AssetWithIdAndAmount;
+            assetIn: import("..").AssetWithIdAndAmount;
+            assetOut: import("..").AssetWithIdAndAmount;
             initiatorAddr: string;
         }) => Promise<Omit<import("./types").V1SwapExecution, "fees" | "groupID">>;
     };
