@@ -63,7 +63,6 @@ abstract class TinymanBaseClient {
     )?.value;
 
     if (searchValue) {
-      // eslint-disable-next-line no-magic-numbers
       if (searchValue.type === 2) {
         return searchValue.uint;
       }

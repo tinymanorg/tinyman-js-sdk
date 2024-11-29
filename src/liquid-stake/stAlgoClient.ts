@@ -133,7 +133,7 @@ class TinymanSTAlgoClient extends TinymanBaseClient {
     const doesUserBoxExist = await this.boxExists(
       this.getUserStateBoxName(accountAddress)
     );
-    const initialTxnCount = 3;
+    const initialTxnCount = 4;
     const totalTxnCount =
       initialTxnCount +
       Number(shouldApplyRateChange) +
