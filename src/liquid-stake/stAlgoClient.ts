@@ -33,10 +33,9 @@ class TinymanSTAlgoClient extends TinymanBaseClient {
     const suggestedParams = await this.getSuggestedParams();
     const userStateBoxName = this.getUserStateBoxName(userAddress);
 
-    let newBox: Record<string, Struct> = {};
-
     const txns = [
       ...(await this.getApplyRateChangeTxnIfNeeded()),
+      ...(await this.getUserBoxPaymentTxnIfNeeded(userAddress, suggestedParams)),
       ...(await this.getOptinTxnIfNeeded(userAddress, STALGO_ASSET_ID[this.network])),
       algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
         from: userAddress,
@@ -58,21 +57,6 @@ class TinymanSTAlgoClient extends TinymanBaseClient {
         suggestedParams
       })
     ];
-
-    if (!(await this.boxExists(userStateBoxName))) {
-      newBox = {
-        [fromByteArray(userStateBoxName)]: USER_STATE
-      };
-
-      const boxPaymentTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-        from: userAddress,
-        to: this.applicationAddress,
-        suggestedParams,
-        amount: this.calculateMinBalance({boxes: newBox})
-      });
-
-      txns.splice(1, 0, boxPaymentTxn);
-    }
 
     return this.setupTxnFeeAndAssignGroupId({
       txns,
@@ -166,6 +150,38 @@ class TinymanSTAlgoClient extends TinymanBaseClient {
     }
 
     return [];
+  }
+
+  private async getUserBoxPaymentTxnIfNeeded(
+    userAddress: string,
+    suggestedParams: algosdk.SuggestedParams
+  ) {
+    const userStateBoxName = this.getUserStateBoxName(userAddress);
+
+    if (!(await this.boxExists(userStateBoxName))) {
+      return this.getUserBoxPaymentTxn(userStateBoxName, userAddress, suggestedParams);
+    }
+
+    return [];
+  }
+
+  private getUserBoxPaymentTxn(
+    userStateBoxName: Uint8Array,
+    userAddress: string,
+    suggestedParams: algosdk.SuggestedParams
+  ) {
+    const newBox: Record<string, Struct> = {
+      [fromByteArray(userStateBoxName)]: USER_STATE
+    };
+
+    const boxPaymentTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+      from: userAddress,
+      to: this.applicationAddress,
+      suggestedParams,
+      amount: this.calculateMinBalance({boxes: newBox})
+    });
+
+    return [boxPaymentTxn];
   }
 
   private async shouldApplyRateChange() {
