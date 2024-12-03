@@ -12,6 +12,7 @@ declare class TinymanSTAlgoClient extends TinymanBaseClient {
     private getUserStateBoxName;
     private getApplyRateChangeTxnIfNeeded;
     private getUserBoxPaymentTxnIfNeeded;
+    private getUserBoxPaymentTxn;
     private shouldApplyRateChange;
     private getApplyRateChangeTxn;
 }

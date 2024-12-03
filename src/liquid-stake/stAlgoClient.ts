@@ -58,10 +58,12 @@ class TinymanSTAlgoClient extends TinymanBaseClient {
       })
     ];
 
-    return this.setupTxnFeeAndAssignGroupId({
-      txns,
-      additionalFeeCount: 2
-    });
+    return Promise.all(
+      this.setupTxnFeeAndAssignGroupId({
+        txns,
+        additionalFeeCount: 2
+      })
+    );
   }
 
   async decreaseStake(amount: number, userAddress: string) {
@@ -81,7 +83,7 @@ class TinymanSTAlgoClient extends TinymanBaseClient {
       })
     ];
 
-    return this.setupTxnFeeAndAssignGroupId({txns, additionalFeeCount: 2});
+    return Promise.all(this.setupTxnFeeAndAssignGroupId({txns, additionalFeeCount: 2}));
   }
 
   async claimRewards(userAddress: string) {
@@ -105,7 +107,7 @@ class TinymanSTAlgoClient extends TinymanBaseClient {
       })
     ];
 
-    return this.setupTxnFeeAndAssignGroupId({txns, additionalFeeCount: 3});
+    return Promise.all(this.setupTxnFeeAndAssignGroupId({txns, additionalFeeCount: 3}));
   }
 
   async calculateIncreaseStakeFee(accountAddress: string) {
