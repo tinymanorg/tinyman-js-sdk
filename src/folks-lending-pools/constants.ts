@@ -1,6 +1,5 @@
 import {SupportedNetwork} from "../util/commonTypes";
 
-// eslint-disable-next-line no-magic-numbers
 const SECONDS_IN_YEAR = BigInt(365 * 24 * 60 * 60);
 const ONE_14_DP = BigInt(1e14);
 const ONE_16_DP = BigInt(1e16);
