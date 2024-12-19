@@ -40,4 +40,4 @@ declare function getSwapQuoteRate(quote: SwapQuote): number;
  */
 declare function getBestQuote(quotes: SwapQuote[]): SwapQuote;
 declare function isSwapQuoteErrorCausedByAmount(error: Error): boolean;
-export { calculateSwapRate, calculatePriceImpact, getSwapQuotePriceImpact, getAssetInFromSwapQuote, getAssetOutFromSwapQuote, getAssetInAndAssetOutFromSwapQuote, getSwapQuoteContractVersion, getSwapTotalFee, getSwapQuoteRate, getBestQuote, isSwapQuoteErrorCausedByAmount };
+export { calculatePriceImpact, calculateSwapRate, getAssetInAndAssetOutFromSwapQuote, getAssetInFromSwapQuote, getAssetOutFromSwapQuote, getBestQuote, getSwapQuoteContractVersion, getSwapQuotePriceImpact, getSwapQuoteRate, getSwapTotalFee, isSwapQuoteErrorCausedByAmount };

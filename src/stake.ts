@@ -39,12 +39,12 @@ function createCommitTxnWithSuggestedParams({
     foreignAssets: [liquidityAssetID],
     accounts: [program.accountAddress],
     appArgs: [encodeString("commit"), amountEncoded],
-    note: joinByteArrays([
+    note: joinByteArrays(
       encodeString("tinymanStaking/v1:b"),
       programIdEncoded,
       encodeUint64(liquidityAssetID),
       amountEncoded
-    ])
+    )
   });
 }
 
@@ -109,4 +109,4 @@ function getStakingAppID(network: SupportedNetwork) {
   return network === "testnet" ? 51948952 : 649588853;
 }
 
-export {prepareCommitTransactions, getStakingAppID};
+export {getStakingAppID, prepareCommitTransactions};

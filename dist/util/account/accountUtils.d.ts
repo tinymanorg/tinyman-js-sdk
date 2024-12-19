@@ -1,7 +1,7 @@
 import { Algodv2, IntDecoding } from "algosdk";
-import { V1PoolInfo } from "../pool/poolTypes";
-import { AccountExcessWithinPool, AccountInformation, AccountInformationData, AccountExcess } from "./accountTypes";
 import { ContractVersionValue } from "../../contract/types";
+import { V1PoolInfo } from "../pool/poolTypes";
+import { AccountExcess, AccountExcessWithinPool, AccountInformation, AccountInformationData } from "./accountTypes";
 export declare function getAccountInformation(client: Algodv2, address: string, intDecoding?: IntDecoding): Promise<AccountInformationData>;
 /**
  * @returns the decoded application local state object (both keys and values are decoded)

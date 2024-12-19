@@ -1,4 +1,4 @@
-import {Algodv2} from "algosdk";
+import {Algodv2, TransactionType} from "algosdk";
 
 import {AssetWithIdAndAmount, TinymanAnalyticsApiAsset} from "../util/asset/assetModels";
 import {SignerTransaction, SupportedNetwork} from "../util/commonTypes";
@@ -48,11 +48,6 @@ export interface SwapRoutePool {
   version: "2.0";
 }
 
-export type SwapRoute = {
-  quote: SwapRouterQuote;
-  pool: SwapRoutePool;
-}[];
-
 export interface SwapRouterQuote {
   swap_type: SwapType;
   amount_in: {
@@ -78,13 +73,41 @@ export interface FetchSwapRouteQuotesPayload {
   swap_type: SwapType;
 }
 
-export type SwapRouterResponse = FetchSwapRouteQuotesPayload & {
-  route: SwapRoute;
+export type SwapRouterResponse = Pick<
+  FetchSwapRouteQuotesPayload,
+  "amount" | "swap_type"
+> & {
+  asset_in: Pick<TinymanAnalyticsApiAsset, "id" | "decimals" | "name" | "unit_name">;
+  asset_out: Pick<TinymanAnalyticsApiAsset, "id" | "decimals" | "name" | "unit_name">;
   price_impact: string;
   status: {
     round_number: string;
     round_datetime: string;
   };
+  transaction_count: number;
+  inner_transaction_count: number;
+  transactions: SwapRouterTransactionRecipe[];
+  transaction_fee: string;
+  transaction_fee_in_input_asset: string;
+  output_amount: string;
+};
+
+export interface SwapRouterTransactionRecipe {
+  type: TransactionType;
+  receiver?: string;
+  app_id: number;
+  asset_id: number;
+  amount: number;
+  args: string[] | null;
+  accounts?: string[];
+  assets?: number[];
+  apps?: number[];
+}
+
+export type SwapRoute = {
+  poolAddress: string;
+  asset_in: number;
+  asset_out: number;
 };
 
 export type GetSwapQuoteParams = {

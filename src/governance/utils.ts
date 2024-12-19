@@ -115,19 +115,6 @@ function parseGlobalStateFromApplicationInfo(applicationInfo: Record<string, any
   return globalState;
 }
 
-//  Move this function to global 'utils' folder
-function concatUint8Arrays(...arrays: Uint8Array[]): Uint8Array {
-  const totalLength = arrays.reduce((sum, arr) => sum + arr.length, 0);
-  const result = new Uint8Array(totalLength);
-  let offset = 0;
-
-  for (const arr of arrays) {
-    result.set(arr, offset);
-    offset += arr.length;
-  }
-  return result;
-}
-
 function serializeMetadata(metadata: Record<string, any>) {
   return JSON.stringify(metadata, Object.keys(metadata).sort(), 0);
 }
@@ -173,7 +160,6 @@ async function getAllBoxNames(algod: AlgodClient, appId: number) {
 export {
   calculateTinyPower,
   combineAndRegroupTxns,
-  concatUint8Arrays,
   doesBoxExist,
   generateCidFromProposalMetadata,
   getAllBoxNames,
