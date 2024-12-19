@@ -1,23 +1,23 @@
 import algosdk, {Algodv2, IntDecoding} from "algosdk";
 import {fromByteArray} from "base64-js";
 
-import {PoolReserves, PoolStatus, PoolAssets, V1PoolInfo} from "../poolTypes";
 import {getContract} from "../../../contract";
+import {CONTRACT_VERSION} from "../../../contract/constants";
+import {getValidatorAppID} from "../../../validator";
 import {
   getAccountInformation,
   getDecodedAccountApplicationLocalState
 } from "../../account/accountUtils";
 import {sortAssetIds} from "../../asset/assetUtils";
+import {SupportedNetwork} from "../../commonTypes";
 import {
   decodeState,
-  joinByteArrays,
+  encodeString,
   getMinBalanceForAccount,
-  encodeString
+  joinByteArrays
 } from "../../util";
 import {DECODED_APP_STATE_KEYS} from "../poolConstants";
-import {CONTRACT_VERSION} from "../../../contract/constants";
-import {SupportedNetwork} from "../../commonTypes";
-import {getValidatorAppID} from "../../../validator";
+import {PoolAssets, PoolReserves, PoolStatus, V1PoolInfo} from "../poolTypes";
 
 const OUTSTANDING_ENCODED = encodeString("o");
 const TOTAL_LIQUIDITY = 0xffffffffffffffffn;
@@ -86,13 +86,13 @@ export async function getPoolReserves(
     const state = decodeState({stateArray: keyValue});
 
     const outstandingAsset1Key = fromByteArray(
-      joinByteArrays([OUTSTANDING_ENCODED, algosdk.encodeUint64(pool.asset1ID)])
+      joinByteArrays(OUTSTANDING_ENCODED, algosdk.encodeUint64(pool.asset1ID))
     );
     const outstandingAsset2Key = fromByteArray(
-      joinByteArrays([OUTSTANDING_ENCODED, algosdk.encodeUint64(pool.asset2ID)])
+      joinByteArrays(OUTSTANDING_ENCODED, algosdk.encodeUint64(pool.asset2ID))
     );
     const outstandingPoolTokenKey = fromByteArray(
-      joinByteArrays([OUTSTANDING_ENCODED, algosdk.encodeUint64(pool.poolTokenID!)])
+      joinByteArrays(OUTSTANDING_ENCODED, algosdk.encodeUint64(pool.poolTokenID!))
     );
 
     const outstandingAsset1Value = state[outstandingAsset1Key];

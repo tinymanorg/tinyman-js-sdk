@@ -7,23 +7,22 @@ import {
   makePaymentTxnWithSuggestedParamsFromObject
 } from "algosdk";
 
+import {encodeString, joinByteArrays} from "../../util/util";
+import {prepareBudgetIncreaseTxn} from "../transactions";
+import {areBuffersEqual, intToBytes, sum} from "../util/utils";
+import {ACCOUNT_POWER_BOX_ARRAY_LEN} from "../vault/constants";
+import {getAccountPowerBoxName, getAccountStateBoxName} from "../vault/storage";
+import {
+  STAKING_ATTENDANCE_BOX_COST,
+  STAKING_VOTE_BOX_COST,
+  STAKING_VOTE_MAX_OPTION_COUNT
+} from "./constants";
 import {
   StakingDistributionProposal,
   getStakingAttendanceSheetBoxName,
   getStakingDistributionProposalBoxName,
   getStakingVoteBoxName
 } from "./storage";
-import {
-  STAKING_VOTE_MAX_OPTION_COUNT,
-  STAKING_ATTENDANCE_BOX_COST,
-  STAKING_VOTE_BOX_COST
-} from "./constants";
-import {concatUint8Arrays} from "../utils";
-import {areBuffersEqual, intToBytes, sum} from "../util/utils";
-import {getAccountPowerBoxName, getAccountStateBoxName} from "../vault/storage";
-import {ACCOUNT_POWER_BOX_ARRAY_LEN} from "../vault/constants";
-import {prepareBudgetIncreaseTxn} from "../transactions";
-import {encodeString} from "../../util/util";
 
 function prepareCastVoteForStakingDistributionProposalTransactions({
   stakingVotingAppId,
@@ -64,10 +63,8 @@ function prepareCastVoteForStakingDistributionProposalTransactions({
     throw new Error("The sum of the votes must equal 100%");
   }
 
-  const argVotes = concatUint8Arrays(...votes.map((vote) => intToBytes(vote)));
-  const argAssetIds = concatUint8Arrays(
-    ...assetIds.map((assetId) => intToBytes(assetId))
-  );
+  const argVotes = joinByteArrays(...votes.map((vote) => intToBytes(vote)));
+  const argAssetIds = joinByteArrays(...assetIds.map((assetId) => intToBytes(assetId)));
 
   const proposalBoxName = getStakingDistributionProposalBoxName(proposalId);
 
