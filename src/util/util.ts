@@ -1,7 +1,7 @@
 import {Algodv2} from "algosdk";
 
-import {SignerTransaction, TinymanApiErrorShape} from "./commonTypes";
 import {AccountInformation} from "./account/accountTypes";
+import {SignerTransaction, TinymanApiErrorShape} from "./commonTypes";
 import TinymanError from "./error/TinymanError";
 
 export function decodeState({
@@ -39,11 +39,9 @@ export function decodeState({
   return state;
 }
 
-export function joinByteArrays(arrays: Uint8Array[]) {
+export function joinByteArrays(...arrays: Uint8Array[]): Uint8Array {
   let totalLength = arrays.reduce((sum, value) => sum + value.length, 0);
-
-  let result = new Uint8Array(totalLength);
-
+  const result = new Uint8Array(totalLength);
   // for each array - copy it over result
   // next array is copied right after the previous one
   let length = 0;
@@ -297,7 +295,7 @@ export function sumUpTxnFees(txns: SignerTransaction[]): number {
 }
 
 export function getTxnGroupID(txns: SignerTransaction[]) {
-  return bufferToBase64(txns[0].txn.group);
+  return bufferToBase64(txns[0].txn.group?.buffer);
 }
 
 export function encodeInteger(number: bigint) {

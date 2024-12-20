@@ -1,7 +1,8 @@
 import algosdk, {Algodv2, IntDecoding} from "algosdk";
 import {fromByteArray, toByteArray} from "base64-js";
 
-import {V1PoolInfo} from "../pool/poolTypes";
+import {getContract} from "../../contract";
+import {ContractVersionValue} from "../../contract/types";
 import {
   BASE_MINIMUM_BALANCE,
   MINIMUM_BALANCE_REQUIRED_PER_APP,
@@ -11,15 +12,14 @@ import {
   MINIMUM_BALANCE_REQUIRED_PER_EXTRA_APP_PAGE,
   MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE
 } from "../constant";
+import {V1PoolInfo} from "../pool/poolTypes";
 import {decodeState, encodeString, joinByteArrays} from "../util";
 import {
+  AccountExcess,
   AccountExcessWithinPool,
   AccountInformation,
-  AccountInformationData,
-  AccountExcess
+  AccountInformationData
 } from "./accountTypes";
-import {ContractVersionValue} from "../../contract/types";
-import {getContract} from "../../contract";
 
 export function getAccountInformation(
   client: Algodv2,
@@ -131,25 +131,25 @@ export async function getAccountExcessWithinPool({
     const state = decodeState({stateArray: keyValue});
 
     const excessAsset1Key = fromByteArray(
-      joinByteArrays([
+      joinByteArrays(
         algosdk.decodeAddress(poolAddress).publicKey,
         EXCESS_ENCODED,
         algosdk.encodeUint64(pool.asset1ID)
-      ])
+      )
     );
     const excessAsset2Key = fromByteArray(
-      joinByteArrays([
+      joinByteArrays(
         algosdk.decodeAddress(poolAddress).publicKey,
         EXCESS_ENCODED,
         algosdk.encodeUint64(pool.asset2ID)
-      ])
+      )
     );
     const excessPoolTokenKey = fromByteArray(
-      joinByteArrays([
+      joinByteArrays(
         algosdk.decodeAddress(poolAddress).publicKey,
         EXCESS_ENCODED,
         algosdk.encodeUint64(pool.poolTokenID!)
-      ])
+      )
     );
 
     const excessAsset1Value = state[excessAsset1Key];
