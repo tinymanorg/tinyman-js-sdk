@@ -46,7 +46,6 @@ export {
 
 export {
   getAccountInformation,
-  calculateAccountMinimumRequiredBalance,
   hasSufficientMinimumBalance,
   isAccountOptedIntoApp,
   getAccountExcessWithinPool,

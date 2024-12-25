@@ -27,7 +27,7 @@ function prepareBudgetIncreaseTxn({
   const increaseBudgetTxnsBoxes = [...boxes, ...emptyBoxes];
 
   return algosdk.makeApplicationNoOpTxnFromObject({
-    from: sender,
+    sender,
     suggestedParams,
     appIndex: index,
     appArgs: [encodeString("increase_budget"), ...extraAppArgs],

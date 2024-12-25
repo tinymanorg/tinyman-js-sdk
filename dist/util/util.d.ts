@@ -1,16 +1,16 @@
 /// <reference types="node" />
 import { Algodv2 } from "algosdk";
 import { SignerTransaction, TinymanApiErrorShape } from "./commonTypes";
-import { AccountInformation } from "./account/accountTypes";
+import { AccountInformationData } from "./account/accountTypes";
 export declare function decodeState({ stateArray, shouldDecodeKeys }: {
-    stateArray: AccountInformation["apps-local-state"][0]["key-value"];
+    stateArray: AccountInformationData["appsLocalState"][0]["keyValue"];
     /**
      * If `true`, the returned object will have decoded keys instead of base64 encoded keys.
      */
     shouldDecodeKeys?: boolean;
 }): Record<string, number | string>;
 export declare function joinByteArrays(arrays: Uint8Array[]): Uint8Array;
-export declare function getMinBalanceForAccount(accountInfo: any): bigint;
+export declare function getMinBalanceForAccount(accountInfo: AccountInformationData): bigint;
 /**
  * Wait until a transaction has been confirmed or rejected by the network
  * @param client - An Algodv2 client

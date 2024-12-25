@@ -7,7 +7,7 @@ export { applySlippageToAmount, ASSET_OPT_IN_PROCESS_TXN_COUNT, convertFromBaseU
 export { generateOptIntoAssetTxns } from "./util/asset/assetUtils";
 export type { AccountAsset, TinymanAnalyticsApiAsset, IndexerAssetInformation, AssetWithIdAndAmount } from "./util/asset/assetModels";
 export { ALGO_ASSET, ALGO_ASSET_ID, POOL_TOKEN_UNIT_NAME } from "./util/asset/assetConstants";
-export { getAccountInformation, calculateAccountMinimumRequiredBalance, hasSufficientMinimumBalance, isAccountOptedIntoApp, getAccountExcessWithinPool, getAccountExcess, getMinRequiredBalanceToOptIn } from "./util/account/accountUtils";
+export { getAccountInformation, hasSufficientMinimumBalance, isAccountOptedIntoApp, getAccountExcessWithinPool, getAccountExcess, getMinRequiredBalanceToOptIn } from "./util/account/accountUtils";
 export type { AccountInformationData } from "./util/account/accountTypes";
 export type { ContractVersionValue } from "./contract/types";
 export { CONTRACT_VERSION } from "./contract/constants";

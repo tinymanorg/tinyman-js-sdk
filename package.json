@@ -1,6 +1,6 @@
 {
   "name": "@tinymanorg/tinyman-js-sdk",
-  "version": "4.1.0",
+  "version": "4.1.1",
   "description": "Tinyman JS SDK",
   "author": "Tinyman Core Team",
   "license": "MIT",
@@ -63,7 +63,7 @@
     "@types/uuid": "^10.0.0"
   },
   "dependencies": {
-    "algosdk": "^2.8.0",
+    "algosdk": "^3.0.0",
     "base64-js": "^1.5.1",
     "multiformats": "^13.2.1",
     "uuid": "^10.0.0"

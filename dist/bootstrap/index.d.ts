@@ -58,8 +58,8 @@ export declare const Bootstrap: {
             txGroup: import("..").SignerTransaction[];
             signedTxns: Uint8Array[];
         }) => Promise<import("..").V2PoolInfo>;
-        getBootstrapFundingTxnAmount: (isAlgoPool: boolean) => number;
-        getTotalCost: (isAlgoPool: boolean) => number;
+        getBootstrapFundingTxnAmount: (isAlgoPool: boolean, minFee: bigint) => number;
+        getTotalCost: (isAlgoPool: boolean, minFee: bigint) => number;
     };
     generateTxns: typeof generateTxns;
     signTxns: typeof signTxns;

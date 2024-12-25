@@ -112,20 +112,20 @@ export async function generateTxns({
   const isAlgoPool = isAlgo(assetIn.id);
   const assetInTxn = isAlgoPool
     ? algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-        from: initiatorAddr,
-        to: poolAddress,
+        sender: initiatorAddr,
+        receiver: poolAddress,
         amount: assetIn.amount,
         suggestedParams
       })
     : algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-        from: initiatorAddr,
-        to: poolAddress,
+        sender: initiatorAddr,
+        receiver: poolAddress,
         assetIndex: assetIn.id,
         amount: assetIn.amount,
         suggestedParams
       });
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
-    from: initiatorAddr,
+    sender: initiatorAddr,
     appIndex: getValidatorAppID(network, CONTRACT_VERSION.V2),
     note: tinymanJSSDKConfig.getAppCallTxnNoteWithClientName(CONTRACT_VERSION.V2),
     appArgs: [
@@ -137,7 +137,10 @@ export async function generateTxns({
     suggestedParams
   });
 
-  validatorAppCallTxn.fee = getV2AddLiquidityAppCallFee(V2AddLiquidityType.SINGLE);
+  validatorAppCallTxn.fee = getV2AddLiquidityAppCallFee(
+    V2AddLiquidityType.SINGLE,
+    suggestedParams.minFee
+  );
 
   const txGroup = algosdk.assignGroupID([assetInTxn, validatorAppCallTxn]);
 

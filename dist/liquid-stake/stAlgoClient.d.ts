@@ -7,8 +7,8 @@ declare class TinymanSTAlgoClient extends TinymanBaseClient {
     increaseStake(amount: number, userAddress: string): Promise<algosdk.Transaction[]>;
     decreaseStake(amount: number, userAddress: string): Promise<algosdk.Transaction[]>;
     claimRewards(userAddress: string): Promise<algosdk.Transaction[]>;
-    calculateIncreaseStakeFee(accountAddress: string): Promise<number>;
-    calculateDecreaseStakeFee(accountAddress: string): Promise<number>;
+    calculateIncreaseStakeFee(accountAddress: string, minFee: bigint): Promise<number>;
+    calculateDecreaseStakeFee(accountAddress: string, minFee: bigint): Promise<number>;
     private getUserStateBoxName;
     private getApplyRateChangeTxnIfNeeded;
     private shouldApplyRateChange;

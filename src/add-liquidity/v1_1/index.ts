@@ -55,7 +55,7 @@ export function getQuote({
     }
 
     return {
-      round: reserves.round,
+      round: Number(reserves.round),
       asset1ID: pool.asset1ID,
       asset1In: BigInt(asset1In),
       asset2ID: pool.asset2ID,
@@ -71,7 +71,7 @@ export function getQuote({
   const poolTokenOut = asset1Ratio < asset2Ratio ? asset1Ratio : asset2Ratio;
 
   return {
-    round: reserves.round,
+    round: Number(reserves.round),
     asset1ID: pool.asset1ID,
     asset1In: BigInt(asset1In),
     asset2ID: pool.asset2ID,
@@ -108,7 +108,7 @@ export async function generateTxns({
   );
   const suggestedParams = await client.getTransactionParams().do();
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
-    from: poolAddress,
+    sender: poolAddress,
     appIndex: getValidatorAppID(network, CONTRACT_VERSION.V1_1),
     appArgs: ADD_LIQUIDITY_APP_CALL_ARGUMENTS.v1_1,
     accounts: [initiatorAddr],
@@ -121,8 +121,8 @@ export async function generateTxns({
   });
 
   const asset1InTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-    from: initiatorAddr,
-    to: poolAddress,
+    sender: initiatorAddr,
+    receiver: poolAddress,
     assetIndex: asset1In.id,
     amount: asset1In.amount,
     suggestedParams
@@ -132,15 +132,15 @@ export async function generateTxns({
 
   if (asset2In.id === ALGO_ASSET_ID) {
     asset2InTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-      from: initiatorAddr,
-      to: poolAddress,
+      sender: initiatorAddr,
+      receiver: poolAddress,
       amount: asset2In.amount,
       suggestedParams
     });
   } else {
     asset2InTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-      from: initiatorAddr,
-      to: poolAddress,
+      sender: initiatorAddr,
+      receiver: poolAddress,
       assetIndex: asset2In.id,
       amount: asset2In.amount,
       suggestedParams
@@ -148,16 +148,16 @@ export async function generateTxns({
   }
 
   const poolTokenOutTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-    from: poolAddress,
-    to: initiatorAddr,
+    sender: poolAddress,
+    receiver: initiatorAddr,
     assetIndex: <number>poolTokenOut.id,
     amount: poolTokenOutAmount,
     suggestedParams
   });
 
   const feeTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-    from: initiatorAddr,
-    to: poolAddress,
+    sender: initiatorAddr,
+    receiver: poolAddress,
     amount: validatorAppCallTxn.fee + poolTokenOutTxn.fee,
     note: DEFAULT_FEE_TXN_NOTE, // just here to make this unique from asset1In if necessary
     suggestedParams
@@ -249,7 +249,7 @@ export async function execute({
 }): Promise<V1_1AddLiquidityExecution> {
   try {
     const poolTokenOutAmount = BigInt(
-      txGroup[V1_1AddLiquidityTxnIndices.LIQUDITY_OUT_TXN].txn.amount
+      txGroup[V1_1AddLiquidityTxnIndices.LIQUDITY_OUT_TXN].txn.payment?.amount ?? 0
     );
 
     const prevExcessAssets = await getAccountExcessWithinPool({

@@ -15,12 +15,13 @@ export async function getFolksWrapperAppOptInRequiredAssetIDs({
   assetIDs: number[];
 }) {
   const wrapperAppAddress = getApplicationAddress(FOLKS_WRAPPER_APP_ID[network]);
-  const appOptedInAssetIDs = (
-    await getAccountInformation(client, wrapperAppAddress)
-  ).assets.map((asset) => asset["asset-id"]);
+  const appOptedInAssetIDs =
+    (await getAccountInformation(client, wrapperAppAddress.toString())).assets?.map(
+      (asset) => asset.assetId
+    ) ?? [];
 
   return assetIDs.filter(
     (assetID: number) =>
-      assetID !== ALGO_ASSET_ID && !appOptedInAssetIDs.includes(assetID)
+      assetID !== ALGO_ASSET_ID && !appOptedInAssetIDs.includes(BigInt(assetID))
   );
 }

@@ -86,21 +86,21 @@ async function generateTxns(
    */
   const inputTxn = isAssetInAlgo
     ? algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-        from: initiatorAddr,
-        to: poolAddress,
+        sender: initiatorAddr,
+        receiver: poolAddress,
         amount: assetInAmount,
         suggestedParams
       })
     : algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-        from: initiatorAddr,
-        to: poolAddress,
+        sender: initiatorAddr,
+        receiver: poolAddress,
         amount: assetInAmount,
         assetIndex: assetInID,
         suggestedParams
       });
 
   const appCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
-    from: initiatorAddr,
+    sender: initiatorAddr,
     appIndex: pool.validatorAppID,
     appArgs: [
       V2_SWAP_APP_CALL_ARG_ENCODED,
@@ -116,7 +116,7 @@ async function generateTxns(
     suggestedParams
   });
 
-  appCallTxn.fee = getSwapAppCallFeeAmount(swapType);
+  appCallTxn.fee = getSwapAppCallFeeAmount(swapType, suggestedParams.minFee);
 
   let txns: Transaction[] = [];
 

@@ -17,7 +17,7 @@ class TinymanTAlgoClient extends TinymanBaseClient {
 
     const txns = [
       algosdk.makeApplicationNoOpTxnFromObject({
-        from: userAddress,
+        sender: userAddress,
         appIndex: this.appId,
         appArgs: [encodeString("sync")],
         suggestedParams,
@@ -39,13 +39,13 @@ class TinymanTAlgoClient extends TinymanBaseClient {
     const txns = [
       ...(await this.getOptinTxnIfNeeded(userAddress, TALGO_ASSET_ID[this.network])),
       algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-        from: userAddress,
-        to: this.applicationAddress,
+        sender: userAddress,
+        receiver: this.applicationAddress,
         amount,
         suggestedParams
       }),
       algosdk.makeApplicationNoOpTxnFromObject({
-        from: userAddress,
+        sender: userAddress,
         appIndex: this.appId,
         appArgs: [encodeString("mint"), intToBytes(amount)],
         accounts: [
@@ -67,14 +67,14 @@ class TinymanTAlgoClient extends TinymanBaseClient {
 
     const txns = [
       algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-        from: userAddress,
-        to: this.applicationAddress,
+        sender: userAddress,
+        receiver: this.applicationAddress,
         assetIndex: TALGO_ASSET_ID[this.network],
         amount,
         suggestedParams
       }),
       algosdk.makeApplicationNoOpTxnFromObject({
-        from: userAddress,
+        sender: userAddress,
         appIndex: this.appId,
         appArgs: [encodeString("burn"), intToBytes(amount)],
         accounts: [
@@ -97,9 +97,7 @@ class TinymanTAlgoClient extends TinymanBaseClient {
    * @returns {Promise<number>} The current ALGO to tALGO ratio.
    */
   async getRatio(): Promise<number> {
-    return (
-      ((await this.getGlobal(encodeString("rate"))) as number) / STAKE_RATIO_COEFFICIENT
-    );
+    return Number(await this.getGlobal(encodeString("rate"))) / STAKE_RATIO_COEFFICIENT;
   }
 
   /**

@@ -113,7 +113,7 @@ function prepareCastVoteForStakingDistributionProposalTransactions({
 
   let txns = [
     makeApplicationNoOpTxnFromObject({
-      from: sender,
+      sender,
       suggestedParams,
       appIndex: stakingVotingAppId,
       appArgs: [
@@ -129,7 +129,7 @@ function prepareCastVoteForStakingDistributionProposalTransactions({
     })
   ];
 
-  txns[0].fee *= 2;
+  txns[0].fee *= 2n;
 
   if (boxes.length >= 7) {
     txns.push(
@@ -162,9 +162,9 @@ function prepareCastVoteForStakingDistributionProposalTransactions({
   if (paymentAmount) {
     txns = [
       makePaymentTxnWithSuggestedParamsFromObject({
-        from: sender,
+        sender,
+        receiver: getApplicationAddress(stakingVotingAppId),
         suggestedParams,
-        to: getApplicationAddress(stakingVotingAppId),
         amount: paymentAmount
       }),
       ...txns

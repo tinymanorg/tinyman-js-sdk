@@ -1,5 +1,3 @@
-import {ALGORAND_MIN_TX_FEE} from "algosdk";
-
 import {calculatePriceImpact} from "../../swap/common/utils";
 import {PoolReserves} from "../../util/pool/poolTypes";
 import {V2_LOCKED_POOL_TOKENS} from "../../util/pool/poolConstants";
@@ -158,19 +156,20 @@ function calculateInternalSwapFeeAmount(
 /**
  * @returns the fee that should be assigned to the app call transaction
  */
-export function getV2AddLiquidityAppCallFee(mode: V2AddLiquidityType) {
+export function getV2AddLiquidityAppCallFee(mode: V2AddLiquidityType, minFee: bigint) {
   const innerTxnCount = V2_ADD_LIQUIDITY_INNER_TXN_COUNT[mode];
 
   // Add +1 to the inner transaction count to account for the app call transaction
-  return (innerTxnCount + 1) * ALGORAND_MIN_TX_FEE;
+  return BigInt(innerTxnCount + 1) * minFee;
 }
 
 /**
  * @returns the total fee for the add liquidity operation including all transaction (including inner transactions) fees
  */
-export function getV2AddLiquidityTotalFee(mode: V2AddLiquidityType) {
-  const totalTxnCount =
-    V2_ADD_LIQUIDITY_INNER_TXN_COUNT[mode] + V2_ADD_LIQUIDITY_TXN_COUNT[mode];
+export function getV2AddLiquidityTotalFee(mode: V2AddLiquidityType, minFee: bigint) {
+  const totalTxnCount = BigInt(
+    V2_ADD_LIQUIDITY_INNER_TXN_COUNT[mode] + V2_ADD_LIQUIDITY_TXN_COUNT[mode]
+  );
 
-  return totalTxnCount * ALGORAND_MIN_TX_FEE;
+  return totalTxnCount * minFee;
 }

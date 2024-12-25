@@ -1,14 +1,15 @@
 import {Algodv2} from "algosdk";
 
 import {SignerTransaction, TinymanApiErrorShape} from "./commonTypes";
-import {AccountInformation} from "./account/accountTypes";
+import {AccountInformationData} from "./account/accountTypes";
 import TinymanError from "./error/TinymanError";
 
+// TODO: Check if final key returns the correct value
 export function decodeState({
   stateArray = [],
   shouldDecodeKeys = false
 }: {
-  stateArray: AccountInformation["apps-local-state"][0]["key-value"];
+  stateArray: AccountInformationData["appsLocalState"][0]["keyValue"];
   /**
    * If `true`, the returned object will have decoded keys instead of base64 encoded keys.
    */
@@ -31,7 +32,7 @@ export function decodeState({
       throw new Error(`Unexpected state type: ${pair.value.type}`);
     }
 
-    let finalKey = shouldDecodeKeys ? atob(key) : key;
+    let finalKey = shouldDecodeKeys ? Buffer.from(key).toString() : key.toString();
 
     state[finalKey] = value;
   }
@@ -62,22 +63,18 @@ const MIN_BALANCE_PER_APP = 100000n;
 const MIN_BALANCE_PER_APP_BYTESLICE = 25000n + 25000n;
 const MIN_BALANCE_PER_APP_UINT = 25000n + 3500n;
 
-export function getMinBalanceForAccount(accountInfo: any): bigint {
-  const totalSchema = accountInfo["apps-total-schema"];
+export function getMinBalanceForAccount(accountInfo: AccountInformationData): bigint {
+  const totalSchema = accountInfo.appsTotalSchema;
   let totalByteSlices = 0n;
   let totalUints = 0n;
 
   if (totalSchema) {
-    if (totalSchema["num-byte-slice"]) {
-      totalByteSlices = totalSchema["num-byte-slice"];
-    }
-    if (totalSchema["num-uint"]) {
-      totalUints = totalSchema["num-uint"];
-    }
+    totalByteSlices = BigInt(totalSchema.numByteSlice);
+    totalUints = BigInt(totalSchema.numUint);
   }
 
-  const localApps = accountInfo["apps-local-state"] || [];
-  const createdApps = accountInfo["created-apps"] || [];
+  const localApps = accountInfo.appsLocalState;
+  const createdApps = accountInfo.createdApps || [];
   const assets = accountInfo.assets || [];
 
   return (
@@ -124,14 +121,14 @@ export async function waitForConfirmation(
     }
 
     if (pendingTransactionInfo) {
-      if (pendingTransactionInfo["confirmed-round"]) {
+      if (pendingTransactionInfo.confirmedRound) {
         // Got the completed Transaction
         return pendingTransactionInfo;
       }
 
-      if (pendingTransactionInfo["pool-error"]) {
+      if (pendingTransactionInfo.poolError) {
         // If there was a pool error, then the transaction has been rejected
-        throw new Error(`Transaction Rejected: ${pendingTransactionInfo["pool-error"]}`);
+        throw new Error(`Transaction Rejected: ${pendingTransactionInfo.poolError}`);
       }
     }
   }
@@ -274,14 +271,14 @@ export async function sendAndWaitRawTransaction(
     }[] = [];
 
     for (let signedTxnGroup of signedTxnGroups) {
-      const {txId} = await client.sendRawTransaction(signedTxnGroup).do();
+      const {txid} = await client.sendRawTransaction(signedTxnGroup).do();
 
-      const status = await waitForConfirmation(client, txId);
-      const confirmedRound = status["confirmed-round"];
+      const status = await waitForConfirmation(client, txid);
+      const confirmedRound = Number(status.confirmedRound);
 
       networkResponse.push({
         confirmedRound,
-        txnID: txId
+        txnID: txid
       });
     }
 
@@ -295,7 +292,7 @@ export async function sendAndWaitRawTransaction(
 }
 
 export function sumUpTxnFees(txns: SignerTransaction[]): number {
-  return txns.reduce((totalFee, txDetail) => totalFee + txDetail.txn.fee, 0);
+  return txns.reduce((totalFee, txDetail) => totalFee + Number(txDetail.txn.fee), 0);
 }
 
 export function getTxnGroupID(txns: SignerTransaction[]) {

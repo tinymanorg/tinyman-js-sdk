@@ -39,14 +39,14 @@ class TinymanSTAlgoClient extends TinymanBaseClient {
       ...(await this.getApplyRateChangeTxnIfNeeded()),
       ...(await this.getOptinTxnIfNeeded(userAddress, STALGO_ASSET_ID[this.network])),
       algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-        from: userAddress,
-        to: this.applicationAddress,
+        sender: userAddress,
+        receiver: this.applicationAddress,
         amount,
         assetIndex: TALGO_ASSET_ID[this.network],
         suggestedParams
       }),
       algosdk.makeApplicationNoOpTxnFromObject({
-        from: userAddress,
+        sender: userAddress,
         appIndex: this.appId,
         appArgs: [encodeString("increase_stake"), intToBytes(amount)],
         foreignApps: [this.vaultAppId],
@@ -65,8 +65,8 @@ class TinymanSTAlgoClient extends TinymanBaseClient {
       };
 
       const boxPaymentTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-        from: userAddress,
-        to: this.applicationAddress,
+        sender: userAddress,
+        receiver: this.applicationAddress,
         suggestedParams,
         amount: this.calculateMinBalance({boxes: newBox})
       });
@@ -88,7 +88,7 @@ class TinymanSTAlgoClient extends TinymanBaseClient {
       ...(await this.getApplyRateChangeTxnIfNeeded()),
       ...(await this.getOptinTxnIfNeeded(userAddress, TALGO_ASSET_ID[this.network])),
       algosdk.makeApplicationNoOpTxnFromObject({
-        from: userAddress,
+        sender: userAddress,
         appIndex: this.appId,
         appArgs: [encodeString("decrease_stake"), intToBytes(amount)],
         foreignAssets: [TALGO_ASSET_ID[this.network], STALGO_ASSET_ID[this.network]],
@@ -108,7 +108,7 @@ class TinymanSTAlgoClient extends TinymanBaseClient {
       ...(await this.getApplyRateChangeTxnIfNeeded()),
       ...(await this.getOptinTxnIfNeeded(userAddress, TINY_ASSET_ID[this.network])),
       algosdk.makeApplicationNoOpTxnFromObject({
-        from: userAddress,
+        sender: userAddress,
         appIndex: this.appId,
         appArgs: [encodeString("claim_rewards")],
         foreignAssets: [TINY_ASSET_ID[this.network]],
@@ -124,7 +124,7 @@ class TinymanSTAlgoClient extends TinymanBaseClient {
     return this.setupTxnFeeAndAssignGroupId({txns, additionalFeeCount: 3});
   }
 
-  async calculateIncreaseStakeFee(accountAddress: string) {
+  async calculateIncreaseStakeFee(accountAddress: string, minFee: bigint) {
     const shouldApplyRateChange = await this.shouldApplyRateChange();
     const shouldOptin = !(await this.isOptedIn(
       accountAddress,
@@ -140,10 +140,10 @@ class TinymanSTAlgoClient extends TinymanBaseClient {
       Number(shouldOptin) +
       Number(!doesUserBoxExist);
 
-    return totalTxnCount * algosdk.ALGORAND_MIN_TX_FEE;
+    return totalTxnCount * Number(minFee);
   }
 
-  async calculateDecreaseStakeFee(accountAddress: string) {
+  async calculateDecreaseStakeFee(accountAddress: string, minFee: bigint) {
     const shouldApplyRateChange = await this.shouldApplyRateChange();
     const shouldOptin = !(await this.isOptedIn(
       accountAddress,
@@ -153,7 +153,7 @@ class TinymanSTAlgoClient extends TinymanBaseClient {
     const totalTxnCount =
       initialTxnCount + Number(shouldApplyRateChange) + Number(shouldOptin);
 
-    return totalTxnCount * algosdk.ALGORAND_MIN_TX_FEE;
+    return totalTxnCount * Number(minFee);
   }
 
   private getUserStateBoxName(userAddress: string) {
@@ -181,7 +181,7 @@ class TinymanSTAlgoClient extends TinymanBaseClient {
   private async getApplyRateChangeTxn() {
     const txns = [
       algosdk.makeApplicationNoOpTxnFromObject({
-        from: this.applicationAddress,
+        sender: this.applicationAddress,
         appIndex: this.appId,
         appArgs: [encodeString("apply_rate_change")],
         suggestedParams: await this.getSuggestedParams()

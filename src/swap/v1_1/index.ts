@@ -97,7 +97,7 @@ async function generateTxns({
   ];
 
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
-    from: poolAddress,
+    sender: poolAddress,
     appIndex: pool.validatorAppID!,
     appArgs: validatorAppCallArgs,
     accounts: [initiatorAddr],
@@ -117,15 +117,15 @@ async function generateTxns({
 
   if (assetInID === ALGO_ASSET_ID) {
     assetInTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-      from: initiatorAddr,
-      to: poolAddress,
+      sender: initiatorAddr,
+      receiver: poolAddress,
       amount: assetInAmount,
       suggestedParams
     });
   } else {
     assetInTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-      from: initiatorAddr,
-      to: poolAddress,
+      sender: initiatorAddr,
+      receiver: poolAddress,
       assetIndex: assetInID,
       amount: assetInAmount,
       suggestedParams
@@ -140,15 +140,15 @@ async function generateTxns({
 
   if (assetOutID === ALGO_ASSET_ID) {
     assetOutTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-      from: poolAddress,
-      to: initiatorAddr,
+      sender: poolAddress,
+      receiver: initiatorAddr,
       amount: assetOutAmount,
       suggestedParams
     });
   } else {
     assetOutTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-      from: poolAddress,
-      to: initiatorAddr,
+      sender: poolAddress,
+      receiver: initiatorAddr,
       assetIndex: assetOutID,
       amount: assetOutAmount,
       suggestedParams
@@ -156,8 +156,8 @@ async function generateTxns({
   }
 
   const feeTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-    from: initiatorAddr,
-    to: poolAddress,
+    sender: initiatorAddr,
+    receiver: poolAddress,
     amount: validatorAppCallTxn.fee + assetOutTxn.fee,
     note: DEFAULT_FEE_TXN_NOTE,
     suggestedParams
@@ -172,9 +172,9 @@ async function generateTxns({
 
   return [
     {txn: txGroup[0], signers: [initiatorAddr]},
-    {txn: txGroup[1], signers: [poolAddress]},
+    {txn: txGroup[1], signers: [poolAddress.toString()]},
     {txn: txGroup[2], signers: [initiatorAddr]},
-    {txn: txGroup[3], signers: [poolAddress]}
+    {txn: txGroup[3], signers: [poolAddress.toString()]}
   ];
 }
 
@@ -274,7 +274,7 @@ function getFixedInputSwapQuote({
   };
 
   const directSwapQuote: DirectSwapQuote = {
-    round: reserves.round,
+    round: Number(reserves.round),
     assetInID: assetIn.id,
     assetInAmount,
     assetOutID,
@@ -447,7 +447,7 @@ function getFixedOutputSwapQuote({
   const priceImpact = roundNumber({decimalPlaces: 5}, Math.abs(rate / poolPrice - 1));
 
   const directSwapQuote: DirectSwapQuote = {
-    round: reserves.round,
+    round: Number(reserves.round),
     assetInID,
     assetInAmount,
     assetOutID: assetOut.id,
@@ -583,13 +583,18 @@ async function execute({
 
   try {
     const assetIn: AssetWithIdAndAmount = {
-      id: txGroup[SwapTxnGroupIndices.ASSET_IN_TXN_INDEX].txn.assetIndex || ALGO_ASSET_ID,
-      amount: txGroup[SwapTxnGroupIndices.ASSET_IN_TXN_INDEX].txn.amount
+      id:
+        Number(
+          txGroup[SwapTxnGroupIndices.ASSET_IN_TXN_INDEX].txn.assetConfig!.assetIndex
+        ) || ALGO_ASSET_ID,
+      amount: txGroup[SwapTxnGroupIndices.ASSET_IN_TXN_INDEX].txn.payment?.amount ?? 0
     };
     const assetOut: AssetWithIdAndAmount = {
       id:
-        txGroup[SwapTxnGroupIndices.ASSET_OUT_TXN_INDEX].txn.assetIndex || ALGO_ASSET_ID,
-      amount: txGroup[SwapTxnGroupIndices.ASSET_OUT_TXN_INDEX].txn.amount
+        Number(
+          txGroup[SwapTxnGroupIndices.ASSET_OUT_TXN_INDEX].txn.assetConfig!.assetIndex
+        ) || ALGO_ASSET_ID,
+      amount: txGroup[SwapTxnGroupIndices.ASSET_OUT_TXN_INDEX].txn.payment?.amount ?? 0
     };
     let swapData: Omit<V1SwapExecution, "fees" | "groupID">;
 

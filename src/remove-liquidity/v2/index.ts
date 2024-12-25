@@ -1,4 +1,4 @@
-import algosdk, {Algodv2, ALGORAND_MIN_TX_FEE, Transaction} from "algosdk";
+import algosdk, {Algodv2, Transaction} from "algosdk";
 
 import {tinymanJSSDKConfig} from "../../config";
 import {CONTRACT_VERSION} from "../../contract/constants";
@@ -40,7 +40,7 @@ function getQuote({
   );
 
   return {
-    round: reserves.round,
+    round: Number(reserves.round),
     asset1Out: {assetId: pool.asset1ID, amount: asset1OutputAmount},
     asset2Out: {assetId: pool.asset2ID, amount: asset2OutputAmount},
     poolTokenIn: {assetId: pool.poolTokenID!, amount: poolTokenIn_bigInt}
@@ -80,7 +80,7 @@ function getSingleAssetRemoveLiquidityQuote({
       });
 
     quote = {
-      round: reserves.round,
+      round: Number(reserves.round),
       assetOut: {assetId: assetOutID, amount: asset1OutputAmount + swapOutputAmount},
       poolTokenIn: {assetId: pool.poolTokenID!, amount: poolTokenIn_bigInt},
       internalSwapQuote: {
@@ -101,7 +101,7 @@ function getSingleAssetRemoveLiquidityQuote({
       });
 
     quote = {
-      round: reserves.round,
+      round: Number(reserves.round),
       assetOut: {assetId: assetOutID, amount: asset2OutputAmount + swapOutputAmount},
       poolTokenIn: {assetId: pool.poolTokenID!, amount: poolTokenIn_bigInt},
       internalSwapQuote: {
@@ -169,15 +169,15 @@ async function generateTxns({
   }
 
   const assetTransferTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-    from: initiatorAddr,
-    to: poolAddress,
+    sender: initiatorAddr,
+    receiver: poolAddress,
     assetIndex: poolTokenId,
     amount: poolTokenIn,
     suggestedParams
   });
 
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
-    from: initiatorAddr,
+    sender: initiatorAddr,
     appIndex: pool.validatorAppID,
     note: tinymanJSSDKConfig.getAppCallTxnNoteWithClientName(CONTRACT_VERSION.V2),
     appArgs: [
@@ -192,7 +192,7 @@ async function generateTxns({
 
   // Add + 1 for outer txn cost
   validatorAppCallTxn.fee =
-    (V2_REMOVE_LIQUIDITY_APP_CALL_INNER_TXN_COUNT + 1) * ALGORAND_MIN_TX_FEE;
+    BigInt(V2_REMOVE_LIQUIDITY_APP_CALL_INNER_TXN_COUNT + 1) * suggestedParams.minFee;
 
   const txns: Transaction[] = [];
 
@@ -262,15 +262,15 @@ async function generateSingleAssetOutTxns({
   }
 
   const assetTransferTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-    from: initiatorAddr,
-    to: poolAddress,
+    sender: initiatorAddr,
+    receiver: poolAddress,
     assetIndex: poolTokenId,
     amount: poolTokenIn,
     suggestedParams
   });
 
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
-    from: initiatorAddr,
+    sender: initiatorAddr,
     appIndex: pool.validatorAppID,
     note: tinymanJSSDKConfig.getAppCallTxnNoteWithClientName(CONTRACT_VERSION.V2),
     appArgs: [
@@ -285,7 +285,7 @@ async function generateSingleAssetOutTxns({
 
   // Add + 1 for outer txn cost
   validatorAppCallTxn.fee =
-    (V2_REMOVE_LIQUIDITY_APP_CALL_INNER_TXN_COUNT + 1) * ALGORAND_MIN_TX_FEE;
+    BigInt(V2_REMOVE_LIQUIDITY_APP_CALL_INNER_TXN_COUNT + 1) * suggestedParams.minFee;
 
   const txns: Transaction[] = [];
 

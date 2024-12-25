@@ -34,7 +34,7 @@ export interface PoolReserves {
   asset1: bigint;
   asset2: bigint;
   issuedLiquidity: bigint;
-  round: number;
+  round: bigint;
 }
 
 export interface PoolAssets {

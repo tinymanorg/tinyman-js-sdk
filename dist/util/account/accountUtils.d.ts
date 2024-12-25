@@ -1,13 +1,12 @@
-import { Algodv2, IntDecoding } from "algosdk";
-import { V1PoolInfo } from "../pool/poolTypes";
-import { AccountExcessWithinPool, AccountInformation, AccountInformationData, AccountExcess } from "./accountTypes";
+import { Algodv2 } from "algosdk";
 import { ContractVersionValue } from "../../contract/types";
-export declare function getAccountInformation(client: Algodv2, address: string, intDecoding?: IntDecoding): Promise<AccountInformationData>;
+import { V1PoolInfo } from "../pool/poolTypes";
+import { AccountExcess, AccountExcessWithinPool, AccountInformationData } from "./accountTypes";
+export declare function getAccountInformation(client: Algodv2, address: string): Promise<AccountInformationData>;
 /**
  * @returns the decoded application local state object (both keys and values are decoded)
  */
 export declare function getDecodedAccountApplicationLocalState(accountInfo: AccountInformationData, validatorAppID: number): Record<string, string | number> | null;
-export declare function calculateAccountMinimumRequiredBalance(account: AccountInformation): number;
 export declare function hasSufficientMinimumBalance(accountData: AccountInformationData): boolean;
 /**
  * Finds the excess amounts accumulated for an account within a pool
@@ -31,7 +30,7 @@ export declare function getAccountExcessWithinPool({ client, pool, accountAddr }
 export declare function getAccountExcess({ client, accountAddr, validatorAppID }: {
     client: Algodv2;
     accountAddr: string;
-    validatorAppID: number;
+    validatorAppID: bigint;
 }): Promise<AccountExcess[]>;
 /**
  * Checks if an account is opted into an app.
@@ -42,7 +41,7 @@ export declare function getAccountExcess({ client, accountAddr, validatorAppID }
  */
 export declare function isAccountOptedIntoApp({ appID, accountAppsLocalState }: {
     appID: number;
-    accountAppsLocalState: AccountInformation["apps-local-state"];
+    accountAppsLocalState: AccountInformationData["appsLocalState"];
 }): boolean;
 /**
  * @returns the minimum balance required to opt in to an app or asset (decided by `type`)

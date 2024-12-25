@@ -75,28 +75,28 @@ export async function generateTxns({
   const isAlgoPool = isAlgo(pool.asset2ID);
   const suggestedParams = await client.getTransactionParams().do();
   const asset1InTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-    from: initiatorAddr,
-    to: poolAddress,
+    sender: initiatorAddr,
+    receiver: poolAddress,
     assetIndex: pool.asset1ID,
     amount: asset1In.amount,
     suggestedParams
   });
   const asset2InTxn = isAlgoPool
     ? algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-        from: initiatorAddr,
-        to: poolAddress,
+        sender: initiatorAddr,
+        receiver: poolAddress,
         amount: asset2In.amount,
         suggestedParams
       })
     : algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-        from: initiatorAddr,
-        to: poolAddress,
+        sender: initiatorAddr,
+        receiver: poolAddress,
         assetIndex: pool.asset2ID,
         amount: asset2In.amount,
         suggestedParams
       });
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
-    from: initiatorAddr,
+    sender: initiatorAddr,
     appIndex: getValidatorAppID(network, CONTRACT_VERSION.V2),
     appArgs: ADD_LIQUIDITY_APP_CALL_ARGUMENTS.v2.INITIAL_LIQUIDITY,
     note: tinymanJSSDKConfig.getAppCallTxnNoteWithClientName(CONTRACT_VERSION.V2),
@@ -105,7 +105,10 @@ export async function generateTxns({
     suggestedParams
   });
 
-  validatorAppCallTxn.fee = getV2AddLiquidityAppCallFee(V2AddLiquidityType.INITIAL);
+  validatorAppCallTxn.fee = getV2AddLiquidityAppCallFee(
+    V2AddLiquidityType.INITIAL,
+    suggestedParams.minFee
+  );
 
   return algosdk
     .assignGroupID([asset1InTxn, asset2InTxn, validatorAppCallTxn])

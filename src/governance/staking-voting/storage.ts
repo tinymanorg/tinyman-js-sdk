@@ -1,5 +1,4 @@
-import {decodeAddress} from "algosdk";
-import AlgodClient from "algosdk/dist/types/client/v2/algod/algod";
+import {Algodv2, decodeAddress} from "algosdk";
 
 import {encodeString} from "../../util/util";
 import {getProposalBoxName} from "../proposal-voting/storage";
@@ -77,7 +76,7 @@ function parseBoxStakingDistributionProposal(
 }
 
 async function getStakingDistributionProposal(
-  algod: AlgodClient,
+  algod: Algodv2,
   appId: number,
   proposalId: string
 ) {

@@ -1,4 +1,4 @@
-import AlgodClient from "algosdk/dist/types/client/v2/algod/algod";
+import { Algodv2 } from "algosdk";
 export declare class Proposal {
     index: number;
     creationTimestamp: number;
@@ -35,4 +35,4 @@ export declare class ProposalVotingAppGlobalState {
 }
 export declare function getProposalBoxName(proposalId: string): Uint8Array;
 export declare function getAttendanceSheetBoxName(address: string, boxIndex: number): Uint8Array;
-export declare function getProposal(client: AlgodClient, appId: number, proposalId: string): Promise<Proposal | null>;
+export declare function getProposal(client: Algodv2, appId: number, proposalId: string): Promise<Proposal | null>;

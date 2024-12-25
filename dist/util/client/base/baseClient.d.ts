@@ -1,15 +1,14 @@
-import algosdk from "algosdk";
-import AlgodClient from "algosdk/dist/types/client/v2/algod/algod";
+import algosdk, { Algodv2 } from "algosdk";
 import { SupportedNetwork } from "../../commonTypes";
-import { Struct } from "./utils";
 import { StructDefinition } from "./types";
+import { Struct } from "./utils";
 declare abstract class TinymanBaseClient {
-    algod: AlgodClient;
+    algod: Algodv2;
     appId: number;
-    applicationAddress: string;
+    applicationAddress: algosdk.Address;
     network: SupportedNetwork;
     readonly structs: Record<string, StructDefinition> | undefined;
-    constructor(algod: AlgodClient, appId: number, network: SupportedNetwork, structs?: Record<string, StructDefinition>);
+    constructor(algod: Algodv2, appId: number, network: SupportedNetwork, structs?: Record<string, StructDefinition>);
     protected setupTxnFeeAndAssignGroupId({ txns, additionalFeeCount }: {
         txns: algosdk.Transaction[];
         additionalFeeCount?: number;
@@ -24,6 +23,6 @@ declare abstract class TinymanBaseClient {
     protected getBox(boxName: Uint8Array, structName: string, appId?: number): Promise<Struct | null>;
     protected getOptinTxnIfNeeded(sender: string, assetId: number): Promise<algosdk.Transaction[]>;
     protected isOptedIn(accountAddress: string, assetId: number): Promise<boolean>;
-    protected getSuggestedParams(): Promise<import("algosdk/dist/types/types/transactions/base").SuggestedParamsWithMinFee>;
+    protected getSuggestedParams(): Promise<import("algosdk/dist/types/client/v2/algod/suggestedParams").SuggestedParamsFromAlgod>;
 }
 export default TinymanBaseClient;

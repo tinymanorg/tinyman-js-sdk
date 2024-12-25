@@ -1,24 +1,23 @@
-import algosdk, {getApplicationAddress, Transaction} from "algosdk";
-import AlgodClient from "algosdk/dist/types/client/v2/algod/algod";
-import {fromByteArray, toByteArray} from "base64-js";
+import algosdk, {Algodv2, getApplicationAddress, Transaction} from "algosdk";
 
 import {SupportedNetwork} from "../../commonTypes";
-import {getBoxCosts, getStruct, Struct} from "./utils";
 import {
   MINIMUM_BALANCE_REQUIREMENT_PER_ACCOUNT,
   MINIMUM_BALANCE_REQUIREMENT_PER_ASSET
 } from "./constants";
 import {StructDefinition} from "./types";
+import {getBoxCosts, getStruct, Struct} from "./utils";
+import {areBuffersEqual} from "../../../governance/util/utils";
 
 abstract class TinymanBaseClient {
-  algod: AlgodClient;
+  algod: Algodv2;
   appId: number;
-  applicationAddress: string;
+  applicationAddress: algosdk.Address;
   network: SupportedNetwork;
   readonly structs: Record<string, StructDefinition> | undefined;
 
   constructor(
-    algod: AlgodClient,
+    algod: Algodv2,
     appId: number,
     network: SupportedNetwork,
     structs?: Record<string, StructDefinition>
@@ -40,12 +39,12 @@ abstract class TinymanBaseClient {
     const {fee} = txns[0];
 
     const transactions = txns.map((txn) => {
-      txn.fee = 0;
+      txn.fee = 0n;
 
       return txn;
     });
 
-    transactions[0].fee = (transactions.length + additionalFeeCount) * fee;
+    transactions[0].fee = BigInt(transactions.length + additionalFeeCount) * fee;
 
     return algosdk.assignGroupID(transactions);
   }
@@ -54,21 +53,18 @@ abstract class TinymanBaseClient {
     const applicationId = appId || this.appId;
 
     const applicationInfo = await this.algod.getApplicationByID(applicationId).do();
-    const globalState = applicationInfo.params["global-state"];
+    const globalState = applicationInfo.params.globalState ?? [];
 
-    const searchKey = fromByteArray(key);
-
-    const searchValue = globalState.find(
-      (item: Record<string, any>) => item.key === searchKey
+    const searchValue = globalState.find((item: algosdk.modelsv2.TealKeyValue) =>
+      areBuffersEqual(item.key, key)
     )?.value;
 
     if (searchValue) {
-      // eslint-disable-next-line no-magic-numbers
       if (searchValue.type === 2) {
         return searchValue.uint;
       }
 
-      return toByteArray(searchValue.bytes);
+      return searchValue.bytes;
     }
 
     return defaultValue;
@@ -135,8 +131,8 @@ abstract class TinymanBaseClient {
 
       txn.push(
         algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-          from: sender,
-          to: sender,
+          sender,
+          receiver: sender,
           assetIndex: assetId,
           amount: 0,
           suggestedParams
