@@ -11,6 +11,8 @@ declare class TinymanSTAlgoClient extends TinymanBaseClient {
     calculateDecreaseStakeFee(accountAddress: string, minFee: bigint): Promise<number>;
     private getUserStateBoxName;
     private getApplyRateChangeTxnIfNeeded;
+    private getUserBoxPaymentTxnIfNeeded;
+    private getUserBoxPaymentTxn;
     private shouldApplyRateChange;
     private getApplyRateChangeTxn;
 }

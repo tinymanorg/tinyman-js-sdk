@@ -33,10 +33,9 @@ class TinymanSTAlgoClient extends TinymanBaseClient {
     const suggestedParams = await this.getSuggestedParams();
     const userStateBoxName = this.getUserStateBoxName(userAddress);
 
-    let newBox: Record<string, Struct> = {};
-
     const txns = [
       ...(await this.getApplyRateChangeTxnIfNeeded()),
+      ...(await this.getUserBoxPaymentTxnIfNeeded(userAddress, suggestedParams)),
       ...(await this.getOptinTxnIfNeeded(userAddress, STALGO_ASSET_ID[this.network])),
       algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
         sender: userAddress,
@@ -59,25 +58,12 @@ class TinymanSTAlgoClient extends TinymanBaseClient {
       })
     ];
 
-    if (!(await this.boxExists(userStateBoxName))) {
-      newBox = {
-        [fromByteArray(userStateBoxName)]: USER_STATE
-      };
-
-      const boxPaymentTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-        sender: userAddress,
-        receiver: this.applicationAddress,
-        suggestedParams,
-        amount: this.calculateMinBalance({boxes: newBox})
-      });
-
-      txns.splice(1, 0, boxPaymentTxn);
-    }
-
-    return this.setupTxnFeeAndAssignGroupId({
-      txns,
-      additionalFeeCount: 2
-    });
+    return Promise.all(
+      this.setupTxnFeeAndAssignGroupId({
+        txns,
+        additionalFeeCount: 2
+      })
+    );
   }
 
   async decreaseStake(amount: number, userAddress: string) {
@@ -97,7 +83,7 @@ class TinymanSTAlgoClient extends TinymanBaseClient {
       })
     ];
 
-    return this.setupTxnFeeAndAssignGroupId({txns, additionalFeeCount: 2});
+    return Promise.all(this.setupTxnFeeAndAssignGroupId({txns, additionalFeeCount: 2}));
   }
 
   async claimRewards(userAddress: string) {
@@ -121,7 +107,7 @@ class TinymanSTAlgoClient extends TinymanBaseClient {
       })
     ];
 
-    return this.setupTxnFeeAndAssignGroupId({txns, additionalFeeCount: 3});
+    return Promise.all(this.setupTxnFeeAndAssignGroupId({txns, additionalFeeCount: 3}));
   }
 
   async calculateIncreaseStakeFee(accountAddress: string, minFee: bigint) {
@@ -133,7 +119,7 @@ class TinymanSTAlgoClient extends TinymanBaseClient {
     const doesUserBoxExist = await this.boxExists(
       this.getUserStateBoxName(accountAddress)
     );
-    const initialTxnCount = 3;
+    const initialTxnCount = 4;
     const totalTxnCount =
       initialTxnCount +
       Number(shouldApplyRateChange) +
@@ -166,6 +152,38 @@ class TinymanSTAlgoClient extends TinymanBaseClient {
     }
 
     return [];
+  }
+
+  private async getUserBoxPaymentTxnIfNeeded(
+    userAddress: string,
+    suggestedParams: algosdk.SuggestedParams
+  ) {
+    const userStateBoxName = this.getUserStateBoxName(userAddress);
+
+    if (!(await this.boxExists(userStateBoxName))) {
+      return this.getUserBoxPaymentTxn(userStateBoxName, userAddress, suggestedParams);
+    }
+
+    return [];
+  }
+
+  private getUserBoxPaymentTxn(
+    userStateBoxName: Uint8Array,
+    userAddress: string,
+    suggestedParams: algosdk.SuggestedParams
+  ) {
+    const newBox: Record<string, Struct> = {
+      [fromByteArray(userStateBoxName)]: USER_STATE
+    };
+
+    const boxPaymentTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+      sender: userAddress,
+      receiver: this.applicationAddress,
+      suggestedParams,
+      amount: this.calculateMinBalance({boxes: newBox})
+    });
+
+    return [boxPaymentTxn];
   }
 
   private async shouldApplyRateChange() {

@@ -175,7 +175,6 @@ export function convertFromBaseUnits(
 
   return roundNumber(
     {decimalPlaces: decimals},
-    // eslint-disable-next-line no-magic-numbers
     Math.pow(10, -decimals) * Number(quantity)
   );
 }
@@ -187,7 +186,6 @@ export function convertToBaseUnits(
   assetDecimals: number | bigint,
   quantity: number | bigint
 ) {
-  // eslint-disable-next-line no-magic-numbers
   const baseAmount = Math.pow(10, Number(assetDecimals)) * Number(quantity);
 
   // make sure the final value is an integer. This prevents this kind of computation errors: 0.0012 * 100000 = 119.99999999999999 and rounds this result into 120
