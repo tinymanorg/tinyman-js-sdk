@@ -1,4 +1,4 @@
-import {Algodv2} from "algosdk";
+import {Algodv2, bytesToBase64} from "algosdk";
 
 import {SignerTransaction, TinymanApiErrorShape} from "./commonTypes";
 import {AccountInformationData} from "./account/accountTypes";
@@ -32,7 +32,7 @@ export function decodeState({
       throw new Error(`Unexpected state type: ${pair.value.type}`);
     }
 
-    let finalKey = shouldDecodeKeys ? Buffer.from(key).toString() : key.toString();
+    let finalKey = shouldDecodeKeys ? Buffer.from(key).toString() : bytesToBase64(key);
 
     state[finalKey] = value;
   }
@@ -294,7 +294,7 @@ export function sumUpTxnFees(txns: SignerTransaction[]): number {
 }
 
 export function getTxnGroupID(txns: SignerTransaction[]) {
-  return bufferToBase64(txns[0].txn.group);
+  return bufferToBase64(txns[0].txn.group?.buffer);
 }
 
 export function encodeInteger(number: bigint) {

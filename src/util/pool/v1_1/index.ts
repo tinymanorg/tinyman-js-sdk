@@ -1,23 +1,23 @@
 import algosdk, {Algodv2} from "algosdk";
 import {fromByteArray} from "base64-js";
 
-import {PoolReserves, PoolStatus, PoolAssets, V1PoolInfo} from "../poolTypes";
 import {getContract} from "../../../contract";
+import {CONTRACT_VERSION} from "../../../contract/constants";
+import {getValidatorAppID} from "../../../validator";
 import {
   getAccountInformation,
   getDecodedAccountApplicationLocalState
 } from "../../account/accountUtils";
 import {sortAssetIds} from "../../asset/assetUtils";
+import {SupportedNetwork} from "../../commonTypes";
 import {
   decodeState,
-  joinByteArrays,
+  encodeString,
   getMinBalanceForAccount,
-  encodeString
+  joinByteArrays
 } from "../../util";
 import {DECODED_APP_STATE_KEYS} from "../poolConstants";
-import {CONTRACT_VERSION} from "../../../contract/constants";
-import {SupportedNetwork} from "../../commonTypes";
-import {getValidatorAppID} from "../../../validator";
+import {PoolAssets, PoolReserves, PoolStatus, V1PoolInfo} from "../poolTypes";
 
 const OUTSTANDING_ENCODED = encodeString("o");
 const TOTAL_LIQUIDITY = 0xffffffffffffffffn;
@@ -39,7 +39,8 @@ export async function getPoolInfo(params: {
     accountInformation,
     validatorAppID
   );
-  const poolTokenID = accountInformation.createdAssets
+
+  const poolTokenID = accountInformation.createdAssets?.length
     ? Number(accountInformation.createdAssets[0].index)
     : undefined;
   let result: V1PoolInfo = {
@@ -53,8 +54,8 @@ export async function getPoolInfo(params: {
   };
 
   if (appState) {
-    result.asset1ID = appState[DECODED_APP_STATE_KEYS.v1_1.asset1] as number;
-    result.asset2ID = appState[DECODED_APP_STATE_KEYS.v1_1.asset2] as number;
+    result.asset1ID = Number(appState[DECODED_APP_STATE_KEYS.v1_1.asset1]);
+    result.asset2ID = Number(appState[DECODED_APP_STATE_KEYS.v1_1.asset2]);
   }
 
   return result;
