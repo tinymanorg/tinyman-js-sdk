@@ -40,6 +40,9 @@ enum SwapTxnGroupIndices {
   ASSET_OUT_TXN_INDEX
 }
 
+/**
+ * @deprecated Use `generateTxns` in V2 instead. This will be removed soon.
+ */
 async function signTxns({
   pool,
   txGroup,
@@ -66,6 +69,9 @@ async function signTxns({
   return signedTxns;
 }
 
+/**
+ * @deprecated Use `generateTxns` in V2 instead. This will be removed soon.
+ */
 async function generateTxns({
   client,
   quoteAndPool,
@@ -179,6 +185,7 @@ async function generateTxns({
 }
 
 /**
+ * @deprecated Use `getQuote` in V2 instead. This will be removed soon.
  *
  * @param type - Type of the swap
  * @param pool - Information for the pool.
@@ -208,6 +215,8 @@ function getQuote(
 }
 
 /**
+ * @deprecated Use `getFixedInputSwapQuote` in V2 instead. This will be removed soon.
+ *
  * Get a quote for a fixed input swap This does not execute any transactions.
  *
  * @param params.pool Information for the pool.
@@ -298,6 +307,7 @@ function getFixedInputSwapQuote({
 }
 
 /**
+ * @deprecated
  * Execute a fixed input swap with the desired quantities.
  *
  * @param params.client An Algodv2 client.
@@ -373,6 +383,8 @@ async function executeFixedInputSwap({
   };
 }
 /**
+ * @deprecated Use `getFixedOutputSwapQuote` in V2 instead. This will be removed soon.
+ *
  * Get a quote for a fixed output swap This does not execute any transactions.
  *
  * @param params.pool Information for the pool.
@@ -467,6 +479,7 @@ function getFixedOutputSwapQuote({
 }
 
 /**
+ * @deprecated
  * Execute a fixed output swap with the desired quantities.
  *
  * @param params.client An Algodv2 client.
@@ -545,6 +558,8 @@ async function executeFixedOutputSwap({
 }
 
 /**
+ * @deprecated Use `execute` in V2 instead. This will be removed soon.
+ *
  * Execute a swap with the desired quantities.
  *
  * @param params.client An Algodv2 client.

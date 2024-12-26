@@ -1,5 +1,9 @@
 import algosdk, {SuggestedParams, Transaction, getApplicationAddress} from "algosdk";
 
+import {encodeString, joinByteArrays} from "../../util/util";
+import {prepareBudgetIncreaseTxn} from "../transactions";
+import {intToBytes} from "../util/utils";
+import {ACCOUNT_POWER_BOX_ARRAY_LEN} from "../vault/constants";
 import {getAccountPowerBoxName, getAccountStateBoxName} from "../vault/storage";
 import {
   REWARD_CLAIM_SHEET_BOX_COST,
@@ -7,11 +11,6 @@ import {
   REWARD_PERIOD_BOX_ARRAY_LEN
 } from "./constants";
 import {getAccountRewardClaimSheetBoxName, getRewardPeriodBoxName} from "./storage";
-import {ACCOUNT_POWER_BOX_ARRAY_LEN} from "../vault/constants";
-import {intToBytes} from "../util/utils";
-import {prepareBudgetIncreaseTxn} from "../transactions";
-import {concatUint8Arrays} from "../utils";
-import {encodeString} from "../../util/util";
 
 function prepareClaimRewardsTransactions({
   rewardsAppId,
@@ -117,7 +116,7 @@ function prepareClaimRewardsTransactions({
         encodeString("claim_rewards"),
         intToBytes(periodIndexStart),
         intToBytes(periodCount),
-        concatUint8Arrays(...accountPowerIndexes.map((number) => intToBytes(number)))
+        joinByteArrays(...accountPowerIndexes.map((number) => intToBytes(number)))
       ],
       foreignApps: [vaultAppId],
       foreignAssets: [tinyAssetId],

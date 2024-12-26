@@ -1,9 +1,9 @@
 import {Algodv2, decodeAddress} from "algosdk";
 
-import {encodeString} from "../../util/util";
+import {encodeString, joinByteArrays} from "../../util/util";
 import {getProposalBoxName} from "../proposal-voting/storage";
 import {bytesToInt, intToBytes} from "../util/utils";
-import {concatUint8Arrays, getRawBoxValue} from "../utils";
+import {getRawBoxValue} from "../utils";
 import {
   PROPOSAL_BOX_PREFIX,
   STAKING_ATTENDANCE_BOX_PREFIX,
@@ -40,11 +40,11 @@ class StakingDistributionProposal {
 }
 
 function getStakingDistributionProposalBoxName(proposalId: string): Uint8Array {
-  return concatUint8Arrays(PROPOSAL_BOX_PREFIX, encodeString(proposalId));
+  return joinByteArrays(PROPOSAL_BOX_PREFIX, encodeString(proposalId));
 }
 
 function getStakingAttendanceSheetBoxName(sender: string, boxIndex: number) {
-  return concatUint8Arrays(
+  return joinByteArrays(
     STAKING_ATTENDANCE_BOX_PREFIX,
     decodeAddress(sender).publicKey,
     intToBytes(boxIndex)
@@ -52,7 +52,7 @@ function getStakingAttendanceSheetBoxName(sender: string, boxIndex: number) {
 }
 
 function getStakingVoteBoxName(proposalIndex: number, assetId: number): Uint8Array {
-  return concatUint8Arrays(
+  return joinByteArrays(
     STAKING_VOTE_BOX_PREFIX,
     intToBytes(proposalIndex),
     intToBytes(assetId)

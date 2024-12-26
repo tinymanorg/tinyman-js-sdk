@@ -57,11 +57,11 @@ function getSwapQuotePriceImpact(quote: SwapQuote) {
 
 function getAssetInFromSwapQuote(quote: SwapQuote): AssetWithIdAndAmount {
   if (quote.type === SwapQuoteType.Router) {
-    const assetIn = getAssetInFromSwapRoute(quote.data.route);
+    const assetIn = getAssetInFromSwapRoute(quote.data);
 
     return {
       id: getAssetId(assetIn.asset),
-      amount: Number(assetIn.amount)
+      amount: assetIn.amount
     };
   }
 
@@ -73,11 +73,11 @@ function getAssetInFromSwapQuote(quote: SwapQuote): AssetWithIdAndAmount {
 
 function getAssetOutFromSwapQuote(quote: SwapQuote): AssetWithIdAndAmount {
   if (quote.type === SwapQuoteType.Router) {
-    const assetOut = getAssetOutFromSwapRoute(quote.data.route);
+    const assetOut = getAssetOutFromSwapRoute(quote.data);
 
     return {
       id: getAssetId(assetOut.asset),
-      amount: Number(assetOut.amount)
+      amount: assetOut.amount
     };
   }
 
@@ -139,7 +139,7 @@ function getSwapQuoteRate(quote: SwapQuote): number {
     return quote.data.quote.rate;
   }
 
-  return getSwapRouteRate(quote.data.route);
+  return getSwapRouteRate(quote.data);
 }
 
 /**
@@ -175,15 +175,15 @@ function isSwapQuoteErrorCausedByAmount(error: Error): boolean {
 }
 
 export {
-  calculateSwapRate,
   calculatePriceImpact,
-  getSwapQuotePriceImpact,
+  calculateSwapRate,
+  getAssetInAndAssetOutFromSwapQuote,
   getAssetInFromSwapQuote,
   getAssetOutFromSwapQuote,
-  getAssetInAndAssetOutFromSwapQuote,
-  getSwapQuoteContractVersion,
-  getSwapTotalFee,
-  getSwapQuoteRate,
   getBestQuote,
+  getSwapQuoteContractVersion,
+  getSwapQuotePriceImpact,
+  getSwapQuoteRate,
+  getSwapTotalFee,
   isSwapQuoteErrorCausedByAmount
 };

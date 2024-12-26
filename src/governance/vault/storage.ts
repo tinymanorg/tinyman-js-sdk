@@ -1,7 +1,8 @@
 import {Algodv2, bytesToBigInt, decodeAddress} from "algosdk";
 
+import {joinByteArrays} from "../../util/util";
 import {intToBytes} from "../util/utils";
-import {concatUint8Arrays, getCumulativePowerDelta, getRawBoxValue} from "../utils";
+import {getCumulativePowerDelta, getRawBoxValue} from "../utils";
 import {
   ACCOUNT_POWER_BOX_ARRAY_LEN,
   ACCOUNT_POWER_SIZE,
@@ -206,7 +207,7 @@ function parseBoxSlopeChange(rawBox: Uint8Array) {
 }
 
 function getSlopeChangeBoxName(timestamp: number) {
-  return concatUint8Arrays(SLOPE_CHANGES, intToBytes(timestamp));
+  return joinByteArrays(SLOPE_CHANGES, intToBytes(timestamp));
 }
 
 async function getAllTotalPowers(

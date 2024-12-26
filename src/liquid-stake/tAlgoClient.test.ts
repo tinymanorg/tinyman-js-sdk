@@ -162,7 +162,6 @@ describe("TinymanTAlgoClient", () => {
     const finalTAlgoAccountAsset = finalAccountInfo.assets.find(
       (asset) => asset.assetId === BigInt(TALGO_ASSET_ID[network])
     );
-
     const expectedAlgoAmount = Math.floor(burnAmount / ratio);
 
     // Check if the account has the correct amount of ALGOs

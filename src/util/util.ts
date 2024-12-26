@@ -40,11 +40,9 @@ export function decodeState({
   return state;
 }
 
-export function joinByteArrays(arrays: Uint8Array[]) {
+export function joinByteArrays(...arrays: Uint8Array[]): Uint8Array {
   let totalLength = arrays.reduce((sum, value) => sum + value.length, 0);
-
-  let result = new Uint8Array(totalLength);
-
+  const result = new Uint8Array(totalLength);
   // for each array - copy it over result
   // next array is copied right after the previous one
   let length = 0;

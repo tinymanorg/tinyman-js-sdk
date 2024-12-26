@@ -85,13 +85,13 @@ export async function getPoolReserves(
     const state = decodeState({stateArray: keyValue});
 
     const outstandingAsset1Key = fromByteArray(
-      joinByteArrays([OUTSTANDING_ENCODED, algosdk.encodeUint64(pool.asset1ID)])
+      joinByteArrays(OUTSTANDING_ENCODED, algosdk.encodeUint64(pool.asset1ID))
     );
     const outstandingAsset2Key = fromByteArray(
-      joinByteArrays([OUTSTANDING_ENCODED, algosdk.encodeUint64(pool.asset2ID)])
+      joinByteArrays(OUTSTANDING_ENCODED, algosdk.encodeUint64(pool.asset2ID))
     );
     const outstandingPoolTokenKey = fromByteArray(
-      joinByteArrays([OUTSTANDING_ENCODED, algosdk.encodeUint64(pool.poolTokenID!)])
+      joinByteArrays(OUTSTANDING_ENCODED, algosdk.encodeUint64(pool.poolTokenID!))
     );
 
     const outstandingAsset1Value = state[outstandingAsset1Key];
