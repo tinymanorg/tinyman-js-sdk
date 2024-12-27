@@ -56,7 +56,7 @@ export type SwapRouterResponse = Pick<FetchSwapRouteQuotesPayload, "amount" | "s
         round_datetime: string;
     };
     transaction_count: number | null;
-    transactions: SwapRouterTransactionRecipe[];
+    transactions: SwapRouterTransactionRecipe[] | null;
     transaction_fee: string | null;
     transaction_fee_in_input_asset: string | null;
     output_amount: string | null;

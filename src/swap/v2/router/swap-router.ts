@@ -44,7 +44,7 @@ export async function generateSwapRouterTxns({
 
   const txns: Transaction[] = [];
 
-  route.transactions.forEach((txnRecipe) => {
+  route.transactions?.forEach((txnRecipe) => {
     txns.push(
       generateSwapRouterTxnFromRecipe(
         txnRecipe,
@@ -185,7 +185,7 @@ export async function getSwapRoute({
     }
   }
 
-  if (!(serializedResponse as SwapRouterResponse).transactions.length) {
+  if (!(serializedResponse as SwapRouterResponse).transactions?.length) {
     throw new SwapQuoteError(
       SwapQuoteErrorType.SwapRouterNoRouteError,
       "Swap router couldn't find a route for this swap."
