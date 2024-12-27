@@ -28,6 +28,10 @@ export async function generateSwapRouterTxns({
   route: SwapRouterResponse;
   slippage: number;
 }) {
+  if (!route.transactions || !route.transaction_fee) {
+    return [];
+  }
+
   const suggestedParams = await client.getTransactionParams().do();
   const [assetInAmountFromRoute, assetOutAmountFromRoute] = [
     getAssetInFromSwapRoute(route).amount,
@@ -44,7 +48,7 @@ export async function generateSwapRouterTxns({
 
   const txns: Transaction[] = [];
 
-  route.transactions?.forEach((txnRecipe) => {
+  route.transactions.forEach((txnRecipe) => {
     txns.push(
       generateSwapRouterTxnFromRecipe(
         txnRecipe,
