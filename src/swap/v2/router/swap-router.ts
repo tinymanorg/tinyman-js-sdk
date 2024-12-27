@@ -28,6 +28,10 @@ export async function generateSwapRouterTxns({
   route: SwapRouterResponse;
   slippage: number;
 }) {
+  if (!route.transactions || !route.transaction_fee) {
+    return [];
+  }
+
   const suggestedParams = await client.getTransactionParams().do();
   const [assetInAmountFromRoute, assetOutAmountFromRoute] = [
     getAssetInFromSwapRoute(route).amount,
@@ -185,7 +189,7 @@ export async function getSwapRoute({
     }
   }
 
-  if (!(serializedResponse as SwapRouterResponse).transactions.length) {
+  if (!(serializedResponse as SwapRouterResponse).transactions?.length) {
     throw new SwapQuoteError(
       SwapQuoteErrorType.SwapRouterNoRouteError,
       "Swap router couldn't find a route for this swap."
