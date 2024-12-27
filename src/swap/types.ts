@@ -48,24 +48,6 @@ export interface SwapRoutePool {
   version: "2.0";
 }
 
-export interface SwapRouterQuote {
-  swap_type: SwapType;
-  amount_in: {
-    asset: SwapRouteAsset;
-    amount: string;
-  };
-  amount_out: {
-    asset: SwapRouteAsset;
-    amount: string;
-  };
-  swap_fees: {
-    amount: string;
-    asset: SwapRouteAsset;
-  };
-  price: number;
-  price_impact: number;
-}
-
 export interface FetchSwapRouteQuotesPayload {
   asset_in_id: string;
   asset_out_id: string;
@@ -79,17 +61,18 @@ export type SwapRouterResponse = Pick<
 > & {
   asset_in: Pick<TinymanAnalyticsApiAsset, "id" | "decimals" | "name" | "unit_name">;
   asset_out: Pick<TinymanAnalyticsApiAsset, "id" | "decimals" | "name" | "unit_name">;
-  price_impact: string;
+  price_impact: string | null;
   status: {
     round_number: string;
     round_datetime: string;
   };
-  transaction_count: number;
-  inner_transaction_count: number;
+  transaction_count: number | null;
   transactions: SwapRouterTransactionRecipe[];
-  transaction_fee: string;
-  transaction_fee_in_input_asset: string;
-  output_amount: string;
+  transaction_fee: string | null;
+  transaction_fee_in_input_asset: string | null;
+  output_amount: string | null;
+  asset_ids: number[] | null;
+  pool_ids: string[] | null;
 };
 
 export interface SwapRouterTransactionRecipe {
