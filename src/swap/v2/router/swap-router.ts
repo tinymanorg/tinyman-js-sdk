@@ -157,7 +157,8 @@ export async function getSwapRoute({
     asset_in_id: String(assetInID),
     asset_out_id: String(assetOutID),
     swap_type: swapType,
-    amount: String(amount)
+    input_amount: swapType === SwapType.FixedInput ? String(amount) : undefined,
+    output_amount: swapType === SwapType.FixedOutput ? String(amount) : undefined
   };
 
   const response = await fetch(
@@ -175,6 +176,7 @@ export async function getSwapRoute({
 
   const serializedResponse = await response.json();
 
+  console.log(serializedResponse);
   if (!response.ok) {
     if (hasTinymanApiErrorShape(serializedResponse)) {
       throw new SwapQuoteError(

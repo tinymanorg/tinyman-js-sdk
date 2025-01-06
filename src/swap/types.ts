@@ -51,7 +51,8 @@ export interface SwapRoutePool {
 export interface FetchSwapRouteQuotesPayload {
   asset_in_id: string;
   asset_out_id: string;
-  amount: string;
+  input_amount?: string;
+  output_amount?: string;
   swap_type: SwapType;
 }
 
