@@ -47,7 +47,7 @@ export interface FetchSwapRouteQuotesPayload {
     amount: string;
     swap_type: SwapType;
 }
-export type SwapRouterResponse = Pick<FetchSwapRouteQuotesPayload, "amount" | "swap_type"> & {
+export type SwapRouterResponse = Pick<FetchSwapRouteQuotesPayload, "swap_type"> & {
     asset_in: Pick<TinymanAnalyticsApiAsset, "id" | "decimals" | "name" | "unit_name">;
     asset_out: Pick<TinymanAnalyticsApiAsset, "id" | "decimals" | "name" | "unit_name">;
     price_impact: string | null;
@@ -59,6 +59,7 @@ export type SwapRouterResponse = Pick<FetchSwapRouteQuotesPayload, "amount" | "s
     transactions: SwapRouterTransactionRecipe[] | null;
     transaction_fee: string | null;
     transaction_fee_in_input_asset: string | null;
+    input_amount: string | null;
     output_amount: string | null;
     asset_ids: number[] | null;
     pool_ids: string[] | null;

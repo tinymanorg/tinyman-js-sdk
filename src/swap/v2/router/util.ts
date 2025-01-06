@@ -4,7 +4,10 @@ import {SwapRouterResponse} from "../../types";
 import {SWAP_ROUTER_APP_ID} from "./constants";
 
 function getSwapRouteRate(
-  route: Pick<SwapRouterResponse, "asset_in" | "asset_out" | "amount" | "output_amount">
+  route: Pick<
+    SwapRouterResponse,
+    "asset_in" | "asset_out" | "input_amount" | "output_amount"
+  >
 ) {
   const {assetIn, assetOut} = getAssetInAndOutFromSwapRoute(route);
 
@@ -33,15 +36,20 @@ function getAssetOutFromSwapRoute(
   };
 }
 
-function getAssetInFromSwapRoute(route: Pick<SwapRouterResponse, "asset_in" | "amount">) {
+function getAssetInFromSwapRoute(
+  route: Pick<SwapRouterResponse, "asset_in" | "input_amount">
+) {
   return {
     asset: route.asset_in,
-    amount: BigInt(route.amount)
+    amount: BigInt(route.input_amount ?? 0)
   };
 }
 
 function getAssetInAndOutFromSwapRoute(
-  route: Pick<SwapRouterResponse, "asset_in" | "asset_out" | "amount" | "output_amount">
+  route: Pick<
+    SwapRouterResponse,
+    "asset_in" | "asset_out" | "input_amount" | "output_amount"
+  >
 ) {
   return {
     assetIn: getAssetInFromSwapRoute(route),
