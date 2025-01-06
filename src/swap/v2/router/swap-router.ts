@@ -176,7 +176,6 @@ export async function getSwapRoute({
 
   const serializedResponse = await response.json();
 
-  console.log(serializedResponse);
   if (!response.ok) {
     if (hasTinymanApiErrorShape(serializedResponse)) {
       throw new SwapQuoteError(
