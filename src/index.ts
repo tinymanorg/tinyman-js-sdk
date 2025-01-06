@@ -116,7 +116,6 @@ export type {
   DirectSwapQuote,
   GenerateSwapTxnsParams,
   SwapQuote,
-  SwapRoute,
   SwapRouterResponse,
   V1SwapExecution,
   V2SwapExecution
