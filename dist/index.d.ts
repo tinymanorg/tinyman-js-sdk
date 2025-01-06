@@ -31,7 +31,7 @@ export { V1_1_REMOVE_LIQUIDITY_TXN_COUNT } from "./remove-liquidity/v1_1/constan
 export { V2_REMOVE_LIQUIDITY_APP_CALL_INNER_TXN_COUNT } from "./remove-liquidity/v2/constants";
 export { Swap } from "./swap";
 export { SwapType } from "./swap/constants";
-export type { DirectSwapQuote, GenerateSwapTxnsParams, SwapQuote, SwapRoute, SwapRouterResponse, V1SwapExecution, V2SwapExecution } from "./swap/types";
+export type { DirectSwapQuote, GenerateSwapTxnsParams, SwapQuote, SwapRouterResponse, V1SwapExecution, V2SwapExecution } from "./swap/types";
 export * from "./swap/v2/util";
 export { SwapQuoteType } from "./swap/types";
 export { SwapQuoteError };

@@ -1,16 +1,16 @@
 import { SupportedNetwork } from "../../../util/commonTypes";
-import { SwapRoute, SwapRouterResponse } from "../../types";
-declare function getSwapRouteRate(route: SwapRouterResponse): number;
+import { SwapRouterResponse } from "../../types";
+declare function getSwapRouteRate(route: Pick<SwapRouterResponse, "asset_in" | "asset_out" | "amount" | "output_amount">): number;
 declare function getSwapRouterAppID(network: SupportedNetwork): number;
-declare function getAssetOutFromSwapRoute(route: SwapRouterResponse): {
+declare function getAssetOutFromSwapRoute(route: Pick<SwapRouterResponse, "asset_out" | "output_amount">): {
     asset: Pick<import("../../..").TinymanAnalyticsApiAsset, "id" | "decimals" | "name" | "unit_name">;
     amount: bigint;
 };
-declare function getAssetInFromSwapRoute(route: SwapRouterResponse): {
+declare function getAssetInFromSwapRoute(route: Pick<SwapRouterResponse, "asset_in" | "amount">): {
     asset: Pick<import("../../..").TinymanAnalyticsApiAsset, "id" | "decimals" | "name" | "unit_name">;
     amount: bigint;
 };
-declare function getAssetInAndOutFromSwapRoute(route: SwapRouterResponse): {
+declare function getAssetInAndOutFromSwapRoute(route: Pick<SwapRouterResponse, "asset_in" | "asset_out" | "amount" | "output_amount">): {
     assetIn: {
         asset: Pick<import("../../..").TinymanAnalyticsApiAsset, "id" | "decimals" | "name" | "unit_name">;
         amount: bigint;
@@ -20,5 +20,4 @@ declare function getAssetInAndOutFromSwapRoute(route: SwapRouterResponse): {
         amount: bigint;
     };
 };
-declare function getSwapRouteFromRouterResponse(routerResponse: SwapRouterResponse): SwapRoute[];
-export { getAssetInAndOutFromSwapRoute, getAssetInFromSwapRoute, getAssetOutFromSwapRoute, getSwapRouteFromRouterResponse, getSwapRouterAppID, getSwapRouteRate };
+export { getAssetInAndOutFromSwapRoute, getAssetInFromSwapRoute, getAssetOutFromSwapRoute, getSwapRouterAppID, getSwapRouteRate };

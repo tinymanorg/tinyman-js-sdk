@@ -87,12 +87,6 @@ export interface SwapRouterTransactionRecipe {
   apps?: number[];
 }
 
-export type SwapRoute = {
-  poolAddress: string;
-  asset_in: number;
-  asset_out: number;
-};
-
 export type GetSwapQuoteParams = {
   assetIn: Pick<TinymanAnalyticsApiAsset, "id" | "decimals">;
   assetOut: Pick<TinymanAnalyticsApiAsset, "id" | "decimals">;
