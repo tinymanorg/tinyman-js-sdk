@@ -197,5 +197,18 @@ export async function getSwapRoute({
     );
   }
 
+  if (
+    Number((serializedResponse as SwapRouterResponse).asset_in.id) !== assetInID ||
+    Number((serializedResponse as SwapRouterResponse).asset_out.id) !== assetOutID ||
+    (serializedResponse as SwapRouterResponse).swap_type === SwapType.FixedInput
+      ? amount !== Number((serializedResponse as SwapRouterResponse).input_amount)
+      : amount !== Number((serializedResponse as SwapRouterResponse).output_amount)
+  ) {
+    throw new SwapQuoteError(
+      SwapQuoteErrorType.UnknownError,
+      "Swap router quote doesn't match the requested swap. Please try again."
+    );
+  }
+
   return serializedResponse;
 }

@@ -67,7 +67,7 @@ export type SwapRouterResponse = Pick<FetchSwapRouteQuotesPayload, "swap_type"> 
   transaction_count: number | null;
   transactions: SwapRouterTransactionRecipe[] | null;
   transaction_fee: string | null;
-  transaction_fee_in_input_asset: string | null;
+  swap_fee: string | null;
   input_amount: string | null;
   output_amount: string | null;
   asset_ids: number[] | null;
