@@ -28,13 +28,14 @@ declare function execute({ client, quote, txGroup, signedTxns }: {
  * @param isSwapRouterEnabled - Whether the swap router is enabled
  * @returns A promise for the Swap quote
  */
-declare function getQuote({ type, amount, assetIn, assetOut, network, isSwapRouterEnabled, pool }: {
+declare function getQuote({ type, amount, assetIn, assetOut, network, slippage, isSwapRouterEnabled, pool }: {
     type: SwapType;
     amount: number | bigint;
     assetIn: AssetWithIdAndDecimals;
     assetOut: AssetWithIdAndDecimals;
     pool: V2PoolInfo | null;
     network: SupportedNetwork;
+    slippage: number;
     isSwapRouterEnabled?: boolean;
 }): Promise<SwapQuote>;
 declare function getFixedInputDirectSwapQuote({ amount, assetIn, assetOut, pool }: {
@@ -52,23 +53,25 @@ declare function getFixedOutputDirectSwapQuote({ amount, assetIn, assetOut, pool
 /**
  * @returns A quote for a fixed input swap. Does NOT execute any transactions.
  */
-declare function getFixedInputSwapQuote({ amount, assetIn, assetOut, isSwapRouterEnabled, network, pool }: {
+declare function getFixedInputSwapQuote({ amount, assetIn, assetOut, isSwapRouterEnabled, network, slippage, pool }: {
     amount: number | bigint;
     assetIn: AssetWithIdAndDecimals;
     assetOut: AssetWithIdAndDecimals;
     network: SupportedNetwork;
     pool: V2PoolInfo | null;
+    slippage: number;
     isSwapRouterEnabled?: boolean;
 }): Promise<SwapQuote>;
 /**
  * @returns A quote for a fixed output swap. Does NOT execute any transactions.
  */
-declare function getFixedOutputSwapQuote({ amount, assetIn, assetOut, isSwapRouterEnabled, network, pool }: {
+declare function getFixedOutputSwapQuote({ amount, assetIn, assetOut, isSwapRouterEnabled, network, slippage, pool }: {
     amount: number | bigint;
     assetIn: AssetWithIdAndDecimals;
     assetOut: AssetWithIdAndDecimals;
     pool: V2PoolInfo | null;
     network: SupportedNetwork;
+    slippage: number;
     isSwapRouterEnabled?: boolean;
 }): Promise<SwapQuote>;
 declare function calculateFixedInputSwap({ inputSupply, outputSupply, swapInputAmount, totalFeeShare, decimals }: {
