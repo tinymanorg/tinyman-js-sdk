@@ -161,8 +161,8 @@ export async function getSwapRoute({
     Number((serializedResponse as SwapRouterResponse).asset_in.id) !== assetInID ||
     Number((serializedResponse as SwapRouterResponse).asset_out.id) !== assetOutID ||
     (serializedResponse as SwapRouterResponse).swap_type === SwapType.FixedInput
-      ? amount !== Number((serializedResponse as SwapRouterResponse).input_amount)
-      : amount !== Number((serializedResponse as SwapRouterResponse).output_amount)
+      ? amount !== BigInt((serializedResponse as SwapRouterResponse).input_amount ?? 0)
+      : amount !== BigInt((serializedResponse as SwapRouterResponse).output_amount ?? 0)
   ) {
     throw new SwapQuoteError(
       SwapQuoteErrorType.UnknownError,
