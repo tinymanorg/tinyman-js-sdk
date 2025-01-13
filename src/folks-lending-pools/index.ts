@@ -36,7 +36,7 @@ function calculateDepositReturn({
   depositInterestRate,
   lastUpdate
 }: {
-  depositAmount: number;
+  depositAmount: bigint;
   depositInterestIndex: bigint;
   depositInterestRate: bigint;
   lastUpdate?: number;
@@ -47,7 +47,7 @@ function calculateDepositReturn({
     lastUpdate
   );
 
-  return divScale(BigInt(depositAmount), latestDepositInterestIndex, ONE_14_DP);
+  return divScale(depositAmount, latestDepositInterestIndex, ONE_14_DP);
 }
 
 /**

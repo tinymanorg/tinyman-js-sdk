@@ -43,8 +43,8 @@ export function getQuote({
   }
 
   return {
-    asset1In: {id: pool.asset1ID, amount: BigInt(asset1.amount)},
-    asset2In: {id: pool.asset2ID, amount: BigInt(asset2.amount)},
+    asset1In: {id: pool.asset1ID, amount: asset1.amount},
+    asset2In: {id: pool.asset2ID, amount: asset2.amount},
     poolTokenOut: {
       id: pool.poolTokenID!,
       amount: calculateV2InitialLiquidityAmount(asset1, asset2)

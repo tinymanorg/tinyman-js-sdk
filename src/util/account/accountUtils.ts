@@ -195,7 +195,7 @@ export async function getAccountExcess({
         excessData.push({
           poolAddress: algosdk.encodeAddress(decodedKey.slice(0, 32)),
           assetID: algosdk.decodeUint64(decodedKey.slice(33, 41), "safe"),
-          amount: parseInt(value as string)
+          amount: BigInt(parseInt(value as string))
         });
       }
     }
@@ -236,28 +236,30 @@ export function getMinRequiredBalanceToOptIn(
         type: "asset-opt-in";
       }
   ) & {
-    currentMinumumBalanceForAccount: number;
-    suggestedTransactionFee?: number;
+    currentMinumumBalanceForAccount: bigint;
+    suggestedTransactionFee?: bigint;
   }
 ) {
   const {currentMinumumBalanceForAccount, suggestedTransactionFee} = params;
 
-  let minBalanceRequirementPerOptIn: number;
+  let minBalanceRequirementPerOptIn: bigint;
 
   if (params.type === "app-opt-in") {
     const contract = getContract(params.contractVersion);
 
     minBalanceRequirementPerOptIn =
       MINIMUM_BALANCE_REQUIRED_PER_APP +
-      contract.schema.numLocalByteSlices * MINIMUM_BALANCE_REQUIRED_PER_BYTE_SCHEMA +
-      contract.schema.numLocalInts * MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE;
+      BigInt(contract.schema.numLocalByteSlices) *
+        MINIMUM_BALANCE_REQUIRED_PER_BYTE_SCHEMA +
+      BigInt(contract.schema.numLocalInts) *
+        MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE;
   } else {
     minBalanceRequirementPerOptIn = MINIMUM_BALANCE_REQUIRED_PER_ASSET;
   }
 
   return (
     minBalanceRequirementPerOptIn +
-    (currentMinumumBalanceForAccount || 0) +
-    (suggestedTransactionFee || 0)
+    (currentMinumumBalanceForAccount || 0n) +
+    (suggestedTransactionFee || 0n)
   );
 }

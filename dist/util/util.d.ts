@@ -18,7 +18,7 @@ export declare function getMinBalanceForAccount(accountInfo: AccountInformationD
  * @returns PendingTransactionInformation
  */
 export declare function waitForConfirmation(client: Algodv2, txId: string): Promise<Record<string, any>>;
-export declare function applySlippageToAmount(type: "positive" | "negative", slippage: number, amount: number | bigint): bigint;
+export declare function applySlippageToAmount(type: "positive" | "negative", slippage: number, amount: bigint): bigint;
 export declare const ASSET_OPT_IN_PROCESS_TXN_COUNT = 1;
 export declare function bufferToBase64(arrayBuffer: undefined | null | WithImplicitCoercion<ArrayBuffer | SharedArrayBuffer>): string;
 /**
@@ -28,7 +28,7 @@ export declare function convertFromBaseUnits(assetDecimals: number | bigint, qua
 /**
  * Computs quantity * 10^(assetDecimals) and rounds the result
  */
-export declare function convertToBaseUnits(assetDecimals: number | bigint, quantity: number | bigint): number;
+export declare function convertToBaseUnits(assetDecimals: number | bigint, quantity: number | bigint): bigint;
 /**
  * Rounds a number up to the provided decimal places limit
  * @param {Object} options -

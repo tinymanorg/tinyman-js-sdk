@@ -71,11 +71,11 @@ export function getQuote({
   return {
     asset1In: {
       id: pool.asset1ID,
-      amount: BigInt(asset1.amount)
+      amount: asset1.amount
     },
     asset2In: {
       id: pool.asset2ID,
-      amount: BigInt(asset2.amount)
+      amount: asset2.amount
     },
     poolTokenOut: {
       id: pool.poolTokenID,

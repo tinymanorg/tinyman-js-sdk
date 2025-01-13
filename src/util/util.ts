@@ -135,7 +135,7 @@ export async function waitForConfirmation(
 export function applySlippageToAmount(
   type: "positive" | "negative",
   slippage: number,
-  amount: number | bigint
+  amount: bigint
 ): bigint {
   if (slippage > 1 || slippage < 0) {
     throw new Error(`Invalid slippage value. Must be between 0 and 1, got ${slippage}`);
@@ -187,7 +187,7 @@ export function convertToBaseUnits(
   const baseAmount = Math.pow(10, Number(assetDecimals)) * Number(quantity);
 
   // make sure the final value is an integer. This prevents this kind of computation errors: 0.0012 * 100000 = 119.99999999999999 and rounds this result into 120
-  return roundNumber({decimalPlaces: 0}, baseAmount);
+  return BigInt(roundNumber({decimalPlaces: 0}, baseAmount));
 }
 
 /**

@@ -52,6 +52,6 @@ export declare function getMinRequiredBalanceToOptIn(params: ({
 } | {
     type: "asset-opt-in";
 }) & {
-    currentMinumumBalanceForAccount: number;
-    suggestedTransactionFee?: number;
-}): number;
+    currentMinumumBalanceForAccount: bigint;
+    suggestedTransactionFee?: bigint;
+}): bigint;

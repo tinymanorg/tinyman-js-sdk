@@ -29,5 +29,5 @@ export interface AccountExcessWithinPool {
 export interface AccountExcess {
   poolAddress: string;
   assetID: number;
-  amount: number;
+  amount: bigint;
 }

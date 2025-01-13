@@ -30,7 +30,7 @@ declare function execute({ client, quote, txGroup, signedTxns }: {
  */
 declare function getQuote({ type, amount, assetIn, assetOut, network, isSwapRouterEnabled, pool }: {
     type: SwapType;
-    amount: number | bigint;
+    amount: bigint;
     assetIn: AssetWithIdAndDecimals;
     assetOut: AssetWithIdAndDecimals;
     pool: V2PoolInfo | null;
@@ -39,13 +39,13 @@ declare function getQuote({ type, amount, assetIn, assetOut, network, isSwapRout
 }): Promise<SwapQuote>;
 declare function getFixedInputDirectSwapQuote({ amount, assetIn, assetOut, pool }: {
     pool: V2PoolInfo;
-    amount: number | bigint;
+    amount: bigint;
     assetIn: AssetWithIdAndDecimals;
     assetOut: AssetWithIdAndDecimals;
 }): DirectSwapQuote;
 declare function getFixedOutputDirectSwapQuote({ amount, assetIn, assetOut, pool }: {
     pool: V2PoolInfo | null;
-    amount: number | bigint;
+    amount: bigint;
     assetIn: AssetWithIdAndDecimals;
     assetOut: AssetWithIdAndDecimals;
 }): SwapQuote;
@@ -53,7 +53,7 @@ declare function getFixedOutputDirectSwapQuote({ amount, assetIn, assetOut, pool
  * @returns A quote for a fixed input swap. Does NOT execute any transactions.
  */
 declare function getFixedInputSwapQuote({ amount, assetIn, assetOut, isSwapRouterEnabled, network, pool }: {
-    amount: number | bigint;
+    amount: bigint;
     assetIn: AssetWithIdAndDecimals;
     assetOut: AssetWithIdAndDecimals;
     network: SupportedNetwork;
@@ -64,7 +64,7 @@ declare function getFixedInputSwapQuote({ amount, assetIn, assetOut, isSwapRoute
  * @returns A quote for a fixed output swap. Does NOT execute any transactions.
  */
 declare function getFixedOutputSwapQuote({ amount, assetIn, assetOut, isSwapRouterEnabled, network, pool }: {
-    amount: number | bigint;
+    amount: bigint;
     assetIn: AssetWithIdAndDecimals;
     assetOut: AssetWithIdAndDecimals;
     pool: V2PoolInfo | null;

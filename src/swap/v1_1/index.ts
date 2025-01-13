@@ -243,7 +243,7 @@ function getFixedInputSwapQuote({
     );
   }
 
-  const assetInAmount = BigInt(assetIn.amount);
+  const assetInAmount = assetIn.amount;
 
   let assetOutID: number;
   let inputSupply: bigint;
@@ -371,9 +371,9 @@ async function executeFixedInputSwap({
   return {
     round: confirmedRound,
     assetInID: assetIn.id,
-    assetInAmount: BigInt(assetIn.amount),
+    assetInAmount: assetIn.amount,
     assetOutID: assetOut.id,
-    assetOutAmount: BigInt(assetOut.amount) + excessAmountDelta,
+    assetOutAmount: assetOut.amount + excessAmountDelta,
     excessAmount: {
       assetID: assetOut.id,
       excessAmountForSwap: excessAmountDelta,
@@ -411,7 +411,7 @@ function getFixedOutputSwapQuote({
     );
   }
 
-  const assetOutAmount = BigInt(assetOut.amount);
+  const assetOutAmount = assetOut.amount;
 
   let assetInID: number;
   let inputSupply: bigint;
@@ -545,9 +545,9 @@ async function executeFixedOutputSwap({
   return {
     round: confirmedRound,
     assetInID: assetIn.id,
-    assetInAmount: BigInt(assetIn.amount) - excessAmountDelta,
+    assetInAmount: assetIn.amount - excessAmountDelta,
     assetOutID: assetOut.id,
-    assetOutAmount: BigInt(assetOut.amount),
+    assetOutAmount: assetOut.amount,
     excessAmount: {
       assetID: assetIn.id,
       excessAmountForSwap: excessAmountDelta,
@@ -602,14 +602,14 @@ async function execute({
         Number(
           txGroup[SwapTxnGroupIndices.ASSET_IN_TXN_INDEX].txn.assetConfig!.assetIndex
         ) || ALGO_ASSET_ID,
-      amount: txGroup[SwapTxnGroupIndices.ASSET_IN_TXN_INDEX].txn.payment?.amount ?? 0
+      amount: txGroup[SwapTxnGroupIndices.ASSET_IN_TXN_INDEX].txn.payment?.amount ?? 0n
     };
     const assetOut: AssetWithIdAndAmount = {
       id:
         Number(
           txGroup[SwapTxnGroupIndices.ASSET_OUT_TXN_INDEX].txn.assetConfig!.assetIndex
         ) || ALGO_ASSET_ID,
-      amount: txGroup[SwapTxnGroupIndices.ASSET_OUT_TXN_INDEX].txn.payment?.amount ?? 0
+      amount: txGroup[SwapTxnGroupIndices.ASSET_OUT_TXN_INDEX].txn.payment?.amount ?? 0n
     };
     let swapData: Omit<V1SwapExecution, "fees" | "groupID">;
 

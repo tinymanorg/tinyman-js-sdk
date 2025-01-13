@@ -28,7 +28,7 @@ export declare const Bootstrap: {
             signedTxns: Uint8Array[];
             txnIDs: string[];
         }) => Promise<import("..").V1PoolInfo>;
-        getBootstrapFundingTxnAmount: (isAlgoPool: boolean) => 960000 | 859000;
+        getBootstrapFundingTxnAmount: (isAlgoPool: boolean) => 960000n | 859000n;
     };
     v2: {
         generateTxns: ({ client, network, asset_1, asset_2, initiatorAddr }: {
@@ -58,8 +58,8 @@ export declare const Bootstrap: {
             txGroup: import("..").SignerTransaction[];
             signedTxns: Uint8Array[];
         }) => Promise<import("..").V2PoolInfo>;
-        getBootstrapFundingTxnAmount: (isAlgoPool: boolean, minFee: bigint) => number;
-        getTotalCost: (isAlgoPool: boolean, minFee: bigint) => number;
+        getBootstrapFundingTxnAmount: (isAlgoPool: boolean, minFee: bigint) => bigint;
+        getTotalCost: (isAlgoPool: boolean, minFee: bigint) => bigint;
     };
     generateTxns: typeof generateTxns;
     signTxns: typeof signTxns;

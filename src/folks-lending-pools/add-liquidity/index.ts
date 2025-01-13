@@ -105,7 +105,7 @@ export async function generateTxns({
       algosdk.makePaymentTxnWithSuggestedParamsFromObject({
         sender: initiatorAddr,
         receiver: wrapperAppAddress,
-        amount: MINIMUM_BALANCE_REQUIRED_PER_ASSET * optInRequiredAssetIds.length,
+        amount: MINIMUM_BALANCE_REQUIRED_PER_ASSET * BigInt(optInRequiredAssetIds.length),
         suggestedParams
       }),
       algosdk.makeApplicationNoOpTxnFromObject({
@@ -140,7 +140,7 @@ export function getAddLiquidityTotalFee(
     minFee * BigInt(4 + FOLKS_LENDING_POOL_APP_CALL_INNER_TXN_COUNT) +
     (wrapperAppOptInRequiredAssetIdCount
       ? BigInt(wrapperAppOptInRequiredAssetIdCount + 1) * minFee +
-        BigInt(wrapperAppOptInRequiredAssetIdCount * MINIMUM_BALANCE_REQUIRED_PER_ASSET)
+        BigInt(wrapperAppOptInRequiredAssetIdCount) * MINIMUM_BALANCE_REQUIRED_PER_ASSET
       : 0n)
   );
 }

@@ -14,7 +14,7 @@ declare function generateTxns({ client, network, asset_1, asset_2, initiatorAddr
  * to the result of this function.
  * @returns the bootstrap funding txn amount
  */
-declare function getBootstrapFundingTxnAmount(isAlgoPool: boolean): 960000 | 859000;
+declare function getBootstrapFundingTxnAmount(isAlgoPool: boolean): 960000n | 859000n;
 declare function signTxns({ txGroup, network, initiatorSigner, asset1ID, asset2ID }: {
     txGroup: SignerTransaction[];
     network: SupportedNetwork;

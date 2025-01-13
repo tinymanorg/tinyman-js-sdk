@@ -2,7 +2,7 @@ import { Algodv2 } from "algosdk";
 import { TinymanAnalyticsApiAsset } from "../../util/asset/assetModels";
 import { SupportedNetwork, SignerTransaction, InitiatorSigner } from "../../util/commonTypes";
 import { V2PoolInfo } from "../../util/pool/poolTypes";
-declare function getTotalCost(isAlgoPool: boolean, minFee: bigint): number;
+declare function getTotalCost(isAlgoPool: boolean, minFee: bigint): bigint;
 declare function generateTxns({ client, network, asset_1, asset_2, initiatorAddr }: {
     client: Algodv2;
     network: SupportedNetwork;
@@ -10,7 +10,7 @@ declare function generateTxns({ client, network, asset_1, asset_2, initiatorAddr
     asset_2: Pick<TinymanAnalyticsApiAsset, "id" | "unit_name">;
     initiatorAddr: string;
 }): Promise<SignerTransaction[]>;
-declare function getBootstrapFundingTxnAmount(isAlgoPool: boolean, minFee: bigint): number;
+declare function getBootstrapFundingTxnAmount(isAlgoPool: boolean, minFee: bigint): bigint;
 declare function signTxns({ txGroup, network, initiatorSigner, asset1ID, asset2ID }: {
     txGroup: SignerTransaction[];
     network: SupportedNetwork;

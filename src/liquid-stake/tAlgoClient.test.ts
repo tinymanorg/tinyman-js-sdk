@@ -20,8 +20,8 @@ const TEST_ACCOUNT = {
 describe("TinymanTAlgoClient", () => {
   let client: TinymanTAlgoClient;
   const network: SupportedNetwork = "testnet";
-  const mintAmount = 1000000;
-  const burnAmount = 500000;
+  const mintAmount = 1000000n;
+  const burnAmount = 500000n;
 
   beforeAll(async () => {
     // Create a new instance of the tAlgoClient
@@ -30,7 +30,7 @@ describe("TinymanTAlgoClient", () => {
       .accountInformation(TEST_ACCOUNT.addr)
       .do()) as AccountInformationData;
 
-    if (accountInfo.amount < BigInt(accountInfo.minBalance) + BigInt(mintAmount * 2)) {
+    if (accountInfo.amount < accountInfo.minBalance + mintAmount * 2n) {
       // Wait for the user to fund the account
       console.log(
         `Go to https://bank.testnet.algorand.network/?account=${TEST_ACCOUNT.addr} and fund your account.`
@@ -114,11 +114,12 @@ describe("TinymanTAlgoClient", () => {
 
     const ratio = await client.getRatio();
     const expectedTAlgoAmount =
-      (initialTAlgoAccountAsset?.amount ?? 0n) + BigInt(Math.floor(mintAmount / ratio));
+      (initialTAlgoAccountAsset?.amount ?? 0n) +
+      BigInt(Math.floor(Number(mintAmount) / ratio));
 
     // Check if the account has the correct amount of ALGOs
     expect(finalAccountInfo.amount).toBe(
-      initialAccountInfo.amount - txnsToBeSigned[0].fee - BigInt(mintAmount)
+      initialAccountInfo.amount - txnsToBeSigned[0].fee - mintAmount
     );
 
     // Check if the account has the correct amount of tALGOs
@@ -162,7 +163,7 @@ describe("TinymanTAlgoClient", () => {
     const finalTAlgoAccountAsset = finalAccountInfo.assets.find(
       (asset) => asset.assetId === BigInt(TALGO_ASSET_ID[network])
     );
-    const expectedAlgoAmount = Math.floor(burnAmount / ratio);
+    const expectedAlgoAmount = Math.floor(Number(burnAmount) / ratio);
 
     // Check if the account has the correct amount of ALGOs
     expect(finalAccountInfo.amount).toBeGreaterThanOrEqual(
@@ -171,7 +172,7 @@ describe("TinymanTAlgoClient", () => {
 
     // Check if the account has the correct amount of tALGOs
     expect(finalTAlgoAccountAsset?.amount).toBe(
-      (initialTAlgoAccountAsset?.amount ?? 0n) - BigInt(burnAmount)
+      (initialTAlgoAccountAsset?.amount ?? 0n) - burnAmount
     );
   }, 10000);
 });

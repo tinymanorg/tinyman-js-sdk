@@ -31,11 +31,10 @@ function getQuote({
 }: {
   pool: V2PoolInfo;
   reserves: PoolReserves;
-  poolTokenIn: number | bigint;
+  poolTokenIn: bigint;
 }): V2RemoveLiquidityQuote {
-  const poolTokenIn_bigInt = BigInt(poolTokenIn);
   const {asset1OutputAmount, asset2OutputAmount} = calculateRemoveLiquidityOutputAmounts(
-    poolTokenIn_bigInt,
+    poolTokenIn,
     reserves
   );
 
@@ -43,7 +42,7 @@ function getQuote({
     round: Number(reserves.round),
     asset1Out: {assetId: pool.asset1ID, amount: asset1OutputAmount},
     asset2Out: {assetId: pool.asset2ID, amount: asset2OutputAmount},
-    poolTokenIn: {assetId: pool.poolTokenID!, amount: poolTokenIn_bigInt}
+    poolTokenIn: {assetId: pool.poolTokenID!, amount: poolTokenIn}
   };
 }
 
@@ -56,13 +55,12 @@ function getSingleAssetRemoveLiquidityQuote({
 }: {
   pool: V2PoolInfo;
   reserves: PoolReserves;
-  poolTokenIn: number | bigint;
+  poolTokenIn: bigint;
   assetOutID: number;
   decimals: {assetIn: number; assetOut: number};
 }): V2SingleAssetRemoveLiquidityQuote {
-  const poolTokenIn_bigInt = BigInt(poolTokenIn);
   const {asset1OutputAmount, asset2OutputAmount} = calculateRemoveLiquidityOutputAmounts(
-    poolTokenIn_bigInt,
+    poolTokenIn,
     reserves
   );
   const totalFeeShare = pool.totalFeeShare!;
@@ -82,7 +80,7 @@ function getSingleAssetRemoveLiquidityQuote({
     quote = {
       round: Number(reserves.round),
       assetOut: {assetId: assetOutID, amount: asset1OutputAmount + swapOutputAmount},
-      poolTokenIn: {assetId: pool.poolTokenID!, amount: poolTokenIn_bigInt},
+      poolTokenIn: {assetId: pool.poolTokenID!, amount: poolTokenIn},
       internalSwapQuote: {
         amountIn: {assetId: pool.asset2ID, amount: asset2OutputAmount},
         amountOut: {assetId: pool.asset1ID, amount: swapOutputAmount},
@@ -103,7 +101,7 @@ function getSingleAssetRemoveLiquidityQuote({
     quote = {
       round: Number(reserves.round),
       assetOut: {assetId: assetOutID, amount: asset2OutputAmount + swapOutputAmount},
-      poolTokenIn: {assetId: pool.poolTokenID!, amount: poolTokenIn_bigInt},
+      poolTokenIn: {assetId: pool.poolTokenID!, amount: poolTokenIn},
       internalSwapQuote: {
         amountIn: {assetId: pool.asset2ID, amount: asset2OutputAmount},
         amountOut: {assetId: pool.asset1ID, amount: swapOutputAmount},
@@ -119,16 +117,15 @@ function getSingleAssetRemoveLiquidityQuote({
 }
 
 function calculateRemoveLiquidityOutputAmounts(
-  poolTokenIn: number | bigint,
+  poolTokenIn: bigint,
   reserves: PoolReserves
 ) {
   let asset1OutputAmount: bigint, asset2OutputAmount: bigint;
-  const poolTokenInBigInt = BigInt(poolTokenIn);
   const issuedPoolTokens = reserves.issuedLiquidity;
 
-  if (issuedPoolTokens > poolTokenInBigInt + BigInt(V2_LOCKED_POOL_TOKENS)) {
-    asset1OutputAmount = (poolTokenInBigInt * reserves.asset1) / issuedPoolTokens;
-    asset2OutputAmount = (poolTokenInBigInt * reserves.asset2) / issuedPoolTokens;
+  if (issuedPoolTokens > poolTokenIn + BigInt(V2_LOCKED_POOL_TOKENS)) {
+    asset1OutputAmount = (poolTokenIn * reserves.asset1) / issuedPoolTokens;
+    asset2OutputAmount = (poolTokenIn * reserves.asset2) / issuedPoolTokens;
   } else {
     asset1OutputAmount = reserves.asset1;
     asset2OutputAmount = reserves.asset2;
@@ -156,8 +153,8 @@ async function generateTxns({
   pool: V2PoolInfo;
   poolTokenIn: number | bigint;
   initiatorAddr: string;
-  minAsset1Amount: number | bigint;
-  minAsset2Amount: number | bigint;
+  minAsset1Amount: bigint;
+  minAsset2Amount: bigint;
   slippage: number;
 }): Promise<SignerTransaction[]> {
   const suggestedParams = await client.getTransactionParams().do();
@@ -228,9 +225,9 @@ async function generateSingleAssetOutTxns({
   client: Algodv2;
   pool: V2PoolInfo;
   outputAssetId: number;
-  poolTokenIn: number | bigint;
+  poolTokenIn: bigint;
   initiatorAddr: string;
-  minOutputAssetAmount: number | bigint;
+  minOutputAssetAmount: bigint;
   slippage: number;
 }): Promise<SignerTransaction[]> {
   const suggestedParams = await client.getTransactionParams().do();
@@ -242,8 +239,8 @@ async function generateSingleAssetOutTxns({
     throw new Error("Pool token asset ID is missing");
   }
 
-  let minAsset1Amount = 0 as number | bigint;
-  let minAsset2Amount = 0 as number | bigint;
+  let minAsset1Amount = 0n;
+  let minAsset2Amount = 0n;
 
   const minOutputAssetAmountAfterSlippage = applySlippageToAmount(
     "negative",
@@ -253,9 +250,9 @@ async function generateSingleAssetOutTxns({
 
   if (outputAssetId === asset1ID) {
     minAsset1Amount = minOutputAssetAmountAfterSlippage;
-    minAsset2Amount = 0;
+    minAsset2Amount = 0n;
   } else if (outputAssetId === asset2ID) {
-    minAsset1Amount = 0;
+    minAsset1Amount = 0n;
     minAsset2Amount = minOutputAssetAmountAfterSlippage;
   } else {
     throw new Error("Invalid output asset id. It doesn't match with pool assets");

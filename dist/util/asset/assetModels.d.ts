@@ -44,19 +44,19 @@ interface IndexerAssetParams {
 }
 export interface AssetWithIdAndAmount {
     id: number;
-    amount: number | bigint;
+    amount: bigint;
 }
 export interface AssetWithIdAndDecimals {
     id: number;
     decimals: number;
 }
 export interface AssetWithAmountAndDecimals {
-    amount: number | bigint;
+    amount: bigint;
     decimals: number;
 }
 export interface AssetWithIdAndAmountAndDecimals {
     id: number;
-    amount: number | bigint;
+    amount: bigint;
     decimals: number;
 }
 export {};

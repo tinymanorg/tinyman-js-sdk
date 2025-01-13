@@ -32,8 +32,8 @@ export function calculateSubsequentAddLiquidity({
   internalSwapQuote: V2AddLiquidityInternalSwapQuote;
 } {
   const oldK = reserves.asset1 * reserves.asset2;
-  const newAsset1Reserves = reserves.asset1 + BigInt(asset1.amount);
-  const newAsset2Reserves = reserves.asset2 + BigInt(asset2.amount);
+  const newAsset1Reserves = reserves.asset1 + asset1.amount;
+  const newAsset2Reserves = reserves.asset2 + asset2.amount;
   const newK = newAsset1Reserves * newAsset2Reserves;
   const newIssuedPoolTokenAmount = BigInt(
     parseInt(
@@ -52,8 +52,8 @@ export function calculateSubsequentAddLiquidity({
   const calculatedAsset2Amount =
     (poolTokenAmount * newAsset2Reserves) / newIssuedPoolTokenAmount;
 
-  const asset1SwapAmount = BigInt(asset1.amount) - calculatedAsset1Amount;
-  const asset2SwapAmount = BigInt(asset2.amount) - calculatedAsset2Amount;
+  const asset1SwapAmount = asset1.amount - calculatedAsset1Amount;
+  const asset2SwapAmount = asset2.amount - calculatedAsset2Amount;
 
   let swapAssetIn: AssetWithIdAndAmountAndDecimals & {reserves: bigint};
   let swapAssetOut: AssetWithIdAndAmountAndDecimals & {reserves: bigint};

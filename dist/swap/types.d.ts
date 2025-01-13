@@ -83,7 +83,7 @@ export type GetSwapQuoteParams = {
         info: V1PoolInfo | V2PoolInfo;
         reserves: PoolReserves;
     }[];
-    amount: number | bigint;
+    amount: bigint;
     type: SwapType;
     network: SupportedNetwork;
     /** If `true`, the function will also check the quotes that use swap route */

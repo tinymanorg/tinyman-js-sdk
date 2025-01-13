@@ -49,12 +49,12 @@ export function getQuote({
 
   const asset1: AssetWithIdAndAmountAndDecimals = {
     id: pool.asset1ID,
-    amount: isAsset1In ? assetIn.amount : 0,
+    amount: isAsset1In ? assetIn.amount : 0n,
     decimals: decimals.asset1
   };
   const asset2: AssetWithIdAndAmountAndDecimals = {
     id: pool.asset2ID,
-    amount: isAsset2In ? assetIn.amount : 0,
+    amount: isAsset2In ? assetIn.amount : 0n,
     decimals: decimals.asset2
   };
   const reserves = {
@@ -75,7 +75,7 @@ export function getQuote({
   return {
     assetIn: {
       id: isAsset1In ? pool.asset1ID : pool.asset2ID,
-      amount: BigInt(assetIn.amount)
+      amount: assetIn.amount
     },
     poolTokenOut: {
       id: pool.poolTokenID,

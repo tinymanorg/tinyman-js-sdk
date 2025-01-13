@@ -1,23 +1,22 @@
-import algosdk from "algosdk";
+import algosdk, {bigIntToBytes} from "algosdk";
 import {fromByteArray} from "base64-js";
 
-import {intToBytes} from "../governance/util/utils";
+import {SECOND_IN_MS} from "../governance/constants";
 import {
   STALGO_ASSET_ID,
   TALGO_ASSET_ID,
   TINY_ASSET_ID
 } from "../util/asset/assetConstants";
+import TinymanBaseClient from "../util/client/base/baseClient";
+import {getStruct, Struct} from "../util/client/base/utils";
 import {SupportedNetwork} from "../util/commonTypes";
 import {encodeString} from "../util/util";
-import TinymanBaseClient from "../util/client/base/baseClient";
 import {
   CURRENT_REWARD_RATE_PER_TIME_END_TIMESTAMP_KEY,
   RESTAKE_APP_ID,
   STRUCTS,
   VAULT_APP_ID
 } from "./constants";
-import {getStruct, Struct} from "../util/client/base/utils";
-import {SECOND_IN_MS} from "../governance/constants";
 
 const USER_STATE = getStruct("UserState", STRUCTS);
 
@@ -29,7 +28,7 @@ class TinymanSTAlgoClient extends TinymanBaseClient {
     this.vaultAppId = VAULT_APP_ID[network];
   }
 
-  async increaseStake(amount: number, userAddress: string) {
+  async increaseStake(amount: bigint, userAddress: string) {
     const suggestedParams = await this.getSuggestedParams();
     const userStateBoxName = this.getUserStateBoxName(userAddress);
 
@@ -47,7 +46,7 @@ class TinymanSTAlgoClient extends TinymanBaseClient {
       algosdk.makeApplicationNoOpTxnFromObject({
         sender: userAddress,
         appIndex: this.appId,
-        appArgs: [encodeString("increase_stake"), intToBytes(amount)],
+        appArgs: [encodeString("increase_stake"), bigIntToBytes(amount, 8)],
         foreignApps: [this.vaultAppId],
         foreignAssets: [STALGO_ASSET_ID[this.network]],
         boxes: [
@@ -66,7 +65,7 @@ class TinymanSTAlgoClient extends TinymanBaseClient {
     );
   }
 
-  async decreaseStake(amount: number, userAddress: string) {
+  async decreaseStake(amount: bigint, userAddress: string) {
     const suggestedParams = await this.getSuggestedParams();
     const userStateBoxName = this.getUserStateBoxName(userAddress);
 
@@ -76,7 +75,7 @@ class TinymanSTAlgoClient extends TinymanBaseClient {
       algosdk.makeApplicationNoOpTxnFromObject({
         sender: userAddress,
         appIndex: this.appId,
-        appArgs: [encodeString("decrease_stake"), intToBytes(amount)],
+        appArgs: [encodeString("decrease_stake"), bigIntToBytes(amount, 8)],
         foreignAssets: [TALGO_ASSET_ID[this.network], STALGO_ASSET_ID[this.network]],
         boxes: [{appIndex: 0, name: userStateBoxName}],
         suggestedParams
@@ -126,7 +125,7 @@ class TinymanSTAlgoClient extends TinymanBaseClient {
       Number(shouldOptin) +
       Number(!doesUserBoxExist);
 
-    return totalTxnCount * Number(minFee);
+    return BigInt(totalTxnCount) * minFee;
   }
 
   async calculateDecreaseStakeFee(accountAddress: string, minFee: bigint) {
@@ -139,7 +138,7 @@ class TinymanSTAlgoClient extends TinymanBaseClient {
     const totalTxnCount =
       initialTxnCount + Number(shouldApplyRateChange) + Number(shouldOptin);
 
-    return totalTxnCount * Number(minFee);
+    return BigInt(totalTxnCount) * minFee;
   }
 
   private getUserStateBoxName(userAddress: string) {

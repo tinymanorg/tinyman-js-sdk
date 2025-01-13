@@ -42,13 +42,13 @@ export function getQuote({
 }: {
   pool: V1PoolInfo;
   reserves: PoolReserves;
-  asset1In: number | bigint;
-  asset2In: number | bigint;
+  asset1In: bigint;
+  asset2In: bigint;
 }): V1_1AddLiquidityQuote {
   if (reserves.issuedLiquidity === 0n) {
     const geoMean = BigInt(Math.floor(Math.sqrt(Number(asset1In) * Number(asset2In))));
 
-    if (geoMean <= BigInt(MINIMUM_ADD_LIQUIDITY_AMOUNT)) {
+    if (geoMean <= MINIMUM_ADD_LIQUIDITY_AMOUNT) {
       throw new Error(
         `Initial liquidity amount is too small. The amount must be greater than ${MINIMUM_ADD_LIQUIDITY_AMOUNT}, this quote is for ${geoMean}.`
       );
@@ -57,25 +57,25 @@ export function getQuote({
     return {
       round: Number(reserves.round),
       asset1ID: pool.asset1ID,
-      asset1In: BigInt(asset1In),
+      asset1In,
       asset2ID: pool.asset2ID,
-      asset2In: BigInt(asset2In),
+      asset2In,
       poolTokenID: pool.poolTokenID!,
-      poolTokenOut: geoMean - BigInt(MINIMUM_ADD_LIQUIDITY_AMOUNT),
+      poolTokenOut: geoMean - MINIMUM_ADD_LIQUIDITY_AMOUNT,
       share: 1
     };
   }
 
-  const asset1Ratio = (BigInt(asset1In) * reserves.issuedLiquidity) / reserves.asset1;
-  const asset2Ratio = (BigInt(asset2In) * reserves.issuedLiquidity) / reserves.asset2;
+  const asset1Ratio = (asset1In * reserves.issuedLiquidity) / reserves.asset1;
+  const asset2Ratio = (asset2In * reserves.issuedLiquidity) / reserves.asset2;
   const poolTokenOut = asset1Ratio < asset2Ratio ? asset1Ratio : asset2Ratio;
 
   return {
     round: Number(reserves.round),
     asset1ID: pool.asset1ID,
-    asset1In: BigInt(asset1In),
+    asset1In,
     asset2ID: pool.asset2ID,
-    asset2In: BigInt(asset2In),
+    asset2In,
     poolTokenID: pool.poolTokenID!,
     poolTokenOut,
     share: poolUtils.getPoolShare(reserves.issuedLiquidity + poolTokenOut, poolTokenOut)
@@ -248,9 +248,8 @@ export async function execute({
   initiatorAddr: string;
 }): Promise<V1_1AddLiquidityExecution> {
   try {
-    const poolTokenOutAmount = BigInt(
-      txGroup[V1_1AddLiquidityTxnIndices.LIQUDITY_OUT_TXN].txn.payment?.amount ?? 0
-    );
+    const poolTokenOutAmount =
+      txGroup[V1_1AddLiquidityTxnIndices.LIQUDITY_OUT_TXN].txn.payment?.amount ?? 0n;
 
     const prevExcessAssets = await getAccountExcessWithinPool({
       client,

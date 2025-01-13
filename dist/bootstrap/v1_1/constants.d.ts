@@ -18,6 +18,6 @@ export declare const V1_1_BOOTSTRAP_TXN_COUNT: {
  * the pool type (ASA-ASA or ASA-Algo) in microalgos.
  */
 export declare const V1_1_BOOTSTRAP_FUNDING_TXN_AMOUNT: {
-    readonly ASA_ALGO: 960000;
-    readonly ASA_ASA: 859000;
+    readonly ASA_ALGO: 960000n;
+    readonly ASA_ASA: 859000n;
 };

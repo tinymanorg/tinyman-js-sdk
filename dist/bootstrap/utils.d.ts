@@ -37,4 +37,4 @@ export declare function calculateBootstrapFundingTxnAmount({ contractVersion, is
     contractVersion: ContractVersionValue;
     isAlgoPool: boolean;
     minFee: bigint;
-}): number;
+}): bigint;

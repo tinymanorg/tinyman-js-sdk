@@ -188,7 +188,7 @@ async function execute({
     round: confirmedRound,
     assetIn: {
       // The actual spent amount is the input amount minus the change (refunded) amount, if any
-      amount: BigInt(assetIn.amount) - BigInt(assetInChangeAmount || 0),
+      amount: assetIn.amount - (assetInChangeAmount || 0n),
       id: assetIn.id
     },
     assetOut,
@@ -217,7 +217,7 @@ async function getQuote({
   pool
 }: {
   type: SwapType;
-  amount: number | bigint;
+  amount: bigint;
   assetIn: AssetWithIdAndDecimals;
   assetOut: AssetWithIdAndDecimals;
   pool: V2PoolInfo | null;
@@ -291,7 +291,7 @@ function getFixedInputDirectSwapQuote({
   pool
 }: {
   pool: V2PoolInfo;
-  amount: number | bigint;
+  amount: bigint;
   assetIn: AssetWithIdAndDecimals;
   assetOut: AssetWithIdAndDecimals;
 }): DirectSwapQuote {
@@ -307,7 +307,7 @@ function getFixedInputDirectSwapQuote({
     {id: assetOutID, decimals: assetOutDecimals}
   ] = [assetIn, assetOut];
 
-  const assetInAmount = BigInt(amount);
+  const assetInAmount = amount;
   const totalFeeShare = pool.totalFeeShare!;
 
   let inputSupply: bigint;
@@ -371,7 +371,7 @@ function getFixedOutputDirectSwapQuote({
   pool
 }: {
   pool: V2PoolInfo | null;
-  amount: number | bigint;
+  amount: bigint;
   assetIn: AssetWithIdAndDecimals;
   assetOut: AssetWithIdAndDecimals;
 }): SwapQuote {
@@ -387,7 +387,7 @@ function getFixedOutputDirectSwapQuote({
     {id: assetOutID, decimals: assetOutDecimals}
   ] = [assetIn, assetOut];
 
-  const assetOutAmount = BigInt(amount);
+  const assetOutAmount = amount;
   const totalFeeShare = pool.totalFeeShare!;
   let inputSupply: bigint;
   let outputSupply: bigint;
@@ -460,7 +460,7 @@ async function getFixedInputSwapQuote({
   network,
   pool
 }: {
-  amount: number | bigint;
+  amount: bigint;
   assetIn: AssetWithIdAndDecimals;
   assetOut: AssetWithIdAndDecimals;
   network: SupportedNetwork;
@@ -531,7 +531,7 @@ async function getFixedOutputSwapQuote({
   network,
   pool
 }: {
-  amount: number | bigint;
+  amount: bigint;
   assetIn: AssetWithIdAndDecimals;
   assetOut: AssetWithIdAndDecimals;
   pool: V2PoolInfo | null;
@@ -585,12 +585,10 @@ function calculateFixedInputSwap({
   totalFeeShare: bigint;
   decimals: {assetIn: number; assetOut: number};
 }) {
-  const totalFeeAmount = BigInt(
-    calculateFixedInputFeeAmount({
-      inputAmount: swapInputAmount,
-      totalFeeShare
-    })
-  );
+  const totalFeeAmount = calculateFixedInputFeeAmount({
+    inputAmount: swapInputAmount,
+    totalFeeShare
+  });
   const swapAmount = swapInputAmount - totalFeeAmount;
   const swapOutputAmount = calculateOutputAmountOfFixedInputSwap({
     inputSupply,
@@ -667,7 +665,7 @@ function calculateFixedInputFeeAmount({
   inputAmount: bigint;
   totalFeeShare: bigint;
 }) {
-  return Math.floor(Number(inputAmount * BigInt(totalFeeShare)) / 10_000);
+  return BigInt(Math.floor(Number(inputAmount * totalFeeShare) / 10_000));
 }
 
 function calculateFixedOutputFeeAmount({
@@ -678,7 +676,7 @@ function calculateFixedOutputFeeAmount({
   totalFeeShare: bigint;
 }) {
   const input_amount = Math.floor(
-    Number((swapAmount * BigInt(10_000)) / (BigInt(10_000) - BigInt(totalFeeShare)))
+    Number((swapAmount * BigInt(10_000)) / (BigInt(10_000) - totalFeeShare))
   );
   const total_fee_amount = BigInt(input_amount) - swapAmount;
 
@@ -695,7 +693,7 @@ function calculateOutputAmountOfFixedInputSwap({
   swapAmount: bigint;
 }): bigint {
   const k = inputSupply * outputSupply;
-  let outputAmount = outputSupply - BigInt(k / (inputSupply + BigInt(swapAmount)));
+  let outputAmount = outputSupply - k / (inputSupply + swapAmount);
 
   outputAmount -= BigInt(1);
 
@@ -712,7 +710,7 @@ function calculateSwapAmountOfFixedOutputSwap({
   outputAmount: bigint;
 }): bigint {
   const k = inputSupply * outputSupply;
-  let swapAmount = BigInt(k / (outputSupply - outputAmount)) - inputSupply;
+  let swapAmount = k / (outputSupply - outputAmount) - inputSupply;
 
   swapAmount += BigInt(1);
 

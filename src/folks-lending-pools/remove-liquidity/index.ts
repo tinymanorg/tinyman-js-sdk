@@ -84,7 +84,7 @@ export async function generateTxns({
   });
 }
 
-export function getRemoveLiquidityTotalFee(minFee: bigint): number {
+export function getRemoveLiquidityTotalFee(minFee: bigint): bigint {
   // 1 asset transfer txn, 1 app call txn and 1 app call txn with inner txns
-  return Number(minFee) * (3 + FOLKS_LENDING_POOL_APP_CALL_INNER_TXN_COUNT);
+  return minFee * BigInt(3 + FOLKS_LENDING_POOL_APP_CALL_INNER_TXN_COUNT);
 }

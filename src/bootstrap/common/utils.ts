@@ -24,8 +24,8 @@ export function getPoolAccountMinBalance(
     MINIMUM_BALANCE_REQUIRED_PER_ASSET + // min balance to create asset
     MINIMUM_BALANCE_REQUIRED_PER_ASSET + // fee + min balance to opt into asset 1
     MINIMUM_BALANCE_REQUIRED_PER_APP + // min balance to opt into validator app
-    MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE * numLocalInts +
-    MINIMUM_BALANCE_REQUIRED_PER_BYTE_SCHEMA * numLocalByteSlices;
+    MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE * BigInt(numLocalInts) +
+    MINIMUM_BALANCE_REQUIRED_PER_BYTE_SCHEMA * BigInt(numLocalByteSlices);
 
   if (!isAlgoPool) {
     fee += MINIMUM_BALANCE_REQUIRED_PER_ASSET; // min balance to opt into asset 2

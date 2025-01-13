@@ -24,7 +24,7 @@ import {tinymanJSSDKConfig} from "../../config";
 function getTotalCost(isAlgoPool: boolean, minFee: bigint) {
   // getBootstrapFundingTxnAmount includes getBootstrapAppCallTxnFee and since app call is signed by the logic sig,
   // the total cost for the user account is funding txn's amount + funding txn's fee
-  return Number(minFee) + getBootstrapFundingTxnAmount(isAlgoPool, minFee);
+  return minFee + getBootstrapFundingTxnAmount(isAlgoPool, minFee);
 }
 
 async function generateTxns({
@@ -108,7 +108,7 @@ async function generateTxns({
 function getBootstrapFundingTxnAmount(isAlgoPool: boolean, minFee: bigint) {
   return (
     getPoolAccountMinBalance(CONTRACT_VERSION.V2, isAlgoPool) +
-    Number(getBootstrapAppCallTxnFee(isAlgoPool, minFee)) +
+    getBootstrapAppCallTxnFee(isAlgoPool, minFee) +
     MINIMUM_BALANCE_REQUIRED_PER_ASSET // Min fee for asset creation
   );
 }

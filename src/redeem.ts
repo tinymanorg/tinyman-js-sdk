@@ -185,7 +185,7 @@ export async function generateRedeemTxns({
   client: Algodv2;
   pool: V1PoolInfo;
   assetID: number;
-  assetOut: number | bigint;
+  assetOut: bigint;
   initiatorAddr: string;
 }): Promise<SignerTransaction[]> {
   const suggestedParams = await client.getTransactionParams().do();
@@ -209,7 +209,7 @@ export async function generateRedeemTxns({
     assetOutTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
       sender: poolAddress,
       receiver: initiatorAddr,
-      amount: BigInt(assetOut),
+      amount: assetOut,
       suggestedParams
     });
   } else {
@@ -217,7 +217,7 @@ export async function generateRedeemTxns({
       sender: poolAddress,
       receiver: initiatorAddr,
       assetIndex: assetID,
-      amount: BigInt(assetOut),
+      amount: assetOut,
       suggestedParams
     });
   }

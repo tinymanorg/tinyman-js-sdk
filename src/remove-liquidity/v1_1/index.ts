@@ -32,21 +32,19 @@ export function getQuote({
   /**
    * The amount of the pool token being deposited.
    */
-  poolTokenIn: number | bigint;
+  poolTokenIn: bigint;
 }): V1_1RemoveLiquidityQuote {
-  const poolTokenIn_bigInt = BigInt(poolTokenIn);
-
   const asset1Out =
     reserves.issuedLiquidity &&
-    (poolTokenIn_bigInt * reserves.asset1) / reserves.issuedLiquidity;
+    (poolTokenIn * reserves.asset1) / reserves.issuedLiquidity;
   const asset2Out =
     reserves.issuedLiquidity &&
-    (poolTokenIn_bigInt * reserves.asset2) / reserves.issuedLiquidity;
+    (poolTokenIn * reserves.asset2) / reserves.issuedLiquidity;
 
   return {
     round: Number(reserves.round),
     poolTokenID: pool.poolTokenID!,
-    poolTokenIn: poolTokenIn_bigInt,
+    poolTokenIn,
     asset1ID: pool.asset1ID,
     asset1Out,
     asset2ID: pool.asset2ID,
@@ -65,9 +63,9 @@ async function generateTxns({
 }: {
   client: Algodv2;
   pool: V1PoolInfo;
-  poolTokenIn: number | bigint;
-  asset1Out: number | bigint;
-  asset2Out: number | bigint;
+  poolTokenIn: bigint;
+  asset1Out: bigint;
+  asset2Out: bigint;
   slippage: number;
   initiatorAddr: string;
 }): Promise<SignerTransaction[]> {
@@ -209,11 +207,11 @@ async function execute({
 }): Promise<V1_1RemoveLiquidityExecution> {
   try {
     const asset1Out =
-      txGroup[V1_1RemoveLiquidityTxnIndices.ASSET1_OUT_TXN].txn.payment?.amount ?? 0;
+      txGroup[V1_1RemoveLiquidityTxnIndices.ASSET1_OUT_TXN].txn.payment?.amount ?? 0n;
     const asset2Out =
-      txGroup[V1_1RemoveLiquidityTxnIndices.ASSET2_OUT_TXN].txn.payment?.amount ?? 0;
+      txGroup[V1_1RemoveLiquidityTxnIndices.ASSET2_OUT_TXN].txn.payment?.amount ?? 0n;
     const poolTokenIn =
-      txGroup[V1_1RemoveLiquidityTxnIndices.POOL_TOKEN_IN_TXN].txn.payment?.amount ?? 0;
+      txGroup[V1_1RemoveLiquidityTxnIndices.POOL_TOKEN_IN_TXN].txn.payment?.amount ?? 0n;
 
     const prevExcessAssets = await getAccountExcessWithinPool({
       client,
@@ -249,11 +247,11 @@ async function execute({
       round: confirmedRound,
       fees: sumUpTxnFees(txGroup),
       asset1ID: pool.asset1ID,
-      asset1Out: BigInt(asset1Out) + excessAmountDeltaAsset1,
+      asset1Out: asset1Out + excessAmountDeltaAsset1,
       asset2ID: pool.asset2ID,
-      asset2Out: BigInt(asset2Out) + excessAmountDeltaAsset2,
+      asset2Out: asset2Out + excessAmountDeltaAsset2,
       poolTokenID: pool.poolTokenID!,
-      poolTokenIn: BigInt(poolTokenIn),
+      poolTokenIn,
       excessAmounts: [
         {
           assetID: pool.asset1ID,
