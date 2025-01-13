@@ -2,9 +2,9 @@ import {decodeAddress, encodeAddress} from "algosdk";
 import AlgodClient from "algosdk/dist/types/client/v2/algod/algod";
 
 import {intToBytes} from "../util/utils";
-import {concatUint8Arrays, getRawBoxValue} from "../utils";
+import {getRawBoxValue} from "../utils";
 import {ATTENDANCE_SHEET_BOX_PREFIX, PROPOSAL_BOX_PREFIX} from "./constants";
-import {encodeString} from "../../util/util";
+import {encodeString, joinByteArrays} from "../../util/util";
 
 export class Proposal {
   index: number;
@@ -108,11 +108,11 @@ export class ProposalVotingAppGlobalState {
 }
 
 export function getProposalBoxName(proposalId: string) {
-  return concatUint8Arrays(PROPOSAL_BOX_PREFIX, encodeString(proposalId));
+  return joinByteArrays(PROPOSAL_BOX_PREFIX, encodeString(proposalId));
 }
 
 export function getAttendanceSheetBoxName(address: string, boxIndex: number) {
-  return concatUint8Arrays(
+  return joinByteArrays(
     ATTENDANCE_SHEET_BOX_PREFIX,
     decodeAddress(address).publicKey,
     intToBytes(boxIndex)

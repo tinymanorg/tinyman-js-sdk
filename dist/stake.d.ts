@@ -16,4 +16,4 @@ declare function prepareCommitTransactions({ client, stakingAppID, program, requ
     requiredAssetID?: number;
 }): Promise<SignerTransaction[]>;
 declare function getStakingAppID(network: SupportedNetwork): 51948952 | 649588853;
-export { prepareCommitTransactions, getStakingAppID };
+export { getStakingAppID, prepareCommitTransactions };

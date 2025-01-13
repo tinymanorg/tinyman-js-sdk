@@ -1,163 +1,40 @@
-import algosdk, {
-  Algodv2,
-  ALGORAND_MIN_TX_FEE,
-  getApplicationAddress,
-  Transaction
-} from "algosdk";
+import algosdk, {Algodv2, SuggestedParams, Transaction} from "algosdk";
+import {toByteArray} from "base64-js";
 
-import {CONTRACT_VERSION} from "../../../contract/constants";
-import {AccountInformation} from "../../../util/account/accountTypes";
-import {ALGO_ASSET_ID} from "../../../util/asset/assetConstants";
-import {getAssetId, isAlgo} from "../../../util/asset/assetUtils";
 import {SupportedNetwork} from "../../../util/commonTypes";
-import SwapQuoteError, {SwapQuoteErrorType} from "../../../util/error/SwapQuoteError";
-import {applySlippageToAmount, hasTinymanApiErrorShape} from "../../../util/util";
-import {getValidatorAppID} from "../../../validator";
-import {SwapType} from "../../constants";
-import {FetchSwapRouteQuotesPayload, SwapRouterResponse, SwapRoute} from "../../types";
-import {
-  V2_SWAP_APP_CALL_ARG_ENCODED,
-  V2_SWAP_APP_CALL_SWAP_TYPE_ARGS_ENCODED,
-  V2_SWAP_ROUTER_APP_ARGS_ENCODED
-} from "../constants";
-import {SWAP_ROUTER_INNER_TXN_COUNT} from "./constants";
-import {
-  getAssetInFromSwapRoute,
-  getAssetOutFromSwapRoute,
-  getSwapRouterAppID
-} from "./util";
 import {TINYMAN_ANALYTICS_API_BASE_URLS} from "../../../util/constant";
-import {tinymanJSSDKConfig} from "../../../config";
-
-/**
- * Generates txns that would opt in the Swap Router Application to the assets used in the swap router
- */
-export async function generateSwapRouterAssetOptInTransaction({
-  client,
-  routerAppID,
-  assetIDs,
-  initiatorAddr
-}: {
-  client: Algodv2;
-  routerAppID: number;
-  assetIDs: number[];
-  initiatorAddr: string;
-}): Promise<Transaction> {
-  const suggestedParams = await client.getTransactionParams().do();
-  // We need to create a NoOp transaction to opt-in to the assets
-  const assetOptInTxn = algosdk.makeApplicationNoOpTxnFromObject({
-    from: initiatorAddr,
-    appIndex: routerAppID,
-    appArgs: [V2_SWAP_ROUTER_APP_ARGS_ENCODED.ASSET_OPT_IN],
-    foreignAssets: assetIDs,
-    suggestedParams
-  });
-  // The number of inner transactions is the number of assets we're opting in to
-  const innerTransactionCount = assetIDs.length;
-
-  /**
-   * The opt-in transaction fee should cover the total cost of inner transactions,
-   * and the outer transaction (thus the +1)
-   */
-  assetOptInTxn.fee = ALGORAND_MIN_TX_FEE * (innerTransactionCount + 1);
-
-  return assetOptInTxn;
-}
+import SwapQuoteError, {SwapQuoteErrorType} from "../../../util/error/SwapQuoteError";
+import {hasTinymanApiErrorShape} from "../../../util/util";
+import {SwapType} from "../../constants";
+import {
+  FetchSwapRouteQuotesPayload,
+  SwapRouterResponse,
+  SwapRouterTransactionRecipe
+} from "../../types";
 
 export async function generateSwapRouterTxns({
   initiatorAddr,
   client,
-  network,
-  swapType,
-  route,
-  slippage
+  route
 }: {
   client: Algodv2;
   initiatorAddr: string;
-  swapType: SwapType;
-  route: SwapRoute;
-  network: SupportedNetwork;
-  slippage: number;
+  route: SwapRouterResponse;
 }) {
-  const suggestedParams = await client.getTransactionParams().do();
-
-  const [assetInID, intermediaryAssetID, assetOutID] = [
-    getAssetId(route[0].quote.amount_in.asset),
-    getAssetId(route[0].quote.amount_out.asset),
-    getAssetId(route[1].quote.amount_out.asset)
-  ];
-  const [assetInAmountFromRoute, assetOutAmountFromRoute] = [
-    Number(getAssetInFromSwapRoute(route).amount),
-    Number(getAssetOutFromSwapRoute(route).amount)
-  ];
-  const [pool1Address, pool2Address] = [route[0].pool.address, route[1].pool.address];
-
-  const assetInAmount =
-    swapType === SwapType.FixedInput
-      ? assetInAmountFromRoute
-      : applySlippageToAmount("positive", slippage, assetInAmountFromRoute);
-  const assetOutAmount =
-    swapType === SwapType.FixedOutput
-      ? assetOutAmountFromRoute
-      : applySlippageToAmount("negative", slippage, assetOutAmountFromRoute);
-
-  const isAssetInAlgo = isAlgo(assetInID);
-
-  const routerAppID = getSwapRouterAppID(network);
-
-  const inputTxn = isAssetInAlgo
-    ? algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-        from: initiatorAddr,
-        to: getApplicationAddress(routerAppID),
-        amount: assetInAmount,
-        suggestedParams
-      })
-    : algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-        from: initiatorAddr,
-        to: getApplicationAddress(routerAppID),
-        amount: assetInAmount,
-        assetIndex: assetInID,
-        suggestedParams
-      });
-
-  const routerAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
-    from: initiatorAddr,
-    appIndex: routerAppID,
-    appArgs: [
-      V2_SWAP_APP_CALL_ARG_ENCODED,
-      V2_SWAP_APP_CALL_SWAP_TYPE_ARGS_ENCODED[swapType],
-      algosdk.encodeUint64(assetOutAmount)
-    ],
-    foreignApps: [getValidatorAppID(network, CONTRACT_VERSION.V2)],
-    foreignAssets: [assetInID, intermediaryAssetID, assetOutID],
-    accounts: [pool1Address, pool2Address],
-    suggestedParams,
-    note: tinymanJSSDKConfig.getAppCallTxnNoteWithClientName(CONTRACT_VERSION.V2)
-  });
-
-  routerAppCallTxn.fee =
-    ALGORAND_MIN_TX_FEE * (SWAP_ROUTER_INNER_TXN_COUNT[swapType] + 1);
-
-  const txnList = [inputTxn, routerAppCallTxn];
-
-  const optInRequiredAssetIDs = await getSwapRouterAppOptInRequiredAssetIDs({
-    client,
-    network,
-    assetIDs: [assetInID, intermediaryAssetID, assetOutID]
-  });
-
-  if (optInRequiredAssetIDs.length > 0) {
-    const routerAppAssetOptInTxn = await generateSwapRouterAssetOptInTransaction({
-      client,
-      initiatorAddr,
-      assetIDs: optInRequiredAssetIDs,
-      routerAppID
-    });
-
-    txnList.unshift(routerAppAssetOptInTxn);
+  if (!route.transactions || !route.transaction_fee) {
+    return [];
   }
 
-  const txGroup = algosdk.assignGroupID(txnList);
+  const suggestedParams = await client.getTransactionParams().do();
+
+  const txns: Transaction[] = [];
+
+  route.transactions.forEach((txnRecipe) => {
+    txns.push(generateSwapRouterTxnFromRecipe(txnRecipe, suggestedParams, initiatorAddr));
+  });
+
+  txns[0].fee = Number(route.transaction_fee);
+  const txGroup = algosdk.assignGroupID(txns);
 
   return txGroup.map((txn: Transaction) => ({
     txn,
@@ -165,25 +42,59 @@ export async function generateSwapRouterTxns({
   }));
 }
 
-export async function getSwapRouterAppOptInRequiredAssetIDs({
-  client,
-  network,
-  assetIDs
-}: {
-  client: Algodv2;
-  network: SupportedNetwork;
-  assetIDs: number[];
-}) {
-  const swapRouterAppAddress = getApplicationAddress(getSwapRouterAppID(network));
-  const accountInfo = (await client
-    .accountInformation(swapRouterAppAddress)
-    .do()) as AccountInformation;
-  const appOptedInAssetIDs = accountInfo.assets.map((asset) => asset["asset-id"]);
+export function generateSwapRouterTxnFromRecipe(
+  recipe: SwapRouterTransactionRecipe,
+  suggestedParams: SuggestedParams,
+  userAddress: string
+) {
+  let txn: Transaction;
 
-  return assetIDs.filter(
-    (assetID: number) =>
-      assetID !== ALGO_ASSET_ID && !appOptedInAssetIDs.includes(assetID)
-  );
+  switch (recipe.type) {
+    case algosdk.TransactionType.pay: {
+      txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+        from: userAddress,
+        to: recipe.receiver!,
+        amount: recipe.amount,
+        suggestedParams
+      });
+      txn.fee = 0;
+
+      return txn;
+    }
+
+    case algosdk.TransactionType.axfer: {
+      txn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
+        from: userAddress,
+        to: recipe.receiver!,
+        amount: recipe.amount,
+        assetIndex: recipe.asset_id,
+        suggestedParams
+      });
+      txn.fee = 0;
+
+      return txn;
+    }
+
+    case algosdk.TransactionType.appl: {
+      const appArgs = recipe.args?.map(toByteArray);
+
+      txn = algosdk.makeApplicationNoOpTxnFromObject({
+        from: userAddress,
+        appIndex: recipe.app_id,
+        appArgs,
+        accounts: recipe.accounts,
+        foreignApps: recipe.apps,
+        foreignAssets: recipe.assets,
+        suggestedParams
+      });
+      txn.fee = 0;
+
+      return txn;
+    }
+
+    default:
+      throw new Error(`Unknown transaction type: ${recipe.type}`);
+  }
 }
 
 export async function getSwapRoute({
@@ -191,23 +102,27 @@ export async function getSwapRoute({
   assetInID,
   assetOutID,
   swapType,
-  network
+  network,
+  slippage
 }: {
   assetInID: number;
   assetOutID: number;
   swapType: SwapType;
   amount: number | bigint;
   network: SupportedNetwork;
+  slippage: number;
 }): Promise<SwapRouterResponse> {
   const payload: FetchSwapRouteQuotesPayload = {
     asset_in_id: String(assetInID),
     asset_out_id: String(assetOutID),
     swap_type: swapType,
-    amount: String(amount)
+    input_amount: swapType === SwapType.FixedInput ? String(amount) : undefined,
+    output_amount: swapType === SwapType.FixedOutput ? String(amount) : undefined,
+    slippage
   };
 
   const response = await fetch(
-    `${TINYMAN_ANALYTICS_API_BASE_URLS[network].v1}/swap-router/quotes/`,
+    `${TINYMAN_ANALYTICS_API_BASE_URLS[network].v1}/swap-router/quotes-v2/`,
     {
       method: "POST",
       headers: {
@@ -235,10 +150,25 @@ export async function getSwapRoute({
     }
   }
 
-  if ((serializedResponse as SwapRouterResponse).route.length < 2) {
+  if (!(serializedResponse as SwapRouterResponse).transactions?.length) {
     throw new SwapQuoteError(
       SwapQuoteErrorType.SwapRouterNoRouteError,
       "Swap router couldn't find a route for this swap."
+    );
+  }
+
+  if (
+    Number((serializedResponse as SwapRouterResponse).asset_in.id) !== assetInID ||
+    Number((serializedResponse as SwapRouterResponse).asset_out.id) !== assetOutID ||
+    (serializedResponse as SwapRouterResponse).swap_type === SwapType.FixedInput
+      ? BigInt(amount) !==
+        BigInt((serializedResponse as SwapRouterResponse).input_amount ?? 0)
+      : BigInt(amount) !==
+        BigInt((serializedResponse as SwapRouterResponse).output_amount ?? 0)
+  ) {
+    throw new SwapQuoteError(
+      SwapQuoteErrorType.UnknownError,
+      "Swap router quote doesn't match the requested swap. Please try again."
     );
   }
 

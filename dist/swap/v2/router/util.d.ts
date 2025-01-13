@@ -1,23 +1,23 @@
 import { SupportedNetwork } from "../../../util/commonTypes";
-import { SwapRoute } from "../../types";
-declare function getSwapRouteRate(route: SwapRoute): number;
+import { SwapRouterResponse } from "../../types";
+declare function getSwapRouteRate(route: Pick<SwapRouterResponse, "asset_in" | "asset_out" | "input_amount" | "output_amount">): number;
 declare function getSwapRouterAppID(network: SupportedNetwork): number;
-declare function getAssetOutFromSwapRoute(route: SwapRoute): {
-    asset: import("../../types").SwapRouteAsset;
-    amount: string;
+declare function getAssetOutFromSwapRoute(route: Pick<SwapRouterResponse, "asset_out" | "output_amount">): {
+    asset: Pick<import("../../..").TinymanAnalyticsApiAsset, "id" | "decimals" | "name" | "unit_name">;
+    amount: bigint;
 };
-declare function getAssetInFromSwapRoute(route: SwapRoute): {
-    asset: import("../../types").SwapRouteAsset;
-    amount: string;
+declare function getAssetInFromSwapRoute(route: Pick<SwapRouterResponse, "asset_in" | "input_amount">): {
+    asset: Pick<import("../../..").TinymanAnalyticsApiAsset, "id" | "decimals" | "name" | "unit_name">;
+    amount: bigint;
 };
-declare function getAssetInAndOutFromSwapRoute(route: SwapRoute): {
+declare function getAssetInAndOutFromSwapRoute(route: Pick<SwapRouterResponse, "asset_in" | "asset_out" | "input_amount" | "output_amount">): {
     assetIn: {
-        asset: import("../../types").SwapRouteAsset;
-        amount: string;
+        asset: Pick<import("../../..").TinymanAnalyticsApiAsset, "id" | "decimals" | "name" | "unit_name">;
+        amount: bigint;
     };
     assetOut: {
-        asset: import("../../types").SwapRouteAsset;
-        amount: string;
+        asset: Pick<import("../../..").TinymanAnalyticsApiAsset, "id" | "decimals" | "name" | "unit_name">;
+        amount: bigint;
     };
 };
-export { getSwapRouteRate, getSwapRouterAppID, getAssetOutFromSwapRoute, getAssetInFromSwapRoute, getAssetInAndOutFromSwapRoute };
+export { getAssetInAndOutFromSwapRoute, getAssetInFromSwapRoute, getAssetOutFromSwapRoute, getSwapRouterAppID, getSwapRouteRate };

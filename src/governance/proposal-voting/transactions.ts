@@ -1,5 +1,7 @@
 import algosdk, {decodeAddress, getApplicationAddress, SuggestedParams} from "algosdk";
 
+import {EXECUTOR_FALLBACK_ADDRESS} from "../../util/account/accountConstants";
+import {encodeString} from "../../util/util";
 import {intToBytes} from "../util/utils";
 import {ACCOUNT_POWER_BOX_ARRAY_LEN} from "../vault/constants";
 import {
@@ -12,13 +14,11 @@ import {
   ACCOUNT_ATTENDANCE_SHEET_BOX_SIZE,
   ATTENDANCE_SHEET_BOX_COST,
   CREATE_PROPOSAL_DEFAULT_EXECUTION_HASH_ARGUMENT,
-  EXECUTOR_FALLBACK_ADDRESS,
-  ProposalVote,
-  PROPOSAL_BOX_COST
+  PROPOSAL_BOX_COST,
+  ProposalVote
 } from "./constants";
 import {getAttendanceSheetBoxName, getProposalBoxName, Proposal} from "./storage";
 import {GenerateProposalMetadataPayload} from "./types";
-import {encodeString} from "../../util/util";
 
 export function generateProposalMetadata({
   category,

@@ -1,6 +1,6 @@
 import { Algodv2 } from "algosdk";
-import { PoolReserves, PoolAssets, V1PoolInfo } from "../poolTypes";
 import { SupportedNetwork } from "../../commonTypes";
+import { PoolAssets, PoolReserves, V1PoolInfo } from "../poolTypes";
 export declare function getPoolInfo(params: {
     client: Algodv2;
     network: SupportedNetwork;

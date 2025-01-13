@@ -1,31 +1,24 @@
 import algosdk, {Algodv2, Transaction} from "algosdk";
 
-import {
-  applySlippageToAmount,
-  convertFromBaseUnits,
-  sendAndWaitRawTransaction
-} from "../../util/util";
+import {tinymanJSSDKConfig} from "../../config";
+import {CONTRACT_VERSION} from "../../contract/constants";
+import {AssetWithIdAndAmount, AssetWithIdAndDecimals} from "../../util/asset/assetModels";
+import {isAlgo} from "../../util/asset/assetUtils";
 import {
   InitiatorSigner,
   SignerTransaction,
   SupportedNetwork
 } from "../../util/commonTypes";
+import SwapQuoteError, {SwapQuoteErrorType} from "../../util/error/SwapQuoteError";
 import TinymanError from "../../util/error/TinymanError";
+import {poolUtils} from "../../util/pool";
 import {V2PoolInfo} from "../../util/pool/poolTypes";
+import {getAppCallInnerAssetData} from "../../util/transaction/transactionUtils";
 import {
-  DirectSwapQuote,
-  GenerateSwapTxnsParams,
-  SwapQuote,
-  SwapQuoteType,
-  V2SwapExecution
-} from "../types";
-import {SwapType} from "../constants";
-import {
-  V2_SWAP_APP_CALL_ARG_ENCODED,
-  V2_SWAP_APP_CALL_SWAP_TYPE_ARGS_ENCODED,
-  V2SwapTxnGroupIndices
-} from "./constants";
-import {isAlgo} from "../../util/asset/assetUtils";
+  applySlippageToAmount,
+  convertFromBaseUnits,
+  sendAndWaitRawTransaction
+} from "../../util/util";
 import {
   calculatePriceImpact,
   getAssetInFromSwapQuote,
@@ -33,20 +26,27 @@ import {
   getBestQuote,
   isSwapQuoteErrorCausedByAmount
 } from "../common/utils";
-import {getAppCallInnerAssetData} from "../../util/transaction/transactionUtils";
-import {AssetWithIdAndAmount, AssetWithIdAndDecimals} from "../../util/asset/assetModels";
-import {tinymanJSSDKConfig} from "../../config";
-import {CONTRACT_VERSION} from "../../contract/constants";
+import {SwapType} from "../constants";
+import {
+  DirectSwapQuote,
+  GenerateSwapTxnsParams,
+  SwapQuote,
+  SwapQuoteType,
+  V2SwapExecution
+} from "../types";
+import {
+  V2_SWAP_APP_CALL_ARG_ENCODED,
+  V2_SWAP_APP_CALL_SWAP_TYPE_ARGS_ENCODED,
+  V2SwapTxnGroupIndices
+} from "./constants";
 import {generateSwapRouterTxns, getSwapRoute} from "./router/swap-router";
-import {poolUtils} from "../../util/pool";
-import SwapQuoteError, {SwapQuoteErrorType} from "../../util/error/SwapQuoteError";
 import {getSwapAppCallFeeAmount, isSwapAssetInAmountLow} from "./util";
 
 async function generateTxns(
   params: GenerateSwapTxnsParams
 ): Promise<SignerTransaction[]> {
   if (params.quote.type === SwapQuoteType.Router) {
-    return generateSwapRouterTxns({...params, route: params.quote.data.route});
+    return generateSwapRouterTxns({...params, route: params.quote.data});
   }
 
   const {client, initiatorAddr, slippage, swapType, quote} = params;
@@ -213,6 +213,7 @@ async function getQuote({
   assetIn,
   assetOut,
   network,
+  slippage,
   isSwapRouterEnabled,
   pool
 }: {
@@ -222,6 +223,7 @@ async function getQuote({
   assetOut: AssetWithIdAndDecimals;
   pool: V2PoolInfo | null;
   network: SupportedNetwork;
+  slippage: number;
   isSwapRouterEnabled?: boolean;
 }): Promise<SwapQuote> {
   let quote: SwapQuote;
@@ -233,7 +235,8 @@ async function getQuote({
       amount,
       isSwapRouterEnabled,
       network,
-      pool
+      pool,
+      slippage
     });
   } else {
     quote = await getFixedOutputSwapQuote({
@@ -242,7 +245,8 @@ async function getQuote({
       assetOut,
       isSwapRouterEnabled,
       network,
-      pool
+      pool,
+      slippage
     });
   }
 
@@ -458,6 +462,7 @@ async function getFixedInputSwapQuote({
   assetOut,
   isSwapRouterEnabled,
   network,
+  slippage,
   pool
 }: {
   amount: number | bigint;
@@ -465,6 +470,7 @@ async function getFixedInputSwapQuote({
   assetOut: AssetWithIdAndDecimals;
   network: SupportedNetwork;
   pool: V2PoolInfo | null;
+  slippage: number;
   isSwapRouterEnabled?: boolean;
 }): Promise<SwapQuote> {
   const quotePromises: Promise<SwapQuote>[] = [];
@@ -510,7 +516,8 @@ async function getFixedInputSwapQuote({
         assetInID: assetIn.id,
         assetOutID: assetOut.id,
         swapType: SwapType.FixedInput,
-        network
+        network,
+        slippage
       }).then((data) => ({type: SwapQuoteType.Router, data}))
     );
   }
@@ -529,6 +536,7 @@ async function getFixedOutputSwapQuote({
   assetOut,
   isSwapRouterEnabled,
   network,
+  slippage,
   pool
 }: {
   amount: number | bigint;
@@ -536,6 +544,7 @@ async function getFixedOutputSwapQuote({
   assetOut: AssetWithIdAndDecimals;
   pool: V2PoolInfo | null;
   network: SupportedNetwork;
+  slippage: number;
   isSwapRouterEnabled?: boolean;
 }): Promise<SwapQuote> {
   const quotePromises: Promise<SwapQuote>[] = [
@@ -562,7 +571,8 @@ async function getFixedOutputSwapQuote({
         assetInID: assetIn.id,
         assetOutID: assetOut.id,
         swapType: SwapType.FixedOutput,
-        network
+        network,
+        slippage
       }).then((data) => ({type: SwapQuoteType.Router, data}))
     );
   }

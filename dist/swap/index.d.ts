@@ -47,21 +47,23 @@ export declare const Swap: {
         }) => Promise<Omit<import("./types").V1SwapExecution, "fees" | "groupID">>;
     };
     v2: {
-        getQuote: ({ type, amount, assetIn, assetOut, network, isSwapRouterEnabled, pool }: {
+        getQuote: ({ type, amount, assetIn, assetOut, network, slippage, isSwapRouterEnabled, pool }: {
             type: import("./constants").SwapType;
             amount: number | bigint;
             assetIn: import("../util/asset/assetModels").AssetWithIdAndDecimals;
             assetOut: import("../util/asset/assetModels").AssetWithIdAndDecimals;
             pool: import("..").V2PoolInfo | null;
             network: import("..").SupportedNetwork;
+            slippage: number;
             isSwapRouterEnabled?: boolean | undefined;
         }) => Promise<import("./types").SwapQuote>;
-        getFixedInputSwapQuote: ({ amount, assetIn, assetOut, isSwapRouterEnabled, network, pool }: {
+        getFixedInputSwapQuote: ({ amount, assetIn, assetOut, isSwapRouterEnabled, network, slippage, pool }: {
             amount: number | bigint;
             assetIn: import("../util/asset/assetModels").AssetWithIdAndDecimals;
             assetOut: import("../util/asset/assetModels").AssetWithIdAndDecimals;
             network: import("..").SupportedNetwork;
             pool: import("..").V2PoolInfo | null;
+            slippage: number;
             isSwapRouterEnabled?: boolean | undefined;
         }) => Promise<import("./types").SwapQuote>;
         getFixedInputDirectSwapQuote: ({ amount, assetIn, assetOut, pool }: {
@@ -76,12 +78,13 @@ export declare const Swap: {
             assetIn: import("../util/asset/assetModels").AssetWithIdAndDecimals;
             assetOut: import("../util/asset/assetModels").AssetWithIdAndDecimals;
         }) => import("./types").SwapQuote;
-        getFixedOutputSwapQuote: ({ amount, assetIn, assetOut, isSwapRouterEnabled, network, pool }: {
+        getFixedOutputSwapQuote: ({ amount, assetIn, assetOut, isSwapRouterEnabled, network, slippage, pool }: {
             amount: number | bigint;
             assetIn: import("../util/asset/assetModels").AssetWithIdAndDecimals;
             assetOut: import("../util/asset/assetModels").AssetWithIdAndDecimals;
             pool: import("..").V2PoolInfo | null;
             network: import("..").SupportedNetwork;
+            slippage: number;
             isSwapRouterEnabled?: boolean | undefined;
         }) => Promise<import("./types").SwapQuote>;
         generateTxns: (params: import("./types").GenerateSwapTxnsParams) => Promise<import("..").SignerTransaction[]>;

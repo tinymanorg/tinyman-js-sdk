@@ -4,13 +4,20 @@ import { PoolReserves, V1PoolInfo } from "../../util/pool/poolTypes";
 import { GenerateV1_1SwapTxnsParams, SwapQuote, V1SwapExecution } from "../types";
 import { SwapType } from "../constants";
 import { AssetWithIdAndAmount } from "../../util/asset/assetModels";
+/**
+ * @deprecated Use `generateTxns` in V2 instead. This will be removed soon.
+ */
 declare function signTxns({ pool, txGroup, initiatorSigner }: {
     pool: V1PoolInfo;
     txGroup: SignerTransaction[];
     initiatorSigner: InitiatorSigner;
 }): Promise<Uint8Array[]>;
+/**
+ * @deprecated Use `generateTxns` in V2 instead. This will be removed soon.
+ */
 declare function generateTxns({ client, quoteAndPool, swapType, slippage, initiatorAddr }: GenerateV1_1SwapTxnsParams): Promise<SignerTransaction[]>;
 /**
+ * @deprecated Use `getQuote` in V2 instead. This will be removed soon.
  *
  * @param type - Type of the swap
  * @param pool - Information for the pool.
@@ -26,6 +33,8 @@ declare function getQuote(type: SwapType, pool: V1PoolInfo, reserves: PoolReserv
     assetOut: number;
 }): SwapQuote;
 /**
+ * @deprecated Use `getFixedInputSwapQuote` in V2 instead. This will be removed soon.
+ *
  * Get a quote for a fixed input swap This does not execute any transactions.
  *
  * @param params.pool Information for the pool.
@@ -44,6 +53,8 @@ declare function getFixedInputSwapQuote({ pool, reserves, assetIn, decimals }: {
     };
 }): SwapQuote;
 /**
+ * @deprecated Use `getFixedOutputSwapQuote` in V2 instead. This will be removed soon.
+ *
  * Get a quote for a fixed output swap This does not execute any transactions.
  *
  * @param params.pool Information for the pool.
@@ -62,6 +73,7 @@ declare function getFixedOutputSwapQuote({ pool, reserves, assetOut, decimals }:
     };
 }): SwapQuote;
 /**
+ * @deprecated
  * Execute a fixed output swap with the desired quantities.
  *
  * @param params.client An Algodv2 client.
@@ -87,6 +99,8 @@ declare function executeFixedOutputSwap({ client, pool, signedTxns, assetIn, ass
     initiatorAddr: string;
 }): Promise<Omit<V1SwapExecution, "fees" | "groupID">>;
 /**
+ * @deprecated Use `execute` in V2 instead. This will be removed soon.
+ *
  * Execute a swap with the desired quantities.
  *
  * @param params.client An Algodv2 client.

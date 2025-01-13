@@ -1,7 +1,7 @@
 /// <reference types="node" />
 import { Algodv2 } from "algosdk";
-import { SignerTransaction, TinymanApiErrorShape } from "./commonTypes";
 import { AccountInformation } from "./account/accountTypes";
+import { SignerTransaction, TinymanApiErrorShape } from "./commonTypes";
 export declare function decodeState({ stateArray, shouldDecodeKeys }: {
     stateArray: AccountInformation["apps-local-state"][0]["key-value"];
     /**
@@ -9,7 +9,7 @@ export declare function decodeState({ stateArray, shouldDecodeKeys }: {
      */
     shouldDecodeKeys?: boolean;
 }): Record<string, number | string>;
-export declare function joinByteArrays(arrays: Uint8Array[]): Uint8Array;
+export declare function joinByteArrays(...arrays: Uint8Array[]): Uint8Array;
 export declare function getMinBalanceForAccount(accountInfo: any): bigint;
 /**
  * Wait until a transaction has been confirmed or rejected by the network
