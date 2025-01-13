@@ -47,6 +47,7 @@ export interface FetchSwapRouteQuotesPayload {
     input_amount?: string;
     output_amount?: string;
     swap_type: SwapType;
+    slippage: number;
 }
 export type SwapRouterResponse = Pick<FetchSwapRouteQuotesPayload, "swap_type"> & {
     asset_in: Pick<TinymanAnalyticsApiAsset, "id" | "decimals" | "name" | "unit_name">;
@@ -88,6 +89,8 @@ export type GetSwapQuoteParams = {
     network: SupportedNetwork;
     /** If `true`, the function will also check the quotes that use swap route */
     isSwapRouterEnabled?: boolean;
+    /** Slippage rate. Should be given as 0.1% -> 0.001. */
+    slippage: number;
 };
 export type SwapQuote = {
     data: DirectSwapQuoteAndPool;

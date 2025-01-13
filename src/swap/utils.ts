@@ -125,7 +125,8 @@ export async function getFixedInputSwapQuote(
       },
       pool: v2Pool?.info ?? null,
       isSwapRouterEnabled,
-      network: params.network
+      network: params.network,
+      slippage: params.slippage
     })
   );
 
@@ -192,7 +193,8 @@ export async function getFixedOutputSwapQuote(
       },
       pool: v2Pool?.info ?? null,
       isSwapRouterEnabled,
-      network: params.network
+      network: params.network,
+      slippage: params.slippage
     })
   );
 

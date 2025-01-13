@@ -213,6 +213,7 @@ async function getQuote({
   assetIn,
   assetOut,
   network,
+  slippage,
   isSwapRouterEnabled,
   pool
 }: {
@@ -222,6 +223,7 @@ async function getQuote({
   assetOut: AssetWithIdAndDecimals;
   pool: V2PoolInfo | null;
   network: SupportedNetwork;
+  slippage: number;
   isSwapRouterEnabled?: boolean;
 }): Promise<SwapQuote> {
   let quote: SwapQuote;
@@ -233,7 +235,8 @@ async function getQuote({
       amount,
       isSwapRouterEnabled,
       network,
-      pool
+      pool,
+      slippage
     });
   } else {
     quote = await getFixedOutputSwapQuote({
@@ -242,7 +245,8 @@ async function getQuote({
       assetOut,
       isSwapRouterEnabled,
       network,
-      pool
+      pool,
+      slippage
     });
   }
 
@@ -458,6 +462,7 @@ async function getFixedInputSwapQuote({
   assetOut,
   isSwapRouterEnabled,
   network,
+  slippage,
   pool
 }: {
   amount: bigint;
@@ -465,6 +470,7 @@ async function getFixedInputSwapQuote({
   assetOut: AssetWithIdAndDecimals;
   network: SupportedNetwork;
   pool: V2PoolInfo | null;
+  slippage: number;
   isSwapRouterEnabled?: boolean;
 }): Promise<SwapQuote> {
   const quotePromises: Promise<SwapQuote>[] = [];
@@ -510,7 +516,8 @@ async function getFixedInputSwapQuote({
         assetInID: assetIn.id,
         assetOutID: assetOut.id,
         swapType: SwapType.FixedInput,
-        network
+        network,
+        slippage
       }).then((data) => ({type: SwapQuoteType.Router, data}))
     );
   }
@@ -529,6 +536,7 @@ async function getFixedOutputSwapQuote({
   assetOut,
   isSwapRouterEnabled,
   network,
+  slippage,
   pool
 }: {
   amount: bigint;
@@ -536,6 +544,7 @@ async function getFixedOutputSwapQuote({
   assetOut: AssetWithIdAndDecimals;
   pool: V2PoolInfo | null;
   network: SupportedNetwork;
+  slippage: number;
   isSwapRouterEnabled?: boolean;
 }): Promise<SwapQuote> {
   const quotePromises: Promise<SwapQuote>[] = [
@@ -562,7 +571,8 @@ async function getFixedOutputSwapQuote({
         assetInID: assetIn.id,
         assetOutID: assetOut.id,
         swapType: SwapType.FixedOutput,
-        network
+        network,
+        slippage
       }).then((data) => ({type: SwapQuoteType.Router, data}))
     );
   }

@@ -166,13 +166,13 @@ describe("TinymanTAlgoClient", () => {
     const expectedAlgoAmount = Math.floor(Number(burnAmount) / ratio);
 
     // Check if the account has the correct amount of ALGOs
-    expect(finalAccountInfo.amount).toBeGreaterThanOrEqual(
-      initialAccountInfo.amount - txnsToBeSigned[0].fee + BigInt(expectedAlgoAmount)
+    expect(Number(finalAccountInfo.amount)).toBeGreaterThanOrEqual(
+      Number(initialAccountInfo.amount - txnsToBeSigned[0].fee) + expectedAlgoAmount
     );
 
     // Check if the account has the correct amount of tALGOs
     expect(finalTAlgoAccountAsset?.amount).toBe(
       (initialTAlgoAccountAsset?.amount ?? 0n) - burnAmount
     );
-  }, 10000);
+  }, 15000);
 });

@@ -1,63 +1,36 @@
-import algosdk, {Algodv2, bigIntToBytes, SuggestedParams, Transaction} from "algosdk";
+import algosdk, {Algodv2, SuggestedParams, Transaction} from "algosdk";
 import {toByteArray} from "base64-js";
 
 import {SupportedNetwork} from "../../../util/commonTypes";
 import {TINYMAN_ANALYTICS_API_BASE_URLS} from "../../../util/constant";
 import SwapQuoteError, {SwapQuoteErrorType} from "../../../util/error/SwapQuoteError";
-import {applySlippageToAmount, hasTinymanApiErrorShape} from "../../../util/util";
+import {hasTinymanApiErrorShape} from "../../../util/util";
 import {SwapType} from "../../constants";
 import {
   FetchSwapRouteQuotesPayload,
   SwapRouterResponse,
   SwapRouterTransactionRecipe
 } from "../../types";
-import {
-  V2SwapRouterAppCallArgsTxnType,
-  V2SwapRouterSwapAppCallArgsIndices
-} from "./constants";
-import {getAssetInFromSwapRoute, getAssetOutFromSwapRoute} from "./util";
 
 export async function generateSwapRouterTxns({
   initiatorAddr,
   client,
-  route,
-  slippage
+  route
 }: {
   client: Algodv2;
   initiatorAddr: string;
   route: SwapRouterResponse;
-  slippage: number;
 }) {
   if (!route.transactions || !route.transaction_fee) {
     return [];
   }
 
   const suggestedParams = await client.getTransactionParams().do();
-  const [assetInAmountFromRoute, assetOutAmountFromRoute] = [
-    getAssetInFromSwapRoute(route).amount,
-    getAssetOutFromSwapRoute(route).amount
-  ];
-  const assetInAmount =
-    route.swap_type === SwapType.FixedInput
-      ? assetInAmountFromRoute
-      : applySlippageToAmount("positive", slippage, assetInAmountFromRoute);
-  const assetOutAmount =
-    route.swap_type === SwapType.FixedOutput
-      ? assetOutAmountFromRoute
-      : applySlippageToAmount("negative", slippage, assetOutAmountFromRoute);
 
   const txns: Transaction[] = [];
 
   route.transactions.forEach((txnRecipe) => {
-    txns.push(
-      generateSwapRouterTxnFromRecipe(
-        txnRecipe,
-        suggestedParams,
-        initiatorAddr,
-        assetInAmount,
-        assetOutAmount
-      )
-    );
+    txns.push(generateSwapRouterTxnFromRecipe(txnRecipe, suggestedParams, initiatorAddr));
   });
 
   txns[0].fee = BigInt(route.transaction_fee);
@@ -72,9 +45,7 @@ export async function generateSwapRouterTxns({
 export function generateSwapRouterTxnFromRecipe(
   recipe: SwapRouterTransactionRecipe,
   suggestedParams: SuggestedParams,
-  userAddress: string,
-  assetInAmount: bigint,
-  assetOutAmount: bigint
+  userAddress: string
 ) {
   let txn: Transaction;
 
@@ -83,7 +54,7 @@ export function generateSwapRouterTxnFromRecipe(
       txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
         sender: userAddress,
         receiver: recipe.receiver!,
-        amount: assetInAmount,
+        amount: recipe.amount,
         suggestedParams
       });
       txn.fee = 0n;
@@ -95,7 +66,7 @@ export function generateSwapRouterTxnFromRecipe(
       txn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
         sender: userAddress,
         receiver: recipe.receiver!,
-        amount: assetInAmount,
+        amount: recipe.amount,
         assetIndex: recipe.asset_id,
         suggestedParams
       });
@@ -106,20 +77,6 @@ export function generateSwapRouterTxnFromRecipe(
 
     case algosdk.TransactionType.appl: {
       const appArgs = recipe.args?.map(toByteArray);
-      const textDecoder = new TextDecoder();
-
-      if (
-        appArgs?.length &&
-        textDecoder.decode(appArgs[V2SwapRouterSwapAppCallArgsIndices.TxnType]) ===
-          V2SwapRouterAppCallArgsTxnType.Swap
-      ) {
-        appArgs?.splice(
-          V2SwapRouterSwapAppCallArgsIndices.InputAmount,
-          2,
-          bigIntToBytes(assetInAmount, 8),
-          bigIntToBytes(assetOutAmount, 8)
-        );
-      }
 
       txn = algosdk.makeApplicationNoOpTxnFromObject({
         sender: userAddress,
@@ -145,20 +102,23 @@ export async function getSwapRoute({
   assetInID,
   assetOutID,
   swapType,
-  network
+  network,
+  slippage
 }: {
   assetInID: number;
   assetOutID: number;
   swapType: SwapType;
   amount: number | bigint;
   network: SupportedNetwork;
+  slippage: number;
 }): Promise<SwapRouterResponse> {
   const payload: FetchSwapRouteQuotesPayload = {
     asset_in_id: String(assetInID),
     asset_out_id: String(assetOutID),
     swap_type: swapType,
     input_amount: swapType === SwapType.FixedInput ? String(amount) : undefined,
-    output_amount: swapType === SwapType.FixedOutput ? String(amount) : undefined
+    output_amount: swapType === SwapType.FixedOutput ? String(amount) : undefined,
+    slippage
   };
 
   const response = await fetch(
