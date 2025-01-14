@@ -55,35 +55,6 @@ export function joinByteArrays(...arrays: Uint8Array[]): Uint8Array {
   return result;
 }
 
-const MIN_BALANCE_PER_ACCOUNT = 100000n;
-const MIN_BALANCE_PER_ASSET = 100000n;
-const MIN_BALANCE_PER_APP = 100000n;
-const MIN_BALANCE_PER_APP_BYTESLICE = 25000n + 25000n;
-const MIN_BALANCE_PER_APP_UINT = 25000n + 3500n;
-
-export function getMinBalanceForAccount(accountInfo: AccountInformationData): bigint {
-  const totalSchema = accountInfo.appsTotalSchema;
-  let totalByteSlices = 0n;
-  let totalUints = 0n;
-
-  if (totalSchema) {
-    totalByteSlices = BigInt(totalSchema.numByteSlice);
-    totalUints = BigInt(totalSchema.numUint);
-  }
-
-  const localApps = accountInfo.appsLocalState;
-  const createdApps = accountInfo.createdApps || [];
-  const assets = accountInfo.assets || [];
-
-  return (
-    MIN_BALANCE_PER_ACCOUNT +
-    MIN_BALANCE_PER_ASSET * BigInt(assets.length) +
-    MIN_BALANCE_PER_APP * BigInt(createdApps.length + localApps.length) +
-    MIN_BALANCE_PER_APP_UINT * totalUints +
-    MIN_BALANCE_PER_APP_BYTESLICE * totalByteSlices
-  );
-}
-
 function delay(timeout: number) {
   return new Promise((resolve) => {
     setTimeout(() => {

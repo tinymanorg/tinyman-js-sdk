@@ -10,12 +10,7 @@ import {
 } from "../../account/accountUtils";
 import {sortAssetIds} from "../../asset/assetUtils";
 import {SupportedNetwork} from "../../commonTypes";
-import {
-  decodeState,
-  encodeString,
-  getMinBalanceForAccount,
-  joinByteArrays
-} from "../../util";
+import {decodeState, encodeString, joinByteArrays} from "../../util";
 import {DECODED_APP_STATE_KEYS} from "../poolConstants";
 import {PoolAssets, PoolReserves, PoolStatus, V1PoolInfo} from "../poolTypes";
 
@@ -129,9 +124,7 @@ export async function getPoolReserves(
   }
 
   if (pool.asset2ID === 0) {
-    const minBalance = getMinBalanceForAccount(info);
-
-    asset2Balance = info.amount - minBalance;
+    asset2Balance = info.amount - info.minBalance;
 
     if (asset2Balance < 0n) {
       asset2Balance = 0n;

@@ -10,7 +10,6 @@ export declare function decodeState({ stateArray, shouldDecodeKeys }: {
     shouldDecodeKeys?: boolean;
 }): Record<string, number | string>;
 export declare function joinByteArrays(...arrays: Uint8Array[]): Uint8Array;
-export declare function getMinBalanceForAccount(accountInfo: AccountInformationData): bigint;
 /**
  * Wait until a transaction has been confirmed or rejected by the network
  * @param client - An Algodv2 client
