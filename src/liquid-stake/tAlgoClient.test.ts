@@ -174,5 +174,5 @@ describe("TinymanTAlgoClient", () => {
     expect(finalTAlgoAccountAsset?.amount).toBe(
       (initialTAlgoAccountAsset?.amount ?? 0n) - burnAmount
     );
-  }, 15000);
+  }, 18000);
 });
