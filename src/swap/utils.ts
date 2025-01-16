@@ -1,24 +1,24 @@
 import {CONTRACT_VERSION} from "../contract/constants";
+import {getAssetId} from "../util/asset/assetUtils";
 import {InitiatorSigner, SignerTransaction} from "../util/commonTypes";
+import SwapQuoteError, {SwapQuoteErrorType} from "../util/error/SwapQuoteError";
 import {V1PoolInfo} from "../util/pool/poolTypes";
-import {
-  GetSwapQuoteBySwapTypeParams,
-  GenerateSwapTxnsParams,
-  GetSwapQuoteParams,
-  SwapQuote,
-  SwapQuoteType,
-  ExecuteSwapCommonParams
-} from "./types";
-import {SwapType} from "./constants";
-import {SwapV1_1} from "./v1_1";
-import {SwapV2} from "./v2";
 import {
   getBestQuote,
   getSwapQuoteContractVersion,
   isSwapQuoteErrorCausedByAmount
 } from "./common/utils";
-import {getAssetId} from "../util/asset/assetUtils";
-import SwapQuoteError, {SwapQuoteErrorType} from "../util/error/SwapQuoteError";
+import {SwapType} from "./constants";
+import {
+  ExecuteSwapCommonParams,
+  GenerateSwapTxnsParams,
+  GetSwapQuoteBySwapTypeParams,
+  GetSwapQuoteParams,
+  SwapQuote,
+  SwapQuoteType
+} from "./types";
+import {SwapV1_1} from "./v1_1";
+import {SwapV2} from "./v2";
 
 /**
  * Gets the best quote for swap from the pools and swap router and returns the best option.
@@ -74,7 +74,7 @@ function validateQuotes(promises: Promise<SwapQuote>[]): Promise<SwapQuote[]> {
 export async function getFixedInputSwapQuote(
   params: GetSwapQuoteBySwapTypeParams
 ): Promise<SwapQuote> {
-  const {amount, assetIn, assetOut, isSwapRouterEnabled, pools} = params;
+  const {amount, assetIn, assetOut, pools} = params;
 
   const quotePromises: Promise<SwapQuote>[] = [];
 
@@ -124,7 +124,6 @@ export async function getFixedInputSwapQuote(
         decimals: assetOut.decimals
       },
       pool: v2Pool?.info ?? null,
-      isSwapRouterEnabled,
       network: params.network,
       slippage: params.slippage
     })
@@ -142,7 +141,7 @@ export async function getFixedInputSwapQuote(
 export async function getFixedOutputSwapQuote(
   params: GetSwapQuoteBySwapTypeParams
 ): Promise<SwapQuote> {
-  const {amount, assetIn, assetOut, pools, isSwapRouterEnabled} = params;
+  const {amount, assetIn, assetOut, pools} = params;
 
   const quotePromises: Promise<SwapQuote>[] = [];
 
@@ -192,7 +191,6 @@ export async function getFixedOutputSwapQuote(
         decimals: assetOut.decimals
       },
       pool: v2Pool?.info ?? null,
-      isSwapRouterEnabled,
       network: params.network,
       slippage: params.slippage
     })

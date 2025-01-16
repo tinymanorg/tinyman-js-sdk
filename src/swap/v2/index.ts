@@ -204,7 +204,6 @@ async function execute({
  * @param assetOut - Asset to be received
  * @param amount - Amount of asset to be swapped
  * @param network - Network to be used
- * @param isSwapRouterEnabled - Whether the swap router is enabled
  * @returns A promise for the Swap quote
  */
 async function getQuote({
@@ -214,7 +213,6 @@ async function getQuote({
   assetOut,
   network,
   slippage,
-  isSwapRouterEnabled,
   pool
 }: {
   type: SwapType;
@@ -224,7 +222,6 @@ async function getQuote({
   pool: V2PoolInfo | null;
   network: SupportedNetwork;
   slippage: number;
-  isSwapRouterEnabled?: boolean;
 }): Promise<SwapQuote> {
   let quote: SwapQuote;
 
@@ -233,7 +230,6 @@ async function getQuote({
       assetIn,
       assetOut,
       amount,
-      isSwapRouterEnabled,
       network,
       pool,
       slippage
@@ -243,7 +239,6 @@ async function getQuote({
       amount,
       assetIn,
       assetOut,
-      isSwapRouterEnabled,
       network,
       pool,
       slippage
@@ -460,7 +455,6 @@ async function getFixedInputSwapQuote({
   amount,
   assetIn,
   assetOut,
-  isSwapRouterEnabled,
   network,
   slippage,
   pool
@@ -471,7 +465,6 @@ async function getFixedInputSwapQuote({
   network: SupportedNetwork;
   pool: V2PoolInfo | null;
   slippage: number;
-  isSwapRouterEnabled?: boolean;
 }): Promise<SwapQuote> {
   const quotePromises: Promise<SwapQuote>[] = [];
 
@@ -509,18 +502,16 @@ async function getFixedInputSwapQuote({
     );
   }
 
-  if (isSwapRouterEnabled) {
-    quotePromises.push(
-      getSwapRoute({
-        amount,
-        assetInID: assetIn.id,
-        assetOutID: assetOut.id,
-        swapType: SwapType.FixedInput,
-        network,
-        slippage
-      }).then((data) => ({type: SwapQuoteType.Router, data}))
-    );
-  }
+  quotePromises.push(
+    getSwapRoute({
+      amount,
+      assetInID: assetIn.id,
+      assetOutID: assetOut.id,
+      swapType: SwapType.FixedInput,
+      network,
+      slippage
+    }).then((data) => ({type: SwapQuoteType.Router, data}))
+  );
 
   const validQuotes = await validateQuotes(quotePromises);
 
@@ -534,7 +525,6 @@ async function getFixedOutputSwapQuote({
   amount,
   assetIn,
   assetOut,
-  isSwapRouterEnabled,
   network,
   slippage,
   pool
@@ -545,7 +535,6 @@ async function getFixedOutputSwapQuote({
   pool: V2PoolInfo | null;
   network: SupportedNetwork;
   slippage: number;
-  isSwapRouterEnabled?: boolean;
 }): Promise<SwapQuote> {
   const quotePromises: Promise<SwapQuote>[] = [
     new Promise((resolve, reject) => {
@@ -564,18 +553,16 @@ async function getFixedOutputSwapQuote({
     })
   ];
 
-  if (isSwapRouterEnabled) {
-    quotePromises.push(
-      getSwapRoute({
-        amount,
-        assetInID: assetIn.id,
-        assetOutID: assetOut.id,
-        swapType: SwapType.FixedOutput,
-        network,
-        slippage
-      }).then((data) => ({type: SwapQuoteType.Router, data}))
-    );
-  }
+  quotePromises.push(
+    getSwapRoute({
+      amount,
+      assetInID: assetIn.id,
+      assetOutID: assetOut.id,
+      swapType: SwapType.FixedOutput,
+      network,
+      slippage
+    }).then((data) => ({type: SwapQuoteType.Router, data}))
+  );
 
   const validQuotes = await validateQuotes(quotePromises);
 
