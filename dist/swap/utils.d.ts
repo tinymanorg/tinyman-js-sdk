@@ -1,8 +1,8 @@
 import { CONTRACT_VERSION } from "../contract/constants";
 import { InitiatorSigner, SignerTransaction } from "../util/commonTypes";
 import { V1PoolInfo } from "../util/pool/poolTypes";
-import { GetSwapQuoteBySwapTypeParams, GenerateSwapTxnsParams, GetSwapQuoteParams, SwapQuote, ExecuteSwapCommonParams } from "./types";
 import { SwapType } from "./constants";
+import { ExecuteSwapCommonParams, GenerateSwapTxnsParams, GetSwapQuoteBySwapTypeParams, GetSwapQuoteParams, SwapQuote } from "./types";
 /**
  * Gets the best quote for swap from the pools and swap router and returns the best option.
  */

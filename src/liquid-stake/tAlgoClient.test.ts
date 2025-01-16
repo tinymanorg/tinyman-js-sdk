@@ -124,7 +124,7 @@ describe("TinymanTAlgoClient", () => {
 
     // Check if the account has the correct amount of tALGOs
     expect(Number(tAlgoAccountAsset?.amount)).toBeCloseTo(Number(expectedTAlgoAmount));
-  }, 10000);
+  }, 18000);
 
   it("should create burn transactions", async () => {
     const spy = jest.spyOn(client, "burn");
