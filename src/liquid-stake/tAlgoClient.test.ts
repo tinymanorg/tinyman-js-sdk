@@ -88,7 +88,7 @@ describe("TinymanTAlgoClient", () => {
     const result = await client.mint(mintAmount, TEST_ACCOUNT.addr);
     const suggestedParams = await algod.getTransactionParams().do();
 
-    expect(result[0].fee).toBe(BigInt(result.length + 4) * suggestedParams.minFee);
+    expect(result[0].fee).toBe(BigInt(result.length + 1) * suggestedParams.minFee);
   });
 
   it("should receive correct amount of tALGOs after mint transaction", async () => {

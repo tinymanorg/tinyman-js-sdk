@@ -58,7 +58,7 @@ class TinymanTAlgoClient extends TinymanBaseClient {
       })
     ];
 
-    return this.setupTxnFeeAndAssignGroupId({txns, additionalFeeCount: 4});
+    return this.setupTxnFeeAndAssignGroupId({txns, additionalFeeCount: 1});
   }
 
   async burn(amount: bigint, userAddress: string) {

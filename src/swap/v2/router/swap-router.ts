@@ -11,6 +11,8 @@ import {
   SwapRouterResponse,
   SwapRouterTransactionRecipe
 } from "../../types";
+import {tinymanJSSDKConfig} from "../../../config";
+import {CONTRACT_VERSION} from "../../../contract/constants";
 
 export async function generateSwapRouterTxns({
   initiatorAddr,
@@ -77,6 +79,8 @@ export function generateSwapRouterTxnFromRecipe(
 
     case algosdk.TransactionType.appl: {
       const appArgs = recipe.args?.map(toByteArray);
+      const isSwapAppCall =
+        recipe.args && Buffer.from(recipe.args[0], "base64").toString("utf8") === "swap";
 
       txn = algosdk.makeApplicationNoOpTxnFromObject({
         sender: userAddress,
@@ -85,7 +89,10 @@ export function generateSwapRouterTxnFromRecipe(
         accounts: recipe.accounts,
         foreignApps: recipe.apps,
         foreignAssets: recipe.assets,
-        suggestedParams
+        suggestedParams,
+        note: isSwapAppCall
+          ? tinymanJSSDKConfig.getAppCallTxnNoteWithClientName(CONTRACT_VERSION.V2)
+          : undefined
       });
       txn.fee = 0n;
 
