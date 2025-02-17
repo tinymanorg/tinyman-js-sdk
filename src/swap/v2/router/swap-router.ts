@@ -11,6 +11,8 @@ import {
   SwapRouterResponse,
   SwapRouterTransactionRecipe
 } from "../../types";
+import {tinymanJSSDKConfig} from "../../../config";
+import {CONTRACT_VERSION} from "../../../contract/constants";
 
 export async function generateSwapRouterTxns({
   initiatorAddr,
@@ -88,6 +90,15 @@ export function generateSwapRouterTxnFromRecipe(
         suggestedParams
       });
       txn.fee = 0;
+
+      if (
+        recipe.args &&
+        Buffer.from(recipe.args[0], "base64").toString("utf8") === "swap"
+      ) {
+        txn.note = tinymanJSSDKConfig.getAppCallTxnNoteWithClientName(
+          CONTRACT_VERSION.V2
+        );
+      }
 
       return txn;
     }
