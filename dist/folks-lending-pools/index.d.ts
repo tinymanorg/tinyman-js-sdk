@@ -7,7 +7,7 @@ import { FolksLendingPool } from "./types";
  * Calculates the amount fAsset received when adding liquidity with original asset.
  */
 declare function calculateDepositReturn({ depositAmount, depositInterestIndex, depositInterestRate, lastUpdate }: {
-    depositAmount: number;
+    depositAmount: bigint;
     depositInterestIndex: bigint;
     depositInterestRate: bigint;
     lastUpdate?: number;

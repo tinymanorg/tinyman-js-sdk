@@ -1,5 +1,4 @@
-import algosdk, { SuggestedParams } from "algosdk";
-import AlgodClient from "algosdk/dist/types/client/v2/algod/algod";
+import algosdk, { Algodv2, SuggestedParams } from "algosdk";
 import { AccountState, SlopeChange, VaultAppGlobalState } from "./storage";
 import { SupportedNetwork } from "../../util/commonTypes";
 declare function prepareCreateLockTransactions({ accountState, lockEndTime, lockedAmount, network, sender, vaultAppGlobalState, suggestedParams, slopeChangeAtLockEndTime, appCallNote }: {
@@ -34,7 +33,7 @@ declare function prepareExtendLockEndTimeTransactions({ accountState, network, n
 }): algosdk.Transaction[];
 declare function prepareWithdrawTransactions({ accountState, network, sender, suggestedParams, appCallNote }: {
     network: SupportedNetwork;
-    client: AlgodClient;
+    client: Algodv2;
     sender: string;
     accountState: AccountState;
     suggestedParams: SuggestedParams;

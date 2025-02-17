@@ -49,7 +49,7 @@ export declare const Swap: {
     v2: {
         getQuote: ({ type, amount, assetIn, assetOut, network, slippage, pool }: {
             type: import("./constants").SwapType;
-            amount: number | bigint;
+            amount: bigint;
             assetIn: import("../util/asset/assetModels").AssetWithIdAndDecimals;
             assetOut: import("../util/asset/assetModels").AssetWithIdAndDecimals;
             pool: import("..").V2PoolInfo | null;
@@ -57,7 +57,7 @@ export declare const Swap: {
             slippage: number;
         }) => Promise<import("./types").SwapQuote>;
         getFixedInputSwapQuote: ({ amount, assetIn, assetOut, network, slippage, pool }: {
-            amount: number | bigint;
+            amount: bigint;
             assetIn: import("../util/asset/assetModels").AssetWithIdAndDecimals;
             assetOut: import("../util/asset/assetModels").AssetWithIdAndDecimals;
             network: import("..").SupportedNetwork;
@@ -66,18 +66,18 @@ export declare const Swap: {
         }) => Promise<import("./types").SwapQuote>;
         getFixedInputDirectSwapQuote: ({ amount, assetIn, assetOut, pool }: {
             pool: import("..").V2PoolInfo;
-            amount: number | bigint;
+            amount: bigint;
             assetIn: import("../util/asset/assetModels").AssetWithIdAndDecimals;
             assetOut: import("../util/asset/assetModels").AssetWithIdAndDecimals;
         }) => import("./types").DirectSwapQuote;
         getFixedOutputDirectSwapQuote: ({ amount, assetIn, assetOut, pool }: {
             pool: import("..").V2PoolInfo | null;
-            amount: number | bigint;
+            amount: bigint;
             assetIn: import("../util/asset/assetModels").AssetWithIdAndDecimals;
             assetOut: import("../util/asset/assetModels").AssetWithIdAndDecimals;
         }) => import("./types").SwapQuote;
         getFixedOutputSwapQuote: ({ amount, assetIn, assetOut, network, slippage, pool }: {
-            amount: number | bigint;
+            amount: bigint;
             assetIn: import("../util/asset/assetModels").AssetWithIdAndDecimals;
             assetOut: import("../util/asset/assetModels").AssetWithIdAndDecimals;
             pool: import("..").V2PoolInfo | null;

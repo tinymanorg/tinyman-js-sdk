@@ -4,8 +4,8 @@ import { SupportedNetwork } from "../util/commonTypes";
 declare class TinymanTAlgoClient extends TinymanBaseClient {
     constructor(algod: algosdk.Algodv2, network: SupportedNetwork);
     sync(userAddress: string): Promise<algosdk.Transaction[]>;
-    mint(amount: number, userAddress: string): Promise<algosdk.Transaction[]>;
-    burn(amount: number, userAddress: string): Promise<algosdk.Transaction[]>;
+    mint(amount: bigint, userAddress: string): Promise<algosdk.Transaction[]>;
+    burn(amount: bigint, userAddress: string): Promise<algosdk.Transaction[]>;
     /**
      * Retrieves the current ratio of ALGO to tALGO in base units.
      * The ratio is calculated as (algoAmount / tAlgoAmount) * 10^12.

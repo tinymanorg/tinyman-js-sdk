@@ -1,12 +1,12 @@
-import { Algodv2, Transaction } from "algosdk";
+import algosdk, { Algodv2, Transaction } from "algosdk";
 import { AssetWithIdAndAmount } from "../asset/assetModels";
-import { SignerTransaction, TxnResponseInnerTxns } from "../commonTypes";
-export declare function getAppCallTxnResponse(client: Algodv2, txGroup: SignerTransaction[]): Promise<Record<string, any> | undefined>;
+import { SignerTransaction } from "../commonTypes";
+export declare function getAppCallTxnResponse(client: Algodv2, txGroup: SignerTransaction[]): Promise<algosdk.modelsv2.PendingTransactionResponse | undefined>;
 /**
  * Tries to find the app call transaction in the group, get the response, and extract the inner txns data.
- * @returns the innter transactions of the app call transaction or `undefined` if no app call transaction was found.
+ * @returns the inner transactions of the app call transaction or `undefined` if no app call transaction was found.
  */
-export declare function getAppCallInnerTxns(client: Algodv2, txGroup: SignerTransaction[]): Promise<TxnResponseInnerTxns | undefined>;
+export declare function getAppCallInnerTxns(client: Algodv2, txGroup: SignerTransaction[]): Promise<algosdk.modelsv2.PendingTransactionResponse[] | undefined>;
 /**
  * Tries to find the asset related (asset transfer / payment (i.e. ALGO transfer))
  * inner transactions in the app call, and return the extracted asset data.

@@ -71,11 +71,11 @@ export function getQuote({
   return {
     asset1In: {
       id: pool.asset1ID,
-      amount: BigInt(asset1.amount)
+      amount: asset1.amount
     },
     asset2In: {
       id: pool.asset2ID,
-      amount: BigInt(asset2.amount)
+      amount: asset2.amount
     },
     poolTokenOut: {
       id: pool.poolTokenID,
@@ -114,28 +114,28 @@ export async function generateTxns({
   const [asset1, asset2] = prepareAssetPairData(asset1In, asset2In);
   const isAlgoPool = isAlgo(asset2.id);
   const asset1InTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-    from: initiatorAddr,
-    to: poolAddress,
+    sender: initiatorAddr,
+    receiver: poolAddress,
     assetIndex: asset1.id,
     amount: asset1.amount,
     suggestedParams
   });
   const asset2InTxn = isAlgoPool
     ? algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-        from: initiatorAddr,
-        to: poolAddress,
+        sender: initiatorAddr,
+        receiver: poolAddress,
         amount: asset2.amount,
         suggestedParams
       })
     : algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-        from: initiatorAddr,
-        to: poolAddress,
+        sender: initiatorAddr,
+        receiver: poolAddress,
         assetIndex: asset2.id,
         amount: asset2.amount,
         suggestedParams
       });
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
-    from: initiatorAddr,
+    sender: initiatorAddr,
     appIndex: getValidatorAppID(network, CONTRACT_VERSION.V2),
     note: tinymanJSSDKConfig.getAppCallTxnNoteWithClientName(CONTRACT_VERSION.V2),
     appArgs: [
@@ -147,7 +147,10 @@ export async function generateTxns({
     suggestedParams
   });
 
-  validatorAppCallTxn.fee = getV2AddLiquidityAppCallFee(V2AddLiquidityType.FLEXIBLE);
+  validatorAppCallTxn.fee = getV2AddLiquidityAppCallFee(
+    V2AddLiquidityType.FLEXIBLE,
+    suggestedParams.minFee
+  );
 
   const txGroup = algosdk.assignGroupID([asset1InTxn, asset2InTxn, validatorAppCallTxn]);
 

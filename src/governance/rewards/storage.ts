@@ -1,5 +1,4 @@
-import {decodeAddress} from "algosdk";
-import AlgodClient from "algosdk/dist/types/client/v2/algod/algod";
+import {Algodv2, decodeAddress} from "algosdk";
 
 import {intToBytes} from "../util/utils";
 import {getRawBoxValue} from "../utils";
@@ -76,7 +75,7 @@ function getAccountRewardClaimSheetBoxName(
 }
 
 async function getRewardClaimSheet(
-  algod: AlgodClient,
+  algod: Algodv2,
   appId: number,
   address: string,
   accountRewardClaimSheetBoxIndex: number

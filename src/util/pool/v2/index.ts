@@ -28,7 +28,7 @@ export async function getPoolInfo(params: {
   const poolAddress = poolLogicSig.address();
   const sortedAssetIDs = sortAssetIds(asset1ID, asset2ID);
 
-  const accountInformation = await getAccountInformation(client, poolAddress);
+  const accountInformation = await getAccountInformation(client, poolAddress.toString());
   const appState = getDecodedAccountApplicationLocalState(
     accountInformation,
     validatorAppID
@@ -74,7 +74,10 @@ export async function getPoolReserves(
   client: Algodv2,
   pool: V2PoolInfo
 ): Promise<PoolReserves> {
-  const accountInformation = await getAccountInformation(client, pool.account.address());
+  const accountInformation = await getAccountInformation(
+    client,
+    pool.account.address().toString()
+  );
   const appState = getDecodedAccountApplicationLocalState(
     accountInformation,
     pool.validatorAppID

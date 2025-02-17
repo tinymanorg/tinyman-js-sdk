@@ -1,5 +1,4 @@
-import {bytesToBigInt, decodeAddress} from "algosdk";
-import AlgodClient from "algosdk/dist/types/client/v2/algod/algod";
+import {Algodv2, bytesToBigInt, decodeAddress} from "algosdk";
 
 import {joinByteArrays} from "../../util/util";
 import {intToBytes} from "../util/utils";
@@ -127,7 +126,7 @@ class VaultAppGlobalState {
   }
 }
 
-async function getAccountState(algodClient: AlgodClient, appId: number, address: string) {
+async function getAccountState(algodClient: Algodv2, appId: number, address: string) {
   const boxName = getAccountStateBoxName(address);
 
   try {
@@ -189,7 +188,7 @@ function getAccountPowerBoxName(address: string, boxIndex: number) {
   return combinedArray;
 }
 
-async function getSlopeChange(algod: AlgodClient, appId: number, timeStamp: number) {
+async function getSlopeChange(algod: Algodv2, appId: number, timeStamp: number) {
   const boxName = getSlopeChangeBoxName(timeStamp);
 
   const rawBox = await getRawBoxValue(algod, appId, boxName);
@@ -212,7 +211,7 @@ function getSlopeChangeBoxName(timestamp: number) {
 }
 
 async function getAllTotalPowers(
-  algodClient: AlgodClient,
+  algodClient: Algodv2,
   appId: number,
   totalPowerCount: number
 ): Promise<TotalPower[]> {
@@ -278,7 +277,7 @@ async function getAccountPowers({
   appId,
   powerCount = null
 }: {
-  algodClient: AlgodClient;
+  algodClient: Algodv2;
   address: string;
   appId: number;
   powerCount: number | null;

@@ -57,7 +57,7 @@ export async function generateOptIntoValidatorTxns({
   const suggestedParams = await client.getTransactionParams().do();
 
   const appOptInTxn = algosdk.makeApplicationOptInTxnFromObject({
-    from: initiatorAddr,
+    sender: initiatorAddr,
     appIndex: getValidatorAppID(network, contractVersion),
     note: tinymanJSSDKConfig.getAppCallTxnNoteWithClientName(contractVersion),
     suggestedParams
@@ -82,7 +82,7 @@ export async function generateOptOutOfValidatorTxns({
   const suggestedParams = await client.getTransactionParams().do();
 
   const appClearStateTxn = algosdk.makeApplicationClearStateTxnFromObject({
-    from: initiatorAddr,
+    sender: initiatorAddr,
     appIndex: getValidatorAppID(network, contractVersion),
     note: tinymanJSSDKConfig.getAppCallTxnNoteWithClientName(contractVersion),
     suggestedParams

@@ -91,7 +91,7 @@ export type GetSwapQuoteParams = {
   assetIn: Pick<TinymanAnalyticsApiAsset, "id" | "decimals">;
   assetOut: Pick<TinymanAnalyticsApiAsset, "id" | "decimals">;
   pools: {info: V1PoolInfo | V2PoolInfo; reserves: PoolReserves}[];
-  amount: number | bigint;
+  amount: bigint;
   type: SwapType;
   network: SupportedNetwork;
   /** Slippage rate. Should be given as 0.1% -> 0.001. */

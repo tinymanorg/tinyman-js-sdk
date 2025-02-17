@@ -1,9 +1,4 @@
-import algosdk, {
-  Algodv2,
-  ALGORAND_MIN_TX_FEE,
-  getApplicationAddress,
-  Transaction
-} from "algosdk";
+import algosdk, {Algodv2, getApplicationAddress, Transaction} from "algosdk";
 
 import {CONTRACT_VERSION} from "../../contract/constants";
 import {TinymanAnalyticsApiAsset} from "../../util/asset/assetModels";
@@ -26,10 +21,10 @@ import {V2BootstrapTxnGroupIndices, V2_BOOTSTRAP_INNER_TXN_COUNT} from "./consta
 import {getAppCallTxnResponse} from "../../util/transaction/transactionUtils";
 import {tinymanJSSDKConfig} from "../../config";
 
-function getTotalCost(isAlgoPool: boolean) {
+function getTotalCost(isAlgoPool: boolean, minFee: bigint) {
   // getBootstrapFundingTxnAmount includes getBootstrapAppCallTxnFee and since app call is signed by the logic sig,
   // the total cost for the user account is funding txn's amount + funding txn's fee
-  return ALGORAND_MIN_TX_FEE + getBootstrapFundingTxnAmount(isAlgoPool);
+  return minFee + getBootstrapFundingTxnAmount(isAlgoPool, minFee);
 }
 
 async function generateTxns({
@@ -71,7 +66,7 @@ async function generateTxns({
   const poolLogicSigAddress = poolLogicSig.address();
   const isAlgoPool = isAlgo(asset2ID);
   const appCallTxn = algosdk.makeApplicationOptInTxnFromObject({
-    from: poolLogicSigAddress,
+    sender: poolLogicSigAddress,
     appIndex: validatorAppID,
     appArgs: [encodeString("bootstrap")],
     note: tinymanJSSDKConfig.getAppCallTxnNoteWithClientName(CONTRACT_VERSION.V2),
@@ -80,12 +75,12 @@ async function generateTxns({
     suggestedParams
   });
 
-  appCallTxn.fee = getBootstrapAppCallTxnFee(isAlgoPool);
+  appCallTxn.fee = getBootstrapAppCallTxnFee(isAlgoPool, suggestedParams.minFee);
 
   const fundingTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-    from: initiatorAddr,
-    to: poolLogicSigAddress,
-    amount: getBootstrapFundingTxnAmount(isAlgoPool),
+    sender: initiatorAddr,
+    receiver: poolLogicSigAddress,
+    amount: getBootstrapFundingTxnAmount(isAlgoPool, suggestedParams.minFee),
     suggestedParams
   });
 
@@ -104,28 +99,28 @@ async function generateTxns({
   };
   signerTxns[V2BootstrapTxnGroupIndices.VALIDATOR_APP_CALL] = {
     txn: txGroup[V2BootstrapTxnGroupIndices.VALIDATOR_APP_CALL],
-    signers: [poolLogicSigAddress]
+    signers: [poolLogicSigAddress.toString()]
   };
 
   return signerTxns;
 }
 
-function getBootstrapFundingTxnAmount(isAlgoPool: boolean) {
+function getBootstrapFundingTxnAmount(isAlgoPool: boolean, minFee: bigint) {
   return (
     getPoolAccountMinBalance(CONTRACT_VERSION.V2, isAlgoPool) +
-    getBootstrapAppCallTxnFee(isAlgoPool) +
+    getBootstrapAppCallTxnFee(isAlgoPool, minFee) +
     MINIMUM_BALANCE_REQUIRED_PER_ASSET // Min fee for asset creation
   );
 }
 
-function getBootstrapAppCallTxnFee(isAlgoPool: boolean) {
+function getBootstrapAppCallTxnFee(isAlgoPool: boolean, minFee: bigint) {
   const innerTxnCount = isAlgoPool
     ? V2_BOOTSTRAP_INNER_TXN_COUNT.ASA_ALGO
     : V2_BOOTSTRAP_INNER_TXN_COUNT.ASA_ASA;
   // Add 1 to the txn count to account for the group transaction itself.
-  const totalTxnCount = innerTxnCount + 1;
+  const totalTxnCount = BigInt(innerTxnCount + 1);
 
-  return totalTxnCount * ALGORAND_MIN_TX_FEE;
+  return totalTxnCount * minFee;
 }
 
 async function signTxns({

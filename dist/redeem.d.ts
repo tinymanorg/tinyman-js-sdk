@@ -50,6 +50,6 @@ export declare function generateRedeemTxns({ client, pool, assetID, assetOut, in
     client: Algodv2;
     pool: V1PoolInfo;
     assetID: number;
-    assetOut: number | bigint;
+    assetOut: bigint;
     initiatorAddr: string;
 }): Promise<SignerTransaction[]>;
