@@ -1,6 +1,7 @@
 import { Account, generateAccount } from "algosdk";
 import { writeFileSync, readFileSync } from "fs";
 import { getAccountInformation } from "@tinymanorg/tinyman-js-sdk";
+
 import { algodClient } from "./client";
 import { assertAccountHasBalance } from "./other";
 
@@ -15,8 +16,8 @@ export async function getAccount(): Promise<Account> {
   if (!account) {
     account = generateAccount();
 
-    console.log("✅ Account generated: " + account.addr);
-    console.log("✅ Account data saved to: " + ACCOUNT_FILENAME);
+    console.log(`✅ Account generated: ${  account.addr}`);
+    console.log(`✅ Account data saved to: ${  ACCOUNT_FILENAME}`);
 
     writeFileSync(ACCOUNT_FILENAME, JSON.stringify(account));
   }
