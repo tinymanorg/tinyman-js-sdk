@@ -1,4 +1,4 @@
-import { Transaction, TransactionType } from "algosdk";
+import { Transaction } from "algosdk";
 export interface SignerTransaction {
     txn: Transaction;
     /**
@@ -18,27 +18,3 @@ export interface TinymanApiErrorShape<Type extends string = string> {
     detail: TinymanApiErrorDetailShape;
     fallback_message: string;
 }
-/**
- * Type of the waitForConfirmation()["inner-txns"]
- * NOT a complete type, only the fields we need.
- */
-export type TxnResponseInnerTxns = {
-    txn: {
-        txn: {
-            type: TransactionType.axfer;
-            xaid: number;
-            aamt: number;
-            arcv: Uint8Array;
-        } | {
-            type: TransactionType.pay;
-            amt: number;
-            rcv: Uint8Array;
-        } | {
-            /**
-             * This is not a real txn type, only added to
-             * demonstrate that there can be other types
-             */
-            type: "other";
-        };
-    };
-}[];

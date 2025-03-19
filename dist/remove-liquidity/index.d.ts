@@ -3,9 +3,9 @@ export declare const RemoveLiquidity: {
         generateTxns: ({ client, pool, poolTokenIn, asset1Out, asset2Out, slippage, initiatorAddr }: {
             client: import("algosdk").Algodv2;
             pool: import("..").V1PoolInfo;
-            poolTokenIn: number | bigint;
-            asset1Out: number | bigint;
-            asset2Out: number | bigint;
+            poolTokenIn: bigint;
+            asset1Out: bigint;
+            asset2Out: bigint;
             slippage: number;
             initiatorAddr: string;
         }) => Promise<import("..").SignerTransaction[]>;
@@ -27,12 +27,12 @@ export declare const RemoveLiquidity: {
         getQuote: ({ pool, reserves, poolTokenIn }: {
             pool: import("..").V2PoolInfo;
             reserves: import("..").PoolReserves;
-            poolTokenIn: number | bigint;
+            poolTokenIn: bigint;
         }) => import("..").V2RemoveLiquidityQuote;
         getSingleAssetRemoveLiquidityQuote: ({ pool, reserves, poolTokenIn, assetOutID, decimals }: {
             pool: import("..").V2PoolInfo;
             reserves: import("..").PoolReserves;
-            poolTokenIn: number | bigint;
+            poolTokenIn: bigint;
             assetOutID: number;
             decimals: {
                 assetIn: number;
@@ -44,17 +44,17 @@ export declare const RemoveLiquidity: {
             pool: import("..").V2PoolInfo;
             poolTokenIn: number | bigint;
             initiatorAddr: string;
-            minAsset1Amount: number | bigint;
-            minAsset2Amount: number | bigint;
+            minAsset1Amount: bigint;
+            minAsset2Amount: bigint;
             slippage: number;
         }) => Promise<import("..").SignerTransaction[]>;
         generateSingleAssetOutTxns: ({ client, pool, initiatorAddr, poolTokenIn, outputAssetId, minOutputAssetAmount, slippage }: {
             client: import("algosdk").Algodv2;
             pool: import("..").V2PoolInfo;
             outputAssetId: number;
-            poolTokenIn: number | bigint;
+            poolTokenIn: bigint;
             initiatorAddr: string;
-            minOutputAssetAmount: number | bigint;
+            minOutputAssetAmount: bigint;
             slippage: number;
         }) => Promise<import("..").SignerTransaction[]>;
         signTxns: ({ txGroup, initiatorSigner }: {

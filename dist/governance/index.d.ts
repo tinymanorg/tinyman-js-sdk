@@ -1,5 +1,4 @@
-import { SuggestedParams, Transaction } from "algosdk";
-import AlgodClient from "algosdk/dist/types/client/v2/algod/algod";
+import { Algodv2, SuggestedParams, Transaction } from "algosdk";
 import { SupportedNetwork } from "../util/commonTypes";
 import { ProposalVote } from "./proposal-voting/constants";
 import { ProposalVotingAppGlobalState } from "./proposal-voting/storage";
@@ -9,7 +8,7 @@ declare class TinymanGovernanceClient {
     private algodClient;
     private userAddress;
     private network;
-    constructor(algodClient: AlgodClient, userAddress: string, network: SupportedNetwork);
+    constructor(algodClient: Algodv2, userAddress: string, network: SupportedNetwork);
     getTinyPower(timeStamp?: number): Promise<number>;
     getTotalTinyPower(timeStamp?: number): Promise<number>;
     getCumulativeTinyPower(timeStamp?: number): Promise<number>;

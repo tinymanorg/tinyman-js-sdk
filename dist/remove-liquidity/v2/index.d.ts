@@ -9,12 +9,12 @@ import { V2RemoveLiquidityExecution, V2RemoveLiquidityQuote, V2SingleAssetRemove
 declare function getQuote({ pool, reserves, poolTokenIn }: {
     pool: V2PoolInfo;
     reserves: PoolReserves;
-    poolTokenIn: number | bigint;
+    poolTokenIn: bigint;
 }): V2RemoveLiquidityQuote;
 declare function getSingleAssetRemoveLiquidityQuote({ pool, reserves, poolTokenIn, assetOutID, decimals }: {
     pool: V2PoolInfo;
     reserves: PoolReserves;
-    poolTokenIn: number | bigint;
+    poolTokenIn: bigint;
     assetOutID: number;
     decimals: {
         assetIn: number;
@@ -29,8 +29,8 @@ declare function generateTxns({ client, pool, poolTokenIn, initiatorAddr, minAss
     pool: V2PoolInfo;
     poolTokenIn: number | bigint;
     initiatorAddr: string;
-    minAsset1Amount: number | bigint;
-    minAsset2Amount: number | bigint;
+    minAsset1Amount: bigint;
+    minAsset2Amount: bigint;
     slippage: number;
 }): Promise<SignerTransaction[]>;
 /**
@@ -40,9 +40,9 @@ declare function generateSingleAssetOutTxns({ client, pool, initiatorAddr, poolT
     client: Algodv2;
     pool: V2PoolInfo;
     outputAssetId: number;
-    poolTokenIn: number | bigint;
+    poolTokenIn: bigint;
     initiatorAddr: string;
-    minOutputAssetAmount: number | bigint;
+    minOutputAssetAmount: bigint;
     slippage: number;
 }): Promise<SignerTransaction[]>;
 declare function signTxns({ txGroup, initiatorSigner }: {

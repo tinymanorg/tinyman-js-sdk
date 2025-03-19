@@ -34,7 +34,7 @@ function createCommitTxnWithSuggestedParams({
 
   return makeApplicationNoOpTxnFromObject({
     appIndex: stakingAppID,
-    from: initiatorAddr,
+    sender: initiatorAddr,
     suggestedParams,
     foreignAssets: [liquidityAssetID],
     accounts: [program.accountAddress],
@@ -76,7 +76,7 @@ async function prepareCommitTransactions({
   if (typeof requiredAssetID === "number") {
     const logBalanceTxn = makeApplicationNoOpTxnFromObject({
       appIndex: stakingAppID,
-      from: initiatorAddr,
+      sender: initiatorAddr,
       suggestedParams,
       foreignAssets: [requiredAssetID],
       accounts: [program.accountAddress],

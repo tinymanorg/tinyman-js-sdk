@@ -35,7 +35,7 @@ export async function generateSwapRouterTxns({
     txns.push(generateSwapRouterTxnFromRecipe(txnRecipe, suggestedParams, initiatorAddr));
   });
 
-  txns[0].fee = Number(route.transaction_fee);
+  txns[0].fee = BigInt(route.transaction_fee);
   const txGroup = algosdk.assignGroupID(txns);
 
   return txGroup.map((txn: Transaction) => ({
@@ -54,51 +54,47 @@ export function generateSwapRouterTxnFromRecipe(
   switch (recipe.type) {
     case algosdk.TransactionType.pay: {
       txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-        from: userAddress,
-        to: recipe.receiver!,
+        sender: userAddress,
+        receiver: recipe.receiver!,
         amount: recipe.amount,
         suggestedParams
       });
-      txn.fee = 0;
+      txn.fee = 0n;
 
       return txn;
     }
 
     case algosdk.TransactionType.axfer: {
       txn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-        from: userAddress,
-        to: recipe.receiver!,
+        sender: userAddress,
+        receiver: recipe.receiver!,
         amount: recipe.amount,
         assetIndex: recipe.asset_id,
         suggestedParams
       });
-      txn.fee = 0;
+      txn.fee = 0n;
 
       return txn;
     }
 
     case algosdk.TransactionType.appl: {
       const appArgs = recipe.args?.map(toByteArray);
+      const isSwapAppCall =
+        recipe.args && Buffer.from(recipe.args[0], "base64").toString("utf8") === "swap";
 
       txn = algosdk.makeApplicationNoOpTxnFromObject({
-        from: userAddress,
+        sender: userAddress,
         appIndex: recipe.app_id,
         appArgs,
         accounts: recipe.accounts,
         foreignApps: recipe.apps,
         foreignAssets: recipe.assets,
-        suggestedParams
+        suggestedParams,
+        note: isSwapAppCall
+          ? tinymanJSSDKConfig.getAppCallTxnNoteWithClientName(CONTRACT_VERSION.V2)
+          : undefined
       });
-      txn.fee = 0;
-
-      if (
-        recipe.args &&
-        Buffer.from(recipe.args[0], "base64").toString("utf8") === "swap"
-      ) {
-        txn.note = tinymanJSSDKConfig.getAppCallTxnNoteWithClientName(
-          CONTRACT_VERSION.V2
-        );
-      }
+      txn.fee = 0n;
 
       return txn;
     }

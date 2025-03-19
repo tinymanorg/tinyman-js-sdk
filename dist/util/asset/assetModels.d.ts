@@ -1,9 +1,5 @@
-export interface AccountAsset {
-    amount: number;
-    "asset-id": number;
-    creator: string;
-    "is-frozen": boolean;
-}
+import { AssetHolding } from "algosdk/dist/types/client/v2/algod/models/types";
+export type AccountAsset = Pick<AssetHolding, "amount" | "assetId" | "isFrozen">;
 export interface TinymanAnalyticsApiAsset {
     id: string;
     is_liquidity_token: boolean;
@@ -48,19 +44,19 @@ interface IndexerAssetParams {
 }
 export interface AssetWithIdAndAmount {
     id: number;
-    amount: number | bigint;
+    amount: bigint;
 }
 export interface AssetWithIdAndDecimals {
     id: number;
     decimals: number;
 }
 export interface AssetWithAmountAndDecimals {
-    amount: number | bigint;
+    amount: bigint;
     decimals: number;
 }
 export interface AssetWithIdAndAmountAndDecimals {
     id: number;
-    amount: number | bigint;
+    amount: bigint;
     decimals: number;
 }
 export {};

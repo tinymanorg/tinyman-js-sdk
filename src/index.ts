@@ -26,7 +26,8 @@ export {
   convertToBaseUnits,
   getTxnGroupID,
   sendAndWaitRawTransaction,
-  sumUpTxnFees
+  sumUpTxnFees,
+  joinByteArrays
 } from "./util/util";
 
 export {generateOptIntoAssetTxns} from "./util/asset/assetUtils";
@@ -45,7 +46,6 @@ export {
 } from "./util/asset/assetConstants";
 
 export {
-  calculateAccountMinimumRequiredBalance,
   getAccountExcess,
   getAccountExcessWithinPool,
   getAccountInformation,

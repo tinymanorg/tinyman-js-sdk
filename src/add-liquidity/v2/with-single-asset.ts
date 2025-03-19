@@ -49,12 +49,12 @@ export function getQuote({
 
   const asset1: AssetWithIdAndAmountAndDecimals = {
     id: pool.asset1ID,
-    amount: isAsset1In ? assetIn.amount : 0,
+    amount: isAsset1In ? assetIn.amount : 0n,
     decimals: decimals.asset1
   };
   const asset2: AssetWithIdAndAmountAndDecimals = {
     id: pool.asset2ID,
-    amount: isAsset2In ? assetIn.amount : 0,
+    amount: isAsset2In ? assetIn.amount : 0n,
     decimals: decimals.asset2
   };
   const reserves = {
@@ -75,7 +75,7 @@ export function getQuote({
   return {
     assetIn: {
       id: isAsset1In ? pool.asset1ID : pool.asset2ID,
-      amount: BigInt(assetIn.amount)
+      amount: assetIn.amount
     },
     poolTokenOut: {
       id: pool.poolTokenID,
@@ -112,20 +112,20 @@ export async function generateTxns({
   const isAlgoPool = isAlgo(assetIn.id);
   const assetInTxn = isAlgoPool
     ? algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-        from: initiatorAddr,
-        to: poolAddress,
+        sender: initiatorAddr,
+        receiver: poolAddress,
         amount: assetIn.amount,
         suggestedParams
       })
     : algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-        from: initiatorAddr,
-        to: poolAddress,
+        sender: initiatorAddr,
+        receiver: poolAddress,
         assetIndex: assetIn.id,
         amount: assetIn.amount,
         suggestedParams
       });
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
-    from: initiatorAddr,
+    sender: initiatorAddr,
     appIndex: getValidatorAppID(network, CONTRACT_VERSION.V2),
     note: tinymanJSSDKConfig.getAppCallTxnNoteWithClientName(CONTRACT_VERSION.V2),
     appArgs: [
@@ -137,7 +137,10 @@ export async function generateTxns({
     suggestedParams
   });
 
-  validatorAppCallTxn.fee = getV2AddLiquidityAppCallFee(V2AddLiquidityType.SINGLE);
+  validatorAppCallTxn.fee = getV2AddLiquidityAppCallFee(
+    V2AddLiquidityType.SINGLE,
+    suggestedParams.minFee
+  );
 
   const txGroup = algosdk.assignGroupID([assetInTxn, validatorAppCallTxn]);
 

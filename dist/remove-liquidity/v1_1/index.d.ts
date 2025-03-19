@@ -12,14 +12,14 @@ export declare function getQuote({ pool, reserves, poolTokenIn }: {
     /**
      * The amount of the pool token being deposited.
      */
-    poolTokenIn: number | bigint;
+    poolTokenIn: bigint;
 }): V1_1RemoveLiquidityQuote;
 declare function generateTxns({ client, pool, poolTokenIn, asset1Out, asset2Out, slippage, initiatorAddr }: {
     client: Algodv2;
     pool: V1PoolInfo;
-    poolTokenIn: number | bigint;
-    asset1Out: number | bigint;
-    asset2Out: number | bigint;
+    poolTokenIn: bigint;
+    asset1Out: bigint;
+    asset2Out: bigint;
     slippage: number;
     initiatorAddr: string;
 }): Promise<SignerTransaction[]>;

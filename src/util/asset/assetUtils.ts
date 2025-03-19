@@ -17,8 +17,8 @@ export async function generateOptIntoAssetTxns({
     const suggestedParams = await client.getTransactionParams().do();
 
     const optInTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-      from: initiatorAddr,
-      to: initiatorAddr,
+      sender: initiatorAddr,
+      receiver: initiatorAddr,
       assetIndex: assetID,
       amount: 0,
       suggestedParams
