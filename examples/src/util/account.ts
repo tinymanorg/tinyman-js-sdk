@@ -1,8 +1,8 @@
-import { Account, generateAccount } from "algosdk";
-import { writeFileSync, readFileSync } from "fs";
-import { getAccountInformation } from "@tinymanorg/tinyman-js-sdk";
-import { algodClient } from "./client";
-import { assertAccountHasBalance } from "./other";
+import {Account, generateAccount, modelsv2} from "algosdk";
+import {writeFileSync, readFileSync} from "fs";
+
+import {algodClient} from "./client";
+import {assertAccountHasBalance} from "./other";
 
 export const ACCOUNT_FILENAME = "account.json";
 
@@ -15,8 +15,8 @@ export async function getAccount(): Promise<Account> {
   if (!account) {
     account = generateAccount();
 
-    console.log("✅ Account generated: " + account.addr);
-    console.log("✅ Account data saved to: " + ACCOUNT_FILENAME);
+    console.log(`✅ Account generated: ${account.addr}`);
+    console.log(`✅ Account data saved to: ${ACCOUNT_FILENAME}`);
 
     writeFileSync(ACCOUNT_FILENAME, JSON.stringify(account));
   }
@@ -33,13 +33,14 @@ export async function getAccount(): Promise<Account> {
 /** tries to read and return account data from the local json file */
 function tryGetAccountFromJson() {
   try {
-    const parsedAccount = JSON.parse(
-      readFileSync(ACCOUNT_FILENAME).toString()
-    ) as { addr: Account["addr"]; sk: Record<string, number> };
+    const parsedAccount = JSON.parse(readFileSync(ACCOUNT_FILENAME).toString()) as {
+      addr: Account["addr"];
+      sk: Record<string, number>;
+    };
     const account: Account = {
       ...parsedAccount,
       // This is needed since byte array can't be serialized correctly
-      sk: new Uint8Array(Object.values(parsedAccount.sk)),
+      sk: new Uint8Array(Object.values(parsedAccount.sk))
     };
 
     return account;
@@ -51,11 +52,10 @@ function tryGetAccountFromJson() {
 /**
  * @returns the amount of the asset (with the given `assetId`) owned by the account
  */
-export async function getOwnedAssetAmount(
-  accountAddress: string,
-  assetId: number
-) {
-  const { assets } = await getAccountInformation(algodClient, accountAddress);
+export async function getOwnedAssetAmount(accountAddress: string, assetId: number) {
+  const {assets} = (await algodClient
+    .accountInformation(accountAddress)
+    .do()) as modelsv2.Account;
 
-  return assets.find((asset) => asset["asset-id"] === assetId)?.amount || 0;
+  return assets?.find((asset) => asset.assetId === assetId)?.amount || 0;
 }

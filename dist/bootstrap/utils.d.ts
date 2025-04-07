@@ -33,7 +33,8 @@ export declare function execute(params: (Parameters<typeof BootstrapV2.execute>[
 /**
  *  Calculates the amount of funding txn for creating a pool
  */
-export declare function calculateBootstrapFundingTxnAmount({ contractVersion, isAlgoPool }: {
+export declare function calculateBootstrapFundingTxnAmount({ contractVersion, isAlgoPool, minFee }: {
     contractVersion: ContractVersionValue;
     isAlgoPool: boolean;
-}): number;
+    minFee: bigint;
+}): bigint;

@@ -12,4 +12,4 @@ export declare function generateTxns({ client, pool, poolTokenIn, initiatorAddr,
     lendingManagerId: number;
     network: SupportedNetwork;
 }): Promise<SignerTransaction[]>;
-export declare function getRemoveLiquidityTotalFee(): number;
+export declare function getRemoveLiquidityTotalFee(minFee: bigint): bigint;

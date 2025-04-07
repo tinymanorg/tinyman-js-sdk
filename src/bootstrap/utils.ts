@@ -59,14 +59,16 @@ export function execute(
  */
 export function calculateBootstrapFundingTxnAmount({
   contractVersion,
-  isAlgoPool
+  isAlgoPool,
+  minFee
 }: {
   contractVersion: ContractVersionValue;
   isAlgoPool: boolean;
-}): number {
+  minFee: bigint;
+}): bigint {
   if (contractVersion === CONTRACT_VERSION.V1_1) {
     return BootstrapV1_1.getBootstrapFundingTxnAmount(isAlgoPool);
   }
 
-  return BootstrapV2.getBootstrapFundingTxnAmount(isAlgoPool);
+  return BootstrapV2.getBootstrapFundingTxnAmount(isAlgoPool, minFee);
 }

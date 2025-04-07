@@ -1,4 +1,4 @@
-import AlgodClient from "algosdk/dist/types/client/v2/algod/algod";
+import { Algodv2 } from "algosdk";
 declare class AccountState {
     lockedAmount: number;
     lockEndTime: number;
@@ -39,16 +39,16 @@ declare class VaultAppGlobalState {
     get lastTotalPowerBoxIndex(): number;
     get lastTotalPowerArrayIndex(): number;
 }
-declare function getAccountState(algodClient: AlgodClient, appId: number, address: string): Promise<AccountState | null>;
+declare function getAccountState(algodClient: Algodv2, appId: number, address: string): Promise<AccountState | null>;
 declare function getAccountStateBoxName(address: string): Uint8Array;
 declare function getTotalPowerBoxName(boxIndex: number): Uint8Array;
 declare function getLastAccountPowerBoxIndexes(powerCount: number): [number, number];
 declare function getAccountPowerBoxName(address: string, boxIndex: number): Uint8Array;
-declare function getSlopeChange(algod: AlgodClient, appId: number, timeStamp: number): Promise<SlopeChange | null>;
+declare function getSlopeChange(algod: Algodv2, appId: number, timeStamp: number): Promise<SlopeChange | null>;
 declare function getSlopeChangeBoxName(timestamp: number): Uint8Array;
-declare function getAllTotalPowers(algodClient: AlgodClient, appId: number, totalPowerCount: number): Promise<TotalPower[]>;
+declare function getAllTotalPowers(algodClient: Algodv2, appId: number, totalPowerCount: number): Promise<TotalPower[]>;
 declare function getAccountPowers({ algodClient, address, appId, powerCount }: {
-    algodClient: AlgodClient;
+    algodClient: Algodv2;
     address: string;
     appId: number;
     powerCount: number | null;

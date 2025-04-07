@@ -1,14 +1,12 @@
-import algosdk, {ALGORAND_MIN_TX_FEE, TransactionType} from "algosdk";
+import algosdk, {TransactionType} from "algosdk";
 
 import {TALGO_ASSET_ID} from "../util/asset/assetConstants";
 import {SupportedNetwork} from "../util/commonTypes";
 import {TinymanTAlgoClient} from "./tAlgoClient";
-import {AccountInformation} from "../util/account/accountTypes";
 import {sendAndWaitRawTransaction} from "../util/util";
-import {calculateAccountMinimumRequiredBalance} from "../util/account/accountUtils";
 
 const algod = new algosdk.Algodv2("", "https://testnet-api.algonode.cloud", "");
-const TEST_ACCOUNT: algosdk.Account = {
+const TEST_ACCOUNT = {
   addr: "XNG5OX7MMUTYVJN4AR7YU27Z6PM7FRRILMXOXWAIXMVPTTW5I7INN7AEPE",
   sk: new Uint8Array([
     14, 109, 69, 154, 246, 14, 24, 178, 50, 15, 86, 9, 107, 152, 149, 174, 9, 6, 85, 232,
@@ -21,20 +19,15 @@ const TEST_ACCOUNT: algosdk.Account = {
 describe("TinymanTAlgoClient", () => {
   let client: TinymanTAlgoClient;
   const network: SupportedNetwork = "testnet";
-  const mintAmount = 1000000;
-  const burnAmount = 500000;
+  const mintAmount = 1000000n;
+  const burnAmount = 500000n;
 
   beforeAll(async () => {
     // Create a new instance of the tAlgoClient
     client = new TinymanTAlgoClient(algod, network);
-    const accountInfo = (await algod
-      .accountInformation(TEST_ACCOUNT.addr)
-      .do()) as AccountInformation;
+    const accountInfo = await algod.accountInformation(TEST_ACCOUNT.addr).do();
 
-    if (
-      accountInfo.amount <
-      calculateAccountMinimumRequiredBalance(accountInfo) + mintAmount * 2
-    ) {
+    if (accountInfo.amount < accountInfo.minBalance + mintAmount * 2n) {
       // Wait for the user to fund the account
       console.log(
         `Go to https://bank.testnet.algorand.network/?account=${TEST_ACCOUNT.addr} and fund your account.`
@@ -44,13 +37,11 @@ describe("TinymanTAlgoClient", () => {
   }, 180000);
 
   async function waitUntilAccountIsFunded(address: string) {
-    const minBalance = 1000000; // Minimum balance in microAlgos (1 Algo)
-    let balance = 0;
+    const minBalance = 1000000n; // Minimum balance in microAlgos (1 Algo)
+    let balance = 0n;
 
     while (balance < minBalance) {
-      const accountInfo = (await algod
-        .accountInformation(address)
-        .do()) as AccountInformation;
+      const accountInfo = await algod.accountInformation(address).do();
 
       balance = accountInfo.amount;
       if (balance < minBalance) {
@@ -71,14 +62,12 @@ describe("TinymanTAlgoClient", () => {
   });
 
   it("should include opt-in txn inside the mint transactions if needed", async () => {
-    const latestAccountInfo = (await algod
-      .accountInformation(TEST_ACCOUNT.addr)
-      .do()) as AccountInformation;
+    const latestAccountInfo = await algod.accountInformation(TEST_ACCOUNT.addr).do();
     const result = await client.mint(mintAmount, TEST_ACCOUNT.addr);
 
     if (
-      latestAccountInfo.assets.some(
-        (asset) => asset["asset-id"] === TALGO_ASSET_ID[network]
+      latestAccountInfo.assets?.some(
+        (asset) => asset.assetId === BigInt(TALGO_ASSET_ID[network])
       )
     ) {
       // Should not contain the opt-in transaction
@@ -90,16 +79,15 @@ describe("TinymanTAlgoClient", () => {
 
   it("should calculate the mint transaction fee correctly", async () => {
     const result = await client.mint(mintAmount, TEST_ACCOUNT.addr);
+    const suggestedParams = await algod.getTransactionParams().do();
 
-    expect(result[0].fee).toBe((result.length + 1) * ALGORAND_MIN_TX_FEE);
+    expect(result[0].fee).toBe(BigInt(result.length + 1) * suggestedParams.minFee);
   });
 
   it("should receive correct amount of tALGOs after mint transaction", async () => {
-    const initialAccountInfo = (await algod
-      .accountInformation(TEST_ACCOUNT.addr)
-      .do()) as AccountInformation;
-    const initialTAlgoAccountAsset = initialAccountInfo.assets.find(
-      (asset) => asset["asset-id"] === TALGO_ASSET_ID[network]
+    const initialAccountInfo = await algod.accountInformation(TEST_ACCOUNT.addr).do();
+    const initialTAlgoAccountAsset = initialAccountInfo.assets?.find(
+      (asset) => asset.assetId === BigInt(TALGO_ASSET_ID[network])
     );
     const txnsToBeSigned = await client.mint(mintAmount, TEST_ACCOUNT.addr);
     const signedTxns: Uint8Array[] = txnsToBeSigned.map((txn) =>
@@ -108,16 +96,15 @@ describe("TinymanTAlgoClient", () => {
 
     await sendAndWaitRawTransaction(algod, [signedTxns]);
 
-    const finalAccountInfo = (await algod
-      .accountInformation(TEST_ACCOUNT.addr)
-      .do()) as AccountInformation;
-    const tAlgoAccountAsset = finalAccountInfo.assets.find(
-      (asset) => asset["asset-id"] === TALGO_ASSET_ID[network]
+    const finalAccountInfo = await algod.accountInformation(TEST_ACCOUNT.addr).do();
+    const tAlgoAccountAsset = finalAccountInfo.assets?.find(
+      (asset) => asset.assetId === BigInt(TALGO_ASSET_ID[network])
     );
 
     const ratio = await client.getRatio();
     const expectedTAlgoAmount =
-      (initialTAlgoAccountAsset?.amount ?? 0) + Math.floor(mintAmount / ratio);
+      (initialTAlgoAccountAsset?.amount ?? 0n) +
+      BigInt(Math.floor(Number(mintAmount) / ratio));
 
     // Check if the account has the correct amount of ALGOs
     expect(finalAccountInfo.amount).toBe(
@@ -125,8 +112,9 @@ describe("TinymanTAlgoClient", () => {
     );
 
     // Check if the account has the correct amount of tALGOs
-    expect(tAlgoAccountAsset?.amount).toBeCloseTo(expectedTAlgoAmount);
+    expect(Number(tAlgoAccountAsset?.amount)).toBeCloseTo(Number(expectedTAlgoAmount));
   }, 18000);
+
   it("should create burn transactions", async () => {
     const spy = jest.spyOn(client, "burn");
 
@@ -137,42 +125,39 @@ describe("TinymanTAlgoClient", () => {
 
   it("should calculate the burn transaction fee correctly", async () => {
     const result = await client.burn(burnAmount, TEST_ACCOUNT.addr);
+    const suggestedParams = await algod.getTransactionParams().do();
 
-    expect(result[0].fee).toBe((result.length + 1) * ALGORAND_MIN_TX_FEE);
+    expect(result[0].fee).toBe(BigInt(result.length + 1) * suggestedParams.minFee);
   });
 
   it("should receive correct amount of ALGOs after burn transaction", async () => {
-    const initialAccountInfo = (await algod
-      .accountInformation(TEST_ACCOUNT.addr)
-      .do()) as AccountInformation;
+    const initialAccountInfo = await algod.accountInformation(TEST_ACCOUNT.addr).do();
     const txnsToBeSigned = await client.burn(burnAmount, TEST_ACCOUNT.addr);
     const signedTxns: Uint8Array[] = txnsToBeSigned.map((txn) =>
       txn.signTxn(TEST_ACCOUNT.sk)
     );
+    const ratio = 1 / (await client.getRatio());
 
     await sendAndWaitRawTransaction(algod, [signedTxns]);
 
-    const finalAccountInfo = (await algod
-      .accountInformation(TEST_ACCOUNT.addr)
-      .do()) as AccountInformation;
+    const finalAccountInfo = await algod.accountInformation(TEST_ACCOUNT.addr).do();
 
-    const initialTAlgoAccountAsset = initialAccountInfo.assets.find(
-      (asset) => asset["asset-id"] === TALGO_ASSET_ID[network]
+    const initialTAlgoAccountAsset = initialAccountInfo.assets?.find(
+      (asset) => asset.assetId === BigInt(TALGO_ASSET_ID[network])
     );
-    const finalTAlgoAccountAsset = finalAccountInfo.assets.find(
-      (asset) => asset["asset-id"] === TALGO_ASSET_ID[network]
+    const finalTAlgoAccountAsset = finalAccountInfo.assets?.find(
+      (asset) => asset.assetId === BigInt(TALGO_ASSET_ID[network])
     );
-
-    const expectedAlgoAmount = burnAmount;
+    const expectedAlgoAmount = Math.floor(Number(burnAmount) / ratio);
 
     // Check if the account has the correct amount of ALGOs
-    expect(finalAccountInfo.amount).toBeGreaterThanOrEqual(
-      initialAccountInfo.amount - txnsToBeSigned[0].fee + expectedAlgoAmount
+    expect(Number(finalAccountInfo.amount)).toBeGreaterThanOrEqual(
+      Number(initialAccountInfo.amount - txnsToBeSigned[0].fee) + expectedAlgoAmount
     );
 
     // Check if the account has the correct amount of tALGOs
     expect(finalTAlgoAccountAsset?.amount).toBe(
-      (initialTAlgoAccountAsset?.amount ?? 0) - burnAmount
+      (initialTAlgoAccountAsset?.amount ?? 0n) - burnAmount
     );
   }, 18000);
 });

@@ -1,12 +1,9 @@
-import {Algodv2} from "algosdk";
+import {Address, Algodv2} from "algosdk";
 
 import {getContract} from "../../../contract";
 import {CONTRACT_VERSION} from "../../../contract/constants";
 import {getValidatorAppID} from "../../../validator";
-import {
-  getAccountInformation,
-  getDecodedAccountApplicationLocalState
-} from "../../account/accountUtils";
+import {getDecodedAccountApplicationLocalState} from "../../account/accountUtils";
 import {sortAssetIds} from "../../asset/assetUtils";
 import {SupportedNetwork} from "../../commonTypes";
 import {DECODED_APP_STATE_KEYS} from "../poolConstants";
@@ -28,7 +25,7 @@ export async function getPoolInfo(params: {
   const poolAddress = poolLogicSig.address();
   const sortedAssetIDs = sortAssetIds(asset1ID, asset2ID);
 
-  const accountInformation = await getAccountInformation(client, poolAddress);
+  const accountInformation = await client.accountInformation(poolAddress).do();
   const appState = getDecodedAccountApplicationLocalState(
     accountInformation,
     validatorAppID
@@ -74,7 +71,7 @@ export async function getPoolReserves(
   client: Algodv2,
   pool: V2PoolInfo
 ): Promise<PoolReserves> {
-  const accountInformation = await getAccountInformation(client, pool.account.address());
+  const accountInformation = await client.accountInformation(pool.account.address()).do();
   const appState = getDecodedAccountApplicationLocalState(
     accountInformation,
     pool.validatorAppID
@@ -103,10 +100,10 @@ export async function getPoolAssets({
   network
 }: {
   client: Algodv2;
-  address: string;
+  address: string | Address;
   network: SupportedNetwork;
 }): Promise<PoolAssets | null> {
-  const info = await getAccountInformation(client, address);
+  const info = await client.accountInformation(address).do();
   const appState = getDecodedAccountApplicationLocalState(
     info,
     getValidatorAppID(network, CONTRACT_VERSION.V2)

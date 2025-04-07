@@ -1,6 +1,6 @@
-import {Algodv2} from "algosdk";
+import {Algodv2, bytesToBase64} from "algosdk";
+import {TealKeyValue} from "algosdk/dist/types/client/v2/algod/models/types";
 
-import {AccountInformation} from "./account/accountTypes";
 import {SignerTransaction, TinymanApiErrorShape} from "./commonTypes";
 import TinymanError from "./error/TinymanError";
 
@@ -8,7 +8,7 @@ export function decodeState({
   stateArray = [],
   shouldDecodeKeys = false
 }: {
-  stateArray: AccountInformation["apps-local-state"][0]["key-value"];
+  stateArray: TealKeyValue[];
   /**
    * If `true`, the returned object will have decoded keys instead of base64 encoded keys.
    */
@@ -31,7 +31,7 @@ export function decodeState({
       throw new Error(`Unexpected state type: ${pair.value.type}`);
     }
 
-    let finalKey = shouldDecodeKeys ? atob(key) : key;
+    let finalKey = shouldDecodeKeys ? Buffer.from(key).toString() : bytesToBase64(key);
 
     state[finalKey] = value;
   }
@@ -52,39 +52,6 @@ export function joinByteArrays(...arrays: Uint8Array[]): Uint8Array {
   }
 
   return result;
-}
-
-const MIN_BALANCE_PER_ACCOUNT = 100000n;
-const MIN_BALANCE_PER_ASSET = 100000n;
-const MIN_BALANCE_PER_APP = 100000n;
-const MIN_BALANCE_PER_APP_BYTESLICE = 25000n + 25000n;
-const MIN_BALANCE_PER_APP_UINT = 25000n + 3500n;
-
-export function getMinBalanceForAccount(accountInfo: any): bigint {
-  const totalSchema = accountInfo["apps-total-schema"];
-  let totalByteSlices = 0n;
-  let totalUints = 0n;
-
-  if (totalSchema) {
-    if (totalSchema["num-byte-slice"]) {
-      totalByteSlices = totalSchema["num-byte-slice"];
-    }
-    if (totalSchema["num-uint"]) {
-      totalUints = totalSchema["num-uint"];
-    }
-  }
-
-  const localApps = accountInfo["apps-local-state"] || [];
-  const createdApps = accountInfo["created-apps"] || [];
-  const assets = accountInfo.assets || [];
-
-  return (
-    MIN_BALANCE_PER_ACCOUNT +
-    MIN_BALANCE_PER_ASSET * BigInt(assets.length) +
-    MIN_BALANCE_PER_APP * BigInt(createdApps.length + localApps.length) +
-    MIN_BALANCE_PER_APP_UINT * totalUints +
-    MIN_BALANCE_PER_APP_BYTESLICE * totalByteSlices
-  );
 }
 
 function delay(timeout: number) {
@@ -122,14 +89,14 @@ export async function waitForConfirmation(
     }
 
     if (pendingTransactionInfo) {
-      if (pendingTransactionInfo["confirmed-round"]) {
+      if (pendingTransactionInfo.confirmedRound) {
         // Got the completed Transaction
         return pendingTransactionInfo;
       }
 
-      if (pendingTransactionInfo["pool-error"]) {
+      if (pendingTransactionInfo.poolError) {
         // If there was a pool error, then the transaction has been rejected
-        throw new Error(`Transaction Rejected: ${pendingTransactionInfo["pool-error"]}`);
+        throw new Error(`Transaction Rejected: ${pendingTransactionInfo.poolError}`);
       }
     }
   }
@@ -138,7 +105,7 @@ export async function waitForConfirmation(
 export function applySlippageToAmount(
   type: "positive" | "negative",
   slippage: number,
-  amount: number | bigint
+  amount: bigint
 ): bigint {
   if (slippage > 1 || slippage < 0) {
     throw new Error(`Invalid slippage value. Must be between 0 and 1, got ${slippage}`);
@@ -190,7 +157,7 @@ export function convertToBaseUnits(
   const baseAmount = Math.pow(10, Number(assetDecimals)) * Number(quantity);
 
   // make sure the final value is an integer. This prevents this kind of computation errors: 0.0012 * 100000 = 119.99999999999999 and rounds this result into 120
-  return roundNumber({decimalPlaces: 0}, baseAmount);
+  return BigInt(roundNumber({decimalPlaces: 0}, baseAmount));
 }
 
 /**
@@ -270,14 +237,14 @@ export async function sendAndWaitRawTransaction(
     }[] = [];
 
     for (let signedTxnGroup of signedTxnGroups) {
-      const {txId} = await client.sendRawTransaction(signedTxnGroup).do();
+      const {txid} = await client.sendRawTransaction(signedTxnGroup).do();
 
-      const status = await waitForConfirmation(client, txId);
-      const confirmedRound = status["confirmed-round"];
+      const status = await waitForConfirmation(client, txid);
+      const confirmedRound = Number(status.confirmedRound);
 
       networkResponse.push({
         confirmedRound,
-        txnID: txId
+        txnID: txid
       });
     }
 
@@ -291,7 +258,7 @@ export async function sendAndWaitRawTransaction(
 }
 
 export function sumUpTxnFees(txns: SignerTransaction[]): number {
-  return txns.reduce((totalFee, txDetail) => totalFee + txDetail.txn.fee, 0);
+  return txns.reduce((totalFee, txDetail) => totalFee + Number(txDetail.txn.fee), 0);
 }
 
 export function getTxnGroupID(txns: SignerTransaction[]) {

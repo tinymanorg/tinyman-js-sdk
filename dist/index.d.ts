@@ -3,12 +3,11 @@ export type { InitiatorSigner, SignerTransaction, SupportedNetwork } from "./uti
 export { BASE_MINIMUM_BALANCE, MINIMUM_ADD_LIQUIDITY_AMOUNT, MINIMUM_BALANCE_REQUIRED_PER_APP, MINIMUM_BALANCE_REQUIRED_PER_ASSET, MINIMUM_BALANCE_REQUIRED_PER_BYTE_SCHEMA, MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE } from "./util/constant";
 export * from "./swap/v2/router";
 export * from "./swap/common/utils";
-export { applySlippageToAmount, ASSET_OPT_IN_PROCESS_TXN_COUNT, convertFromBaseUnits, convertToBaseUnits, getTxnGroupID, sendAndWaitRawTransaction, sumUpTxnFees } from "./util/util";
+export { applySlippageToAmount, ASSET_OPT_IN_PROCESS_TXN_COUNT, convertFromBaseUnits, convertToBaseUnits, getTxnGroupID, sendAndWaitRawTransaction, sumUpTxnFees, joinByteArrays } from "./util/util";
 export { generateOptIntoAssetTxns } from "./util/asset/assetUtils";
-export type { AccountAsset, AssetWithIdAndAmount, IndexerAssetInformation, TinymanAnalyticsApiAsset } from "./util/asset/assetModels";
+export type { AssetWithIdAndAmount, TinymanAnalyticsApiAsset } from "./util/asset/assetModels";
 export { ALGO_ASSET, ALGO_ASSET_ID, POOL_TOKEN_UNIT_NAME } from "./util/asset/assetConstants";
-export { calculateAccountMinimumRequiredBalance, getAccountExcess, getAccountExcessWithinPool, getAccountInformation, getMinRequiredBalanceToOptIn, hasSufficientMinimumBalance, isAccountOptedIntoApp } from "./util/account/accountUtils";
-export type { AccountInformationData } from "./util/account/accountTypes";
+export { getAccountExcess, getAccountExcessWithinPool, getMinRequiredBalanceToOptIn, hasSufficientMinimumBalance, isAccountOptedIntoApp } from "./util/account/accountUtils";
 export { CONTRACT_VERSION } from "./contract/constants";
 export type { ContractVersionValue } from "./contract/types";
 export { tinymanContract_v1_1 } from "./contract/v1_1/contract";

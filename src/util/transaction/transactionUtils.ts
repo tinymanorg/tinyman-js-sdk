@@ -3,21 +3,22 @@ import algosdk, {
   assignGroupID,
   decodeUnsignedTransaction,
   encodeUnsignedTransaction,
-  Transaction,
   TransactionType,
   waitForConfirmation
 } from "algosdk";
 
 import {ALGO_ASSET_ID} from "../asset/assetConstants";
 import {AssetWithIdAndAmount} from "../asset/assetModels";
-import {SignerTransaction, TxnResponseInnerTxns} from "../commonTypes";
+import {SignerTransaction} from "../commonTypes";
 import {DEFAULT_WAIT_FOR_CONFIRMATION_ROUNDS} from "../constant";
 
 export async function getAppCallTxnResponse(
   client: Algodv2,
   txGroup: SignerTransaction[]
 ) {
-  const appCallTxnId = txGroup.find(({txn}) => txn.type === "appl")?.txn.txID();
+  const appCallTxnId = txGroup
+    .find(({txn}) => txn.type === TransactionType.appl)
+    ?.txn.txID();
   const appCallTxnResponse = appCallTxnId
     ? await waitForConfirmation(
         client,
@@ -31,15 +32,15 @@ export async function getAppCallTxnResponse(
 
 /**
  * Tries to find the app call transaction in the group, get the response, and extract the inner txns data.
- * @returns the innter transactions of the app call transaction or `undefined` if no app call transaction was found.
+ * @returns the inner transactions of the app call transaction or `undefined` if no app call transaction was found.
  */
 export async function getAppCallInnerTxns(
   client: Algodv2,
   txGroup: SignerTransaction[]
-): Promise<TxnResponseInnerTxns | undefined> {
+): Promise<algosdk.modelsv2.PendingTransactionResponse[] | undefined> {
   const txResponse = await getAppCallTxnResponse(client, txGroup);
 
-  return txResponse?.["inner-txns"];
+  return txResponse?.innerTxns;
 }
 
 /**
@@ -54,7 +55,7 @@ export async function getAppCallInnerAssetData(
   const innerTxns = await getAppCallInnerTxns(client, txGroup);
   // Get the account address that will receive the assets after a certain operation is successful.
   // This equals to the address of the account that signs the txGroup.
-  const receivingAccountAddress = extractSenderAddressFromTransaction(txGroup[0].txn);
+  const receivingAccountAddress = txGroup[0].txn.sender.toString();
 
   return innerTxns?.reduce<AssetWithIdAndAmount[]>((assets, {txn}) => {
     let updatedAssets = assets;
@@ -62,20 +63,21 @@ export async function getAppCallInnerAssetData(
 
     if (
       innerTxn.type === TransactionType.axfer &&
-      algosdk.encodeAddress(innerTxn.arcv) === receivingAccountAddress
+      innerTxn.assetTransfer &&
+      innerTxn.assetTransfer.receiver.toString() === receivingAccountAddress
     ) {
       updatedAssets.push({
-        id: innerTxn.xaid,
-        amount: innerTxn.aamt
+        id: Number(innerTxn.assetTransfer.assetIndex),
+        amount: innerTxn.assetTransfer?.amount
       });
     } else if (
       innerTxn.type === TransactionType.pay &&
-      algosdk.encodeAddress(innerTxn.rcv) === receivingAccountAddress
+      innerTxn.payment?.receiver.toString() === receivingAccountAddress
     ) {
       updatedAssets.push({
         // Payment transactions are always in ALGO
         id: ALGO_ASSET_ID,
-        amount: innerTxn.amt
+        amount: innerTxn.payment.amount
       });
     }
 
@@ -113,13 +115,4 @@ export function combineAndRegroupSignerTxns(
     // Replace the old transaction, with the new transaction that has the new group ID
     txn: newTxnGroup[index]
   }));
-}
-
-/**
- * Extracts the account address from the provided transaction.
- * @param txn - The transaction to extract the sender address from
- * @returns the account address of the sender
- */
-export function extractSenderAddressFromTransaction(txn: Transaction): string {
-  return algosdk.encodeAddress(txn.from.publicKey);
 }

@@ -15,8 +15,8 @@ import { AssetWithIdAndAmount } from "../../util/asset/assetModels";
 export declare function getQuote({ pool, reserves, asset1In, asset2In }: {
     pool: V1PoolInfo;
     reserves: PoolReserves;
-    asset1In: number | bigint;
-    asset2In: number | bigint;
+    asset1In: bigint;
+    asset2In: bigint;
 }): V1_1AddLiquidityQuote;
 export declare function generateTxns({ client, network, poolAddress, asset1In, asset2In, poolTokenOut, slippage, initiatorAddr }: {
     client: Algodv2;

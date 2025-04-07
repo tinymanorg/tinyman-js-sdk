@@ -33,7 +33,7 @@ For more details about the modules and functions, see ["Module methods" section]
 ```typescript
 // Address of the account that will sign the transactions
 const accountAddress = "...";
-const account = await getAccountInformation(algodClient, accountAddress);
+const account = await client.accountInformation(address).do();
 const isAppOptInRequired = isAccountOptedIntoApp({
   appID: getValidatorAppID("mainnet", CONTRACT_VERSION.V1_1),
   accountAppsLocalState: account["apps-local-state"]

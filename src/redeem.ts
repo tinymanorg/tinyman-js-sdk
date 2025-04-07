@@ -185,13 +185,13 @@ export async function generateRedeemTxns({
   client: Algodv2;
   pool: V1PoolInfo;
   assetID: number;
-  assetOut: number | bigint;
+  assetOut: bigint;
   initiatorAddr: string;
 }): Promise<SignerTransaction[]> {
   const suggestedParams = await client.getTransactionParams().do();
   const poolAddress = pool.account.address();
   const validatorAppCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
-    from: poolAddress,
+    sender: poolAddress,
     appIndex: pool.validatorAppID,
     appArgs: [encodeString("redeem")],
     note: tinymanJSSDKConfig.getAppCallTxnNoteWithClientName(pool.contractVersion),
@@ -207,24 +207,24 @@ export async function generateRedeemTxns({
 
   if (assetID === 0) {
     assetOutTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-      from: poolAddress,
-      to: initiatorAddr,
-      amount: BigInt(assetOut),
+      sender: poolAddress,
+      receiver: initiatorAddr,
+      amount: assetOut,
       suggestedParams
     });
   } else {
     assetOutTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-      from: poolAddress,
-      to: initiatorAddr,
+      sender: poolAddress,
+      receiver: initiatorAddr,
       assetIndex: assetID,
-      amount: BigInt(assetOut),
+      amount: assetOut,
       suggestedParams
     });
   }
 
   const feeTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-    from: initiatorAddr,
-    to: poolAddress,
+    sender: initiatorAddr,
+    receiver: poolAddress,
     amount: validatorAppCallTxn.fee + assetOutTxn.fee,
     note: DEFAULT_FEE_TXN_NOTE,
     suggestedParams
@@ -239,11 +239,11 @@ export async function generateRedeemTxns({
     },
     {
       txn: txGroup[1],
-      signers: [poolAddress]
+      signers: [poolAddress.toString()]
     },
     {
       txn: txGroup[2],
-      signers: [poolAddress]
+      signers: [poolAddress.toString()]
     }
   ];
 }

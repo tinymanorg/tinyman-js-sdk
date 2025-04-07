@@ -1,4 +1,4 @@
-import AlgodClient from "algosdk/dist/types/client/v2/algod/algod";
+import { Algodv2 } from "algosdk";
 declare class RewardsAppGlobalState {
     tinyAssetId: number;
     vaultAppId: number;
@@ -15,5 +15,5 @@ declare class RewardClaimSheet {
 }
 declare function getRewardPeriodBoxName(boxIndex: number): Uint8Array;
 declare function getAccountRewardClaimSheetBoxName(address: string, boxIndex: number): Uint8Array;
-declare function getRewardClaimSheet(algod: AlgodClient, appId: number, address: string, accountRewardClaimSheetBoxIndex: number): Promise<RewardClaimSheet | null>;
+declare function getRewardClaimSheet(algod: Algodv2, appId: number, address: string, accountRewardClaimSheetBoxIndex: number): Promise<RewardClaimSheet | null>;
 export { getAccountRewardClaimSheetBoxName, getRewardClaimSheet, getRewardPeriodBoxName, RewardClaimSheet, RewardsAppGlobalState };

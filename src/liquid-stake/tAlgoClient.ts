@@ -1,10 +1,9 @@
-import algosdk, {encodeAddress} from "algosdk";
+import algosdk, {bigIntToBytes, encodeAddress} from "algosdk";
 
-import TinymanBaseClient from "../util/client/base/baseClient";
-import {encodeString} from "../util/util";
 import {TALGO_ASSET_ID} from "../util/asset/assetConstants";
-import {intToBytes} from "../governance/util/utils";
+import TinymanBaseClient from "../util/client/base/baseClient";
 import {SupportedNetwork} from "../util/commonTypes";
+import {encodeString} from "../util/util";
 import {STAKE_APP_ID, STAKE_RATIO_COEFFICIENT} from "./constants";
 
 class TinymanTAlgoClient extends TinymanBaseClient {
@@ -17,7 +16,7 @@ class TinymanTAlgoClient extends TinymanBaseClient {
 
     const txns = [
       algosdk.makeApplicationNoOpTxnFromObject({
-        from: userAddress,
+        sender: userAddress,
         appIndex: this.appId,
         appArgs: [encodeString("sync")],
         suggestedParams,
@@ -33,21 +32,21 @@ class TinymanTAlgoClient extends TinymanBaseClient {
     return this.setupTxnFeeAndAssignGroupId({txns});
   }
 
-  async mint(amount: number, userAddress: string) {
+  async mint(amount: bigint, userAddress: string) {
     const suggestedParams = await this.getSuggestedParams();
 
     const txns = [
       ...(await this.getOptinTxnIfNeeded(userAddress, TALGO_ASSET_ID[this.network])),
       algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-        from: userAddress,
-        to: this.applicationAddress,
+        sender: userAddress,
+        receiver: this.applicationAddress,
         amount,
         suggestedParams
       }),
       algosdk.makeApplicationNoOpTxnFromObject({
-        from: userAddress,
+        sender: userAddress,
         appIndex: this.appId,
-        appArgs: [encodeString("mint"), intToBytes(amount)],
+        appArgs: [encodeString("mint"), bigIntToBytes(amount, 8)],
         accounts: [
           encodeAddress(await this.getGlobal(encodeString("account_1"))),
           encodeAddress(await this.getGlobal(encodeString("account_2"))),
@@ -62,21 +61,21 @@ class TinymanTAlgoClient extends TinymanBaseClient {
     return this.setupTxnFeeAndAssignGroupId({txns, additionalFeeCount: 1});
   }
 
-  async burn(amount: number, userAddress: string) {
+  async burn(amount: bigint, userAddress: string) {
     const suggestedParams = await this.getSuggestedParams();
 
     const txns = [
       algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-        from: userAddress,
-        to: this.applicationAddress,
+        sender: userAddress,
+        receiver: this.applicationAddress,
         assetIndex: TALGO_ASSET_ID[this.network],
         amount,
         suggestedParams
       }),
       algosdk.makeApplicationNoOpTxnFromObject({
-        from: userAddress,
+        sender: userAddress,
         appIndex: this.appId,
-        appArgs: [encodeString("burn"), intToBytes(amount)],
+        appArgs: [encodeString("burn"), bigIntToBytes(amount, 8)],
         accounts: [
           encodeAddress(await this.getGlobal(encodeString("account_1"))),
           encodeAddress(await this.getGlobal(encodeString("account_2"))),
@@ -97,9 +96,7 @@ class TinymanTAlgoClient extends TinymanBaseClient {
    * @returns {Promise<number>} The current ALGO to tALGO ratio.
    */
   async getRatio(): Promise<number> {
-    return (
-      ((await this.getGlobal(encodeString("rate"))) as number) / STAKE_RATIO_COEFFICIENT
-    );
+    return Number(await this.getGlobal(encodeString("rate"))) / STAKE_RATIO_COEFFICIENT;
   }
 
   /**

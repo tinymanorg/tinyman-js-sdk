@@ -1,4 +1,4 @@
-import { Algodv2 } from "algosdk";
+import { Address, Algodv2 } from "algosdk";
 import { SupportedNetwork } from "../../commonTypes";
 import { V2PoolInfo, PoolReserves, PoolAssets } from "../poolTypes";
 /**
@@ -13,6 +13,6 @@ export declare function getPoolInfo(params: {
 export declare function getPoolReserves(client: Algodv2, pool: V2PoolInfo): Promise<PoolReserves>;
 export declare function getPoolAssets({ client, address, network }: {
     client: Algodv2;
-    address: string;
+    address: string | Address;
     network: SupportedNetwork;
 }): Promise<PoolAssets | null>;

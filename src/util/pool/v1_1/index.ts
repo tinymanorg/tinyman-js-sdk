@@ -1,21 +1,13 @@
-import algosdk, {Algodv2, IntDecoding} from "algosdk";
+import algosdk, {Algodv2} from "algosdk";
 import {fromByteArray} from "base64-js";
 
 import {getContract} from "../../../contract";
 import {CONTRACT_VERSION} from "../../../contract/constants";
 import {getValidatorAppID} from "../../../validator";
-import {
-  getAccountInformation,
-  getDecodedAccountApplicationLocalState
-} from "../../account/accountUtils";
+import {getDecodedAccountApplicationLocalState} from "../../account/accountUtils";
 import {sortAssetIds} from "../../asset/assetUtils";
 import {SupportedNetwork} from "../../commonTypes";
-import {
-  decodeState,
-  encodeString,
-  getMinBalanceForAccount,
-  joinByteArrays
-} from "../../util";
+import {decodeState, encodeString, joinByteArrays} from "../../util";
 import {DECODED_APP_STATE_KEYS} from "../poolConstants";
 import {PoolAssets, PoolReserves, PoolStatus, V1PoolInfo} from "../poolTypes";
 
@@ -34,12 +26,15 @@ export async function getPoolInfo(params: {
   const validatorAppID = getValidatorAppID(network, CONTRACT_VERSION.V1_1);
   const poolAddress = poolLogicSig.address();
   const sortedAssetIDs = sortAssetIds(asset1ID, asset2ID);
-  const accountInformation = await getAccountInformation(client, poolAddress);
+  const accountInformation = await client.accountInformation(poolAddress.toString()).do();
   const appState = getDecodedAccountApplicationLocalState(
     accountInformation,
     validatorAppID
   );
-  const poolTokenID = accountInformation["created-assets"][0]?.index;
+
+  const poolTokenID = accountInformation.createdAssets?.length
+    ? Number(accountInformation.createdAssets[0].index)
+    : undefined;
   let result: V1PoolInfo = {
     account: poolLogicSig,
     validatorAppID,
@@ -51,8 +46,8 @@ export async function getPoolInfo(params: {
   };
 
   if (appState) {
-    result.asset1ID = appState[DECODED_APP_STATE_KEYS.v1_1.asset1] as number;
-    result.asset2ID = appState[DECODED_APP_STATE_KEYS.v1_1.asset2] as number;
+    result.asset1ID = Number(appState[DECODED_APP_STATE_KEYS.v1_1.asset1]);
+    result.asset2ID = Number(appState[DECODED_APP_STATE_KEYS.v1_1.asset2]);
   }
 
   return result;
@@ -62,22 +57,27 @@ export async function getPoolReserves(
   client: Algodv2,
   pool: V1PoolInfo
 ): Promise<PoolReserves> {
-  const info = await getAccountInformation(
-    client,
-    pool.account.address(),
-    IntDecoding.BIGINT
-  );
-  const appsLocalState = info["apps-local-state"] || [];
+  const info = await client.accountInformation(pool.account.address()).do();
+  const {appsLocalState, assets} = info;
 
   let outstandingAsset1 = 0n;
   let outstandingAsset2 = 0n;
   let outstandingPoolTokens = 0n;
 
+  if (!appsLocalState) {
+    throw new Error("State of the pool account is not found");
+  }
+
+  if (!assets) {
+    throw new Error("Assets are not defined for this pool");
+  }
+
   for (const app of appsLocalState) {
-    if (app.id != pool.validatorAppID) {
+    if (app.id != BigInt(pool.validatorAppID)) {
       continue;
     }
-    const keyValue = app["key-value"];
+
+    const {keyValue} = app;
 
     if (!keyValue) {
       break;
@@ -116,23 +116,21 @@ export async function getPoolReserves(
   let asset2Balance = 0n;
   let poolTokenBalance = 0n;
 
-  for (const asset of info.assets) {
-    const id = asset["asset-id"];
+  for (const asset of assets) {
+    const id = Number(asset.assetId);
     const {amount} = asset;
 
     if (id == pool.asset1ID) {
-      asset1Balance = BigInt(amount);
+      asset1Balance = amount;
     } else if (id == pool.asset2ID) {
-      asset2Balance = BigInt(amount);
+      asset2Balance = amount;
     } else if (id == pool.poolTokenID) {
-      poolTokenBalance = BigInt(amount);
+      poolTokenBalance = amount;
     }
   }
 
   if (pool.asset2ID === 0) {
-    const minBalance = getMinBalanceForAccount(info);
-
-    asset2Balance = BigInt(info.amount) - minBalance;
+    asset2Balance = info.amount - info.minBalance;
 
     if (asset2Balance < 0n) {
       asset2Balance = 0n;
@@ -184,7 +182,7 @@ export async function getPoolAssets(
     return cache[address];
   }
 
-  const info = await getAccountInformation(client, address);
+  const info = await client.accountInformation(address).do();
   const appState = getDecodedAccountApplicationLocalState(
     info,
     getValidatorAppID(network, CONTRACT_VERSION.V1_1)
@@ -196,13 +194,13 @@ export async function getPoolAssets(
     let poolTokenID: number;
 
     // The Pool Token is the only asset the Pool has created
-    const poolTokenAsset = info["created-assets"][0];
+    const poolTokenAsset = info.createdAssets![0];
 
-    poolTokenID = poolTokenAsset.index;
+    poolTokenID = Number(poolTokenAsset.index);
 
     assets = {
-      asset1ID: appState[DECODED_APP_STATE_KEYS[CONTRACT_VERSION.V1_1].asset1] as number,
-      asset2ID: appState[DECODED_APP_STATE_KEYS[CONTRACT_VERSION.V1_1].asset2] as number,
+      asset1ID: Number(appState[DECODED_APP_STATE_KEYS[CONTRACT_VERSION.V1_1].asset1]),
+      asset2ID: Number(appState[DECODED_APP_STATE_KEYS[CONTRACT_VERSION.V1_1].asset2]),
       poolTokenID
     };
 

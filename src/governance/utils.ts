@@ -1,4 +1,3 @@
-import AlgodClient from "algosdk/dist/types/client/v2/algod/algod";
 import {CID} from "multiformats";
 /* eslint-disable import/no-unresolved */
 import {base32} from "multiformats/bases/base32";
@@ -6,6 +5,7 @@ import {code} from "multiformats/codecs/raw";
 import {sha256} from "multiformats/hashes/sha2";
 /* eslint-enable import/no-unresolved */
 import {
+  Algodv2,
   Transaction,
   assignGroupID,
   decodeUnsignedTransaction,
@@ -15,7 +15,7 @@ import {
 import {TWO_TO_THE_64} from "./vault/constants";
 import {getSlope} from "./vault/utils";
 
-async function getRawBoxValue(algod: AlgodClient, appId: number, boxName: Uint8Array) {
+async function getRawBoxValue(algod: Algodv2, appId: number, boxName: Uint8Array) {
   try {
     const {value} = await algod.getApplicationBoxByName(appId, boxName).do();
 
@@ -30,7 +30,7 @@ async function getRawBoxValue(algod: AlgodClient, appId: number, boxName: Uint8A
 }
 
 async function doesBoxExist(
-  algod: AlgodClient,
+  algod: Algodv2,
   appId: number,
   boxName: Uint8Array
 ): Promise<boolean> {
@@ -87,14 +87,14 @@ function getCumulativePowerDelta(bias: number, slope: number, timeDelta: number)
   return biasDelta;
 }
 
-async function getGlobalState(algod: AlgodClient, appId: number) {
+async function getGlobalState(algod: Algodv2, appId: number) {
   const applicationInfo = await algod.getApplicationByID(appId).do();
 
   return parseGlobalStateFromApplicationInfo(applicationInfo);
 }
 
 function parseGlobalStateFromApplicationInfo(applicationInfo: Record<string, any>) {
-  const rawGlobalState = applicationInfo.params["global-state"];
+  const rawGlobalState = applicationInfo.params.globalState;
 
   const globalState: Record<string, any> = {};
 
@@ -151,7 +151,7 @@ function combineAndRegroupTxns(...txns: Transaction[][]): Transaction[] {
   return newTxnGroup;
 }
 
-async function getAllBoxNames(algod: AlgodClient, appId: number) {
+async function getAllBoxNames(algod: Algodv2, appId: number) {
   const response = await algod.getApplicationBoxes(appId).do();
 
   return response.boxes.map((box) => box.name);

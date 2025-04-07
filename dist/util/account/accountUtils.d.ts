@@ -1,14 +1,12 @@
-import { Algodv2, IntDecoding } from "algosdk";
+import algosdk, { Algodv2 } from "algosdk";
 import { ContractVersionValue } from "../../contract/types";
 import { V1PoolInfo } from "../pool/poolTypes";
-import { AccountExcess, AccountExcessWithinPool, AccountInformation, AccountInformationData } from "./accountTypes";
-export declare function getAccountInformation(client: Algodv2, address: string, intDecoding?: IntDecoding): Promise<AccountInformationData>;
+import { AccountExcess, AccountExcessWithinPool } from "./accountTypes";
 /**
  * @returns the decoded application local state object (both keys and values are decoded)
  */
-export declare function getDecodedAccountApplicationLocalState(accountInfo: AccountInformationData, validatorAppID: number): Record<string, string | number> | null;
-export declare function calculateAccountMinimumRequiredBalance(account: AccountInformation): number;
-export declare function hasSufficientMinimumBalance(accountData: AccountInformationData): boolean;
+export declare function getDecodedAccountApplicationLocalState(accountInfo: algosdk.modelsv2.Account, validatorAppID: number): Record<string, string | number> | null;
+export declare function hasSufficientMinimumBalance(accountData: algosdk.modelsv2.Account): boolean;
 /**
  * Finds the excess amounts accumulated for an account within a pool
  * @param params.client An Algodv2 client.
@@ -31,7 +29,7 @@ export declare function getAccountExcessWithinPool({ client, pool, accountAddr }
 export declare function getAccountExcess({ client, accountAddr, validatorAppID }: {
     client: Algodv2;
     accountAddr: string;
-    validatorAppID: number;
+    validatorAppID: bigint;
 }): Promise<AccountExcess[]>;
 /**
  * Checks if an account is opted into an app.
@@ -42,7 +40,7 @@ export declare function getAccountExcess({ client, accountAddr, validatorAppID }
  */
 export declare function isAccountOptedIntoApp({ appID, accountAppsLocalState }: {
     appID: number;
-    accountAppsLocalState: AccountInformation["apps-local-state"];
+    accountAppsLocalState: algosdk.modelsv2.Account["appsLocalState"];
 }): boolean;
 /**
  * @returns the minimum balance required to opt in to an app or asset (decided by `type`)
@@ -53,6 +51,6 @@ export declare function getMinRequiredBalanceToOptIn(params: ({
 } | {
     type: "asset-opt-in";
 }) & {
-    currentMinumumBalanceForAccount: number;
-    suggestedTransactionFee?: number;
-}): number;
+    currentMinumumBalanceForAccount: bigint;
+    suggestedTransactionFee?: bigint;
+}): bigint;

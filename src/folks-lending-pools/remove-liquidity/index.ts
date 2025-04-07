@@ -1,9 +1,4 @@
-import algosdk, {
-  ALGORAND_MIN_TX_FEE,
-  Algodv2,
-  decodeAddress,
-  encodeUint64
-} from "algosdk";
+import algosdk, {Algodv2, encodeUint64} from "algosdk";
 
 import {V2PoolInfo} from "../../util/pool/poolTypes";
 import {
@@ -46,19 +41,19 @@ export async function generateTxns({
   }
 
   const assetTransferTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-    from: initiatorAddr,
-    to: wrapperAppAddress,
+    sender: initiatorAddr,
+    receiver: wrapperAppAddress,
     assetIndex: poolTokenId,
     amount: poolTokenIn,
     suggestedParams
   });
 
   const appCallTxn1 = algosdk.makeApplicationNoOpTxnFromObject({
-    from: initiatorAddr,
+    sender: initiatorAddr,
     appIndex: FOLKS_WRAPPER_APP_ID[network],
     appArgs: [
       encodeString("remove_liquidity"),
-      decodeAddress(poolAddress).publicKey,
+      poolAddress.publicKey,
       encodeUint64(asset1Out.lendingAppId),
       encodeUint64(asset2Out.lendingAppId)
     ],
@@ -69,11 +64,11 @@ export async function generateTxns({
   });
 
   appCallTxn1.fee =
-    ALGORAND_MIN_TX_FEE * (FOLKS_LENDING_POOL_APP_CALL_INNER_TXN_COUNT + 1);
+    suggestedParams.minFee * BigInt(FOLKS_LENDING_POOL_APP_CALL_INNER_TXN_COUNT + 1);
 
   const validatorAppID = getValidatorAppID(network, CONTRACT_VERSION.V2);
   const appCallTxn2 = algosdk.makeApplicationNoOpTxnFromObject({
-    from: initiatorAddr,
+    sender: initiatorAddr,
     appIndex: FOLKS_WRAPPER_APP_ID[network],
     appArgs: [encodeString("noop")],
     accounts: [poolAddress],
@@ -89,7 +84,7 @@ export async function generateTxns({
   });
 }
 
-export function getRemoveLiquidityTotalFee() {
+export function getRemoveLiquidityTotalFee(minFee: bigint): bigint {
   // 1 asset transfer txn, 1 app call txn and 1 app call txn with inner txns
-  return ALGORAND_MIN_TX_FEE * (3 + FOLKS_LENDING_POOL_APP_CALL_INNER_TXN_COUNT);
+  return minFee * BigInt(3 + FOLKS_LENDING_POOL_APP_CALL_INNER_TXN_COUNT);
 }

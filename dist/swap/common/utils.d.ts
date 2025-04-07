@@ -26,11 +26,13 @@ declare function getSwapQuoteContractVersion(quote: SwapQuote): ContractVersionV
  * for the swap transaction with given parameters
  */
 declare function getSwapTotalFee(params: {
+    minFee: bigint;
+} & ({
     version: typeof CONTRACT_VERSION.V1_1;
 } | {
     version: typeof CONTRACT_VERSION.V2;
     type: SwapType;
-}): number;
+})): bigint;
 /**
  * @returns The asset amount ratio for the given quote
  */

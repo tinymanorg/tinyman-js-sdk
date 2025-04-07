@@ -84,7 +84,7 @@ export type GetSwapQuoteParams = {
         info: V1PoolInfo | V2PoolInfo;
         reserves: PoolReserves;
     }[];
-    amount: number | bigint;
+    amount: bigint;
     type: SwapType;
     network: SupportedNetwork;
     /** Slippage rate. Should be given as 0.1% -> 0.001. */

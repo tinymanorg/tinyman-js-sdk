@@ -26,15 +26,14 @@ export {
   convertToBaseUnits,
   getTxnGroupID,
   sendAndWaitRawTransaction,
-  sumUpTxnFees
+  sumUpTxnFees,
+  joinByteArrays
 } from "./util/util";
 
 export {generateOptIntoAssetTxns} from "./util/asset/assetUtils";
 
 export type {
-  AccountAsset,
   AssetWithIdAndAmount,
-  IndexerAssetInformation,
   TinymanAnalyticsApiAsset
 } from "./util/asset/assetModels";
 
@@ -45,16 +44,12 @@ export {
 } from "./util/asset/assetConstants";
 
 export {
-  calculateAccountMinimumRequiredBalance,
   getAccountExcess,
   getAccountExcessWithinPool,
-  getAccountInformation,
   getMinRequiredBalanceToOptIn,
   hasSufficientMinimumBalance,
   isAccountOptedIntoApp
 } from "./util/account/accountUtils";
-
-export type {AccountInformationData} from "./util/account/accountTypes";
 
 export {CONTRACT_VERSION} from "./contract/constants";
 export type {ContractVersionValue} from "./contract/types";

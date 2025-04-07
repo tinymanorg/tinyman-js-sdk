@@ -36,7 +36,7 @@ function calculateDepositReturn({
   depositInterestRate,
   lastUpdate
 }: {
-  depositAmount: number;
+  depositAmount: bigint;
   depositInterestIndex: bigint;
   depositInterestRate: bigint;
   lastUpdate?: number;
@@ -47,7 +47,7 @@ function calculateDepositReturn({
     lastUpdate
   );
 
-  return divScale(BigInt(depositAmount), latestDepositInterestIndex, ONE_14_DP);
+  return divScale(depositAmount, latestDepositInterestIndex, ONE_14_DP);
 }
 
 /**
@@ -81,7 +81,7 @@ export async function fetchFolksLendingPool(
   appId: number
 ): Promise<FolksLendingPool> {
   const appInfo = await algod.getApplicationByID(appId).do();
-  const rawState = appInfo.params["global-state"];
+  const rawState = appInfo.params.globalState ?? [];
   const state = parseState(rawState);
 
   const managerAppId = Number(Buffer.from(state.pm, "base64").readBigUInt64BE(0));

@@ -9,7 +9,7 @@ import SwapQuoteError, {SwapQuoteErrorType} from "../../util/error/SwapQuoteErro
 import {convertFromBaseUnits, roundNumber} from "../../util/util";
 import {SwapType} from "../constants";
 import {SwapQuote, SwapQuoteType} from "../types";
-import {V1_1_SWAP_TOTAL_FEE} from "../v1_1/constants";
+import {getV1SwapTotalFee} from "../v1_1/utils";
 import {
   getAssetInFromSwapRoute,
   getAssetOutFromSwapRoute,
@@ -109,7 +109,7 @@ function getSwapQuoteContractVersion(quote: SwapQuote): ContractVersionValue {
  * for the swap transaction with given parameters
  */
 function getSwapTotalFee(
-  params:
+  params: {minFee: bigint} & (
     | {
         version: typeof CONTRACT_VERSION.V1_1;
       }
@@ -117,13 +117,14 @@ function getSwapTotalFee(
         version: typeof CONTRACT_VERSION.V2;
         type: SwapType;
       }
+  )
 ) {
   switch (params.version) {
     case CONTRACT_VERSION.V1_1:
-      return V1_1_SWAP_TOTAL_FEE;
+      return getV1SwapTotalFee(params.minFee);
 
     case CONTRACT_VERSION.V2:
-      return getV2SwapTotalFee(params.type);
+      return getV2SwapTotalFee(params.type, params.minFee);
 
     default:
       throw new Error("Provided contract version was not valid.");
