@@ -1,4 +1,4 @@
-import algosdk, {Algodv2} from "algosdk";
+import {Algodv2, decodeUint64, encodeAddress, encodeUint64, modelsv2} from "algosdk";
 import {fromByteArray, toByteArray} from "base64-js";
 
 import {getContract} from "../../contract";
@@ -17,7 +17,7 @@ import {AccountExcess, AccountExcessWithinPool} from "./accountTypes";
  * @returns the decoded application local state object (both keys and values are decoded)
  */
 export function getDecodedAccountApplicationLocalState(
-  accountInfo: algosdk.modelsv2.Account,
+  accountInfo: Pick<modelsv2.Account, "appsLocalState">,
   validatorAppID: number
 ) {
   const appState = accountInfo.appsLocalState?.find(
@@ -36,7 +36,9 @@ export function getDecodedAccountApplicationLocalState(
   return decodedState;
 }
 
-export function hasSufficientMinimumBalance(accountData: algosdk.modelsv2.Account) {
+export function hasSufficientMinimumBalance(
+  accountData: Pick<modelsv2.Account, "amount" | "minBalance">
+) {
   return accountData.amount >= accountData.minBalance;
 }
 
@@ -82,24 +84,16 @@ export async function getAccountExcessWithinPool({
     const state = decodeState({stateArray: keyValue});
 
     const excessAsset1Key = fromByteArray(
-      joinByteArrays(
-        poolAddress.publicKey,
-        EXCESS_ENCODED,
-        algosdk.encodeUint64(pool.asset1ID)
-      )
+      joinByteArrays(poolAddress.publicKey, EXCESS_ENCODED, encodeUint64(pool.asset1ID))
     );
     const excessAsset2Key = fromByteArray(
-      joinByteArrays(
-        poolAddress.publicKey,
-        EXCESS_ENCODED,
-        algosdk.encodeUint64(pool.asset2ID)
-      )
+      joinByteArrays(poolAddress.publicKey, EXCESS_ENCODED, encodeUint64(pool.asset2ID))
     );
     const excessPoolTokenKey = fromByteArray(
       joinByteArrays(
         poolAddress.publicKey,
         EXCESS_ENCODED,
-        algosdk.encodeUint64(pool.poolTokenID!)
+        encodeUint64(pool.poolTokenID!)
       )
     );
 
@@ -171,8 +165,8 @@ export async function getAccountExcess({
 
       if (decodedKey.length === 41 && decodedKey[32] === 101) {
         excessData.push({
-          poolAddress: algosdk.encodeAddress(decodedKey.slice(0, 32)),
-          assetID: algosdk.decodeUint64(decodedKey.slice(33, 41), "safe"),
+          poolAddress: encodeAddress(decodedKey.slice(0, 32)),
+          assetID: decodeUint64(decodedKey.slice(33, 41), "safe"),
           amount: BigInt(parseInt(value as string))
         });
       }
@@ -194,7 +188,7 @@ export function isAccountOptedIntoApp({
   accountAppsLocalState
 }: {
   appID: number;
-  accountAppsLocalState: algosdk.modelsv2.Account["appsLocalState"];
+  accountAppsLocalState: modelsv2.Account["appsLocalState"];
 }): boolean {
   return accountAppsLocalState
     ? accountAppsLocalState.some((appState) => appState.id === BigInt(appID))
