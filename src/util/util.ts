@@ -4,7 +4,6 @@ import {TealKeyValue} from "algosdk/dist/types/client/v2/algod/models/types";
 import {SignerTransaction, TinymanApiErrorShape} from "./commonTypes";
 import TinymanError from "./error/TinymanError";
 
-// TODO: Check if final key returns the correct value
 export function decodeState({
   stateArray = [],
   shouldDecodeKeys = false
