@@ -35,11 +35,11 @@
     "javascript"
   ],
   "devDependencies": {
-    "@babel/preset-env": "^7.20.2",
-    "@babel/preset-typescript": "^7.21.0",
+    "@babel/preset-env": "^7.26.9",
+    "@babel/preset-typescript": "^7.27.0",
     "@hipo/eslint-config-base": "^4.3.0",
     "@hipo/eslint-config-typescript": "^1.2.0",
-    "@rollup/plugin-babel": "^6.0.3",
+    "@rollup/plugin-babel": "^6.0.4",
     "@rollup/plugin-commonjs": "^24.0.1",
     "@rollup/plugin-json": "^6.0.0",
     "@rollup/plugin-node-resolve": "^15.0.1",
