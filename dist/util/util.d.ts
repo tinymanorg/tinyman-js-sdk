@@ -1,9 +1,9 @@
 /// <reference types="node" />
 import { Algodv2 } from "algosdk";
+import { TealKeyValue } from "algosdk/dist/types/client/v2/algod/models/types";
 import { SignerTransaction, TinymanApiErrorShape } from "./commonTypes";
-import { AccountInformationData } from "./account/accountTypes";
 export declare function decodeState({ stateArray, shouldDecodeKeys }: {
-    stateArray: AccountInformationData["appsLocalState"][0]["keyValue"];
+    stateArray: TealKeyValue[];
     /**
      * If `true`, the returned object will have decoded keys instead of base64 encoded keys.
      */

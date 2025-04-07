@@ -1,7 +1,7 @@
 import {Algodv2, bytesToBase64} from "algosdk";
+import {TealKeyValue} from "algosdk/dist/types/client/v2/algod/models/types";
 
 import {SignerTransaction, TinymanApiErrorShape} from "./commonTypes";
-import {AccountInformationData} from "./account/accountTypes";
 import TinymanError from "./error/TinymanError";
 
 // TODO: Check if final key returns the correct value
@@ -9,7 +9,7 @@ export function decodeState({
   stateArray = [],
   shouldDecodeKeys = false
 }: {
-  stateArray: AccountInformationData["appsLocalState"][0]["keyValue"];
+  stateArray: TealKeyValue[];
   /**
    * If `true`, the returned object will have decoded keys instead of base64 encoded keys.
    */

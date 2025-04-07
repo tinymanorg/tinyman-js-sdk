@@ -600,14 +600,14 @@ async function execute({
     const assetIn: AssetWithIdAndAmount = {
       id:
         Number(
-          txGroup[SwapTxnGroupIndices.ASSET_IN_TXN_INDEX].txn.assetConfig!.assetIndex
+          txGroup[SwapTxnGroupIndices.ASSET_IN_TXN_INDEX].txn.assetConfig?.assetIndex
         ) || ALGO_ASSET_ID,
       amount: txGroup[SwapTxnGroupIndices.ASSET_IN_TXN_INDEX].txn.payment?.amount ?? 0n
     };
     const assetOut: AssetWithIdAndAmount = {
       id:
         Number(
-          txGroup[SwapTxnGroupIndices.ASSET_OUT_TXN_INDEX].txn.assetConfig!.assetIndex
+          txGroup[SwapTxnGroupIndices.ASSET_OUT_TXN_INDEX].txn.assetConfig?.assetIndex
         ) || ALGO_ASSET_ID,
       amount: txGroup[SwapTxnGroupIndices.ASSET_OUT_TXN_INDEX].txn.payment?.amount ?? 0n
     };

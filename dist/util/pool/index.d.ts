@@ -56,7 +56,7 @@ export declare const poolUtils: {
         getPoolReserves(client: import("algosdk").Algodv2, pool: import("./poolTypes").V2PoolInfo): Promise<import("./poolTypes").PoolReserves>;
         getPoolAssets({ client, address, network }: {
             client: import("algosdk").Algodv2;
-            address: string;
+            address: string | import("algosdk").Address;
             network: import("../commonTypes").SupportedNetwork;
         }): Promise<import("./poolTypes").PoolAssets | null>;
     };

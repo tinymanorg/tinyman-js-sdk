@@ -2,7 +2,6 @@ import {Algodv2, getApplicationAddress} from "algosdk";
 
 import {SupportedNetwork} from "../../util/commonTypes";
 import {FOLKS_WRAPPER_APP_ID} from "../constants";
-import {getAccountInformation} from "../../util/account/accountUtils";
 import {ALGO_ASSET_ID} from "../../util/asset/assetConstants";
 
 export async function getFolksWrapperAppOptInRequiredAssetIDs({
@@ -15,10 +14,10 @@ export async function getFolksWrapperAppOptInRequiredAssetIDs({
   assetIDs: number[];
 }) {
   const wrapperAppAddress = getApplicationAddress(FOLKS_WRAPPER_APP_ID[network]);
-  const appOptedInAssetIDs =
-    (await getAccountInformation(client, wrapperAppAddress.toString())).assets?.map(
-      (asset) => asset.assetId
-    ) ?? [];
+  const appInfo = await client.accountInformation(wrapperAppAddress).do();
+  const appOptedInAssetIDs = appInfo.assets
+    ? appInfo.assets.map((asset) => asset.assetId)
+    : [];
 
   return assetIDs.filter(
     (assetID: number) =>

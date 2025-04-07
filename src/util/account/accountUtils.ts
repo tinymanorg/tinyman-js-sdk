@@ -11,50 +11,32 @@ import {
 } from "../constant";
 import {V1PoolInfo} from "../pool/poolTypes";
 import {decodeState, encodeString, joinByteArrays} from "../util";
-import {
-  AccountExcess,
-  AccountExcessWithinPool,
-  AccountInformationData
-} from "./accountTypes";
-
-export function getAccountInformation(client: Algodv2, address: string) {
-  return new Promise<AccountInformationData>(async (resolve, reject) => {
-    try {
-      const accountInfo = await client.accountInformation(address).do();
-
-      resolve({
-        ...accountInfo,
-        assets: accountInfo.assets ?? [],
-        appsLocalState: accountInfo.appsLocalState ?? []
-      });
-    } catch (error: any) {
-      reject(new Error(error.message || "Failed to fetch account information"));
-    }
-  });
-}
+import {AccountExcess, AccountExcessWithinPool} from "./accountTypes";
 
 /**
  * @returns the decoded application local state object (both keys and values are decoded)
  */
 export function getDecodedAccountApplicationLocalState(
-  accountInfo: AccountInformationData,
+  accountInfo: algosdk.modelsv2.Account,
   validatorAppID: number
 ) {
-  const appState = accountInfo.appsLocalState.find(
+  const appState = accountInfo.appsLocalState?.find(
     (app) => app.id === BigInt(validatorAppID)
   );
 
-  if (!appState) {
+  if (!appState || !appState.keyValue) {
     return null;
   }
 
-  const {keyValue} = appState;
-  const decodedState = decodeState({stateArray: keyValue, shouldDecodeKeys: true});
+  const decodedState = decodeState({
+    stateArray: appState.keyValue,
+    shouldDecodeKeys: true
+  });
 
   return decodedState;
 }
 
-export function hasSufficientMinimumBalance(accountData: AccountInformationData) {
+export function hasSufficientMinimumBalance(accountData: algosdk.modelsv2.Account) {
   return accountData.amount >= accountData.minBalance;
 }
 
@@ -76,9 +58,7 @@ export async function getAccountExcessWithinPool({
   pool: V1PoolInfo;
   accountAddr: string;
 }): Promise<AccountExcessWithinPool> {
-  const info = (await client
-    .accountInformation(accountAddr)
-    .do()) as AccountInformationData;
+  const info = await client.accountInformation(accountAddr).do();
 
   const {appsLocalState} = info;
 
@@ -88,7 +68,7 @@ export async function getAccountExcessWithinPool({
 
   const poolAddress = pool.account.address();
 
-  for (const app of appsLocalState) {
+  for (const app of appsLocalState ?? []) {
     if (app.id != BigInt(pool.validatorAppID)) {
       continue;
     }
@@ -173,12 +153,10 @@ export async function getAccountExcess({
   accountAddr: string;
   validatorAppID: bigint;
 }) {
-  const info = (await client
-    .accountInformation(accountAddr)
-    .do()) as AccountInformationData;
+  const info = await client.accountInformation(accountAddr).do();
 
   const {appsLocalState} = info;
-  const appState = appsLocalState.find(
+  const appState = appsLocalState?.find(
     // `==` is used here to coerce bigints if necessary
     (appLocalState) => appLocalState.id == validatorAppID
   );
@@ -216,7 +194,7 @@ export function isAccountOptedIntoApp({
   accountAppsLocalState
 }: {
   appID: number;
-  accountAppsLocalState: AccountInformationData["appsLocalState"];
+  accountAppsLocalState: algosdk.modelsv2.Account["appsLocalState"];
 }): boolean {
   return accountAppsLocalState
     ? accountAppsLocalState.some((appState) => appState.id === BigInt(appID))
