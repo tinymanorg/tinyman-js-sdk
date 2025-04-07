@@ -3,7 +3,6 @@ import algosdk, {
   assignGroupID,
   decodeUnsignedTransaction,
   encodeUnsignedTransaction,
-  Transaction,
   TransactionType,
   waitForConfirmation
 } from "algosdk";
@@ -56,7 +55,7 @@ export async function getAppCallInnerAssetData(
   const innerTxns = await getAppCallInnerTxns(client, txGroup);
   // Get the account address that will receive the assets after a certain operation is successful.
   // This equals to the address of the account that signs the txGroup.
-  const receivingAccountAddress = extractSenderAddressFromTransaction(txGroup[0].txn);
+  const receivingAccountAddress = txGroup[0].txn.sender.toString();
 
   return innerTxns?.reduce<AssetWithIdAndAmount[]>((assets, {txn}) => {
     let updatedAssets = assets;
@@ -116,13 +115,4 @@ export function combineAndRegroupSignerTxns(
     // Replace the old transaction, with the new transaction that has the new group ID
     txn: newTxnGroup[index]
   }));
-}
-
-/**
- * Extracts the account address from the provided transaction.
- * @param txn - The transaction to extract the sender address from
- * @returns the account address of the sender
- */
-export function extractSenderAddressFromTransaction(txn: Transaction): string {
-  return txn.sender.toString();
 }

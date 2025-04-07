@@ -1,4 +1,4 @@
-import algosdk, { Algodv2, Transaction } from "algosdk";
+import algosdk, { Algodv2 } from "algosdk";
 import { AssetWithIdAndAmount } from "../asset/assetModels";
 import { SignerTransaction } from "../commonTypes";
 export declare function getAppCallTxnResponse(client: Algodv2, txGroup: SignerTransaction[]): Promise<algosdk.modelsv2.PendingTransactionResponse | undefined>;
@@ -19,9 +19,3 @@ export declare function getAppCallInnerAssetData(client: Algodv2, txGroup: Signe
  * @returns the combined signer transaction groups, with a new assigned group ID
  */
 export declare function combineAndRegroupSignerTxns(...signerTransactions: SignerTransaction[][]): SignerTransaction[];
-/**
- * Extracts the account address from the provided transaction.
- * @param txn - The transaction to extract the sender address from
- * @returns the account address of the sender
- */
-export declare function extractSenderAddressFromTransaction(txn: Transaction): string;
