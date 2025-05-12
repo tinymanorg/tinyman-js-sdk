@@ -1,7 +1,7 @@
 import algosdk from "algosdk";
-import TinymanAppClient from "../util/client/base/nullableBaseClient";
 import { SupportedNetwork } from "../util/commonTypes";
-declare class TinymanSTAlgoClient extends TinymanAppClient {
+import TinymanBaseClient from "../util/client/base/baseClient";
+declare class TinymanSTAlgoClient extends TinymanBaseClient<number, algosdk.Address> {
     vaultAppId: number;
     constructor(algod: algosdk.Algodv2, network: SupportedNetwork);
     increaseStake(amount: bigint, userAddress: string): Promise<algosdk.Transaction[]>;

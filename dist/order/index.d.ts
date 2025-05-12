@@ -1,8 +1,8 @@
 import algosdk, { Algodv2, Transaction } from "algosdk";
 import { OrderType, PutOrderParams, PutRecurringOrderParams } from "./types";
 import { SupportedNetwork } from "../util/commonTypes";
-import TinymanNullableBaseClient from "../util/client/base/nullableBaseClient";
-declare class OrderingClient extends TinymanNullableBaseClient {
+import TinymanBaseClient from "../util/client/base/baseClient";
+declare class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | null> {
     registryAppId: number;
     registryApplicationAddress: string;
     vaultAppId: number;

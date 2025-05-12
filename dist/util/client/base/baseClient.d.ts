@@ -2,13 +2,13 @@ import algosdk, { Algodv2 } from "algosdk";
 import { SupportedNetwork } from "../../commonTypes";
 import { StructDefinition } from "./types";
 import { Struct } from "./utils";
-declare abstract class TinymanBaseClient {
-    algod: Algodv2;
-    appId: number;
-    applicationAddress: algosdk.Address;
-    network: SupportedNetwork;
+declare abstract class TinymanBaseClient<AppId extends number | null, AppAddress extends algosdk.Address | null> {
+    protected algod: Algodv2;
+    protected appId: AppId;
+    protected applicationAddress: AppAddress;
+    protected network: SupportedNetwork;
     readonly structs: Record<string, StructDefinition> | undefined;
-    constructor(algod: Algodv2, appId: number, network: SupportedNetwork, structs?: Record<string, StructDefinition>);
+    constructor(algod: Algodv2, appId: AppId, network: SupportedNetwork, structs?: Record<string, StructDefinition>);
     protected setupTxnFeeAndAssignGroupId({ txns, additionalFeeCount }: {
         txns: algosdk.Transaction[];
         additionalFeeCount?: number;

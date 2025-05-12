@@ -36,12 +36,12 @@ import {
 } from "../util/constant";
 import {Struct} from "../util/client/base/utils";
 import {ALGO_ASSET_ID} from "../util/asset/assetConstants";
-import TinymanNullableBaseClient from "../util/client/base/nullableBaseClient";
+import TinymanBaseClient from "../util/client/base/baseClient";
 
 const ENTRY_STRUCT = getStruct("Entry", STRUCTS);
 const ORDER_STRUCT = getStruct("Order", STRUCTS);
 
-class OrderingClient extends TinymanNullableBaseClient {
+class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | null> {
   registryAppId: number;
   registryApplicationAddress: string;
   vaultAppId: number;
@@ -124,7 +124,7 @@ class OrderingClient extends TinymanNullableBaseClient {
   }
 
   async shouldUpdateOrderingApp(): Promise<boolean> {
-    if (!this.isAppIdAvailable()) {
+    if (!this.appId) {
       return Promise.resolve(false);
     }
 
@@ -134,7 +134,9 @@ class OrderingClient extends TinymanNullableBaseClient {
   }
 
   async updateOrderingApp(): Promise<Transaction[]> {
-    this.requireAppId();
+    if (!this.appId) {
+      throw new Error("Application ID not provided");
+    }
 
     const sp = await this.getSuggestedParams();
 
@@ -216,7 +218,7 @@ class OrderingClient extends TinymanNullableBaseClient {
   }
 
   async checkOrderAppAvailability(orderAppId?: number) {
-    if (!this.isAppIdAvailable()) {
+    if (!this.appId && !this.applicationAddress) {
       if (orderAppId) {
         this.appId = orderAppId;
         this.applicationAddress = getApplicationAddress(orderAppId);
@@ -251,7 +253,7 @@ class OrderingClient extends TinymanNullableBaseClient {
     let totalFee = 0n;
 
     // If the application ID is not set yet, ignore the fee calculation
-    if (!this.isAppIdAvailable()) {
+    if (!this.applicationAddress) {
       return totalFee;
     }
 
@@ -297,7 +299,7 @@ class OrderingClient extends TinymanNullableBaseClient {
     isPartialAllowed,
     duration
   }: PutOrderParams) {
-    this.requireAppId();
+    await this.checkOrderAppAvailability();
 
     const sp = await this.getSuggestedParams();
     const newOrderId = await this.getOrderCount();
@@ -395,7 +397,7 @@ class OrderingClient extends TinymanNullableBaseClient {
     maxTargetAmount,
     minTargetAmount
   }: PutRecurringOrderParams) {
-    this.requireAppId();
+    await this.checkOrderAppAvailability();
 
     const orderId = await this.getOrderCount();
     const orderBoxName = this.getOrderBoxName(orderId, OrderType.Recurring);
@@ -484,7 +486,9 @@ class OrderingClient extends TinymanNullableBaseClient {
   }
 
   async cancelOrder(orderId: number, type: OrderType) {
-    this.requireAppId();
+    if (!this.appId) {
+      throw new Error("Application ID not provided");
+    }
 
     const sp = await this.getSuggestedParams();
 
@@ -533,7 +537,7 @@ class OrderingClient extends TinymanNullableBaseClient {
   }
 
   private getOrderCount(): Promise<number> {
-    return this.isAppIdAvailable()
+    return this.appId
       ? this.getGlobal(TOTAL_ORDER_COUNT_KEY, 0, this.appId)
       : Promise.resolve(0);
   }
@@ -563,7 +567,9 @@ class OrderingClient extends TinymanNullableBaseClient {
     assetIds: number[],
     suggestedParams: algosdk.SuggestedParams
   ) {
-    this.requireAppId();
+    if (!this.appId || !this.applicationAddress) {
+      throw new Error("Application ID not provided");
+    }
 
     if (!assetIds.length) {
       return [];
@@ -580,7 +586,9 @@ class OrderingClient extends TinymanNullableBaseClient {
   }
 
   async collect(orderId: number, type: OrderType) {
-    this.requireAppId();
+    if (!this.appId) {
+      throw new Error("Application ID not provided");
+    }
 
     const sp = await this.getSuggestedParams();
 

@@ -9,22 +9,27 @@ import {StructDefinition} from "./types";
 import {getBoxCosts, getStruct, Struct} from "./utils";
 import {areBuffersEqual} from "../../../governance/util/utils";
 
-abstract class TinymanBaseClient {
-  algod: Algodv2;
-  appId: number;
-  applicationAddress: algosdk.Address;
-  network: SupportedNetwork;
+abstract class TinymanBaseClient<
+  AppId extends number | null,
+  AppAddress extends algosdk.Address | null
+> {
+  protected algod: Algodv2;
+  protected appId: AppId;
+  protected applicationAddress: AppAddress;
+  protected network: SupportedNetwork;
   readonly structs: Record<string, StructDefinition> | undefined;
 
   constructor(
     algod: Algodv2,
-    appId: number,
+    appId: AppId,
     network: SupportedNetwork,
     structs?: Record<string, StructDefinition>
   ) {
     this.algod = algod;
     this.appId = appId;
-    this.applicationAddress = getApplicationAddress(this.appId);
+    this.applicationAddress = (
+      this.appId ? getApplicationAddress(this.appId) : null
+    ) as AppAddress;
     this.network = network;
     this.structs = structs;
   }
@@ -51,6 +56,10 @@ abstract class TinymanBaseClient {
 
   protected async getGlobal(key: Uint8Array, defaultValue?: any, appId?: number) {
     const applicationId = appId || this.appId;
+
+    if (!applicationId) {
+      throw new Error("Application ID not provided");
+    }
 
     const applicationInfo = await this.algod.getApplicationByID(applicationId).do();
     const globalState = applicationInfo.params.globalState ?? [];
@@ -91,6 +100,10 @@ abstract class TinymanBaseClient {
   protected async boxExists(boxName: Uint8Array, appId?: number) {
     const applicationId = appId || this.appId;
 
+    if (!applicationId) {
+      throw new Error("Application ID not provided");
+    }
+
     try {
       const box = await this.algod.getApplicationBoxByName(applicationId, boxName).do();
 
@@ -103,6 +116,11 @@ abstract class TinymanBaseClient {
   protected async getBox(boxName: Uint8Array, structName: string, appId?: number) {
     try {
       const applicationId = appId || this.appId;
+
+      if (!applicationId) {
+        throw new Error("Application ID not provided");
+      }
+
       const boxValue = (
         await this.algod.getApplicationBoxByName(applicationId, boxName).do()
       ).value;
