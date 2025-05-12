@@ -27,7 +27,8 @@ export {
   getTxnGroupID,
   sendAndWaitRawTransaction,
   sumUpTxnFees,
-  joinByteArrays
+  joinByteArrays,
+  intToBytes
 } from "./util/util";
 
 export {generateOptIntoAssetTxns} from "./util/asset/assetUtils";
@@ -148,7 +149,6 @@ export {TinymanTAlgoClient} from "./liquid-stake/tAlgoClient";
 export {ProposalVote} from "./governance/proposal-voting/constants";
 export {generateProposalMetadata} from "./governance/proposal-voting/transactions";
 export type {GenerateProposalMetadataPayload} from "./governance/proposal-voting/types";
-export {intToBytes} from "./governance/util/utils";
 export {AccountState} from "./governance/vault/storage";
 export {getStartTimestampOfWeek} from "./governance/vault/utils";
 
@@ -157,3 +157,6 @@ export {
   combineAndRegroupTxns,
   generateCidFromProposalMetadata
 } from "./governance/utils";
+
+export {OrderingClient} from "./order/index";
+export type {PutOrderParams, PutRecurringOrderParams, OrderType} from "./order/types";

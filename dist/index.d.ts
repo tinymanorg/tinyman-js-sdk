@@ -3,7 +3,7 @@ export type { InitiatorSigner, SignerTransaction, SupportedNetwork } from "./uti
 export { BASE_MINIMUM_BALANCE, MINIMUM_ADD_LIQUIDITY_AMOUNT, MINIMUM_BALANCE_REQUIRED_PER_APP, MINIMUM_BALANCE_REQUIRED_PER_ASSET, MINIMUM_BALANCE_REQUIRED_PER_BYTE_SCHEMA, MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE } from "./util/constant";
 export * from "./swap/v2/router";
 export * from "./swap/common/utils";
-export { applySlippageToAmount, ASSET_OPT_IN_PROCESS_TXN_COUNT, convertFromBaseUnits, convertToBaseUnits, getTxnGroupID, sendAndWaitRawTransaction, sumUpTxnFees, joinByteArrays } from "./util/util";
+export { applySlippageToAmount, ASSET_OPT_IN_PROCESS_TXN_COUNT, convertFromBaseUnits, convertToBaseUnits, getTxnGroupID, sendAndWaitRawTransaction, sumUpTxnFees, joinByteArrays, intToBytes } from "./util/util";
 export { generateOptIntoAssetTxns } from "./util/asset/assetUtils";
 export type { AssetWithIdAndAmount, TinymanAnalyticsApiAsset } from "./util/asset/assetModels";
 export { ALGO_ASSET, ALGO_ASSET_ID, POOL_TOKEN_UNIT_NAME } from "./util/asset/assetConstants";
@@ -48,7 +48,8 @@ export { TinymanTAlgoClient } from "./liquid-stake/tAlgoClient";
 export { ProposalVote } from "./governance/proposal-voting/constants";
 export { generateProposalMetadata } from "./governance/proposal-voting/transactions";
 export type { GenerateProposalMetadataPayload } from "./governance/proposal-voting/types";
-export { intToBytes } from "./governance/util/utils";
 export { AccountState } from "./governance/vault/storage";
 export { getStartTimestampOfWeek } from "./governance/vault/utils";
 export { calculateTinyPower, combineAndRegroupTxns, generateCidFromProposalMetadata } from "./governance/utils";
+export { OrderingClient } from "./order/index";
+export type { PutOrderParams, PutRecurringOrderParams, OrderType } from "./order/types";

@@ -1,7 +1,7 @@
 import algosdk from "algosdk";
-import TinymanBaseClient from "../util/client/base/baseClient";
+import TinymanAppClient from "../util/client/base/nullableBaseClient";
 import { SupportedNetwork } from "../util/commonTypes";
-declare class TinymanTAlgoClient extends TinymanBaseClient {
+declare class TinymanTAlgoClient extends TinymanAppClient {
     constructor(algod: algosdk.Algodv2, network: SupportedNetwork);
     sync(userAddress: string): Promise<algosdk.Transaction[]>;
     mint(amount: bigint, userAddress: string): Promise<algosdk.Transaction[]>;

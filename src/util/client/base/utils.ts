@@ -127,6 +127,7 @@ function getType(
     }
 
     const structName = match[1] as keyof typeof structReference;
+    // eslint-disable-next-line no-magic-numbers
     const length = parseInt(match[2], 10);
 
     return new ArrayData(new Struct(structName, structReference), Number(length));

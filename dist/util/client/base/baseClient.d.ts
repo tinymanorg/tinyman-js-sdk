@@ -22,7 +22,7 @@ declare abstract class TinymanBaseClient {
     protected boxExists(boxName: Uint8Array, appId?: number): Promise<boolean>;
     protected getBox(boxName: Uint8Array, structName: string, appId?: number): Promise<Struct | null>;
     protected getOptinTxnIfNeeded(sender: string, assetId: number): Promise<algosdk.Transaction[]>;
-    protected isOptedIn(accountAddress: string, assetId: number): Promise<boolean>;
+    protected isOptedIn(accountAddress: string | algosdk.Address, assetId: number): Promise<boolean>;
     protected getSuggestedParams(): Promise<import("algosdk/dist/types/client/v2/algod/suggestedParams").SuggestedParamsFromAlgod>;
 }
 export default TinymanBaseClient;

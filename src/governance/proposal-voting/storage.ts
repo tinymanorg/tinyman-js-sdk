@@ -1,9 +1,8 @@
 import {Algodv2, decodeAddress, encodeAddress} from "algosdk";
 
-import {intToBytes} from "../util/utils";
 import {getRawBoxValue} from "../utils";
 import {ATTENDANCE_SHEET_BOX_PREFIX, PROPOSAL_BOX_PREFIX} from "./constants";
-import {encodeString, joinByteArrays} from "../../util/util";
+import {encodeString, intToBytes, joinByteArrays} from "../../util/util";
 
 export class Proposal {
   index: number;

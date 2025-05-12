@@ -50,6 +50,7 @@ export declare function sendAndWaitRawTransaction(client: Algodv2, signedTxnGrou
 }[]>;
 export declare function sumUpTxnFees(txns: SignerTransaction[]): number;
 export declare function getTxnGroupID(txns: SignerTransaction[]): string;
+export declare function intToBytes(num: number, length?: number): Uint8Array;
 export declare function encodeInteger(number: bigint): number[];
 /**
  * Converts a text into bytes

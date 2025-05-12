@@ -143,7 +143,7 @@ abstract class TinymanBaseClient {
     return txn;
   }
 
-  protected async isOptedIn(accountAddress: string, assetId: number) {
+  protected async isOptedIn(accountAddress: string | algosdk.Address, assetId: number) {
     try {
       await this.algod.accountAssetInformation(accountAddress, assetId).do();
 

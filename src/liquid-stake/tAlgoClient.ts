@@ -1,12 +1,12 @@
 import algosdk, {bigIntToBytes, encodeAddress} from "algosdk";
 
 import {TALGO_ASSET_ID} from "../util/asset/assetConstants";
-import TinymanBaseClient from "../util/client/base/baseClient";
+import TinymanAppClient from "../util/client/base/nullableBaseClient";
 import {SupportedNetwork} from "../util/commonTypes";
 import {encodeString} from "../util/util";
 import {STAKE_APP_ID, STAKE_RATIO_COEFFICIENT} from "./constants";
 
-class TinymanTAlgoClient extends TinymanBaseClient {
+class TinymanTAlgoClient extends TinymanAppClient {
   constructor(algod: algosdk.Algodv2, network: SupportedNetwork) {
     super(algod, STAKE_APP_ID[network], network);
   }

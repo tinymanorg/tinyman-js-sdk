@@ -1,12 +1,12 @@
-import algosdk, { Algodv2 } from "algosdk";
+import { Algodv2, modelsv2 } from "algosdk";
 import { ContractVersionValue } from "../../contract/types";
 import { V1PoolInfo } from "../pool/poolTypes";
 import { AccountExcess, AccountExcessWithinPool } from "./accountTypes";
 /**
  * @returns the decoded application local state object (both keys and values are decoded)
  */
-export declare function getDecodedAccountApplicationLocalState(accountInfo: algosdk.modelsv2.Account, validatorAppID: number): Record<string, string | number> | null;
-export declare function hasSufficientMinimumBalance(accountData: algosdk.modelsv2.Account): boolean;
+export declare function getDecodedAccountApplicationLocalState(accountInfo: Pick<modelsv2.Account, "appsLocalState">, validatorAppID: number): Record<string, string | number> | null;
+export declare function hasSufficientMinimumBalance(accountData: Pick<modelsv2.Account, "amount" | "minBalance">): boolean;
 /**
  * Finds the excess amounts accumulated for an account within a pool
  * @param params.client An Algodv2 client.
@@ -40,7 +40,7 @@ export declare function getAccountExcess({ client, accountAddr, validatorAppID }
  */
 export declare function isAccountOptedIntoApp({ appID, accountAppsLocalState }: {
     appID: number;
-    accountAppsLocalState: algosdk.modelsv2.Account["appsLocalState"];
+    accountAppsLocalState: modelsv2.Account["appsLocalState"];
 }): boolean;
 /**
  * @returns the minimum balance required to opt in to an app or asset (decided by `type`)
