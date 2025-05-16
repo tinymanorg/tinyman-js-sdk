@@ -1,5 +1,5 @@
-import algosdk, { Algodv2 } from "algosdk";
-import { SupportedNetwork } from "../../commonTypes";
+import algosdk, { Algodv2, Transaction } from "algosdk";
+import { SignerTransaction, SupportedNetwork } from "../../commonTypes";
 import { StructDefinition } from "./types";
 import { Struct } from "./utils";
 declare abstract class TinymanBaseClient<AppId extends number | null, AppAddress extends algosdk.Address | null> {
@@ -24,5 +24,6 @@ declare abstract class TinymanBaseClient<AppId extends number | null, AppAddress
     protected getOptinTxnIfNeeded(sender: string, assetId: number): Promise<algosdk.Transaction[]>;
     protected isOptedIn(accountAddress: string | algosdk.Address, assetId: number): Promise<boolean>;
     protected getSuggestedParams(): Promise<import("algosdk/dist/types/client/v2/algod/suggestedParams").SuggestedParamsFromAlgod>;
+    protected convertStandardTransactionsToSignerTransactions(txns: Transaction[], signer: string | string[]): SignerTransaction[];
 }
 export default TinymanBaseClient;
