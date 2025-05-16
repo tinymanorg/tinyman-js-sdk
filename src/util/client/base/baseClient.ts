@@ -175,7 +175,7 @@ abstract class TinymanBaseClient<
     return this.algod.getTransactionParams().do();
   }
 
-  convertStandardTransactionsToSignerTransactions(
+  protected convertStandardTransactionsToSignerTransactions(
     txns: Transaction[],
     signer: string | string[]
   ): SignerTransaction[] {
