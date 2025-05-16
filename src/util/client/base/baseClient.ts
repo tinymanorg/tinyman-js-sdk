@@ -14,9 +14,9 @@ abstract class TinymanBaseClient<
   AppAddress extends algosdk.Address | null
 > {
   protected algod: Algodv2;
-  protected appId: AppId;
   protected applicationAddress: AppAddress;
   protected network: SupportedNetwork;
+  public appId: AppId;
   readonly structs: Record<string, StructDefinition> | undefined;
 
   constructor(

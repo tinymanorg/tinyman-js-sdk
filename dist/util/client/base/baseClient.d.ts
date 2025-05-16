@@ -4,9 +4,9 @@ import { StructDefinition } from "./types";
 import { Struct } from "./utils";
 declare abstract class TinymanBaseClient<AppId extends number | null, AppAddress extends algosdk.Address | null> {
     protected algod: Algodv2;
-    protected appId: AppId;
     protected applicationAddress: AppAddress;
     protected network: SupportedNetwork;
+    appId: AppId;
     readonly structs: Record<string, StructDefinition> | undefined;
     constructor(algod: Algodv2, appId: AppId, network: SupportedNetwork, structs?: Record<string, StructDefinition>);
     protected setupTxnFeeAndAssignGroupId({ txns, additionalFeeCount }: {
