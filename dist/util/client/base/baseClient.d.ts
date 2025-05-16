@@ -24,6 +24,6 @@ declare abstract class TinymanBaseClient<AppId extends number | null, AppAddress
     protected getOptinTxnIfNeeded(sender: string, assetId: number): Promise<algosdk.Transaction[]>;
     protected isOptedIn(accountAddress: string | algosdk.Address, assetId: number): Promise<boolean>;
     protected getSuggestedParams(): Promise<import("algosdk/dist/types/client/v2/algod/suggestedParams").SuggestedParamsFromAlgod>;
-    protected convertStandardTransactionsToSignerTransactions(txns: Transaction[], signer: string | string[]): SignerTransaction[];
+    convertStandardTransactionsToSignerTransactions(txns: Transaction[], signer: string | string[]): SignerTransaction[];
 }
 export default TinymanBaseClient;
