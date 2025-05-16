@@ -7,7 +7,7 @@ import {
   TALGO_ASSET_ID,
   TINY_ASSET_ID
 } from "../util/asset/assetConstants";
-import {getStruct, Struct} from "../util/client/base/utils";
+import {Struct} from "../util/client/base/utils";
 import {SupportedNetwork} from "../util/commonTypes";
 import {encodeString} from "../util/util";
 import {
@@ -18,7 +18,7 @@ import {
 } from "./constants";
 import TinymanBaseClient from "../util/client/base/baseClient";
 
-const USER_STATE = getStruct("UserState", STRUCTS);
+const USER_STATE = new Struct("UserState", STRUCTS);
 
 class TinymanSTAlgoClient extends TinymanBaseClient<number, algosdk.Address> {
   vaultAppId: number;

@@ -11,6 +11,7 @@ import {
   APPROVAL_PROGRAM,
   CLEAR_PROGRAM,
   GOVERNOR_ORDER_FEE_RATE_KEY,
+  MINIMUM_PUT_ORDER_TRANSACTION_COUNT,
   ORDER_APP_EXTRA_PAGES,
   ORDER_APP_GLOBAL_SCHEMA,
   ORDER_APP_LOCAL_SCHEMA,
@@ -21,12 +22,7 @@ import {
   VAULT_APP_ID
 } from "./constants";
 import {OrderType, PutOrderParams, PutRecurringOrderParams} from "./types";
-import {
-  createPaddedByteArray,
-  getMinBalanceForAccount,
-  getStruct,
-  joinByteArrays
-} from "./utils";
+import {createPaddedByteArray, joinByteArrays} from "./utils";
 import {SupportedNetwork} from "../util/commonTypes";
 import {encodeString, intToBytes} from "../util/util";
 import {
@@ -38,8 +34,8 @@ import {Struct} from "../util/client/base/utils";
 import {ALGO_ASSET_ID} from "../util/asset/assetConstants";
 import TinymanBaseClient from "../util/client/base/baseClient";
 
-const ENTRY_STRUCT = getStruct("Entry", STRUCTS);
-const ORDER_STRUCT = getStruct("Order", STRUCTS);
+const ENTRY_STRUCT = new Struct("Entry", STRUCTS);
+const ORDER_STRUCT = new Struct("Order", STRUCTS);
 
 class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | null> {
   registryAppId: number;
@@ -81,10 +77,6 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
 
     const registryAppId = REGISTRY_APP_ID[network];
 
-    if (!registryAppId) {
-      throw new Error("Registry application ID not provided");
-    }
-
     let boxValue: Buffer | null = null;
 
     try {
@@ -95,13 +87,11 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
       // Ignore the error if the box is not found
     }
 
-    const structClass = getStruct("Entry", STRUCTS);
-
-    return boxValue ? (structClass.apply(boxValue).getField("app_id") as bigint) : null;
+    return boxValue ? (ENTRY_STRUCT.apply(boxValue).getField("app_id") as bigint) : null;
   }
 
   /**
-   *  Initialize the OrderingClient by fetching the personal app id from global state.
+   *  Initializes the OrderingClient by fetching the personal app id from global state.
    *  Until the user creates an application, the app id will be set as null
    */
   static async initializeOrderingClient(
@@ -123,6 +113,12 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
     );
   }
 
+  /**
+   * Compares the contracts between the user's order app and the latest available contract.
+   *
+   * @returns {boolean}
+   */
+  // TODO: Use versioning system instead of comparing the encoded version of compiled programs
   async shouldUpdateOrderingApp(): Promise<boolean> {
     if (!this.appId) {
       return Promise.resolve(false);
@@ -130,10 +126,17 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
 
     const appInfo = await this.algod.getApplicationByID(this.appId).do();
 
-    return APPROVAL_PROGRAM.localeCompare(appInfo.params["approval-program"]) !== 0;
+    return (
+      APPROVAL_PROGRAM.localeCompare(bytesToBase64(appInfo.params.approvalProgram)) !== 0
+    );
   }
 
-  async updateOrderingApp(): Promise<Transaction[]> {
+  /**
+   * Prepares transactions to update the ordering app using the latest contracts.
+   * @returns {Promise<Transaction[]>}
+   */
+  // TODO: Once the contracts are public, use getCompiledPrograms for approval and clear programs
+  async prepareUpdateOrderingAppTransactions(): Promise<Transaction[]> {
     if (!this.appId) {
       throw new Error("Application ID not provided");
     }
@@ -164,7 +167,12 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
     );
   }
 
-  async createOrderApp(userAddress: string) {
+  /**
+   * Prepares transactions to create the order app for a user.
+   * @param {string} userAddress - The address of the user.
+   * @returns {Promise<Transaction[]>}
+   */
+  async prepareCreateOrderAppTransactions(userAddress: string) {
     const sp = await this.getSuggestedParams();
 
     const entryBoxName = OrderingClient.getRegistryEntryBoxName(userAddress);
@@ -241,7 +249,7 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
     }
   }
 
-  async getPutOrderTxnFee({
+  async getPutOrderTransactionFee({
     assetInId,
     assetOutId,
     type
@@ -267,31 +275,45 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
       const newOrderId = await this.getOrderCount();
       const orderBoxName = this.getOrderBoxName(newOrderId, type);
 
-      // We can assume that the order box is not created with the new order id yet.
+      // We can assume that the order box is not created with a new order id yet.
       const newBoxes: Record<string, Struct> = {
         [bytesToBase64(orderBoxName)]: ORDER_STRUCT
       };
 
       totalFee +=
         BigInt(
+          MINIMUM_PUT_ORDER_TRANSACTION_COUNT +
+            assetsToOptin.length +
+            Number(Boolean(assetsToOptin.length))
+        ) *
+          suggestedMinFee +
+        BigInt(
           this.calculateMinBalance({
             boxes: newBoxes,
             assets: assetsToOptin.length
           })
-        ) + suggestedMinFee;
-
-      totalFee +=
-        // eslint-disable-next-line no-magic-numbers
-        BigInt(3 + assetsToOptin.length + Number(Boolean(assetsToOptin.length))) *
-        suggestedMinFee;
+        );
     } catch (error: any) {
-      // Ignore err
+      // Ignore errors
     }
 
     return totalFee;
   }
 
-  async putOrder({
+  /**
+   * Prepares an array of transactions to place a limit order.
+   *
+   * @param {PutOrderParams} params - The parameters for the put order operation.
+   * @param params.assetInId - The ID of the input asset.
+   * @param params.assetOutId - The ID of the output asset.
+   * @param params.assetInAmount - The amount of the input asset in base units.
+   * @param params.assetOutAmount - The amount of the output asset in base units.
+   * @param params.isPartialAllowed - Whether partial fills are allowed.
+   * @param params.duration - The duration of the order in seconds.
+   * @param [params.orderAppId] - (Optional) The application ID for the order.
+   * @returns A promise that resolves the transaction array.
+   */
+  async preparePutOrderTransactions({
     assetInId,
     assetOutId,
     assetInAmount,
@@ -323,10 +345,9 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
         .accountInformation(this.applicationAddress!)
         .do();
 
-      const accountMinBalance = getMinBalanceForAccount(accountInfo);
       const requiredAmountToCoverMinBalance = Math.max(
         0,
-        Number(accountMinBalance - BigInt(accountInfo.amount))
+        Number(accountInfo.minBalance - BigInt(accountInfo.amount))
       );
 
       transactions.push(
@@ -345,7 +366,7 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
     }
 
     transactions.push(
-      ...this.prepareOrderAppAssetOptinTxnsIfNeeded(assetsToOptin, sp),
+      ...this.prepareOrderAppAssetOptinTransactionsIfNeeded(assetsToOptin, sp),
       assetInId === ALGO_ASSET_ID
         ? algosdk.makePaymentTxnWithSuggestedParamsFromObject({
             sender: this.userAddress,
@@ -388,14 +409,27 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
     });
   }
 
-  async putRecurringOrder({
+  /**
+   * Prepares an array of transactions to place a recurring order.
+   *
+   * @param {PutRecurringOrderParams} params - The parameters for the recurring order.
+   * @param params.amount - The total amount of the asset to be used for the recurring order.
+   * @param params.assetId - The ID of the asset being used for the order.
+   * @param params.targetAssetId - The ID of the target asset for the order.
+   * @param params.targetRecurrence - The number of times the order should recur.
+   * @param params.interval - The interval between each recurrence in seconds.
+   * @param params.maxTargetPrice - (Optional) The maximum price per unit of the target asset to be accepted.
+   * @param params.minTargetPrice - (Optional) The minimum price per unit of the target asset to be accepted.
+   * @returns A promise that resolves the transaction array.
+   */
+  async putRecurringOrderTransactions({
     amount,
     assetId,
     targetAssetId,
     targetRecurrence,
     interval,
-    maxTargetAmount,
-    minTargetAmount
+    maxTargetPrice,
+    minTargetPrice
   }: PutRecurringOrderParams) {
     await this.checkOrderAppAvailability();
 
@@ -408,6 +442,7 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
       this.applicationAddress!,
       [assetId, targetAssetId]
     );
+    const amountPerOrder = Math.floor(amount / targetRecurrence);
 
     if (!(await this.boxExists(orderBoxName))) {
       newBoxes = {
@@ -419,10 +454,9 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
         .accountInformation(this.applicationAddress!)
         .do();
 
-      const accountMinBalance = getMinBalanceForAccount(accountInfo);
       const requiredAmountToCoverMinBalance = Math.max(
         0,
-        Number(accountMinBalance - BigInt(accountInfo.amount))
+        Number(accountInfo.minBalance - BigInt(accountInfo.amount))
       );
 
       transactions.push(
@@ -441,7 +475,10 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
     }
 
     transactions.push(
-      ...this.prepareOrderAppAssetOptinTxnsIfNeeded(assetsToOptin, suggestedParams),
+      ...this.prepareOrderAppAssetOptinTransactionsIfNeeded(
+        assetsToOptin,
+        suggestedParams
+      ),
       assetId === ALGO_ASSET_ID
         ? algosdk.makePaymentTxnWithSuggestedParamsFromObject({
             sender: this.userAddress,
@@ -469,10 +506,12 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
         appArgs: [
           encodeString("put_recurring_order"),
           intToBytes(assetId),
-          intToBytes(Math.floor(amount / targetRecurrence)),
+          intToBytes(amountPerOrder),
           intToBytes(targetAssetId),
-          intToBytes(minTargetAmount),
-          intToBytes(maxTargetAmount),
+          // Min received target amount per order
+          intToBytes(maxTargetPrice ? Math.floor(amountPerOrder / maxTargetPrice) : 0),
+          // Max received target amount per order
+          intToBytes(minTargetPrice ? Math.floor(amountPerOrder / minTargetPrice) : 0),
           intToBytes(targetRecurrence),
           intToBytes(interval)
         ]
@@ -485,12 +524,17 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
     });
   }
 
-  async cancelOrder(orderId: number, type: OrderType) {
+  /**
+   * Prepares an array of transactions to cancel an order.
+   *
+   * @param orderId - The ID of the order to cancel.
+   * @param type - The type of the order to cancel.
+   * @returns A promise that resolves the transaction array.
+   */
+  async prepareCancelOrderTransactions(orderId: number, type: OrderType) {
     if (!this.appId) {
       throw new Error("Application ID not provided");
     }
-
-    const sp = await this.getSuggestedParams();
 
     const orderBoxName = this.getOrderBoxName(orderId, type);
     const order = await this.getBox(orderBoxName, "Order");
@@ -499,6 +543,7 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
       throw new Error("Order not found");
     }
 
+    const sp = await this.getSuggestedParams();
     const transactions = [
       algosdk.makeApplicationNoOpTxnFromObject({
         sender: this.userAddress,
@@ -516,73 +561,6 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
     ];
 
     return this.setupTxnFeeAndAssignGroupId({txns: transactions, additionalFeeCount: 1});
-  }
-
-  async getPlatformFeeRate(tinyPower: number | null) {
-    try {
-      const thresholdTinyPower = await this.getGlobal(
-        TOTAL_ORDER_COUNT_KEY,
-        0,
-        this.registryAppId
-      );
-
-      if (tinyPower && tinyPower >= thresholdTinyPower) {
-        return this.getGlobal(GOVERNOR_ORDER_FEE_RATE_KEY, 0, this.registryAppId);
-      }
-
-      return this.getGlobal(ORDER_FEE_RATE_KEY, 0, this.registryAppId);
-    } catch (error: any) {
-      throw new Error(error.message);
-    }
-  }
-
-  private getOrderCount(): Promise<number> {
-    return this.appId
-      ? this.getGlobal(TOTAL_ORDER_COUNT_KEY, 0, this.appId)
-      : Promise.resolve(0);
-  }
-
-  private getOrderBoxName(id: number, type: OrderType) {
-    const orderPrefix = encodeString(type === OrderType.Limit ? "o" : "r");
-    const orderIdBytes = intToBytes(id);
-
-    return joinByteArrays(orderPrefix, orderIdBytes);
-  }
-
-  private prepareOrderAppAssetOptInTxn(
-    userAddress: string,
-    appId: number,
-    assetIds: number[],
-    suggestedParams: algosdk.SuggestedParams
-  ) {
-    return algosdk.makeApplicationNoOpTxnFromObject({
-      sender: userAddress,
-      appIndex: appId,
-      appArgs: [encodeString("asset_opt_in"), createPaddedByteArray(assetIds)],
-      suggestedParams
-    });
-  }
-
-  private prepareOrderAppAssetOptinTxnsIfNeeded(
-    assetIds: number[],
-    suggestedParams: algosdk.SuggestedParams
-  ) {
-    if (!this.appId || !this.applicationAddress) {
-      throw new Error("Application ID not provided");
-    }
-
-    if (!assetIds.length) {
-      return [];
-    }
-
-    return [
-      this.prepareOrderAppAssetOptInTxn(
-        this.userAddress,
-        this.appId,
-        assetIds,
-        suggestedParams
-      )
-    ];
   }
 
   async collect(orderId: number, type: OrderType) {
@@ -618,6 +596,75 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
     return this.setupTxnFeeAndAssignGroupId({txns, additionalFeeCount: 2});
   }
 
+  /**
+   * Gets the platform fee rate based on the provided tiny power from the global state.
+   *
+   * @param tinyPower - The tiny power to check against the threshold.
+   * @returns The platform fee rate.
+   */
+  async getPlatformFeeRate(tinyPower: number | null): Promise<number> {
+    const thresholdTinyPower = await this.getGlobal(
+      TOTAL_ORDER_COUNT_KEY,
+      0,
+      this.registryAppId
+    );
+
+    if (tinyPower && tinyPower >= thresholdTinyPower) {
+      return this.getGlobal(GOVERNOR_ORDER_FEE_RATE_KEY, 0, this.registryAppId);
+    }
+
+    return this.getGlobal(ORDER_FEE_RATE_KEY, 0, this.registryAppId);
+  }
+
+  private getOrderCount(): Promise<number> {
+    return this.appId
+      ? this.getGlobal(TOTAL_ORDER_COUNT_KEY, 0, this.appId)
+      : Promise.resolve(0);
+  }
+
+  private getOrderBoxName(id: number, type: OrderType) {
+    const orderPrefix = encodeString(type === OrderType.Limit ? "o" : "r");
+    const orderIdBytes = intToBytes(id);
+
+    return joinByteArrays(orderPrefix, orderIdBytes);
+  }
+
+  private prepareOrderAppAssetOptInTransaction(
+    userAddress: string,
+    appId: number,
+    assetIds: number[],
+    suggestedParams: algosdk.SuggestedParams
+  ) {
+    return algosdk.makeApplicationNoOpTxnFromObject({
+      sender: userAddress,
+      appIndex: appId,
+      appArgs: [encodeString("asset_opt_in"), createPaddedByteArray(assetIds)],
+      suggestedParams
+    });
+  }
+
+  private prepareOrderAppAssetOptinTransactionsIfNeeded(
+    assetIds: number[],
+    suggestedParams: algosdk.SuggestedParams
+  ) {
+    if (!this.appId || !this.applicationAddress) {
+      throw new Error("Application ID not provided");
+    }
+
+    if (!assetIds.length) {
+      return [];
+    }
+
+    return [
+      this.prepareOrderAppAssetOptInTransaction(
+        this.userAddress,
+        this.appId,
+        assetIds,
+        suggestedParams
+      )
+    ];
+  }
+
   private async getAssetsToOptInToOrderingClient(
     appId: string | algosdk.Address,
     assetIds: number[]
@@ -637,7 +684,3 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
 }
 
 export {OrderingClient};
-
-/* eslint
-    max-lines: "off"
-*/

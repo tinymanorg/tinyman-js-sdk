@@ -6,7 +6,7 @@ import {
   MINIMUM_BALANCE_REQUIREMENT_PER_ASSET
 } from "./constants";
 import {StructDefinition} from "./types";
-import {getBoxCosts, getStruct, Struct} from "./utils";
+import {getBoxCosts, Struct} from "./utils";
 import {areBuffersEqual} from "../../../governance/util/utils";
 
 abstract class TinymanBaseClient<
@@ -129,7 +129,7 @@ abstract class TinymanBaseClient<
         throw new Error("structs not defined");
       }
 
-      const structClass = getStruct(structName, this.structs);
+      const structClass = new Struct(structName, this.structs);
 
       return structClass.apply(Buffer.from(boxValue));
     } catch (error: any) {

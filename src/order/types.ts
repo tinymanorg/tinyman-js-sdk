@@ -15,8 +15,8 @@ export interface PutRecurringOrderParams {
   targetAssetId: number;
   targetRecurrence: number;
   interval: number;
-  minTargetAmount: number;
-  maxTargetAmount: number;
+  minTargetPrice: number;
+  maxTargetPrice: number;
 }
 
 export enum OrderType {

@@ -91,7 +91,7 @@ class TealistInt {
 
     // Read bytes in big-endian order
     for (let i = 0; i < buffer.length; i++) {
-      // eslint-disable-next-line no-bitwise, no-magic-numbers
+      // eslint-disable-next-line no-bitwise
       value = (value << BigInt(8)) + BigInt(buffer[i]);
     }
 
@@ -127,7 +127,6 @@ function getType(
     }
 
     const structName = match[1] as keyof typeof structReference;
-    // eslint-disable-next-line no-magic-numbers
     const length = parseInt(match[2], 10);
 
     return new ArrayData(new Struct(structName, structReference), Number(length));
@@ -147,8 +146,4 @@ function getBoxCosts(boxes: Record<string, Struct>) {
   }, MINIMUM_BALANCE_REQUIREMENT_PER_BOX);
 }
 
-function getStruct(name: string, structReference: Record<string, StructDefinition>) {
-  return new Struct(name, structReference);
-}
-
-export {ArrayData, getBoxCosts, Struct, getStruct};
+export {ArrayData, getBoxCosts, Struct};

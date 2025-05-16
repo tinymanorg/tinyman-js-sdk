@@ -10,7 +10,6 @@ const REWARD_PERIOD_BOX_SIZE = 1008;
 const REWARD_PERIOD_BOX_ARRAY_LEN = 42;
 
 const REWARD_CLAIM_SHEET_BOX_COST =
-  // eslint-disable-next-line no-magic-numbers
   BOX_FLAT_MIN_BALANCE + BOX_BYTE_MIN_BALANCE * (41 + REWARD_CLAIM_SHEET_BOX_SIZE);
 
 export {
