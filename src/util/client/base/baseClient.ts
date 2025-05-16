@@ -1,6 +1,6 @@
 import algosdk, {Algodv2, getApplicationAddress, Transaction} from "algosdk";
 
-import {SupportedNetwork} from "../../commonTypes";
+import {SignerTransaction, SupportedNetwork} from "../../commonTypes";
 import {
   MINIMUM_BALANCE_REQUIREMENT_PER_ACCOUNT,
   MINIMUM_BALANCE_REQUIREMENT_PER_ASSET
@@ -173,6 +173,22 @@ abstract class TinymanBaseClient<
 
   protected getSuggestedParams() {
     return this.algod.getTransactionParams().do();
+  }
+
+  convertStandardTransactionsToSignerTransactions(
+    txns: Transaction[],
+    signer: string | string[]
+  ): SignerTransaction[] {
+    if (Array.isArray(signer) && signer.length !== txns.length) {
+      throw new Error("Signer length does not match transaction length");
+    }
+
+    return txns.map((txn, index) => {
+      return {
+        txn,
+        signers: Array.isArray(signer) ? [signer[index]] : [signer]
+      };
+    });
   }
 }
 

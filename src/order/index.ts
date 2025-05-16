@@ -563,7 +563,13 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
     return this.setupTxnFeeAndAssignGroupId({txns: transactions, additionalFeeCount: 1});
   }
 
-  async collect(orderId: number, type: OrderType) {
+  /**
+   * Prepares an array of transactions to claim the collected target amount for an order.
+   * @param orderId - The ID of the order for which to claim the collected target amount.
+   * @param type - The type of the order (OrderType.Limit or OrderType.Recurring).
+   * @returns A promise that resolves the transaction array.
+   */
+  async prepareClaimCollectedTargetAmount(orderId: number, type: OrderType) {
     if (!this.appId) {
       throw new Error("Application ID not provided");
     }
