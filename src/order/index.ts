@@ -1,6 +1,7 @@
 import algosdk, {
   Algodv2,
   base64ToBytes,
+  bigIntToBytes,
   bytesToBase64,
   decodeAddress,
   getApplicationAddress,
@@ -388,9 +389,9 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
         appArgs: [
           encodeString("put_order"),
           intToBytes(assetInId),
-          intToBytes(assetInAmount),
+          bigIntToBytes(assetInAmount, 8),
           intToBytes(assetOutId),
-          intToBytes(assetOutAmount),
+          bigIntToBytes(assetOutAmount, 8),
           intToBytes(Number(isPartialAllowed)),
           intToBytes(duration)
         ],
@@ -442,7 +443,7 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
       this.applicationAddress!,
       [assetId, targetAssetId]
     );
-    const amountPerOrder = Math.floor(amount / targetRecurrence);
+    const amountPerOrder = amount / BigInt(targetRecurrence);
 
     if (!(await this.boxExists(orderBoxName))) {
       newBoxes = {
@@ -506,12 +507,16 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
         appArgs: [
           encodeString("put_recurring_order"),
           intToBytes(assetId),
-          intToBytes(amountPerOrder),
+          bigIntToBytes(amountPerOrder, 8),
           intToBytes(targetAssetId),
           // Min received target amount per order
-          intToBytes(maxTargetPrice ? Math.floor(amountPerOrder / maxTargetPrice) : 0),
+          intToBytes(
+            maxTargetPrice ? Math.floor(Number(amountPerOrder) / maxTargetPrice) : 0
+          ),
           // Max received target amount per order
-          intToBytes(minTargetPrice ? Math.floor(amountPerOrder / minTargetPrice) : 0),
+          intToBytes(
+            minTargetPrice ? Math.floor(Number(amountPerOrder) / minTargetPrice) : 0
+          ),
           intToBytes(targetRecurrence),
           intToBytes(interval)
         ]

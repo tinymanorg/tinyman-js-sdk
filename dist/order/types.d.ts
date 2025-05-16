@@ -1,15 +1,15 @@
 export interface PutOrderParams {
     assetInId: number;
     assetOutId: number;
-    assetInAmount: number;
-    assetOutAmount: number;
+    assetInAmount: bigint;
+    assetOutAmount: bigint;
     isPartialAllowed: boolean;
     duration: number;
     orderAppId?: number;
 }
 export interface PutRecurringOrderParams {
     assetId: number;
-    amount: number;
+    amount: bigint;
     targetAssetId: number;
     targetRecurrence: number;
     interval: number;

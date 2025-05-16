@@ -1,8 +1,8 @@
 export interface PutOrderParams {
   assetInId: number;
   assetOutId: number;
-  assetInAmount: number;
-  assetOutAmount: number;
+  assetInAmount: bigint;
+  assetOutAmount: bigint;
   isPartialAllowed: boolean;
   duration: number;
   // This field is needed the first time the order app is created by the user
@@ -11,7 +11,7 @@ export interface PutOrderParams {
 
 export interface PutRecurringOrderParams {
   assetId: number;
-  amount: number;
+  amount: bigint;
   targetAssetId: number;
   targetRecurrence: number;
   interval: number;
