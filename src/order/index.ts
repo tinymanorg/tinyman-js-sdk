@@ -116,7 +116,7 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
   /**
    * Compares the contracts between the user's order app and the latest available contract.
    *
-   * @returns {boolean}
+   * @returns A boolean indicating if the order app needs to be updated.
    */
   // TODO: Use versioning system instead of comparing the encoded version of compiled programs
   async shouldUpdateOrderingApp(): Promise<boolean> {
@@ -133,7 +133,7 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
 
   /**
    * Prepares transactions to update the ordering app using the latest contracts.
-   * @returns {Promise<Transaction[]>}
+   * @returns A promise that resolves the transaction array.
    */
   // TODO: Once the contracts are public, use getCompiledPrograms for approval and clear programs
   async prepareUpdateOrderingAppTransactions(): Promise<Transaction[]> {
@@ -169,8 +169,8 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
 
   /**
    * Prepares transactions to create the order app for a user.
-   * @param {string} userAddress - The address of the user.
-   * @returns {Promise<Transaction[]>}
+   * @param userAddress - The address of the user.
+   * @returns A promise that resolves the transaction array.
    */
   async prepareCreateOrderAppTransactions(userAddress: string) {
     const sp = await this.getSuggestedParams();
@@ -422,7 +422,7 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
    * @param params.minTargetPrice - (Optional) The minimum price per unit of the target asset to be accepted.
    * @returns A promise that resolves the transaction array.
    */
-  async putRecurringOrderTransactions({
+  async preparePutRecurringOrderTransactions({
     amount,
     assetId,
     targetAssetId,
