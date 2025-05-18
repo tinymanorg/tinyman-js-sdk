@@ -15,19 +15,19 @@ class RewardsAppGlobalState {
 
   // eslint-disable-next-line max-params
   constructor(
-    tinyAssetId: number,
-    vaultAppId: number,
-    rewardHistoryCount: number,
-    firstPeriodTimestamp: number,
-    rewardPeriodCount: number,
+    tinyAssetId: bigint,
+    vaultAppId: bigint,
+    rewardHistoryCount: bigint,
+    firstPeriodTimestamp: bigint,
+    rewardPeriodCount: bigint,
     manager: string,
     rewardsManager: string
   ) {
-    this.tinyAssetId = tinyAssetId;
-    this.vaultAppId = vaultAppId;
-    this.rewardHistoryCount = rewardHistoryCount;
-    this.firstPeriodTimestamp = firstPeriodTimestamp;
-    this.rewardPeriodCount = rewardPeriodCount;
+    this.tinyAssetId = Number(tinyAssetId);
+    this.vaultAppId = Number(vaultAppId);
+    this.rewardHistoryCount = Number(rewardHistoryCount);
+    this.firstPeriodTimestamp = Number(firstPeriodTimestamp);
+    this.rewardPeriodCount = Number(rewardPeriodCount);
     this.manager = manager;
     this.rewardsManager = rewardsManager;
   }
