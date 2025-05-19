@@ -7,7 +7,7 @@ declare class RewardsAppGlobalState {
     rewardPeriodCount: number;
     manager: string;
     rewardsManager: string;
-    constructor(tinyAssetId: number, vaultAppId: number, rewardHistoryCount: number, firstPeriodTimestamp: number, rewardPeriodCount: number, manager: string, rewardsManager: string);
+    constructor(tinyAssetId: bigint, vaultAppId: bigint, rewardHistoryCount: bigint, firstPeriodTimestamp: bigint, rewardPeriodCount: bigint, manager: string, rewardsManager: string);
 }
 declare class RewardClaimSheet {
     value: Uint8Array;
