@@ -102,9 +102,9 @@ class TinymanTAlgoClient extends TinymanBaseClient<number, algosdk.Address> {
   /**
    * Retrieves the circulating supply of minted tALGO in base units.
    *
-   * @returns {Promise<number>}
+   * @returns {Promise<bigint>}
    */
-  getCirculatingSupply(): Promise<number> {
+  getCirculatingSupply(): Promise<bigint> {
     return this.getGlobal(encodeString("minted_talgo"));
   }
 }

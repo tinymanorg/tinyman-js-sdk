@@ -6,6 +6,7 @@ import {sha256} from "multiformats/hashes/sha2";
 /* eslint-enable import/no-unresolved */
 import {
   Algodv2,
+  modelsv2,
   Transaction,
   assignGroupID,
   decodeUnsignedTransaction,
@@ -93,20 +94,20 @@ async function getGlobalState(algod: Algodv2, appId: number) {
   return parseGlobalStateFromApplicationInfo(applicationInfo);
 }
 
-function parseGlobalStateFromApplicationInfo(applicationInfo: Record<string, any>) {
-  const rawGlobalState = applicationInfo.params.globalState;
+function parseGlobalStateFromApplicationInfo(applicationInfo: modelsv2.Application) {
+  const rawGlobalState = applicationInfo.params.globalState ?? [];
 
   const globalState: Record<string, any> = {};
 
   for (const pair of rawGlobalState) {
-    const key = Buffer.from(pair.key, "base64").toString();
+    const key = Buffer.from(pair.key).toString();
 
     let value;
 
     if (pair.value.type === 1) {
-      value = Buffer.from(pair.value.bytes || "", "base64");
+      value = pair.value.bytes;
     } else {
-      value = pair.value.uint || 0;
+      value = pair.value.uint;
     }
 
     globalState[key] = value;

@@ -16,8 +16,8 @@ declare class TinymanTAlgoClient extends TinymanBaseClient<number, algosdk.Addre
     /**
      * Retrieves the circulating supply of minted tALGO in base units.
      *
-     * @returns {Promise<number>}
+     * @returns {Promise<bigint>}
      */
-    getCirculatingSupply(): Promise<number>;
+    getCirculatingSupply(): Promise<bigint>;
 }
 export { TinymanTAlgoClient };
