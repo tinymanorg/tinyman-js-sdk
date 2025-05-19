@@ -34,6 +34,7 @@ import {
 import {Struct} from "../util/client/base/utils";
 import {ALGO_ASSET_ID} from "../util/asset/assetConstants";
 import TinymanBaseClient from "../util/client/base/baseClient";
+import {isAlgo} from "../util/asset/assetUtils";
 
 const ENTRY_STRUCT = new Struct("Entry", STRUCTS);
 const ORDER_STRUCT = new Struct("Order", STRUCTS);
@@ -683,7 +684,7 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
     const assetsToOptin: number[] = [];
 
     for (const asset of assetIds) {
-      const shouldOptIn = !(await this.isOptedIn(appId, asset));
+      const shouldOptIn = isAlgo(asset) ? false : !(await this.isOptedIn(appId, asset));
 
       if (shouldOptIn) {
         assetsToOptin.push(asset);
