@@ -108,10 +108,10 @@ class VaultAppGlobalState {
 
   // eslint-disable-next-line no-useless-constructor
   constructor(
-    tinyAssetId: bigint,
     public totalLockedAmount: bigint,
     public totalPowerCount: bigint,
-    lastTotalPowerTimestamp: bigint
+    lastTotalPowerTimestamp: bigint,
+    tinyAssetId: bigint
   ) {
     this.lastTotalPowerTimestamp = Number(lastTotalPowerTimestamp);
     this.tinyAssetId = Number(tinyAssetId);
@@ -152,14 +152,6 @@ async function getAccountState(algodClient: Algodv2, appId: number, address: str
 function parseBoxAccountState(rawBox: Uint8Array): AccountState {
   const buffer = Buffer.from(rawBox);
 
-  console.log(
-    new AccountState(
-      buffer.readUIntBE(0, 8),
-      buffer.readUIntBE(8, 8),
-      buffer.readUIntBE(16, 8),
-      buffer.readUIntBE(24, 8)
-    )
-  );
   return new AccountState(
     buffer.readUIntBE(0, 8),
     buffer.readUIntBE(8, 8),
@@ -232,11 +224,9 @@ async function getAllTotalPowers(
   let boxCount = 0;
 
   if (totalPowerCount) {
-    boxCount = Math.ceil(
-      Number(
-        (totalPowerCount + BigInt(ACCOUNT_POWER_BOX_ARRAY_LEN - 1)) /
-          BigInt(ACCOUNT_POWER_BOX_ARRAY_LEN)
-      )
+    boxCount = Number(
+      (totalPowerCount + BigInt(ACCOUNT_POWER_BOX_ARRAY_LEN - 1)) /
+        BigInt(ACCOUNT_POWER_BOX_ARRAY_LEN)
     );
   }
 

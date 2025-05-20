@@ -34,7 +34,7 @@ declare class VaultAppGlobalState {
     totalPowerCount: bigint;
     tinyAssetId: number;
     lastTotalPowerTimestamp: number;
-    constructor(tinyAssetId: bigint, totalLockedAmount: bigint, totalPowerCount: bigint, lastTotalPowerTimestamp: bigint);
+    constructor(totalLockedAmount: bigint, totalPowerCount: bigint, lastTotalPowerTimestamp: bigint, tinyAssetId: bigint);
     get freeTotalPowerSpaceCount(): number;
     get lastTotalPowerBoxIndex(): number;
     get lastTotalPowerArrayIndex(): number;
