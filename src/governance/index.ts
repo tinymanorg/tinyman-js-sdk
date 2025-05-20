@@ -200,10 +200,10 @@ class TinymanGovernanceClient {
       const data = await getGlobalState(this.algodClient, VAULT_APP_ID[this.network]);
 
       return new VaultAppGlobalState(
-        data.tiny_asset_id,
         data.total_locked_amount,
         data.total_power_count,
-        data.last_total_power_timestamp
+        data.last_total_power_timestamp,
+        data.tiny_asset_id
       );
     } catch (error: any) {
       console.error(error);
@@ -375,7 +375,7 @@ class TinymanGovernanceClient {
     });
 
     accountState.powerCount += 1;
-    vaultAppGlobalState.totalPowerCount += 1;
+    vaultAppGlobalState.totalPowerCount += 1n;
 
     const slopeChangeAtNewLockEndTime = await getSlopeChange(
       this.algodClient,

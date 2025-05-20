@@ -81,25 +81,25 @@ export class ProposalVotingAppGlobalState {
 
   // eslint-disable-next-line max-params
   constructor(
-    vaultAppId: number,
-    proposalIndexCounter: number,
-    votingDelay: number,
-    votingDuration: number,
-    proposalThreshold: number,
-    proposalThresholdNumerator: number,
-    quorumThreshold: number,
-    approvalRequirement: number,
+    vaultAppId: bigint,
+    proposalIndexCounter: bigint,
+    votingDelay: bigint,
+    votingDuration: bigint,
+    proposalThreshold: bigint,
+    proposalThresholdNumerator: bigint,
+    quorumThreshold: bigint,
+    approvalRequirement: bigint,
     manager: string,
     proposalManager: Uint8Array
   ) {
-    this.vaultAppId = vaultAppId;
-    this.proposalIndexCounter = proposalIndexCounter;
-    this.votingDelay = votingDelay;
-    this.votingDuration = votingDuration;
-    this.proposalThreshold = proposalThreshold;
-    this.proposalThresholdNumerator = proposalThresholdNumerator;
-    this.quorumThreshold = quorumThreshold;
-    this.approvalRequirement = approvalRequirement;
+    this.vaultAppId = Number(vaultAppId);
+    this.proposalIndexCounter = Number(proposalIndexCounter);
+    this.votingDelay = Number(votingDelay);
+    this.votingDuration = Number(votingDuration);
+    this.proposalThreshold = Number(proposalThreshold);
+    this.proposalThresholdNumerator = Number(proposalThresholdNumerator);
+    this.quorumThreshold = Number(quorumThreshold);
+    this.approvalRequirement = Number(approvalRequirement);
     this.manager = manager;
     this.proposalManager = proposalManager;
   }
