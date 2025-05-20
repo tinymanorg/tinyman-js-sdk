@@ -31,7 +31,7 @@ export declare class ProposalVotingAppGlobalState {
     approvalRequirement: number;
     manager: string;
     proposalManager: Uint8Array;
-    constructor(vaultAppId: bigint, proposalIndexCounter: bigint, votingDelay: bigint, votingDuration: bigint, proposalThreshold: bigint, proposalThresholdNumerator: bigint, quorumThreshold: bigint, approvalRequirement: bigint, manager: string, proposalManager: Uint8Array);
+    constructor(vaultAppId: number, proposalIndexCounter: number, votingDelay: number, votingDuration: number, proposalThreshold: number, proposalThresholdNumerator: number, quorumThreshold: number, approvalRequirement: number, manager: string, proposalManager: Uint8Array);
 }
 export declare function getProposalBoxName(proposalId: string): Uint8Array;
 export declare function getAttendanceSheetBoxName(address: string, boxIndex: number): Uint8Array;
