@@ -375,7 +375,7 @@ class TinymanGovernanceClient {
     });
 
     accountState.powerCount += 1;
-    vaultAppGlobalState.totalPowerCount += 1;
+    vaultAppGlobalState.totalPowerCount += 1n;
 
     const slopeChangeAtNewLockEndTime = await getSlopeChange(
       this.algodClient,

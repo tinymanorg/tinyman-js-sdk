@@ -40,11 +40,11 @@ class AccountState {
   }
 
   get lastAccountPowerBoxIndex() {
-    return getLastAccountPowerBoxIndexes(this.powerCount)[0];
+    return getLastAccountPowerBoxIndexes(BigInt(this.powerCount))[0];
   }
 
   get lastAccountPowerArrayIndex() {
-    return getLastAccountPowerBoxIndexes(this.powerCount)[1];
+    return getLastAccountPowerBoxIndexes(BigInt(this.powerCount))[1];
   }
 }
 
@@ -103,16 +103,22 @@ class SlopeChange {
 }
 
 class VaultAppGlobalState {
+  tinyAssetId: number;
+  lastTotalPowerTimestamp: number;
+
   // eslint-disable-next-line no-useless-constructor
   constructor(
-    public tinyAssetId: number,
-    public totalLockedAmount: number,
-    public totalPowerCount: number,
-    public lastTotalPowerTimestamp: number
-  ) {}
+    public totalLockedAmount: bigint,
+    public totalPowerCount: bigint,
+    lastTotalPowerTimestamp: bigint,
+    tinyAssetId: bigint
+  ) {
+    this.lastTotalPowerTimestamp = Number(lastTotalPowerTimestamp);
+    this.tinyAssetId = Number(tinyAssetId);
+  }
 
   get freeTotalPowerSpaceCount() {
-    const remainder = this.totalPowerCount % ACCOUNT_POWER_BOX_ARRAY_LEN;
+    const remainder = Number(this.totalPowerCount % BigInt(ACCOUNT_POWER_BOX_ARRAY_LEN));
 
     return remainder > 0 ? ACCOUNT_POWER_BOX_ARRAY_LEN - remainder : 0;
   }
@@ -168,10 +174,10 @@ function getTotalPowerBoxName(boxIndex: number): Uint8Array {
   return combinedArray;
 }
 
-function getLastAccountPowerBoxIndexes(powerCount: number): [number, number] {
-  const lastIndex = powerCount - 1;
-  const boxIndex = Math.floor(lastIndex / ACCOUNT_POWER_BOX_ARRAY_LEN);
-  const arrayIndex = lastIndex % ACCOUNT_POWER_BOX_ARRAY_LEN;
+function getLastAccountPowerBoxIndexes(powerCount: bigint): [number, number] {
+  const lastIndex = powerCount - 1n;
+  const boxIndex = Number(lastIndex / BigInt(ACCOUNT_POWER_BOX_ARRAY_LEN));
+  const arrayIndex = Number(lastIndex % BigInt(ACCOUNT_POWER_BOX_ARRAY_LEN));
 
   return [boxIndex, arrayIndex];
 }
@@ -213,12 +219,15 @@ function getSlopeChangeBoxName(timestamp: number) {
 async function getAllTotalPowers(
   algodClient: Algodv2,
   appId: number,
-  totalPowerCount: number
+  totalPowerCount: bigint
 ): Promise<TotalPower[]> {
   let boxCount = 0;
 
   if (totalPowerCount) {
-    boxCount = Math.ceil(totalPowerCount / ACCOUNT_POWER_BOX_ARRAY_LEN);
+    boxCount = Number(
+      (totalPowerCount + BigInt(ACCOUNT_POWER_BOX_ARRAY_LEN - 1)) /
+        BigInt(ACCOUNT_POWER_BOX_ARRAY_LEN)
+    );
   }
 
   const totalPowers: TotalPower[] = [];

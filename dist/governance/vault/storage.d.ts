@@ -30,11 +30,11 @@ declare class SlopeChange {
     constructor(slopeDelta?: number);
 }
 declare class VaultAppGlobalState {
+    totalLockedAmount: bigint;
+    totalPowerCount: bigint;
     tinyAssetId: number;
-    totalLockedAmount: number;
-    totalPowerCount: number;
     lastTotalPowerTimestamp: number;
-    constructor(tinyAssetId: number, totalLockedAmount: number, totalPowerCount: number, lastTotalPowerTimestamp: number);
+    constructor(totalLockedAmount: bigint, totalPowerCount: bigint, lastTotalPowerTimestamp: bigint, tinyAssetId: bigint);
     get freeTotalPowerSpaceCount(): number;
     get lastTotalPowerBoxIndex(): number;
     get lastTotalPowerArrayIndex(): number;
@@ -42,11 +42,11 @@ declare class VaultAppGlobalState {
 declare function getAccountState(algodClient: Algodv2, appId: number, address: string): Promise<AccountState | null>;
 declare function getAccountStateBoxName(address: string): Uint8Array;
 declare function getTotalPowerBoxName(boxIndex: number): Uint8Array;
-declare function getLastAccountPowerBoxIndexes(powerCount: number): [number, number];
+declare function getLastAccountPowerBoxIndexes(powerCount: bigint): [number, number];
 declare function getAccountPowerBoxName(address: string, boxIndex: number): Uint8Array;
 declare function getSlopeChange(algod: Algodv2, appId: number, timeStamp: number): Promise<SlopeChange | null>;
 declare function getSlopeChangeBoxName(timestamp: number): Uint8Array;
-declare function getAllTotalPowers(algodClient: Algodv2, appId: number, totalPowerCount: number): Promise<TotalPower[]>;
+declare function getAllTotalPowers(algodClient: Algodv2, appId: number, totalPowerCount: bigint): Promise<TotalPower[]>;
 declare function getAccountPowers({ algodClient, address, appId, powerCount }: {
     algodClient: Algodv2;
     address: string;
