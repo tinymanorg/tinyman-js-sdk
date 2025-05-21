@@ -17,6 +17,6 @@ export interface PutRecurringOrderParams {
     maxTargetPrice: number;
 }
 export declare enum OrderType {
-    Limit = "trigger_order",
+    Trigger = "trigger_order",
     Recurring = "recurring_order"
 }

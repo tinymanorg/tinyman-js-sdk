@@ -79,7 +79,7 @@ declare class OrderingClient extends TinymanBaseClient<number | null, algosdk.Ad
     /**
      * Prepares an array of transactions to claim the collected target amount for an order.
      * @param orderId - The ID of the order for which to claim the collected target amount.
-     * @param type - The type of the order (OrderType.Limit or OrderType.Recurring).
+     * @param type - The type of the order (OrderType.Trigger or OrderType.Recurring).
      * @returns A promise that resolves the transaction array.
      */
     prepareClaimCollectedTargetAmount(orderId: number, type: OrderType): Promise<algosdk.Transaction[]>;

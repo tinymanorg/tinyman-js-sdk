@@ -20,6 +20,6 @@ export interface PutRecurringOrderParams {
 }
 
 export enum OrderType {
-  Limit = "trigger_order",
+  Trigger = "trigger_order",
   Recurring = "recurring_order"
 }

@@ -328,7 +328,7 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
     const sp = await this.getSuggestedParams();
     const newOrderId = await this.getOrderCount();
 
-    const orderBoxName = this.getOrderBoxName(newOrderId, OrderType.Limit);
+    const orderBoxName = this.getOrderBoxName(newOrderId, OrderType.Trigger);
     let newBoxes: Record<string, Struct> = {};
     const transactions: Transaction[] = [];
 
@@ -557,7 +557,7 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
         appIndex: this.appId,
         appArgs: [
           encodeString(
-            type === OrderType.Limit ? "cancel_order" : "cancel_recurring_order"
+            type === OrderType.Trigger ? "cancel_order" : "cancel_recurring_order"
           ),
           intToBytes(orderId)
         ],
@@ -572,7 +572,7 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
   /**
    * Prepares an array of transactions to claim the collected target amount for an order.
    * @param orderId - The ID of the order for which to claim the collected target amount.
-   * @param type - The type of the order (OrderType.Limit or OrderType.Recurring).
+   * @param type - The type of the order (OrderType.Trigger or OrderType.Recurring).
    * @returns A promise that resolves the transaction array.
    */
   async prepareClaimCollectedTargetAmount(orderId: number, type: OrderType) {
@@ -597,7 +597,7 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
         appArgs: [
           encodeString("collect"),
           intToBytes(orderId),
-          encodeString(type === OrderType.Limit ? "o" : "r")
+          encodeString(type === OrderType.Trigger ? "o" : "r")
         ],
         boxes: [{appIndex: 0, name: orderBoxName}],
         foreignAssets: [Number(order.getField("target_asset_id") as bigint)],
@@ -635,7 +635,7 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
   }
 
   private getOrderBoxName(id: number, type: OrderType) {
-    const orderPrefix = encodeString(type === OrderType.Limit ? "o" : "r");
+    const orderPrefix = encodeString(type === OrderType.Recurring ? "o" : "r");
     const orderIdBytes = intToBytes(id);
 
     return joinByteArrays(orderPrefix, orderIdBytes);
