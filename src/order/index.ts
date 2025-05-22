@@ -40,7 +40,8 @@ import TinymanBaseClient from "../util/client/base/baseClient";
 import {isAlgo} from "../util/asset/assetUtils";
 
 const ENTRY_STRUCT = new Struct("Entry", REGISTRY_STRUCT);
-const ORDER_STRUCT = new Struct(OrderType.Trigger, ORDER_STRUCTS);
+const TRIGGER_STRUCT = new Struct(OrderType.Trigger, ORDER_STRUCTS);
+const RECURRING_STRUCT = new Struct(OrderType.Recurring, ORDER_STRUCTS);
 
 class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | null> {
   registryAppId: number;
@@ -127,23 +128,24 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
    *
    * @returns A boolean indicating if the order app needs to be updated.
    */
-  // TODO: Use versioning system instead of comparing the encoded version of compiled programs
   async shouldUpdateOrderingApp(): Promise<boolean> {
     if (!this.appId) {
       return Promise.resolve(false);
     }
 
-    const version = await this.getLatestOrderAppVersion();
+    const latestVersion = await this.getLatestOrderAppVersion();
 
-    if (!version) {
+    if (!latestVersion) {
       throw new Error("Registry app has no approved version. Unable to compare.");
     }
 
-    const appInfo = await this.algod.getApplicationByID(this.appId).do();
+    const currentVersion = (await this.getGlobal(
+      encodeString("version"),
+      undefined,
+      this.appId
+    )) as bigint | undefined;
 
-    return (
-      APPROVAL_PROGRAM.localeCompare(bytesToBase64(appInfo.params.approvalProgram)) !== 0
-    );
+    return latestVersion !== currentVersion;
   }
 
   /**
@@ -324,7 +326,7 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
 
       // We can assume that the order box is not created with a new order id yet.
       const newBoxes: Record<string, Struct> = {
-        [bytesToBase64(orderBoxName)]: ORDER_STRUCT
+        [bytesToBase64(orderBoxName)]: TRIGGER_STRUCT
       };
 
       totalFee +=
@@ -385,7 +387,7 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
     if (!(await this.boxExists(orderBoxName))) {
       newBoxes = {
         ...newBoxes,
-        [bytesToBase64(orderBoxName)]: ORDER_STRUCT
+        [bytesToBase64(orderBoxName)]: TRIGGER_STRUCT
       };
 
       const accountInfo = await this.algod
@@ -498,7 +500,7 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
     if (!(await this.boxExists(orderBoxName))) {
       newBoxes = {
         ...newBoxes,
-        [bytesToBase64(orderBoxName)]: ORDER_STRUCT
+        [bytesToBase64(orderBoxName)]: RECURRING_STRUCT
       };
 
       const accountInfo = await this.algod
