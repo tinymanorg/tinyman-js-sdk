@@ -159,4 +159,8 @@ export {
 } from "./governance/utils";
 
 export {OrderingClient} from "./order/index";
-export type {PutOrderParams, PutRecurringOrderParams, OrderType} from "./order/types";
+export type {
+  PutTriggerOrderParams,
+  PutRecurringOrderParams,
+  OrderType
+} from "./order/types";

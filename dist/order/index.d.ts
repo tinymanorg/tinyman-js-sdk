@@ -1,5 +1,5 @@
 import algosdk, { Algodv2, Transaction } from "algosdk";
-import { OrderType, PutOrderParams, PutRecurringOrderParams } from "./types";
+import { OrderType, PutTriggerOrderParams, PutRecurringOrderParams } from "./types";
 import { SupportedNetwork } from "../util/commonTypes";
 import TinymanBaseClient from "../util/client/base/baseClient";
 declare class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | null> {
@@ -7,6 +7,8 @@ declare class OrderingClient extends TinymanBaseClient<number | null, algosdk.Ad
     registryApplicationAddress: string;
     vaultAppId: number;
     vaultApplicationAddress: string;
+    routerAppId: number;
+    routerApplicationAddress: string;
     userAddress: string;
     private constructor();
     private static getRegistryEntryBoxName;
@@ -35,7 +37,7 @@ declare class OrderingClient extends TinymanBaseClient<number | null, algosdk.Ad
      */
     prepareCreateOrderAppTransactions(userAddress: string): Promise<algosdk.Transaction[]>;
     checkOrderAppAvailability(orderAppId?: number): Promise<void>;
-    getPutOrderTransactionFee({ assetInId, assetOutId, type }: {
+    getPutTriggerOrderTransactionFee({ assetInId, assetOutId, type }: {
         assetInId: number;
         assetOutId: number;
         type: OrderType;
@@ -43,7 +45,7 @@ declare class OrderingClient extends TinymanBaseClient<number | null, algosdk.Ad
     /**
      * Prepares an array of transactions to place a limit order.
      *
-     * @param {PutOrderParams} params - The parameters for the put order operation.
+     * @param {PutTriggerOrderParams} params - The parameters for the put order operation.
      * @param params.assetInId - The ID of the input asset.
      * @param params.assetOutId - The ID of the output asset.
      * @param params.assetInAmount - The amount of the input asset in base units.
@@ -53,7 +55,7 @@ declare class OrderingClient extends TinymanBaseClient<number | null, algosdk.Ad
      * @param [params.orderAppId] - (Optional) The application ID for the order.
      * @returns A promise that resolves the transaction array.
      */
-    preparePutOrderTransactions({ assetInId, assetOutId, assetInAmount, assetOutAmount, isPartialAllowed, duration }: PutOrderParams): Promise<algosdk.Transaction[]>;
+    preparePutTriggerOrderTransactions({ assetInId, assetOutId, assetInAmount, assetOutAmount, isPartialAllowed, duration }: PutTriggerOrderParams): Promise<algosdk.Transaction[]>;
     /**
      * Prepares an array of transactions to place a recurring order.
      *
@@ -92,8 +94,10 @@ declare class OrderingClient extends TinymanBaseClient<number | null, algosdk.Ad
     getPlatformFeeRate(tinyPower: number | null): Promise<number>;
     private getOrderCount;
     private getOrderBoxName;
+    private getRegistryEntryBoxName;
     private prepareOrderAppAssetOptInTransaction;
     private prepareOrderAppAssetOptinTransactionsIfNeeded;
     private getAssetsToOptInToOrderingClient;
+    private getLatestOrderAppVersion;
 }
 export { OrderingClient };

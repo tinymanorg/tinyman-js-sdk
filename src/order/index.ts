@@ -9,6 +9,7 @@ import algosdk, {
 } from "algosdk";
 
 import {
+  APP_VERSION_KEY,
   APPROVAL_PROGRAM,
   CLEAR_PROGRAM,
   GOVERNOR_ORDER_FEE_RATE_KEY,
@@ -18,11 +19,13 @@ import {
   ORDER_APP_LOCAL_SCHEMA,
   ORDER_FEE_RATE_KEY,
   REGISTRY_APP_ID,
-  STRUCTS,
+  ROUTER_APP_ID,
+  REGISTRY_STRUCT,
+  ORDER_STRUCTS,
   TOTAL_ORDER_COUNT_KEY,
   VAULT_APP_ID
 } from "./constants";
-import {OrderType, PutOrderParams, PutRecurringOrderParams} from "./types";
+import {OrderType, PutTriggerOrderParams, PutRecurringOrderParams} from "./types";
 import {createPaddedByteArray, joinByteArrays} from "./utils";
 import {SupportedNetwork} from "../util/commonTypes";
 import {encodeString, intToBytes} from "../util/util";
@@ -36,14 +39,16 @@ import {ALGO_ASSET_ID} from "../util/asset/assetConstants";
 import TinymanBaseClient from "../util/client/base/baseClient";
 import {isAlgo} from "../util/asset/assetUtils";
 
-const ENTRY_STRUCT = new Struct("Entry", STRUCTS);
-const ORDER_STRUCT = new Struct("Order", STRUCTS);
+const ENTRY_STRUCT = new Struct("Entry", REGISTRY_STRUCT);
+const ORDER_STRUCT = new Struct(OrderType.Trigger, ORDER_STRUCTS);
 
 class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | null> {
   registryAppId: number;
   registryApplicationAddress: string;
   vaultAppId: number;
   vaultApplicationAddress: string;
+  routerAppId: number;
+  routerApplicationAddress: string;
   userAddress: string;
 
   private constructor(
@@ -52,13 +57,15 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
     network: SupportedNetwork,
     userAddress: string
   ) {
-    super(algod, orderAppId, network, STRUCTS);
+    super(algod, orderAppId, network, REGISTRY_STRUCT);
 
     this.algod = algod;
     this.registryAppId = REGISTRY_APP_ID[network];
     this.registryApplicationAddress = getApplicationAddress(
       this.registryAppId
     ).toString();
+    this.routerAppId = ROUTER_APP_ID[network];
+    this.routerApplicationAddress = getApplicationAddress(this.routerAppId).toString();
     this.vaultAppId = VAULT_APP_ID[network];
     this.vaultApplicationAddress = getApplicationAddress(this.vaultAppId).toString();
     this.userAddress = userAddress;
@@ -126,6 +133,12 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
       return Promise.resolve(false);
     }
 
+    const version = await this.getLatestOrderAppVersion();
+
+    if (!version) {
+      throw new Error("Registry app has no approved version. Unable to compare.");
+    }
+
     const appInfo = await this.algod.getApplicationByID(this.appId).do();
 
     return (
@@ -143,16 +156,39 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
       throw new Error("Application ID not provided");
     }
 
-    const sp = await this.getSuggestedParams();
+    const version = await this.getLatestOrderAppVersion();
+
+    if (!version) {
+      throw new Error(
+        "Registry app has no approved version. Unable to update order app."
+      );
+    }
+
+    const suggestedParams = await this.getSuggestedParams();
 
     const transactions = [
       algosdk.makeApplicationUpdateTxnFromObject({
         sender: this.userAddress,
-        suggestedParams: sp,
+        suggestedParams,
         appIndex: this.appId,
-        appArgs: [encodeString("update_application")],
+        appArgs: [encodeString("update_application"), bigIntToBytes(version, 8)],
         approvalProgram: base64ToBytes(APPROVAL_PROGRAM),
         clearProgram: base64ToBytes(CLEAR_PROGRAM)
+      }),
+      algosdk.makeApplicationNoOpTxnFromObject({
+        sender: this.userAddress,
+        suggestedParams,
+        appIndex: this.registryAppId,
+        appArgs: [
+          encodeString("verify_update"),
+          joinByteArrays(encodeString("v"), bigIntToBytes(version, 8))
+        ]
+      }),
+      algosdk.makeApplicationNoOpTxnFromObject({
+        sender: this.userAddress,
+        suggestedParams,
+        appIndex: this.appId,
+        appArgs: [encodeString("post_update")]
       })
     ];
 
@@ -175,6 +211,14 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
    * @returns A promise that resolves the transaction array.
    */
   async prepareCreateOrderAppTransactions(userAddress: string) {
+    const version = await this.getLatestOrderAppVersion();
+
+    if (!version) {
+      throw new Error(
+        "Registry app has no approved version. Unable to create order app."
+      );
+    }
+
     const sp = await this.getSuggestedParams();
 
     const entryBoxName = OrderingClient.getRegistryEntryBoxName(userAddress);
@@ -201,12 +245,7 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
         sender: userAddress,
         suggestedParams: sp,
         onComplete: algosdk.OnApplicationComplete.NoOpOC,
-        appArgs: [
-          encodeString("create_application"),
-          intToBytes(this.registryAppId),
-          intToBytes(this.vaultAppId),
-          decodeAddress(this.userAddress).publicKey
-        ],
+        appArgs: [encodeString("create_application"), intToBytes(this.registryAppId)],
         approvalProgram: base64ToBytes(APPROVAL_PROGRAM),
         clearProgram: base64ToBytes(CLEAR_PROGRAM),
         numGlobalByteSlices: ORDER_APP_GLOBAL_SCHEMA.numByteSlice,
@@ -220,7 +259,13 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
         suggestedParams: sp,
         appIndex: this.registryAppId,
         appArgs: [encodeString("create_entry")],
-        boxes: [{appIndex: 0, name: entryBoxName}]
+        boxes: [
+          {appIndex: 0, name: entryBoxName},
+          {
+            appIndex: this.registryAppId,
+            name: joinByteArrays(encodeString("v"), bigIntToBytes(version, 8))
+          }
+        ]
       })
     );
 
@@ -251,7 +296,7 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
     }
   }
 
-  async getPutOrderTransactionFee({
+  async getPutTriggerOrderTransactionFee({
     assetInId,
     assetOutId,
     type
@@ -305,7 +350,7 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
   /**
    * Prepares an array of transactions to place a limit order.
    *
-   * @param {PutOrderParams} params - The parameters for the put order operation.
+   * @param {PutTriggerOrderParams} params - The parameters for the put order operation.
    * @param params.assetInId - The ID of the input asset.
    * @param params.assetOutId - The ID of the output asset.
    * @param params.assetInAmount - The amount of the input asset in base units.
@@ -315,14 +360,14 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
    * @param [params.orderAppId] - (Optional) The application ID for the order.
    * @returns A promise that resolves the transaction array.
    */
-  async preparePutOrderTransactions({
+  async preparePutTriggerOrderTransactions({
     assetInId,
     assetOutId,
     assetInAmount,
     assetOutAmount,
     isPartialAllowed,
     duration
-  }: PutOrderParams) {
+  }: PutTriggerOrderParams) {
     await this.checkOrderAppAvailability();
 
     const sp = await this.getSuggestedParams();
@@ -388,7 +433,7 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
         suggestedParams: sp,
         appIndex: this.appId!,
         appArgs: [
-          encodeString("put_order"),
+          encodeString("put_trigger_order"),
           intToBytes(assetInId),
           bigIntToBytes(assetInAmount, 8),
           intToBytes(assetOutId),
@@ -400,14 +445,18 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
         foreignApps: [this.registryAppId, this.vaultAppId],
         boxes: [
           {appIndex: 0, name: orderBoxName},
-          {appIndex: this.vaultAppId, name: decodeAddress(this.userAddress).publicKey}
+          {appIndex: this.vaultAppId, name: decodeAddress(this.userAddress).publicKey},
+          {
+            appIndex: this.registryAppId,
+            name: this.getRegistryEntryBoxName(this.userAddress)
+          }
         ]
       })
     );
 
     return this.setupTxnFeeAndAssignGroupId({
       txns: transactions,
-      additionalFeeCount: 1 + assetsToOptin.length
+      additionalFeeCount: 2 + assetsToOptin.length
     });
   }
 
@@ -543,7 +592,10 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
     }
 
     const orderBoxName = this.getOrderBoxName(orderId, type);
-    const order = await this.getBox(orderBoxName, "Order");
+    const order = await this.getBox(
+      orderBoxName,
+      type === OrderType.Trigger ? "TriggerOrder" : "RecurringOrder"
+    );
 
     if (!order) {
       throw new Error("Order not found");
@@ -557,16 +609,23 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
         appIndex: this.appId,
         appArgs: [
           encodeString(
-            type === OrderType.Trigger ? "cancel_order" : "cancel_recurring_order"
+            type === OrderType.Trigger ? "cancel_trigger_order" : "cancel_recurring_order"
           ),
           intToBytes(orderId)
         ],
-        boxes: [{appIndex: 0, name: orderBoxName}],
-        foreignAssets: [Number(order.getField("asset_id"))]
+        boxes: [
+          {appIndex: 0, name: orderBoxName},
+          {
+            appIndex: this.registryAppId,
+            name: this.getRegistryEntryBoxName(this.userAddress)
+          }
+        ],
+        foreignAssets: [Number(order.getField("asset_id"))],
+        foreignApps: [this.registryAppId]
       })
     ];
 
-    return this.setupTxnFeeAndAssignGroupId({txns: transactions, additionalFeeCount: 1});
+    return this.setupTxnFeeAndAssignGroupId({txns: transactions, additionalFeeCount: 2});
   }
 
   /**
@@ -641,6 +700,10 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
     return joinByteArrays(orderPrefix, orderIdBytes);
   }
 
+  private getRegistryEntryBoxName(userAddress: string) {
+    return joinByteArrays(encodeString("e"), decodeAddress(userAddress).publicKey);
+  }
+
   private prepareOrderAppAssetOptInTransaction(
     userAddress: string,
     appId: number,
@@ -692,6 +755,10 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
     }
 
     return assetsToOptin;
+  }
+
+  private getLatestOrderAppVersion(): Promise<bigint | undefined> {
+    return this.getGlobal(APP_VERSION_KEY, this.registryAppId);
   }
 }
 

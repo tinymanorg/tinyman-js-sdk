@@ -1,4 +1,4 @@
-export interface PutOrderParams {
+export interface PutTriggerOrderParams {
     assetInId: number;
     assetOutId: number;
     assetInAmount: bigint;

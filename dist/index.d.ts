@@ -52,4 +52,4 @@ export { AccountState } from "./governance/vault/storage";
 export { getStartTimestampOfWeek } from "./governance/vault/utils";
 export { calculateTinyPower, combineAndRegroupTxns, generateCidFromProposalMetadata } from "./governance/utils";
 export { OrderingClient } from "./order/index";
-export type { PutOrderParams, PutRecurringOrderParams, OrderType } from "./order/types";
+export type { PutTriggerOrderParams, PutRecurringOrderParams, OrderType } from "./order/types";
