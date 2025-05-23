@@ -247,7 +247,12 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
         sender: userAddress,
         suggestedParams: sp,
         onComplete: algosdk.OnApplicationComplete.NoOpOC,
-        appArgs: [encodeString("create_application"), intToBytes(this.registryAppId)],
+        appArgs: [
+          encodeString("create_application"),
+          intToBytes(this.registryAppId),
+          intToBytes(this.vaultAppId),
+          intToBytes(this.vaultAppId)
+        ],
         approvalProgram: base64ToBytes(APPROVAL_PROGRAM),
         clearProgram: base64ToBytes(CLEAR_PROGRAM),
         numGlobalByteSlices: ORDER_APP_GLOBAL_SCHEMA.numByteSlice,
@@ -265,7 +270,7 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
           {appIndex: 0, name: entryBoxName},
           {
             appIndex: this.registryAppId,
-            name: joinByteArrays(encodeString("v"), bigIntToBytes(version, 8))
+            name: joinByteArrays(encodeString("v"), intToBytes(Number(version)))
           }
         ]
       })
@@ -760,7 +765,7 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
   }
 
   private getLatestOrderAppVersion(): Promise<bigint | undefined> {
-    return this.getGlobal(APP_VERSION_KEY, this.registryAppId);
+    return this.getGlobal(APP_VERSION_KEY, undefined, this.registryAppId);
   }
 }
 
