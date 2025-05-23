@@ -265,6 +265,20 @@ export function getTxnGroupID(txns: SignerTransaction[]) {
   return bufferToBase64(txns[0].txn.group?.buffer);
 }
 
+/* eslint-disable no-bitwise */
+export function intToBytes(num: number, length = 8): Uint8Array {
+  const byteArray = new Uint8Array(length);
+  let newNum = BigInt(num);
+
+  for (let i = length - 1; i >= 0; i--) {
+    byteArray[i] = Number(newNum & BigInt(0xff));
+    newNum >>= BigInt(8);
+  }
+
+  return byteArray;
+}
+/* eslint-enable no-bitwise */
+
 export function encodeInteger(number: bigint) {
   let buf: number[] = [];
 

@@ -19,9 +19,8 @@ import {
 } from "./storage";
 import {prepareBudgetIncreaseTxn} from "../transactions";
 import {getNewTotalPowerTimestamps} from "./utils";
-import {intToBytes} from "../util/utils";
 import {SupportedNetwork} from "../../util/commonTypes";
-import {encodeString} from "../../util/util";
+import {encodeString, intToBytes} from "../../util/util";
 import {TINY_ASSET_ID} from "../../util/asset/assetConstants";
 
 function prepareCreateLockTransactions({

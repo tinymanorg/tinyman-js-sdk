@@ -7,9 +7,9 @@ import {
   makePaymentTxnWithSuggestedParamsFromObject
 } from "algosdk";
 
-import {encodeString, joinByteArrays} from "../../util/util";
+import {encodeString, intToBytes, joinByteArrays} from "../../util/util";
 import {prepareBudgetIncreaseTxn} from "../transactions";
-import {areBuffersEqual, intToBytes, sum} from "../util/utils";
+import {areBuffersEqual, sum} from "../util/utils";
 import {ACCOUNT_POWER_BOX_ARRAY_LEN} from "../vault/constants";
 import {getAccountPowerBoxName, getAccountStateBoxName} from "../vault/storage";
 import {

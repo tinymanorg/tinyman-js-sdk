@@ -1,7 +1,6 @@
 import {Algodv2, bytesToBigInt, decodeAddress} from "algosdk";
 
-import {joinByteArrays} from "../../util/util";
-import {intToBytes} from "../util/utils";
+import {joinByteArrays, intToBytes} from "../../util/util";
 import {getCumulativePowerDelta, getRawBoxValue} from "../utils";
 import {
   ACCOUNT_POWER_BOX_ARRAY_LEN,

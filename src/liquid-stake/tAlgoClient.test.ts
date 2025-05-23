@@ -30,7 +30,7 @@ describe("TinymanTAlgoClient", () => {
     if (accountInfo.amount < accountInfo.minBalance + mintAmount * 2n) {
       // Wait for the user to fund the account
       console.log(
-        `Go to https://bank.testnet.algorand.network/?account=${TEST_ACCOUNT.addr} and fund your account.`
+        "Go to https://bank.testnet.algorand.network/?account=XNG5OX7MMUTYVJN4AR7YU27Z6PM7FRRILMXOXWAIXMVPTTW5I7INN7AEPE and fund your account."
       );
       await waitUntilAccountIsFunded(TEST_ACCOUNT.addr);
     }

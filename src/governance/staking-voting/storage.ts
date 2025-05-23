@@ -1,8 +1,8 @@
 import {Algodv2, decodeAddress} from "algosdk";
 
-import {encodeString, joinByteArrays} from "../../util/util";
+import {encodeString, intToBytes, joinByteArrays} from "../../util/util";
 import {getProposalBoxName} from "../proposal-voting/storage";
-import {bytesToInt, intToBytes} from "../util/utils";
+import {bytesToInt} from "../util/utils";
 import {getRawBoxValue} from "../utils";
 import {
   PROPOSAL_BOX_PREFIX,

@@ -1,8 +1,7 @@
 import algosdk, {decodeAddress, getApplicationAddress, SuggestedParams} from "algosdk";
 
 import {EXECUTOR_FALLBACK_ADDRESS} from "../../util/account/accountConstants";
-import {encodeString} from "../../util/util";
-import {intToBytes} from "../util/utils";
+import {encodeString, intToBytes} from "../../util/util";
 import {ACCOUNT_POWER_BOX_ARRAY_LEN} from "../vault/constants";
 import {
   getAccountPowerBoxName,

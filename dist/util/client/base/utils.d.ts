@@ -19,5 +19,4 @@ declare class ArrayData {
     getField(index: number): Struct;
 }
 declare function getBoxCosts(boxes: Record<string, Struct>): number;
-declare function getStruct(name: string, structReference: Record<string, StructDefinition>): Struct;
-export { ArrayData, getBoxCosts, Struct, getStruct };
+export { ArrayData, getBoxCosts, Struct };
