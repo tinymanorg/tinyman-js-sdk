@@ -20,3 +20,7 @@ export declare enum OrderType {
     Trigger = "trigger_order",
     Recurring = "recurring_order"
 }
+export declare enum OrderStruct {
+    Trigger = "TriggerOrder",
+    Recurring = "RecurringOrder"
+}

@@ -1,7 +1,7 @@
 import {StructDefinition} from "../util/client/base/types";
 import {SupportedNetwork} from "../util/commonTypes";
 import {encodeString} from "../util/util";
-import {OrderType} from "./types";
+import {OrderStruct} from "./types";
 
 const TOTAL_ORDER_COUNT_KEY = encodeString("order_count");
 const GOVERNOR_ORDER_FEE_RATE_KEY = encodeString("governor_order_fee_rate");
@@ -11,8 +11,8 @@ const GOVERNOR_FEE_RATE_POWER_THRESHOLD_KEY = encodeString(
 const ORDER_FEE_RATE_KEY = encodeString("order_fee_rate");
 const APP_VERSION_KEY = encodeString("latest_version");
 
-const ORDER_STRUCTS: Record<OrderType, StructDefinition> = {
-  [OrderType.Trigger]: {
+const ORDER_STRUCTS: Record<OrderStruct, StructDefinition> = {
+  TriggerOrder: {
     size: 80,
     fields: {
       asset_id: {
@@ -67,7 +67,7 @@ const ORDER_STRUCTS: Record<OrderType, StructDefinition> = {
       }
     }
   },
-  [OrderType.Recurring]: {
+  RecurringOrder: {
     size: 88,
     fields: {
       asset_id: {

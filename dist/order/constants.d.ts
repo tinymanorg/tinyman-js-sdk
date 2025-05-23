@@ -1,12 +1,12 @@
 import { StructDefinition } from "../util/client/base/types";
 import { SupportedNetwork } from "../util/commonTypes";
-import { OrderType } from "./types";
+import { OrderStruct } from "./types";
 declare const TOTAL_ORDER_COUNT_KEY: Uint8Array;
 declare const GOVERNOR_ORDER_FEE_RATE_KEY: Uint8Array;
 declare const GOVERNOR_FEE_RATE_POWER_THRESHOLD_KEY: Uint8Array;
 declare const ORDER_FEE_RATE_KEY: Uint8Array;
 declare const APP_VERSION_KEY: Uint8Array;
-declare const ORDER_STRUCTS: Record<OrderType, StructDefinition>;
+declare const ORDER_STRUCTS: Record<OrderStruct, StructDefinition>;
 declare const REGISTRY_STRUCT: Record<string, StructDefinition>;
 declare const ORDER_APP_GLOBAL_SCHEMA: {
     numUint: number;

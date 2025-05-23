@@ -25,7 +25,12 @@ import {
   TOTAL_ORDER_COUNT_KEY,
   VAULT_APP_ID
 } from "./constants";
-import {OrderType, PutTriggerOrderParams, PutRecurringOrderParams} from "./types";
+import {
+  OrderType,
+  PutTriggerOrderParams,
+  PutRecurringOrderParams,
+  OrderStruct
+} from "./types";
 import {createPaddedByteArray, joinByteArrays} from "./utils";
 import {SupportedNetwork} from "../util/commonTypes";
 import {encodeString, intToBytes} from "../util/util";
@@ -40,8 +45,8 @@ import TinymanBaseClient from "../util/client/base/baseClient";
 import {isAlgo} from "../util/asset/assetUtils";
 
 const ENTRY_STRUCT = new Struct("Entry", REGISTRY_STRUCT);
-const TRIGGER_STRUCT = new Struct(OrderType.Trigger, ORDER_STRUCTS);
-const RECURRING_STRUCT = new Struct(OrderType.Recurring, ORDER_STRUCTS);
+const TRIGGER_STRUCT = new Struct(OrderStruct.Trigger, ORDER_STRUCTS);
+const RECURRING_STRUCT = new Struct(OrderStruct.Recurring, ORDER_STRUCTS);
 
 class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | null> {
   registryAppId: number;
@@ -559,7 +564,11 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
         foreignAssets: [targetAssetId],
         boxes: [
           {appIndex: 0, name: orderBoxName},
-          {appIndex: this.vaultAppId, name: decodeAddress(this.userAddress).publicKey}
+          {appIndex: this.vaultAppId, name: decodeAddress(this.userAddress).publicKey},
+          {
+            appIndex: this.registryAppId,
+            name: this.getRegistryEntryBoxName(this.userAddress)
+          }
         ],
         appArgs: [
           encodeString("put_recurring_order"),
@@ -599,9 +608,12 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
     }
 
     const orderBoxName = this.getOrderBoxName(orderId, type);
+
     const order = await this.getBox(
       orderBoxName,
-      type === OrderType.Trigger ? "TriggerOrder" : "RecurringOrder"
+      type === OrderType.Trigger ? OrderStruct.Trigger : OrderStruct.Recurring,
+      this.appId,
+      ORDER_STRUCTS
     );
 
     if (!order) {
@@ -649,7 +661,10 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
     const sp = await this.getSuggestedParams();
 
     const orderBoxName = this.getOrderBoxName(orderId, type);
-    const order = await this.getBox(orderBoxName, "Order");
+    const order = await this.getBox(
+      orderBoxName,
+      type === OrderType.Trigger ? OrderStruct.Trigger : OrderStruct.Recurring
+    );
 
     if (!order) {
       throw new Error("Order not found");
@@ -701,7 +716,7 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
   }
 
   private getOrderBoxName(id: number, type: OrderType) {
-    const orderPrefix = encodeString(type === OrderType.Recurring ? "o" : "r");
+    const orderPrefix = encodeString(type === OrderType.Trigger ? "o" : "r");
     const orderIdBytes = intToBytes(id);
 
     return joinByteArrays(orderPrefix, orderIdBytes);

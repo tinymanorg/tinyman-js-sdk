@@ -113,9 +113,15 @@ abstract class TinymanBaseClient<
     }
   }
 
-  protected async getBox(boxName: Uint8Array, structName: string, appId?: number) {
+  protected async getBox(
+    boxName: Uint8Array,
+    structName: string,
+    appId?: number,
+    structs?: Record<string, StructDefinition>
+  ) {
     try {
       const applicationId = appId || this.appId;
+      const structure = structs ?? this.structs;
 
       if (!applicationId) {
         throw new Error("Application ID not provided");
@@ -125,11 +131,11 @@ abstract class TinymanBaseClient<
         await this.algod.getApplicationBoxByName(applicationId, boxName).do()
       ).value;
 
-      if (!this.structs) {
+      if (!structure) {
         throw new Error("structs not defined");
       }
 
-      const structClass = new Struct(structName, this.structs);
+      const structClass = new Struct(structName, structure);
 
       return structClass.apply(Buffer.from(boxValue));
     } catch (error: any) {
