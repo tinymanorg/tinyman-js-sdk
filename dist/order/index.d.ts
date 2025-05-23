@@ -60,7 +60,7 @@ declare class OrderingClient extends TinymanBaseClient<number | null, algosdk.Ad
      * Prepares an array of transactions to place a recurring order.
      *
      * @param {PutRecurringOrderParams} params - The parameters for the recurring order.
-     * @param params.amount - The total amount of the asset to be used for the recurring order.
+     * @param params.amount - The amount per order to be used for the recurring order.
      * @param params.assetId - The ID of the asset being used for the order.
      * @param params.targetAssetId - The ID of the target asset for the order.
      * @param params.targetRecurrence - The number of times the order should recur.

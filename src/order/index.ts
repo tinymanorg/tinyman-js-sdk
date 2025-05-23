@@ -241,7 +241,7 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
         algosdk.makePaymentTxnWithSuggestedParamsFromObject({
           sender: userAddress,
           receiver: this.registryApplicationAddress,
-          amount: this.calculateMinBalance({accounts: 1, boxes: newBoxes}),
+          amount: this.calculateMinBalance({accounts: 1, assets: 1, boxes: newBoxes}),
           suggestedParams: sp
         })
       );
@@ -406,7 +406,7 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
 
       const requiredAmountToCoverMinBalance = Math.max(
         0,
-        Number(accountInfo.minBalance - BigInt(accountInfo.amount))
+        Number(accountInfo.minBalance - accountInfo.amount)
       );
 
       transactions.push(
@@ -476,7 +476,7 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
    * Prepares an array of transactions to place a recurring order.
    *
    * @param {PutRecurringOrderParams} params - The parameters for the recurring order.
-   * @param params.amount - The total amount of the asset to be used for the recurring order.
+   * @param params.amount - The amount per order to be used for the recurring order.
    * @param params.assetId - The ID of the asset being used for the order.
    * @param params.targetAssetId - The ID of the target asset for the order.
    * @param params.targetRecurrence - The number of times the order should recur.
@@ -505,7 +505,7 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
       this.applicationAddress!,
       [assetId, targetAssetId]
     );
-    const amountPerOrder = amount / BigInt(targetRecurrence);
+    const totalAmount = amount * BigInt(targetRecurrence);
 
     if (!(await this.boxExists(orderBoxName))) {
       newBoxes = {
@@ -546,14 +546,14 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
         ? algosdk.makePaymentTxnWithSuggestedParamsFromObject({
             sender: this.userAddress,
             receiver: this.applicationAddress!,
-            amount,
+            amount: totalAmount,
             suggestedParams
           })
         : algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
             sender: this.userAddress,
             receiver: this.applicationAddress!,
             assetIndex: assetId,
-            amount,
+            amount: totalAmount,
             suggestedParams
           }),
       algosdk.makeApplicationNoOpTxnFromObject({
@@ -573,16 +573,12 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
         appArgs: [
           encodeString("put_recurring_order"),
           intToBytes(assetId),
-          bigIntToBytes(amountPerOrder, 8),
+          bigIntToBytes(amount, 8),
           intToBytes(targetAssetId),
           // Min received target amount per order
-          intToBytes(
-            maxTargetPrice ? Math.floor(Number(amountPerOrder) / maxTargetPrice) : 0
-          ),
+          intToBytes(maxTargetPrice ? Math.floor(Number(amount) / maxTargetPrice) : 0),
           // Max received target amount per order
-          intToBytes(
-            minTargetPrice ? Math.floor(Number(amountPerOrder) / minTargetPrice) : 0
-          ),
+          intToBytes(minTargetPrice ? Math.floor(Number(amount) / minTargetPrice) : 0),
           intToBytes(targetRecurrence),
           intToBytes(interval)
         ]
@@ -591,7 +587,7 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
 
     return this.setupTxnFeeAndAssignGroupId({
       txns: transactions,
-      additionalFeeCount: 1 + assetsToOptin.length
+      additionalFeeCount: 2 + assetsToOptin.length
     });
   }
 
