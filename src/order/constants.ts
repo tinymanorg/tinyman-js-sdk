@@ -127,10 +127,7 @@ const ORDER_STRUCTS: Record<OrderStruct, StructDefinition> = {
         offset: 80
       }
     }
-  }
-} as const;
-
-const REGISTRY_STRUCT: Record<string, StructDefinition> = {
+  },
   Entry: {
     size: 8,
     fields: {
@@ -141,7 +138,7 @@ const REGISTRY_STRUCT: Record<string, StructDefinition> = {
       }
     }
   }
-};
+} as const;
 
 const ORDER_APP_GLOBAL_SCHEMA = {
   numUint: 16,
@@ -182,7 +179,6 @@ export {
   ORDER_APP_LOCAL_SCHEMA,
   REGISTRY_APP_ID,
   ORDER_STRUCTS,
-  REGISTRY_STRUCT,
   TOTAL_ORDER_COUNT_KEY,
   VAULT_APP_ID,
   MINIMUM_BALANCE_REQUIREMENT_PER_APP,

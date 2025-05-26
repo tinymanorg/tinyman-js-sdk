@@ -20,7 +20,6 @@ import {
   ORDER_FEE_RATE_KEY,
   REGISTRY_APP_ID,
   ROUTER_APP_ID,
-  REGISTRY_STRUCT,
   ORDER_STRUCTS,
   TOTAL_ORDER_COUNT_KEY,
   VAULT_APP_ID,
@@ -45,7 +44,7 @@ import {ALGO_ASSET_ID} from "../util/asset/assetConstants";
 import TinymanBaseClient from "../util/client/base/baseClient";
 import {isAlgo} from "../util/asset/assetUtils";
 
-const ENTRY_STRUCT = new Struct("Entry", REGISTRY_STRUCT);
+const ENTRY_STRUCT = new Struct("Entry", ORDER_STRUCTS);
 const TRIGGER_STRUCT = new Struct(OrderStruct.Trigger, ORDER_STRUCTS);
 const RECURRING_STRUCT = new Struct(OrderStruct.Recurring, ORDER_STRUCTS);
 
@@ -64,7 +63,7 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
     network: SupportedNetwork,
     userAddress: string
   ) {
-    super(algod, orderAppId, network, REGISTRY_STRUCT);
+    super(algod, orderAppId, network, ORDER_STRUCTS);
 
     this.algod = algod;
     this.registryAppId = REGISTRY_APP_ID[network];
@@ -603,9 +602,7 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
 
     const order = await this.getBox(
       orderBoxName,
-      type === OrderType.Trigger ? OrderStruct.Trigger : OrderStruct.Recurring,
-      this.appId,
-      ORDER_STRUCTS
+      type === OrderType.Trigger ? OrderStruct.Trigger : OrderStruct.Recurring
     );
 
     if (!order) {

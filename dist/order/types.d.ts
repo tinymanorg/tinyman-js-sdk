@@ -22,5 +22,6 @@ export declare enum OrderType {
 }
 export declare enum OrderStruct {
     Trigger = "TriggerOrder",
-    Recurring = "RecurringOrder"
+    Recurring = "RecurringOrder",
+    Entry = "Entry"
 }
