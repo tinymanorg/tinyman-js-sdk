@@ -1,4 +1,9 @@
-import algosdk, {Algodv2, getApplicationAddress, Transaction} from "algosdk";
+import algosdk, {
+  Algodv2,
+  getApplicationAddress,
+  Transaction,
+  bytesToBase64
+} from "algosdk";
 
 import {CONTRACT_VERSION} from "../../contract/constants";
 import {TinymanAnalyticsApiAsset} from "../../util/asset/assetModels";
@@ -186,12 +191,13 @@ async function execute({
 }): Promise<V2PoolInfo> {
   try {
     await client.sendRawTransaction(signedTxns).do();
-    const poolTokenAssetId = (await getAppCallTxnResponse(client, txGroup))?.[
-      "local-state-delta"
-    ][0].delta?.find(({key}) => key === btoa(DECODED_APP_STATE_KEYS.v2.poolTokenID))
-      ?.value.uint;
+    const poolTokenAssetId = ((await getAppCallTxnResponse(client, txGroup))
+      ?.localStateDelta ?? [])[0]?.delta?.find(
+      ({key}) =>
+        key === bytesToBase64(encodeString(DECODED_APP_STATE_KEYS.v2.poolTokenID))
+    )?.value.uint;
 
-    if (typeof poolTokenAssetId !== "number") {
+    if (typeof poolTokenAssetId !== "bigint") {
       throw new Error(`Generated ID is not valid: got ${poolTokenAssetId}`);
     }
 

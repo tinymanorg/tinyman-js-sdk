@@ -1,5 +1,5 @@
 /// <reference types="node" />
-import { Algodv2 } from "algosdk";
+import { Algodv2, modelsv2 } from "algosdk";
 import { TealKeyValue } from "algosdk/dist/types/client/v2/algod/models/types";
 import { SignerTransaction, TinymanApiErrorShape } from "./commonTypes";
 export declare function decodeState({ stateArray, shouldDecodeKeys }: {
@@ -16,7 +16,7 @@ export declare function joinByteArrays(...arrays: Uint8Array[]): Uint8Array;
  * @param txid - The ID of the transaction to wait for.
  * @returns PendingTransactionInformation
  */
-export declare function waitForConfirmation(client: Algodv2, txId: string): Promise<Record<string, any>>;
+export declare function waitForConfirmation(client: Algodv2, txId: string): Promise<modelsv2.PendingTransactionResponse>;
 export declare function applySlippageToAmount(type: "positive" | "negative", slippage: number, amount: bigint): bigint;
 export declare const ASSET_OPT_IN_PROCESS_TXN_COUNT = 1;
 export declare function bufferToBase64(arrayBuffer: undefined | null | WithImplicitCoercion<ArrayBuffer | SharedArrayBuffer>): string;
