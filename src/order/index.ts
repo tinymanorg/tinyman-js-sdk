@@ -23,7 +23,8 @@ import {
   REGISTRY_STRUCT,
   ORDER_STRUCTS,
   TOTAL_ORDER_COUNT_KEY,
-  VAULT_APP_ID
+  VAULT_APP_ID,
+  APP_LATEST_VERSION_KEY
 } from "./constants";
 import {
   OrderType,
@@ -145,7 +146,7 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
     }
 
     const currentVersion = (await this.getGlobal(
-      encodeString("version"),
+      APP_VERSION_KEY,
       undefined,
       this.appId
     )) as bigint | undefined;
@@ -186,9 +187,9 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
         sender: this.userAddress,
         suggestedParams,
         appIndex: this.registryAppId,
-        appArgs: [
-          encodeString("verify_update"),
-          joinByteArrays(encodeString("v"), bigIntToBytes(version, 8))
+        appArgs: [encodeString("verify_update"), bigIntToBytes(version, 8)],
+        boxes: [
+          {appIndex: this.registryAppId, name: this.getAppVersionBoxName(Number(version))}
         ]
       }),
       algosdk.makeApplicationNoOpTxnFromObject({
@@ -252,12 +253,7 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
         sender: userAddress,
         suggestedParams: sp,
         onComplete: algosdk.OnApplicationComplete.NoOpOC,
-        appArgs: [
-          encodeString("create_application"),
-          intToBytes(this.registryAppId),
-          intToBytes(this.vaultAppId),
-          intToBytes(this.vaultAppId)
-        ],
+        appArgs: [encodeString("create_application"), intToBytes(this.registryAppId)],
         approvalProgram: base64ToBytes(APPROVAL_PROGRAM),
         clearProgram: base64ToBytes(CLEAR_PROGRAM),
         numGlobalByteSlices: ORDER_APP_GLOBAL_SCHEMA.numByteSlice,
@@ -275,7 +271,7 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
           {appIndex: 0, name: entryBoxName},
           {
             appIndex: this.registryAppId,
-            name: joinByteArrays(encodeString("v"), intToBytes(Number(version)))
+            name: this.getAppVersionBoxName(Number(version))
           }
         ]
       })
@@ -776,7 +772,11 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
   }
 
   private getLatestOrderAppVersion(): Promise<bigint | undefined> {
-    return this.getGlobal(APP_VERSION_KEY, undefined, this.registryAppId);
+    return this.getGlobal(APP_LATEST_VERSION_KEY, undefined, this.registryAppId);
+  }
+
+  private getAppVersionBoxName(version: number) {
+    return joinByteArrays(encodeString("v"), intToBytes(version));
   }
 }
 

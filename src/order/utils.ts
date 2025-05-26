@@ -1,11 +1,11 @@
-import {Algodv2} from "algosdk";
+import {Algodv2, base64ToBytes} from "algosdk";
 
 import {intToBytes, joinByteArrays} from "../util/util";
 
 async function compileTeal(sourceCode: string, algod: Algodv2): Promise<Uint8Array> {
   const compiled = await algod.compile(sourceCode).do();
 
-  return new Uint8Array(Buffer.from(compiled.result, "base64"));
+  return base64ToBytes(compiled.result);
 }
 
 // Fetch and compile the approval and clear programs

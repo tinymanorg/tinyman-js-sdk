@@ -99,5 +99,6 @@ declare class OrderingClient extends TinymanBaseClient<number | null, algosdk.Ad
     private prepareOrderAppAssetOptinTransactionsIfNeeded;
     private getAssetsToOptInToOrderingClient;
     private getLatestOrderAppVersion;
+    private getAppVersionBoxName;
 }
 export { OrderingClient };
