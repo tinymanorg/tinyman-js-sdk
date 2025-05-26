@@ -198,7 +198,7 @@ async function doBootstrap({
   client: Algodv2;
   signedTxns: Uint8Array[];
   txnIDs: string[];
-}): Promise<{poolTokenID: number}> {
+}): Promise<{poolTokenID: bigint}> {
   try {
     await client.sendRawTransaction(signedTxns).do();
 
@@ -207,9 +207,9 @@ async function doBootstrap({
       txnIDs[V1_1BootstrapTxnGroupIndices.POOL_TOKEN_CREATE]
     );
 
-    const poolTokenID = assetCreationResult["asset-index"];
+    const poolTokenID = assetCreationResult.assetIndex;
 
-    if (typeof poolTokenID !== "number") {
+    if (typeof poolTokenID !== "bigint") {
       throw new Error(`Generated ID is not valid: got ${poolTokenID}`);
     }
 

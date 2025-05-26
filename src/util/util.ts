@@ -1,4 +1,4 @@
-import {Algodv2, bytesToBase64} from "algosdk";
+import {Algodv2, bytesToBase64, modelsv2} from "algosdk";
 import {TealKeyValue} from "algosdk/dist/types/client/v2/algod/models/types";
 
 import {SignerTransaction, TinymanApiErrorShape} from "./commonTypes";
@@ -71,17 +71,17 @@ function delay(timeout: number) {
 export async function waitForConfirmation(
   client: Algodv2,
   txId: string
-): Promise<Record<string, any>> {
+): Promise<modelsv2.PendingTransactionResponse> {
   // eslint-disable-next-line no-constant-condition
   while (true) {
     await delay(1000);
 
-    let pendingTransactionInfo: Record<string, any> | null = null;
+    let pendingTransactionInfo: modelsv2.PendingTransactionResponse | null = null;
 
     try {
       pendingTransactionInfo = (await client
         .pendingTransactionInformation(txId)
-        .do()) as Record<string, any> | null;
+        .do()) as modelsv2.PendingTransactionResponse | null;
     } catch (error: any) {
       // Ignore errors from PendingTransactionInformation, since it may return 404 if the algod
       // instance is behind a load balancer and the request goes to a different algod than the
