@@ -189,9 +189,7 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
         suggestedParams,
         appIndex: this.registryAppId,
         appArgs: [encodeString("verify_update"), bigIntToBytes(version, 8)],
-        boxes: [
-          {appIndex: this.registryAppId, name: this.getAppVersionBoxName(Number(version))}
-        ]
+        boxes: [{appIndex: this.registryAppId, name: this.getAppVersionBoxName(version)}]
       }),
       algosdk.makeApplicationNoOpTxnFromObject({
         sender: this.userAddress,
@@ -272,7 +270,7 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
           {appIndex: 0, name: entryBoxName},
           {
             appIndex: this.registryAppId,
-            name: this.getAppVersionBoxName(Number(version))
+            name: this.getAppVersionBoxName(version)
           }
         ]
       })
@@ -686,7 +684,7 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
    * @param tinyPower - The tiny power to check against the threshold.
    * @returns The platform fee rate.
    */
-  async getPlatformFeeRate(tinyPower: number | null): Promise<number> {
+  async getPlatformFeeRate(tinyPower: number | null): Promise<bigint> {
     const thresholdTinyPower = await this.getGlobal(
       TOTAL_ORDER_COUNT_KEY,
       0,
@@ -774,8 +772,8 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
     return this.getGlobal(APP_LATEST_VERSION_KEY, undefined, this.registryAppId);
   }
 
-  private getAppVersionBoxName(version: number) {
-    return joinByteArrays(encodeString("v"), intToBytes(version));
+  private getAppVersionBoxName(version: bigint) {
+    return joinByteArrays(encodeString("v"), bigIntToBytes(version, 8));
   }
 }
 

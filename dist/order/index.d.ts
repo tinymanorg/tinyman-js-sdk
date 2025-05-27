@@ -91,7 +91,7 @@ declare class OrderingClient extends TinymanBaseClient<number | null, algosdk.Ad
      * @param tinyPower - The tiny power to check against the threshold.
      * @returns The platform fee rate.
      */
-    getPlatformFeeRate(tinyPower: number | null): Promise<number>;
+    getPlatformFeeRate(tinyPower: number | null): Promise<bigint>;
     private getOrderCount;
     private getOrderBoxName;
     private getRegistryEntryBoxName;
