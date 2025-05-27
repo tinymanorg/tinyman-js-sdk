@@ -44,7 +44,7 @@ import {ALGO_ASSET_ID} from "../util/asset/assetConstants";
 import TinymanBaseClient from "../util/client/base/baseClient";
 import {isAlgo} from "../util/asset/assetUtils";
 
-const ENTRY_STRUCT = new Struct("Entry", ORDER_STRUCTS);
+const ENTRY_STRUCT = new Struct(OrderStruct.Entry, ORDER_STRUCTS);
 const TRIGGER_STRUCT = new Struct(OrderStruct.Trigger, ORDER_STRUCTS);
 const RECURRING_STRUCT = new Struct(OrderStruct.Recurring, ORDER_STRUCTS);
 
@@ -102,6 +102,7 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
       // Ignore the error if the box is not found
     }
 
+    console.log(boxValue);
     return boxValue ? (ENTRY_STRUCT.apply(boxValue).getField("app_id") as bigint) : null;
   }
 
@@ -120,12 +121,14 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
       userAddress
     );
 
-    return new OrderingClient(
+    const client = new OrderingClient(
       algod,
-      orderApplicationId ? Number(orderApplicationId) : null,
+      orderApplicationId ? Number(orderApplicationId.toString()) : null,
       network,
       userAddress
     );
+
+    return client;
   }
 
   /**

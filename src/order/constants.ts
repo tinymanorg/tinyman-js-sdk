@@ -151,7 +151,7 @@ const ORDER_APP_LOCAL_SCHEMA = {
 const ORDER_APP_EXTRA_PAGES = 3;
 
 const REGISTRY_APP_ID: Record<SupportedNetwork, number> = {
-  mainnet: 2814989833,
+  mainnet: 3019195131,
   testnet: 739800082
 };
 
@@ -161,7 +161,7 @@ const VAULT_APP_ID: Record<SupportedNetwork, number> = {
 };
 
 const ROUTER_APP_ID: Record<SupportedNetwork, number> = {
-  mainnet: NaN,
+  mainnet: 2614712672,
   testnet: 730573191
 };
 
