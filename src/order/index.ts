@@ -102,7 +102,6 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
       // Ignore the error if the box is not found
     }
 
-    console.log(boxValue);
     return boxValue ? (ENTRY_STRUCT.apply(boxValue).getField("app_id") as bigint) : null;
   }
 
