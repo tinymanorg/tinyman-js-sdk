@@ -17,42 +17,38 @@ export async function fixedInputSwap({
   asset_1: {id: string; unit_name: string};
   asset_2: {id: string; unit_name: string};
 }) {
-  const initiatorAddr = account.addr;
+  const initiatorAddr = account.addr.toString();
   const pool = await poolUtils.v2.getPoolInfo({
     network: "testnet" as SupportedNetwork,
     client: algodClient,
     asset1ID: Number(asset_1.id),
     asset2ID: Number(asset_2.id)
   });
+  const slippage = 0.05;
 
   /**
    * This example uses only v2 quote. Similarly, we can use
    * Swap.getQuote method, which will return the best quote (highest rate)
    * after checking both v1 and v2
    */
-  const fixedInputSwapQuote = Swap.v2.getQuote(
-    SwapType.FixedInput,
+
+  const fixedInputSwapQuote = await Swap.v2.getQuote({
+    type: SwapType.FixedInput,
     pool,
-    {id: pool.asset1ID, amount: 1_000_000},
-    {assetIn: 6, assetOut: 6}
-  );
-  const assetIn = {
-    id: fixedInputSwapQuote.assetInID,
-    amount: fixedInputSwapQuote.assetInAmount
-  };
-  const assetOut = {
-    id: fixedInputSwapQuote.assetOutID,
-    amount: fixedInputSwapQuote.assetOutAmount
-  };
+    amount: 1_000_000n,
+    assetIn: {id: pool.asset1ID, decimals: 6},
+    assetOut: {id: pool.asset2ID, decimals: 6},
+    network: "testnet",
+    slippage
+  });
 
   const fixedInputSwapTxns = await Swap.v2.generateTxns({
     client: algodClient,
+    network: "testnet",
+    quote: fixedInputSwapQuote,
     swapType: SwapType.FixedInput,
-    pool,
-    initiatorAddr,
-    assetIn,
-    assetOut,
-    slippage: 0.05
+    slippage,
+    initiatorAddr
   });
 
   const signedTxns = await Swap.v2.signTxns({
@@ -61,14 +57,75 @@ export async function fixedInputSwap({
   });
 
   const swapExecutionResponse = await Swap.v2.execute({
-    network: "testnet" as SupportedNetwork,
+    quote: fixedInputSwapQuote,
     client: algodClient,
     signedTxns,
-    pool,
-    txGroup: fixedInputSwapTxns,
-    assetIn
+    txGroup: fixedInputSwapTxns
   });
 
   console.log("✅ Fixed Input Swap executed successfully!");
+  console.log({txnID: swapExecutionResponse.txnID});
+}
+
+/**
+ * Executes a swap with a fixed input amount
+ * (Input amount is entered by the user, output amount is to be calculated by the SDK)
+ */
+export async function fixedInputSwapWithoutSwapRouter({
+  account,
+  asset_1,
+  asset_2
+}: {
+  account: Account;
+  asset_1: {id: string; unit_name: string};
+  asset_2: {id: string; unit_name: string};
+}) {
+  const initiatorAddr = account.addr.toString();
+  const pool = await poolUtils.v2.getPoolInfo({
+    network: "testnet" as SupportedNetwork,
+    client: algodClient,
+    asset1ID: Number(asset_1.id),
+    asset2ID: Number(asset_2.id)
+  });
+  const slippage = 0.05;
+
+  /**
+   * This example uses only v2 quote. Similarly, we can use
+   * Swap.getQuote method, which will return the best quote (highest rate)
+   * after checking both v1 and v2, without using the swap router
+   */
+
+  const fixedInputSwapQuote = await Swap.v2.getQuote({
+    type: SwapType.FixedInput,
+    pool,
+    amount: 1_000_000n,
+    assetIn: {id: pool.asset1ID, decimals: 6},
+    assetOut: {id: pool.asset2ID, decimals: 6},
+    network: "testnet",
+    slippage
+  });
+
+  const fixedInputSwapTxns = await Swap.v2.generateTxns({
+    client: algodClient,
+    network: "testnet",
+    quote: fixedInputSwapQuote,
+    swapType: SwapType.FixedInput,
+    slippage,
+    initiatorAddr
+  });
+
+  const signedTxns = await Swap.v2.signTxns({
+    txGroup: fixedInputSwapTxns,
+    initiatorSigner: signerWithSecretKey(account)
+  });
+
+  const swapExecutionResponse = await Swap.v2.execute({
+    quote: fixedInputSwapQuote,
+    client: algodClient,
+    signedTxns,
+    txGroup: fixedInputSwapTxns
+  });
+
+  console.log("✅ Fixed Input Swap with disabled Swap Router executed successfully!");
   console.log({txnID: swapExecutionResponse.txnID});
 }
