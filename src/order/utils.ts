@@ -1,31 +1,4 @@
-import {Algodv2, base64ToBytes} from "algosdk";
-
 import {intToBytes, joinByteArrays} from "../util/util";
-
-async function compileTeal(sourceCode: string, algod: Algodv2): Promise<Uint8Array> {
-  const compiled = await algod.compile(sourceCode).do();
-
-  return base64ToBytes(compiled.result);
-}
-
-// Fetch and compile the approval and clear programs
-async function getCompiledPrograms(algod: Algodv2) {
-  // TODO: Fetch the source code from github once they are public
-  const approvalSourceResponse = await fetch(
-    `${process.env.PUBLIC_URL}/contracts/order_approval.teal`
-  );
-  const clearSourceResponse = await fetch(
-    `${process.env.PUBLIC_URL}/contracts/order_clear_state.teal`
-  );
-
-  const approvalSource = await approvalSourceResponse.text();
-  const clearSource = await clearSourceResponse.text();
-
-  const approvalProgram = await compileTeal(approvalSource, algod);
-  const clearProgram = await compileTeal(clearSource, algod);
-
-  return {approvalProgram, clearProgram};
-}
 
 function createPaddedByteArray(
   elements: number[],
@@ -55,10 +28,4 @@ async function computeSHA512(fileArrayBuffer: Uint8Array) {
   return hashHex;
 }
 
-export {
-  compileTeal,
-  computeSHA512,
-  createPaddedByteArray,
-  getCompiledPrograms,
-  joinByteArrays
-};
+export {computeSHA512, createPaddedByteArray, joinByteArrays};
