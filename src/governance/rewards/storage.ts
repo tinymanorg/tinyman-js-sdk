@@ -1,8 +1,8 @@
 import {Algodv2, decodeAddress} from "algosdk";
 
-import {intToBytes} from "../util/utils";
 import {getRawBoxValue} from "../utils";
 import {REWARD_CLAIM_SHEET_BOX_PREFIX, REWARD_PERIOD_BOX_PREFIX} from "./constants";
+import {intToBytes} from "../../util/util";
 
 class RewardsAppGlobalState {
   tinyAssetId: number;

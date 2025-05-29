@@ -23,7 +23,7 @@ export async function addSingleAssetLiquidity({
   asset_1: {id: string; unit_name: string};
   asset_2: {id: string; unit_name: string};
 }) {
-  const initiatorAddr = account.addr;
+  const initiatorAddr = account.addr.toString();
   const poolInfo = await poolUtils.v2.getPoolInfo({
     network: "testnet" as SupportedNetwork,
     client: algodClient,
@@ -37,7 +37,7 @@ export async function addSingleAssetLiquidity({
     assetIn: {
       // Add liquidity only using asset1
       id: Number(asset_1.id),
-      amount: 25_000_000
+      amount: 25_000_000n
     },
     decimals: {
       asset1: 6,
@@ -49,7 +49,7 @@ export async function addSingleAssetLiquidity({
     network: "testnet" as SupportedNetwork,
     client: algodClient,
     initiatorAddr,
-    poolAddress: poolInfo.account.address(),
+    poolAddress: poolInfo.account.address().toString(),
     assetIn: quote.assetIn,
     poolTokenId: poolInfo.poolTokenID!,
     minPoolTokenAssetAmount: quote.minPoolTokenAssetAmountWithSlippage

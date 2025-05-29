@@ -22,7 +22,7 @@ export async function getAccount(): Promise<Account> {
   }
 
   try {
-    await assertAccountHasBalance(account.addr);
+    await assertAccountHasBalance(account.addr.toString());
   } catch (error) {
     console.log(error);
   }
@@ -52,10 +52,10 @@ function tryGetAccountFromJson() {
 /**
  * @returns the amount of the asset (with the given `assetId`) owned by the account
  */
-export async function getOwnedAssetAmount(accountAddress: string, assetId: number) {
+export async function getOwnedAssetAmount(accountAddress: string, assetId: bigint) {
   const {assets} = (await algodClient
     .accountInformation(accountAddress)
     .do()) as modelsv2.Account;
 
-  return assets?.find((asset) => asset.assetId === assetId)?.amount || 0;
+  return assets?.find((asset) => asset.assetId === assetId)?.amount || 0n;
 }

@@ -17,7 +17,7 @@ export async function removeLiquidity({
   asset_1: {id: string; unit_name: string};
   asset_2: {id: string; unit_name: string};
 }) {
-  const initiatorAddr = account.addr;
+  const initiatorAddr = account.addr.toString();
   const poolInfo = await poolUtils.v2.getPoolInfo({
     network: "testnet" as SupportedNetwork,
     client: algodClient,
@@ -29,14 +29,14 @@ export async function removeLiquidity({
   // Get the owned pool token amount, so we can decide how much to remove
   const ownedPoolTokenAssetAmount = await getOwnedAssetAmount(
     initiatorAddr,
-    poolInfo.poolTokenID!
+    BigInt(poolInfo.poolTokenID!)
   );
 
   /**
    * For testing purposes, we will remove 1/4 of the owned pool tokens,
    * it can be any amount that is lower than the owned amount
    */
-  const poolTokenAmountToBeRemoved = Math.floor(ownedPoolTokenAssetAmount / 4);
+  const poolTokenAmountToBeRemoved = ownedPoolTokenAssetAmount / 4n;
 
   // Get a quote for the desired removal amount
   const quote = RemoveLiquidity.v2.getQuote({

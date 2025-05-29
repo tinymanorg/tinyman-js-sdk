@@ -23,7 +23,9 @@ export function getPoolShare(totalLiquidity: bigint, ownedLiquidity: bigint) {
 /**
  * Calculates the pair ratio for the pool reserves
  */
-export function getPoolPairRatio(reserves: null | PoolReserves): null | number {
+export function getPoolPairRatio(
+  reserves: null | Pick<PoolReserves, "asset1" | "asset2">
+): null | number {
   const isEmpty = isPoolEmpty(reserves);
   let pairRatio: null | number = null;
 
@@ -40,7 +42,9 @@ export function getPoolPairRatio(reserves: null | PoolReserves): null | number {
  * @param poolReserves - Pool reserves
  * @returns true if pool is empty, otherwise returns false
  */
-export function isPoolEmpty(poolReserves: undefined | null | PoolReserves) {
+export function isPoolEmpty(
+  poolReserves: undefined | null | Pick<PoolReserves, "asset1" | "asset2">
+): boolean {
   return Boolean(poolReserves && !(poolReserves.asset1 + poolReserves.asset2));
 }
 

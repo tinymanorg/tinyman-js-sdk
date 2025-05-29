@@ -1,0 +1,194 @@
+import {StructDefinition} from "../util/client/base/types";
+import {SupportedNetwork} from "../util/commonTypes";
+import {encodeString} from "../util/util";
+import {OrderStruct} from "./types";
+
+const TOTAL_ORDER_COUNT_KEY = encodeString("order_count");
+const GOVERNOR_ORDER_FEE_RATE_KEY = encodeString("governor_order_fee_rate");
+const GOVERNOR_FEE_RATE_POWER_THRESHOLD_KEY = encodeString(
+  "governor_fee_rate_power_threshold"
+);
+const ORDER_FEE_RATE_KEY = encodeString("order_fee_rate");
+const APP_LATEST_VERSION_KEY = encodeString("latest_version");
+const APP_VERSION_KEY = encodeString("version");
+
+const ORDER_STRUCTS: Record<OrderStruct, StructDefinition> = {
+  TriggerOrder: {
+    size: 80,
+    fields: {
+      asset_id: {
+        type: "int",
+        size: 8,
+        offset: 0
+      },
+      amount: {
+        type: "int",
+        size: 8,
+        offset: 8
+      },
+      target_asset_id: {
+        type: "int",
+        size: 8,
+        offset: 16
+      },
+      target_amount: {
+        type: "int",
+        size: 8,
+        offset: 24
+      },
+      filled_amount: {
+        type: "int",
+        size: 8,
+        offset: 32
+      },
+      collected_target_amount: {
+        type: "int",
+        size: 8,
+        offset: 40
+      },
+      is_partial_allowed: {
+        type: "int",
+        size: 8,
+        offset: 48
+      },
+      fee_rate: {
+        type: "int",
+        size: 8,
+        offset: 56
+      },
+      creation_timestamp: {
+        type: "int",
+        size: 8,
+        offset: 64
+      },
+      expiration_timestamp: {
+        type: "int",
+        size: 8,
+        offset: 72
+      }
+    }
+  },
+  RecurringOrder: {
+    size: 88,
+    fields: {
+      asset_id: {
+        type: "int",
+        size: 8,
+        offset: 0
+      },
+      amount: {
+        type: "int",
+        size: 8,
+        offset: 8
+      },
+      target_asset_id: {
+        type: "int",
+        size: 8,
+        offset: 16
+      },
+      collected_target_amount: {
+        type: "int",
+        size: 8,
+        offset: 24
+      },
+      min_target_amount: {
+        type: "int",
+        size: 8,
+        offset: 32
+      },
+      max_target_amount: {
+        type: "int",
+        size: 8,
+        offset: 40
+      },
+      remaining_recurrences: {
+        type: "int",
+        size: 8,
+        offset: 48
+      },
+      interval: {
+        type: "int",
+        size: 8,
+        offset: 56
+      },
+      fee_rate: {
+        type: "int",
+        size: 8,
+        offset: 64
+      },
+      last_fill_timestamp: {
+        type: "int",
+        size: 8,
+        offset: 72
+      },
+      creation_timestamp: {
+        type: "int",
+        size: 8,
+        offset: 80
+      }
+    }
+  },
+  Entry: {
+    size: 8,
+    fields: {
+      app_id: {
+        type: "int",
+        size: 8,
+        offset: 0
+      }
+    }
+  }
+} as const;
+
+const ORDER_APP_GLOBAL_SCHEMA = {
+  numUint: 16,
+  numByteSlice: 16
+};
+const ORDER_APP_LOCAL_SCHEMA = {
+  numUint: 0,
+  numByteSlice: 0
+};
+const ORDER_APP_EXTRA_PAGES = 3;
+
+const REGISTRY_APP_ID: Record<SupportedNetwork, number> = {
+  mainnet: 3019195131,
+  testnet: 739800082
+};
+
+const VAULT_APP_ID: Record<SupportedNetwork, number> = {
+  mainnet: 2200606875,
+  testnet: 480164661
+};
+
+const ROUTER_APP_ID: Record<SupportedNetwork, number> = {
+  mainnet: 2614712672,
+  testnet: 730573191
+};
+
+const MINIMUM_BALANCE_REQUIREMENT_PER_APP = 100_000;
+
+const MINIMUM_PUT_ORDER_TRANSACTION_COUNT = 5;
+
+const APPROVAL_PROGRAM =
+  "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";
+const CLEAR_PROGRAM = "CoEBQw==";
+
+export {
+  ORDER_APP_EXTRA_PAGES,
+  ORDER_APP_GLOBAL_SCHEMA,
+  ORDER_APP_LOCAL_SCHEMA,
+  REGISTRY_APP_ID,
+  ORDER_STRUCTS,
+  TOTAL_ORDER_COUNT_KEY,
+  VAULT_APP_ID,
+  MINIMUM_BALANCE_REQUIREMENT_PER_APP,
+  GOVERNOR_ORDER_FEE_RATE_KEY,
+  GOVERNOR_FEE_RATE_POWER_THRESHOLD_KEY,
+  ORDER_FEE_RATE_KEY,
+  MINIMUM_PUT_ORDER_TRANSACTION_COUNT,
+  APPROVAL_PROGRAM,
+  CLEAR_PROGRAM,
+  ROUTER_APP_ID,
+  APP_LATEST_VERSION_KEY,
+  APP_VERSION_KEY
+};

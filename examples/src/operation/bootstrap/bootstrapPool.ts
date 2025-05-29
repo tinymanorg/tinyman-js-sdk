@@ -29,7 +29,7 @@ export async function bootstrapPool({
     client: algodClient,
     asset_1,
     asset_2,
-    initiatorAddr
+    initiatorAddr: initiatorAddr.toString()
   });
 
   const signedTxns = await Bootstrap.v2.signTxns({

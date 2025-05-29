@@ -1,30 +1,35 @@
 import algosdk, {Algodv2, getApplicationAddress, Transaction} from "algosdk";
 
-import {SupportedNetwork} from "../../commonTypes";
+import {SignerTransaction, SupportedNetwork} from "../../commonTypes";
 import {
   MINIMUM_BALANCE_REQUIREMENT_PER_ACCOUNT,
   MINIMUM_BALANCE_REQUIREMENT_PER_ASSET
 } from "./constants";
 import {StructDefinition} from "./types";
-import {getBoxCosts, getStruct, Struct} from "./utils";
+import {getBoxCosts, Struct} from "./utils";
 import {areBuffersEqual} from "../../../governance/util/utils";
 
-abstract class TinymanBaseClient {
-  algod: Algodv2;
-  appId: number;
-  applicationAddress: algosdk.Address;
-  network: SupportedNetwork;
+abstract class TinymanBaseClient<
+  AppId extends number | null,
+  AppAddress extends algosdk.Address | null
+> {
+  protected algod: Algodv2;
+  protected applicationAddress: AppAddress;
+  protected network: SupportedNetwork;
+  public appId: AppId;
   readonly structs: Record<string, StructDefinition> | undefined;
 
   constructor(
     algod: Algodv2,
-    appId: number,
+    appId: AppId,
     network: SupportedNetwork,
     structs?: Record<string, StructDefinition>
   ) {
     this.algod = algod;
     this.appId = appId;
-    this.applicationAddress = getApplicationAddress(this.appId);
+    this.applicationAddress = (
+      this.appId ? getApplicationAddress(this.appId) : null
+    ) as AppAddress;
     this.network = network;
     this.structs = structs;
   }
@@ -51,6 +56,10 @@ abstract class TinymanBaseClient {
 
   protected async getGlobal(key: Uint8Array, defaultValue?: any, appId?: number) {
     const applicationId = appId || this.appId;
+
+    if (!applicationId) {
+      throw new Error("Application ID not provided");
+    }
 
     const applicationInfo = await this.algod.getApplicationByID(applicationId).do();
     const globalState = applicationInfo.params.globalState ?? [];
@@ -91,6 +100,10 @@ abstract class TinymanBaseClient {
   protected async boxExists(boxName: Uint8Array, appId?: number) {
     const applicationId = appId || this.appId;
 
+    if (!applicationId) {
+      throw new Error("Application ID not provided");
+    }
+
     try {
       const box = await this.algod.getApplicationBoxByName(applicationId, boxName).do();
 
@@ -100,18 +113,29 @@ abstract class TinymanBaseClient {
     }
   }
 
-  protected async getBox(boxName: Uint8Array, structName: string, appId?: number) {
+  protected async getBox(
+    boxName: Uint8Array,
+    structName: string,
+    appId?: number,
+    structs?: Record<string, StructDefinition>
+  ) {
     try {
       const applicationId = appId || this.appId;
+      const structure = structs ?? this.structs;
+
+      if (!applicationId) {
+        throw new Error("Application ID not provided");
+      }
+
       const boxValue = (
         await this.algod.getApplicationBoxByName(applicationId, boxName).do()
       ).value;
 
-      if (!this.structs) {
+      if (!structure) {
         throw new Error("structs not defined");
       }
 
-      const structClass = getStruct(structName, this.structs);
+      const structClass = new Struct(structName, structure);
 
       return structClass.apply(Buffer.from(boxValue));
     } catch (error: any) {
@@ -143,7 +167,7 @@ abstract class TinymanBaseClient {
     return txn;
   }
 
-  protected async isOptedIn(accountAddress: string, assetId: number) {
+  protected async isOptedIn(accountAddress: string | algosdk.Address, assetId: number) {
     try {
       await this.algod.accountAssetInformation(accountAddress, assetId).do();
 
@@ -155,6 +179,22 @@ abstract class TinymanBaseClient {
 
   protected getSuggestedParams() {
     return this.algod.getTransactionParams().do();
+  }
+
+  public convertStandardTransactionsToSignerTransactions(
+    txns: Transaction[],
+    signer: string | string[]
+  ): SignerTransaction[] {
+    if (Array.isArray(signer) && signer.length !== txns.length) {
+      throw new Error("Signer length does not match transaction length");
+    }
+
+    return txns.map((txn, index) => {
+      return {
+        txn,
+        signers: Array.isArray(signer) ? [signer[index]] : [signer]
+      };
+    });
   }
 }
 

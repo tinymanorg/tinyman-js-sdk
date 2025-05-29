@@ -23,7 +23,7 @@ export async function addFlexibleLiquidity({
   asset_1: {id: string; unit_name: string};
   asset_2: {id: string; unit_name: string};
 }) {
-  const initiatorAddr = account.addr;
+  const initiatorAddr = account.addr.toString();
   const poolInfo = await poolUtils.v2.getPoolInfo({
     network: "testnet" as SupportedNetwork,
     client: algodClient,
@@ -35,11 +35,11 @@ export async function addFlexibleLiquidity({
   const quote = AddLiquidity.v2.flexible.getQuote({
     pool: poolInfo,
     asset1: {
-      amount: 25_000_000,
+      amount: 25_000_000n,
       decimals: 6
     },
     asset2: {
-      amount: 75_000_000,
+      amount: 75_000_000n,
       decimals: 6
     }
   });
@@ -48,7 +48,7 @@ export async function addFlexibleLiquidity({
     network: "testnet" as SupportedNetwork,
     client: algodClient,
     initiatorAddr,
-    poolAddress: poolInfo.account.address(),
+    poolAddress: poolInfo.account.address().toString(),
     asset1In: quote.asset1In,
     asset2In: quote.asset2In,
     poolTokenOut: quote.poolTokenOut,
