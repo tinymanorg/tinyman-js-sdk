@@ -171,7 +171,7 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
     }
 
     const suggestedParams = await this.getSuggestedParams();
-    const {approvalProgram, clearProgram} = await getCompiledPrograms(this.algod);
+    const {approvalProgram, clearProgram} = await getCompiledPrograms();
 
     const transactions = [
       algosdk.makeApplicationUpdateTxnFromObject({
@@ -245,7 +245,7 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
       );
     }
 
-    const {approvalProgram, clearProgram} = await getCompiledPrograms(this.algod);
+    const {approvalProgram, clearProgram} = await getCompiledPrograms();
 
     transactions.push(
       algosdk.makeApplicationCreateTxnFromObject({

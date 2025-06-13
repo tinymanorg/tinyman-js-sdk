@@ -1,5 +1,3 @@
-import {Algodv2, base64ToBytes} from "algosdk";
-
 import {intToBytes, joinByteArrays} from "../util/util";
 
 function createPaddedByteArray(
@@ -30,26 +28,20 @@ async function computeSHA512(fileArrayBuffer: Uint8Array) {
   return hashHex;
 }
 
-async function compileTeal(sourceCode: string, algod: Algodv2): Promise<Uint8Array> {
-  const compiled = await algod.compile(sourceCode).do();
-
-  return base64ToBytes(compiled.result);
-}
-
 // Fetch and compile the approval and clear programs
-async function getCompiledPrograms(algod: Algodv2) {
+async function getCompiledPrograms() {
   const approvalSourceResponse = await fetch(
-    "https://raw.githubusercontent.com/tinymanorg/tinyman-order-protocol/main/contracts/order/build/order_approval.teal"
+    "https://raw.githubusercontent.com/tinymanorg/tinyman-order-protocol/main/contracts/order/build/order_approval.teal.tok"
   );
   const clearSourceResponse = await fetch(
-    "https://raw.githubusercontent.com/tinymanorg/tinyman-order-protocol/main/contracts/order/build/order_clear_state.teal"
+    "https://raw.githubusercontent.com/tinymanorg/tinyman-order-protocol/main/contracts/order/build/order_clear_state.teal.tok"
   );
 
-  const approvalSource = await approvalSourceResponse.text();
-  const clearSource = await clearSourceResponse.text();
+  const approvalSourceResponseBuffer = await approvalSourceResponse.arrayBuffer();
+  const approvalProgram = new Uint8Array(approvalSourceResponseBuffer);
 
-  const approvalProgram = await compileTeal(approvalSource, algod);
-  const clearProgram = await compileTeal(clearSource, algod);
+  const clearSourceResponseBuffer = await clearSourceResponse.arrayBuffer();
+  const clearProgram = new Uint8Array(clearSourceResponseBuffer);
 
   return {approvalProgram, clearProgram};
 }
