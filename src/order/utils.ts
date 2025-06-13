@@ -28,4 +28,22 @@ async function computeSHA512(fileArrayBuffer: Uint8Array) {
   return hashHex;
 }
 
-export {computeSHA512, createPaddedByteArray, joinByteArrays};
+// Fetch and compile the approval and clear programs
+async function getCompiledPrograms() {
+  const approvalSourceResponse = await fetch(
+    "https://raw.githubusercontent.com/tinymanorg/tinyman-order-protocol/main/contracts/order/build/order_approval.teal.tok"
+  );
+  const clearSourceResponse = await fetch(
+    "https://raw.githubusercontent.com/tinymanorg/tinyman-order-protocol/main/contracts/order/build/order_clear_state.teal.tok"
+  );
+
+  const approvalSourceResponseBuffer = await approvalSourceResponse.arrayBuffer();
+  const approvalProgram = new Uint8Array(approvalSourceResponseBuffer);
+
+  const clearSourceResponseBuffer = await clearSourceResponse.arrayBuffer();
+  const clearProgram = new Uint8Array(clearSourceResponseBuffer);
+
+  return {approvalProgram, clearProgram};
+}
+
+export {computeSHA512, createPaddedByteArray, getCompiledPrograms, joinByteArrays};

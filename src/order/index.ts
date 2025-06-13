@@ -1,6 +1,5 @@
 import algosdk, {
   Algodv2,
-  base64ToBytes,
   bigIntToBytes,
   bytesToBase64,
   decodeAddress,
@@ -8,41 +7,39 @@ import algosdk, {
   Transaction
 } from "algosdk";
 
+import {ALGO_ASSET_ID} from "../util/asset/assetConstants";
+import {isAlgo} from "../util/asset/assetUtils";
+import TinymanBaseClient from "../util/client/base/baseClient";
+import {Struct} from "../util/client/base/utils";
+import {SupportedNetwork} from "../util/commonTypes";
 import {
+  MINIMUM_BALANCE_REQUIRED_PER_APP,
+  MINIMUM_BALANCE_REQUIRED_PER_BYTE_SCHEMA,
+  MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE
+} from "../util/constant";
+import {encodeString, intToBytes} from "../util/util";
+import {
+  APP_LATEST_VERSION_KEY,
   APP_VERSION_KEY,
-  APPROVAL_PROGRAM,
-  CLEAR_PROGRAM,
   GOVERNOR_ORDER_FEE_RATE_KEY,
   MINIMUM_PUT_ORDER_TRANSACTION_COUNT,
   ORDER_APP_EXTRA_PAGES,
   ORDER_APP_GLOBAL_SCHEMA,
   ORDER_APP_LOCAL_SCHEMA,
   ORDER_FEE_RATE_KEY,
+  ORDER_STRUCTS,
   REGISTRY_APP_ID,
   ROUTER_APP_ID,
-  ORDER_STRUCTS,
   TOTAL_ORDER_COUNT_KEY,
-  VAULT_APP_ID,
-  APP_LATEST_VERSION_KEY
+  VAULT_APP_ID
 } from "./constants";
 import {
+  OrderStruct,
   OrderType,
-  PutTriggerOrderParams,
   PutRecurringOrderParams,
-  OrderStruct
+  PutTriggerOrderParams
 } from "./types";
-import {createPaddedByteArray, joinByteArrays} from "./utils";
-import {SupportedNetwork} from "../util/commonTypes";
-import {encodeString, intToBytes} from "../util/util";
-import {
-  MINIMUM_BALANCE_REQUIRED_PER_APP,
-  MINIMUM_BALANCE_REQUIRED_PER_BYTE_SCHEMA,
-  MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE
-} from "../util/constant";
-import {Struct} from "../util/client/base/utils";
-import {ALGO_ASSET_ID} from "../util/asset/assetConstants";
-import TinymanBaseClient from "../util/client/base/baseClient";
-import {isAlgo} from "../util/asset/assetUtils";
+import {createPaddedByteArray, getCompiledPrograms, joinByteArrays} from "./utils";
 
 const ENTRY_STRUCT = new Struct(OrderStruct.Entry, ORDER_STRUCTS);
 const TRIGGER_STRUCT = new Struct(OrderStruct.Trigger, ORDER_STRUCTS);
@@ -174,6 +171,7 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
     }
 
     const suggestedParams = await this.getSuggestedParams();
+    const {approvalProgram, clearProgram} = await getCompiledPrograms();
 
     const transactions = [
       algosdk.makeApplicationUpdateTxnFromObject({
@@ -181,8 +179,8 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
         suggestedParams,
         appIndex: this.appId,
         appArgs: [encodeString("update_application"), bigIntToBytes(version, 8)],
-        approvalProgram: base64ToBytes(APPROVAL_PROGRAM),
-        clearProgram: base64ToBytes(CLEAR_PROGRAM)
+        approvalProgram,
+        clearProgram
       }),
       algosdk.makeApplicationNoOpTxnFromObject({
         sender: this.userAddress,
@@ -247,14 +245,16 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
       );
     }
 
+    const {approvalProgram, clearProgram} = await getCompiledPrograms();
+
     transactions.push(
       algosdk.makeApplicationCreateTxnFromObject({
         sender: userAddress,
         suggestedParams: sp,
         onComplete: algosdk.OnApplicationComplete.NoOpOC,
         appArgs: [encodeString("create_application"), intToBytes(this.registryAppId)],
-        approvalProgram: base64ToBytes(APPROVAL_PROGRAM),
-        clearProgram: base64ToBytes(CLEAR_PROGRAM),
+        approvalProgram,
+        clearProgram,
         numGlobalByteSlices: ORDER_APP_GLOBAL_SCHEMA.numByteSlice,
         numGlobalInts: ORDER_APP_GLOBAL_SCHEMA.numUint,
         numLocalByteSlices: ORDER_APP_LOCAL_SCHEMA.numByteSlice,
