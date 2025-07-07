@@ -17,7 +17,7 @@ import {
   MINIMUM_BALANCE_REQUIRED_PER_BYTE_SCHEMA,
   MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE
 } from "../util/constant";
-import {encodeString, intToBytes} from "../util/util";
+import {encodeString, intToBytes, joinByteArrays} from "../util/util";
 import {
   APP_LATEST_VERSION_KEY,
   APP_VERSION_KEY,
@@ -39,7 +39,7 @@ import {
   PutRecurringOrderParams,
   PutTriggerOrderParams
 } from "./types";
-import {createPaddedByteArray, getCompiledPrograms, joinByteArrays} from "./utils";
+import {createPaddedByteArray, getCompiledPrograms} from "./utils";
 
 const ENTRY_STRUCT = new Struct(OrderStruct.Entry, ORDER_STRUCTS);
 const TRIGGER_STRUCT = new Struct(OrderStruct.Trigger, ORDER_STRUCTS);
@@ -156,7 +156,6 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
    * Prepares transactions to update the ordering app using the latest contracts.
    * @returns A promise that resolves the transaction array.
    */
-  // TODO: Once the contracts are public, use getCompiledPrograms for approval and clear programs
   async prepareUpdateOrderingAppTransactions(): Promise<Transaction[]> {
     if (!this.appId) {
       throw new Error("Application ID not provided");
