@@ -33,7 +33,7 @@ class TinymanSTAlgoClient extends TinymanBaseClient<number, algosdk.Address> {
     const userStateBoxName = this.getUserStateBoxName(userAddress);
 
     const txns = [
-      ...(await this.getApplyRateChangeTxnIfNeeded()),
+      ...(await this.getApplyRateChangeTxnIfNeeded(userAddress)),
       ...(await this.getUserBoxPaymentTxnIfNeeded(userAddress, suggestedParams)),
       ...(await this.getOptinTxnIfNeeded(userAddress, STALGO_ASSET_ID[this.network])),
       algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
@@ -70,7 +70,7 @@ class TinymanSTAlgoClient extends TinymanBaseClient<number, algosdk.Address> {
     const userStateBoxName = this.getUserStateBoxName(userAddress);
 
     const txns = [
-      ...(await this.getApplyRateChangeTxnIfNeeded()),
+      ...(await this.getApplyRateChangeTxnIfNeeded(userAddress)),
       ...(await this.getOptinTxnIfNeeded(userAddress, TALGO_ASSET_ID[this.network])),
       algosdk.makeApplicationNoOpTxnFromObject({
         sender: userAddress,
@@ -90,7 +90,7 @@ class TinymanSTAlgoClient extends TinymanBaseClient<number, algosdk.Address> {
     const userStateBoxName = this.getUserStateBoxName(userAddress);
 
     const txns = [
-      ...(await this.getApplyRateChangeTxnIfNeeded()),
+      ...(await this.getApplyRateChangeTxnIfNeeded(userAddress)),
       ...(await this.getOptinTxnIfNeeded(userAddress, TINY_ASSET_ID[this.network])),
       algosdk.makeApplicationNoOpTxnFromObject({
         sender: userAddress,
@@ -145,9 +145,9 @@ class TinymanSTAlgoClient extends TinymanBaseClient<number, algosdk.Address> {
     return algosdk.decodeAddress(userAddress).publicKey;
   }
 
-  private async getApplyRateChangeTxnIfNeeded() {
+  private async getApplyRateChangeTxnIfNeeded(userAddress: string) {
     if (await this.shouldApplyRateChange()) {
-      return this.getApplyRateChangeTxn();
+      return this.getApplyRateChangeTxn(userAddress);
     }
 
     return [];
@@ -195,17 +195,15 @@ class TinymanSTAlgoClient extends TinymanBaseClient<number, algosdk.Address> {
     return currentRateEndTimestamp <= now;
   }
 
-  private async getApplyRateChangeTxn() {
-    const txns = [
+  private async getApplyRateChangeTxn(userAddress: string) {
+    return [
       algosdk.makeApplicationNoOpTxnFromObject({
-        sender: this.applicationAddress,
+        sender: userAddress,
         appIndex: this.appId,
         appArgs: [encodeString("apply_rate_change")],
         suggestedParams: await this.getSuggestedParams()
       })
     ];
-
-    return this.setupTxnFeeAndAssignGroupId({txns});
   }
 }
 
