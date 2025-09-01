@@ -1,18 +1,18 @@
 import algosdk, {Algodv2, SuggestedParams, Transaction} from "algosdk";
 import {toByteArray} from "base64-js";
 
+import {tinymanJSSDKConfig} from "../../../config";
+import {CONTRACT_VERSION} from "../../../contract/constants";
 import {SupportedNetwork} from "../../../util/commonTypes";
 import {TINYMAN_ANALYTICS_API_BASE_URLS} from "../../../util/constant";
 import SwapQuoteError, {SwapQuoteErrorType} from "../../../util/error/SwapQuoteError";
 import {hasTinymanApiErrorShape} from "../../../util/util";
 import {SwapType} from "../../constants";
 import {
-  FetchSwapRouteQuotesPayload,
-  SwapRouterResponse,
+  FetchSwapRouteQuotesPayloadV3,
+  SwapRouterResponseV3,
   SwapRouterTransactionRecipe
 } from "../../types";
-import {tinymanJSSDKConfig} from "../../../config";
-import {CONTRACT_VERSION} from "../../../contract/constants";
 
 export async function generateSwapRouterTxns({
   initiatorAddr,
@@ -21,7 +21,7 @@ export async function generateSwapRouterTxns({
 }: {
   client: Algodv2;
   initiatorAddr: string;
-  route: SwapRouterResponse;
+  route: SwapRouterResponseV3;
 }) {
   if (!route.transactions || !route.transaction_fee) {
     return [];
@@ -35,7 +35,9 @@ export async function generateSwapRouterTxns({
     txns.push(generateSwapRouterTxnFromRecipe(txnRecipe, suggestedParams, initiatorAddr));
   });
 
-  txns[0].fee = BigInt(route.transaction_fee);
+  txns[0].fee =
+    BigInt(route.transaction_fee) +
+    BigInt(route.inner_transaction_count) * BigInt(suggestedParams.minFee);
   const txGroup = algosdk.assignGroupID(txns);
 
   return txGroup.map((txn: Transaction) => ({
@@ -44,19 +46,19 @@ export async function generateSwapRouterTxns({
   }));
 }
 
-export function generateSwapRouterTxnFromRecipe(
-  recipe: SwapRouterTransactionRecipe,
+function generateSwapRouterTxnFromRecipe(
+  txnRecipe: SwapRouterTransactionRecipe,
   suggestedParams: SuggestedParams,
   userAddress: string
 ) {
   let txn: Transaction;
 
-  switch (recipe.type) {
+  switch (txnRecipe.type) {
     case algosdk.TransactionType.pay: {
       txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
         sender: userAddress,
-        receiver: recipe.receiver!,
-        amount: recipe.amount,
+        receiver: txnRecipe.receiver,
+        amount: txnRecipe.amount,
         suggestedParams
       });
       txn.fee = 0n;
@@ -67,9 +69,9 @@ export function generateSwapRouterTxnFromRecipe(
     case algosdk.TransactionType.axfer: {
       txn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
         sender: userAddress,
-        receiver: recipe.receiver!,
-        amount: recipe.amount,
-        assetIndex: recipe.asset_id,
+        receiver: txnRecipe.receiver,
+        amount: txnRecipe.amount,
+        assetIndex: txnRecipe.asset_id,
         suggestedParams
       });
       txn.fee = 0n;
@@ -78,17 +80,18 @@ export function generateSwapRouterTxnFromRecipe(
     }
 
     case algosdk.TransactionType.appl: {
-      const appArgs = recipe.args?.map(toByteArray);
+      const appArgs = txnRecipe.args?.map(toByteArray);
       const isSwapAppCall =
-        recipe.args && Buffer.from(recipe.args[0], "base64").toString("utf8") === "swap";
+        txnRecipe.args &&
+        Buffer.from(txnRecipe.args[0], "base64").toString("utf8") === "swap";
 
       txn = algosdk.makeApplicationNoOpTxnFromObject({
         sender: userAddress,
-        appIndex: recipe.app_id,
+        appIndex: txnRecipe.app_id,
         appArgs,
-        accounts: recipe.accounts,
-        foreignApps: recipe.apps,
-        foreignAssets: recipe.assets,
+        accounts: txnRecipe.accounts,
+        foreignApps: txnRecipe.apps,
+        foreignAssets: txnRecipe.assets,
         suggestedParams,
         note: isSwapAppCall
           ? tinymanJSSDKConfig.getAppCallTxnNoteWithClientName(CONTRACT_VERSION.V2)
@@ -100,7 +103,7 @@ export function generateSwapRouterTxnFromRecipe(
     }
 
     default:
-      throw new Error(`Unknown transaction type: ${recipe.type}`);
+      throw new Error(`Unknown transaction type: ${txnRecipe.type}`);
   }
 }
 
@@ -117,11 +120,11 @@ export async function getSwapRoute({
   swapType: SwapType;
   amount: number | bigint;
   network: SupportedNetwork;
-  slippage: number;
-}): Promise<SwapRouterResponse> {
-  const payload: FetchSwapRouteQuotesPayload = {
-    asset_in_id: String(assetInID),
-    asset_out_id: String(assetOutID),
+  slippage: string;
+}): Promise<SwapRouterResponseV3> {
+  const payload: FetchSwapRouteQuotesPayloadV3 = {
+    input_asset_id: String(assetInID),
+    output_asset_id: String(assetOutID),
     swap_type: swapType,
     input_amount: swapType === SwapType.FixedInput ? String(amount) : undefined,
     output_amount: swapType === SwapType.FixedOutput ? String(amount) : undefined,
@@ -129,7 +132,7 @@ export async function getSwapRoute({
   };
 
   const response = await fetch(
-    `${TINYMAN_ANALYTICS_API_BASE_URLS[network].v1}/swap-router/quotes-v2/`,
+    `${TINYMAN_ANALYTICS_API_BASE_URLS[network].v1}/swap-router/quotes-v3/`,
     {
       method: "POST",
       headers: {
@@ -157,7 +160,7 @@ export async function getSwapRoute({
     }
   }
 
-  if (!(serializedResponse as SwapRouterResponse).transactions?.length) {
+  if (!(serializedResponse as SwapRouterResponseV3).transactions?.length) {
     throw new SwapQuoteError(
       SwapQuoteErrorType.SwapRouterNoRouteError,
       "Swap router couldn't find a route for this swap."
@@ -165,13 +168,13 @@ export async function getSwapRoute({
   }
 
   if (
-    Number((serializedResponse as SwapRouterResponse).asset_in.id) !== assetInID ||
-    Number((serializedResponse as SwapRouterResponse).asset_out.id) !== assetOutID ||
-    (serializedResponse as SwapRouterResponse).swap_type === SwapType.FixedInput
+    Number((serializedResponse as SwapRouterResponseV3).input_asset.id) !== assetInID ||
+    Number((serializedResponse as SwapRouterResponseV3).output_asset.id) !== assetOutID ||
+    (serializedResponse as SwapRouterResponseV3).swap_type === SwapType.FixedInput
       ? BigInt(amount) !==
-        BigInt((serializedResponse as SwapRouterResponse).input_amount ?? 0)
+        BigInt((serializedResponse as SwapRouterResponseV3).input_amount ?? 0)
       : BigInt(amount) !==
-        BigInt((serializedResponse as SwapRouterResponse).output_amount ?? 0)
+        BigInt((serializedResponse as SwapRouterResponseV3).output_amount ?? 0)
   ) {
     throw new SwapQuoteError(
       SwapQuoteErrorType.UnknownError,

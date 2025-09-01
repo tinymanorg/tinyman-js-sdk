@@ -77,14 +77,14 @@ export type SwapRouterResponse = Pick<FetchSwapRouteQuotesPayload, "swap_type"> 
 
 export interface SwapRouterTransactionRecipe {
   type: TransactionType;
-  receiver?: string;
+  receiver: string;
   app_id: number;
   asset_id: number;
   amount: number;
   args: string[] | null;
-  accounts?: string[];
-  assets?: number[];
-  apps?: number[];
+  accounts: string[];
+  assets: number[];
+  apps: number[];
 }
 
 export type GetSwapQuoteParams = {
@@ -104,7 +104,7 @@ export type SwapQuote =
       type: SwapQuoteType.Direct;
     }
   | {
-      data: SwapRouterResponse;
+      data: SwapRouterResponseV3;
       type: SwapQuoteType.Router;
     };
 
@@ -172,4 +172,40 @@ export interface ExecuteSwapCommonParams {
   client: Algodv2;
   txGroup: SignerTransaction[];
   signedTxns: Uint8Array[];
+}
+
+export interface FetchSwapRouteQuotesPayloadV3 {
+  input_asset_id: string;
+  output_asset_id: string;
+  input_amount?: string;
+  output_amount?: string;
+  swap_type: SwapType;
+  slippage: string;
+}
+
+export interface SwapRouterResponseV3 {
+  swap_type: SwapType;
+  input_amount: string;
+  output_amount: string;
+  slippage: string;
+  input_asset: Pick<TinymanAnalyticsApiAsset, "id" | "decimals" | "name" | "unit_name">;
+  output_asset: Pick<TinymanAnalyticsApiAsset, "id" | "decimals" | "name" | "unit_name">;
+  input_amount_arg: string; // It's slippaged input_amount for fixed-output.
+  output_amount_arg: string; // It's slippaged output_amount for fixed-input.
+  input_amount_mapping: string[];
+  pool_mapping: string[];
+  asset_mapping: number[];
+  asset_in_algo_price: string;
+  price_impact: string;
+  transactions: SwapRouterTransactionRecipe[];
+  transaction_count: number;
+  inner_transaction_count: number;
+  transaction_fee: string;
+  transaction_fee_in_input_asset: string;
+  swap_fee: string;
+  swap_fee_algo_price: string;
+  status: {
+    round_number: string;
+    round_datetime: string;
+  };
 }
