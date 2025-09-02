@@ -1,18 +1,18 @@
 import algosdk, {Algodv2, SuggestedParams, Transaction} from "algosdk";
 import {toByteArray} from "base64-js";
 
-import {tinymanJSSDKConfig} from "../../../config";
-import {CONTRACT_VERSION} from "../../../contract/constants";
-import {SupportedNetwork} from "../../../util/commonTypes";
-import {TINYMAN_ANALYTICS_API_BASE_URLS} from "../../../util/constant";
-import SwapQuoteError, {SwapQuoteErrorType} from "../../../util/error/SwapQuoteError";
-import {hasTinymanApiErrorShape} from "../../../util/util";
-import {SwapType} from "../../constants";
+import {tinymanJSSDKConfig} from "../../config";
+import {CONTRACT_VERSION} from "../../contract/constants";
+import {SupportedNetwork} from "../../util/commonTypes";
+import {TINYMAN_ANALYTICS_API_BASE_URLS} from "../../util/constant";
+import SwapQuoteError, {SwapQuoteErrorType} from "../../util/error/SwapQuoteError";
+import {hasTinymanApiErrorShape} from "../../util/util";
+import {SwapType} from "../constants";
 import {
-  FetchSwapRouteQuotesPayloadV3,
-  SwapRouterResponseV3,
+  FetchSwapRouteQuotesPayload,
+  SwapRouterResponse,
   SwapRouterTransactionRecipe
-} from "../../types";
+} from "../types";
 
 export async function generateSwapRouterTxns({
   initiatorAddr,
@@ -21,7 +21,7 @@ export async function generateSwapRouterTxns({
 }: {
   client: Algodv2;
   initiatorAddr: string;
-  route: SwapRouterResponseV3;
+  route: SwapRouterResponse;
 }) {
   if (!route.transactions || !route.transaction_fee) {
     return [];
@@ -121,8 +121,8 @@ export async function getSwapRoute({
   amount: number | bigint;
   network: SupportedNetwork;
   slippage: string;
-}): Promise<SwapRouterResponseV3> {
-  const payload: FetchSwapRouteQuotesPayloadV3 = {
+}): Promise<SwapRouterResponse> {
+  const payload: FetchSwapRouteQuotesPayload = {
     input_asset_id: String(assetInID),
     output_asset_id: String(assetOutID),
     swap_type: swapType,
@@ -160,7 +160,7 @@ export async function getSwapRoute({
     }
   }
 
-  if (!(serializedResponse as SwapRouterResponseV3).transactions?.length) {
+  if (!(serializedResponse as SwapRouterResponse).transactions?.length) {
     throw new SwapQuoteError(
       SwapQuoteErrorType.SwapRouterNoRouteError,
       "Swap router couldn't find a route for this swap."
@@ -168,13 +168,13 @@ export async function getSwapRoute({
   }
 
   if (
-    Number((serializedResponse as SwapRouterResponseV3).input_asset.id) !== assetInID ||
-    Number((serializedResponse as SwapRouterResponseV3).output_asset.id) !== assetOutID ||
-    (serializedResponse as SwapRouterResponseV3).swap_type === SwapType.FixedInput
+    Number((serializedResponse as SwapRouterResponse).input_asset.id) !== assetInID ||
+    Number((serializedResponse as SwapRouterResponse).output_asset.id) !== assetOutID ||
+    (serializedResponse as SwapRouterResponse).swap_type === SwapType.FixedInput
       ? BigInt(amount) !==
-        BigInt((serializedResponse as SwapRouterResponseV3).input_amount ?? 0)
+        BigInt((serializedResponse as SwapRouterResponse).input_amount ?? 0)
       : BigInt(amount) !==
-        BigInt((serializedResponse as SwapRouterResponseV3).output_amount ?? 0)
+        BigInt((serializedResponse as SwapRouterResponse).output_amount ?? 0)
   ) {
     throw new SwapQuoteError(
       SwapQuoteErrorType.UnknownError,

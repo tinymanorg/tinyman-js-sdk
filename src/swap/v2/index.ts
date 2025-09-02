@@ -40,7 +40,7 @@ import {
   V2SwapTxnGroupIndices
 } from "./constants";
 import {getSwapAppCallFeeAmount, isSwapAssetInAmountLow} from "./util";
-import {generateSwapRouterTxns, getSwapRoute} from "../router/v3/swap-router";
+import {generateSwapRouterTxns, getSwapRoute} from "../router";
 
 async function generateTxns(
   params: GenerateSwapTxnsParams

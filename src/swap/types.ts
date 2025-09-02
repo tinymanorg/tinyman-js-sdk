@@ -48,33 +48,6 @@ export interface SwapRoutePool {
   version: "2.0";
 }
 
-export interface FetchSwapRouteQuotesPayload {
-  asset_in_id: string;
-  asset_out_id: string;
-  input_amount?: string;
-  output_amount?: string;
-  swap_type: SwapType;
-  slippage: number;
-}
-
-export type SwapRouterResponse = Pick<FetchSwapRouteQuotesPayload, "swap_type"> & {
-  asset_in: Pick<TinymanAnalyticsApiAsset, "id" | "decimals" | "name" | "unit_name">;
-  asset_out: Pick<TinymanAnalyticsApiAsset, "id" | "decimals" | "name" | "unit_name">;
-  price_impact: string | null;
-  status: {
-    round_number: string;
-    round_datetime: string;
-  };
-  transaction_count: number | null;
-  transactions: SwapRouterTransactionRecipe[] | null;
-  transaction_fee: string | null;
-  swap_fee: string | null;
-  input_amount: string | null;
-  output_amount: string | null;
-  asset_ids: number[] | null;
-  pool_ids: string[] | null;
-};
-
 export interface SwapRouterTransactionRecipe {
   type: TransactionType;
   receiver: string;
@@ -104,7 +77,7 @@ export type SwapQuote =
       type: SwapQuoteType.Direct;
     }
   | {
-      data: SwapRouterResponseV3;
+      data: SwapRouterResponse;
       type: SwapQuoteType.Router;
     };
 
@@ -174,7 +147,7 @@ export interface ExecuteSwapCommonParams {
   signedTxns: Uint8Array[];
 }
 
-export interface FetchSwapRouteQuotesPayloadV3 {
+export interface FetchSwapRouteQuotesPayload {
   input_asset_id: string;
   output_asset_id: string;
   input_amount?: string;
@@ -183,7 +156,7 @@ export interface FetchSwapRouteQuotesPayloadV3 {
   slippage: string;
 }
 
-export interface SwapRouterResponseV3 {
+export interface SwapRouterResponse {
   swap_type: SwapType;
   input_amount: string;
   output_amount: string;
