@@ -147,8 +147,8 @@ export interface SwapRouterResponse {
     input_amount_arg: string;
     output_amount_arg: string;
     input_amount_mapping: string[];
-    pool_mapping: string[];
-    asset_mapping: number[];
+    pool_mapping: string[][];
+    asset_mapping: number[][];
     asset_in_algo_price: string;
     price_impact: string;
     transactions: SwapRouterTransactionRecipe[];

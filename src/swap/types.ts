@@ -166,8 +166,8 @@ export interface SwapRouterResponse {
   input_amount_arg: string; // It's slippaged input_amount for fixed-output.
   output_amount_arg: string; // It's slippaged output_amount for fixed-input.
   input_amount_mapping: string[];
-  pool_mapping: string[];
-  asset_mapping: number[];
+  pool_mapping: string[][];
+  asset_mapping: number[][];
   asset_in_algo_price: string;
   price_impact: string;
   transactions: SwapRouterTransactionRecipe[];
