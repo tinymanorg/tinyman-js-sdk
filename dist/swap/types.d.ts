@@ -152,8 +152,6 @@ export interface SwapRouterResponse {
     asset_in_algo_price: string;
     price_impact: string;
     transactions: SwapRouterTransactionRecipe[];
-    transaction_count: number;
-    inner_transaction_count: number;
     transaction_fee: string;
     transaction_fee_in_input_asset: string;
     swap_fee: string;

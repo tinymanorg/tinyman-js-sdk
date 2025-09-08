@@ -35,9 +35,7 @@ export async function generateSwapRouterTxns({
     txns.push(generateSwapRouterTxnFromRecipe(txnRecipe, suggestedParams, initiatorAddr));
   });
 
-  txns[0].fee =
-    BigInt(route.transaction_fee) +
-    BigInt(route.inner_transaction_count) * BigInt(suggestedParams.minFee);
+  txns[0].fee = BigInt(route.transaction_fee);
   const txGroup = algosdk.assignGroupID(txns);
 
   return txGroup.map((txn: Transaction) => ({
