@@ -21,6 +21,7 @@ import {encodeString, intToBytes, joinByteArrays} from "../util/util";
 import {
   APP_LATEST_VERSION_KEY,
   APP_VERSION_KEY,
+  GOVERNOR_FEE_RATE_POWER_THRESHOLD_KEY,
   GOVERNOR_ORDER_FEE_RATE_KEY,
   MINIMUM_PUT_ORDER_TRANSACTION_COUNT,
   ORDER_APP_EXTRA_PAGES,
@@ -685,7 +686,7 @@ class OrderingClient extends TinymanBaseClient<number | null, algosdk.Address | 
    */
   async getPlatformFeeRate(tinyPower: number | null): Promise<bigint> {
     const thresholdTinyPower = await this.getGlobal(
-      TOTAL_ORDER_COUNT_KEY,
+      GOVERNOR_FEE_RATE_POWER_THRESHOLD_KEY,
       0,
       this.registryAppId
     );
