@@ -14,7 +14,7 @@ import {
   getAssetInFromSwapRoute,
   getAssetOutFromSwapRoute,
   getSwapRouteRate
-} from "../v2/router/util";
+} from "../router/util";
 import {getV2SwapTotalFee} from "../v2/util";
 
 function calculateSwapRate({

@@ -39,8 +39,8 @@ import {
   V2_SWAP_APP_CALL_SWAP_TYPE_ARGS_ENCODED,
   V2SwapTxnGroupIndices
 } from "./constants";
-import {generateSwapRouterTxns, getSwapRoute} from "./router/swap-router";
 import {getSwapAppCallFeeAmount, isSwapAssetInAmountLow} from "./util";
+import {generateSwapRouterTxns, getSwapRoute} from "../router";
 
 async function generateTxns(
   params: GenerateSwapTxnsParams
@@ -509,7 +509,7 @@ async function getFixedInputSwapQuote({
       assetOutID: assetOut.id,
       swapType: SwapType.FixedInput,
       network,
-      slippage
+      slippage: String(slippage)
     }).then((data) => ({type: SwapQuoteType.Router, data}))
   );
 
@@ -560,7 +560,7 @@ async function getFixedOutputSwapQuote({
       assetOutID: assetOut.id,
       swapType: SwapType.FixedOutput,
       network,
-      slippage
+      slippage: String(slippage)
     }).then((data) => ({type: SwapQuoteType.Router, data}))
   );
 

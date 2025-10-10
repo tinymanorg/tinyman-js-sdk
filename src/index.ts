@@ -15,7 +15,7 @@ export {
   MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE
 } from "./util/constant";
 
-export * from "./swap/v2/router";
+export * from "./swap/router";
 
 export * from "./swap/common/utils";
 
