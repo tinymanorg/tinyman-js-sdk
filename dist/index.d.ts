@@ -1,7 +1,7 @@
 import SwapQuoteError from "./util/error/SwapQuoteError";
 export type { InitiatorSigner, SignerTransaction, SupportedNetwork } from "./util/commonTypes";
 export { BASE_MINIMUM_BALANCE, MINIMUM_ADD_LIQUIDITY_AMOUNT, MINIMUM_BALANCE_REQUIRED_PER_APP, MINIMUM_BALANCE_REQUIRED_PER_ASSET, MINIMUM_BALANCE_REQUIRED_PER_BYTE_SCHEMA, MINIMUM_BALANCE_REQUIRED_PER_INT_SCHEMA_VALUE } from "./util/constant";
-export * from "./swap/v2/router";
+export * from "./swap/router";
 export * from "./swap/common/utils";
 export { applySlippageToAmount, ASSET_OPT_IN_PROCESS_TXN_COUNT, convertFromBaseUnits, convertToBaseUnits, getTxnGroupID, sendAndWaitRawTransaction, sumUpTxnFees, joinByteArrays, intToBytes } from "./util/util";
 export { generateOptIntoAssetTxns } from "./util/asset/assetUtils";

@@ -1,12 +1,12 @@
-import {SupportedNetwork} from "../../../util/commonTypes";
-import {convertFromBaseUnits} from "../../../util/util";
-import {SwapRouterResponse} from "../../types";
+import {SupportedNetwork} from "../../util/commonTypes";
+import {convertFromBaseUnits} from "../../util/util";
+import {SwapRouterResponse} from "../types";
 import {SWAP_ROUTER_APP_ID} from "./constants";
 
 function getSwapRouteRate(
   route: Pick<
     SwapRouterResponse,
-    "asset_in" | "asset_out" | "input_amount" | "output_amount"
+    "input_asset" | "output_asset" | "input_amount" | "output_amount"
   >
 ) {
   const {assetIn, assetOut} = getAssetInAndOutFromSwapRoute(route);
@@ -28,19 +28,19 @@ function getSwapRouterAppID(network: SupportedNetwork) {
 }
 
 function getAssetOutFromSwapRoute(
-  route: Pick<SwapRouterResponse, "asset_out" | "output_amount">
+  route: Pick<SwapRouterResponse, "output_asset" | "output_amount">
 ) {
   return {
-    asset: route.asset_out,
+    asset: route.output_asset,
     amount: BigInt(route.output_amount ?? 0)
   };
 }
 
 function getAssetInFromSwapRoute(
-  route: Pick<SwapRouterResponse, "asset_in" | "input_amount">
+  route: Pick<SwapRouterResponse, "input_asset" | "input_amount">
 ) {
   return {
-    asset: route.asset_in,
+    asset: route.input_asset,
     amount: BigInt(route.input_amount ?? 0)
   };
 }
@@ -48,7 +48,7 @@ function getAssetInFromSwapRoute(
 function getAssetInAndOutFromSwapRoute(
   route: Pick<
     SwapRouterResponse,
-    "asset_in" | "asset_out" | "input_amount" | "output_amount"
+    "input_asset" | "output_asset" | "input_amount" | "output_amount"
   >
 ) {
   return {

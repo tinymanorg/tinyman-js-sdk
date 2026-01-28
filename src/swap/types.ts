@@ -48,43 +48,16 @@ export interface SwapRoutePool {
   version: "2.0";
 }
 
-export interface FetchSwapRouteQuotesPayload {
-  asset_in_id: string;
-  asset_out_id: string;
-  input_amount?: string;
-  output_amount?: string;
-  swap_type: SwapType;
-  slippage: number;
-}
-
-export type SwapRouterResponse = Pick<FetchSwapRouteQuotesPayload, "swap_type"> & {
-  asset_in: Pick<TinymanAnalyticsApiAsset, "id" | "decimals" | "name" | "unit_name">;
-  asset_out: Pick<TinymanAnalyticsApiAsset, "id" | "decimals" | "name" | "unit_name">;
-  price_impact: string | null;
-  status: {
-    round_number: string;
-    round_datetime: string;
-  };
-  transaction_count: number | null;
-  transactions: SwapRouterTransactionRecipe[] | null;
-  transaction_fee: string | null;
-  swap_fee: string | null;
-  input_amount: string | null;
-  output_amount: string | null;
-  asset_ids: number[] | null;
-  pool_ids: string[] | null;
-};
-
 export interface SwapRouterTransactionRecipe {
   type: TransactionType;
-  receiver?: string;
+  receiver: string;
   app_id: number;
   asset_id: number;
   amount: number;
   args: string[] | null;
-  accounts?: string[];
-  assets?: number[];
-  apps?: number[];
+  accounts: string[];
+  assets: number[];
+  apps: number[];
 }
 
 export type GetSwapQuoteParams = {
@@ -172,4 +145,38 @@ export interface ExecuteSwapCommonParams {
   client: Algodv2;
   txGroup: SignerTransaction[];
   signedTxns: Uint8Array[];
+}
+
+export interface FetchSwapRouteQuotesPayload {
+  input_asset_id: string;
+  output_asset_id: string;
+  input_amount?: string;
+  output_amount?: string;
+  swap_type: SwapType;
+  slippage: string;
+}
+
+export interface SwapRouterResponse {
+  swap_type: SwapType;
+  input_amount: string;
+  output_amount: string;
+  slippage: string;
+  input_asset: Pick<TinymanAnalyticsApiAsset, "id" | "decimals" | "name" | "unit_name">;
+  output_asset: Pick<TinymanAnalyticsApiAsset, "id" | "decimals" | "name" | "unit_name">;
+  input_amount_arg: string; // It's slippaged input_amount for fixed-output.
+  output_amount_arg: string; // It's slippaged output_amount for fixed-input.
+  input_amount_mapping: string[];
+  pool_mapping: string[][];
+  asset_mapping: number[][];
+  asset_in_algo_price: string;
+  price_impact: string;
+  transactions: SwapRouterTransactionRecipe[];
+  transaction_fee: string;
+  transaction_fee_in_input_asset: string;
+  swap_fee: string;
+  swap_fee_algo_price: string;
+  status: {
+    round_number: string;
+    round_datetime: string;
+  };
 }

@@ -1,9 +1,9 @@
-import {SupportedNetwork} from "../../../util/commonTypes";
-import {SwapType} from "../../constants";
+import {SupportedNetwork} from "../../util/commonTypes";
+import {SwapType} from "../constants";
 
 export const SWAP_ROUTER_APP_ID: Record<SupportedNetwork, number> = {
   testnet: 184778019,
-  mainnet: 1083651166
+  mainnet: 3119560942
 };
 
 /**
