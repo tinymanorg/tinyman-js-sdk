@@ -1,9 +1,7 @@
 import {CID} from "multiformats";
-/* eslint-disable import/no-unresolved */
 import {base32} from "multiformats/bases/base32";
 import {code} from "multiformats/codecs/raw";
 import {sha256} from "multiformats/hashes/sha2";
-/* eslint-enable import/no-unresolved */
 import {
   Algodv2,
   modelsv2,
