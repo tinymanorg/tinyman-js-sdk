@@ -5,6 +5,10 @@ on:
     branches:
       - main
 
+permissions:
+  id-token: write  # Required for OIDC
+  contents: read
+
 jobs:
   publish:
     if: github.repository_owner == 'tinymanorg'
@@ -15,6 +19,7 @@ jobs:
         with:
           node-version: 18
           registry-url: https://registry.npmjs.org/
+          package-manager-cache: false  # never use caching in release builds
       - run: npm install
       # - run: npm test
       - run: npm run build
