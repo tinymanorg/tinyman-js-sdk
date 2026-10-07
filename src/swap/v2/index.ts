@@ -166,11 +166,14 @@ async function execute({
   const assetIn = getAssetInFromSwapQuote(quote);
   let innerTxnAssetData: AssetWithIdAndAmount[] | undefined;
 
-  try {
-    innerTxnAssetData = await getAppCallInnerAssetData(client, txGroup);
-  } catch (_error) {
-    // We can ignore this error since the main execution was successful
-  }
+  // This doesn't work when Pera modifies the txgroup during signing. 
+  // await getAppCallInnerAssetData never returns because it is looking for the wrong txid.
+  // Disabling for the moment as it's not critical.
+  // try {
+  //   innerTxnAssetData = await getAppCallInnerAssetData(client, txGroup);
+  // } catch (_error) {
+  //   // We can ignore this error since the main execution was successful
+  // }
 
   /**
    * If the swap type if Fixed Output, usually there will be a difference between
